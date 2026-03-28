@@ -7,4 +7,4 @@ project(
 )
 set(CXX_STANDARD 23)
 
-add_subdirectory(cli)
+add_subdirectory(src)
