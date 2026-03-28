@@ -1,5 +1,3 @@
-//https://chatgpt.com/c/69b6d342-05b4-832a-a0fb-15bedba19922
-
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <iostream>
@@ -12,283 +10,227 @@
 #include <csignal>
 #include <atomic>
 
+#include "lib.h"
+#include "start.h"
+#include "single.h"
+#include "stream.h"
+#include "stop.h"
+
+//todo ...
 #include "ir_parser1.cpp"
 
 using namespace std;
 using namespace std::literals;
 // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-volatile int s = -1;
+const int HEADER_SIZE = 4;
 
-void handle_sigint(int)
+std::atomic<int> sock = -1;
+
+void handleSigint(int)
 {
-  auto s_l = s;
-  s = -1;
-  if (s_l < 0) {
+  int s = sock.exchange(-1);
+  if (s < 0) {
     return;
   }
 
-  vector<uint8_t> stop = { 0x20, 0xA4, 0x80, 0x00 };
-  send(s_l, stop.data(), stop.size(), 0);
+  frame::Stop stop;
+  auto tx = stop.get();
+
+  send(s, tx.data(), tx.size(), 0);
 
   cout << "ctrl+c detected, close connection" << endl;
 
-  close(s_l);
+  close(s);
 }
 
-void printTime()
+bool open(const std::string &host, uint16_t port)
 {
-  using namespace std::chrono;
+  //handle ctrl+c
+  std::signal(SIGINT, handleSigint);
 
-  // get current time
-  auto now = system_clock::now();
-  auto secs = time_point_cast<seconds>(now);
-  auto ms = duration_cast<milliseconds>(now - secs).count();
+  sock = socket(AF_INET, SOCK_STREAM, 0);
 
-  // convert to calendar time
-  time_t tt = system_clock::to_time_t(secs);
-  tm local = *localtime(&tt);
-
-  // print timestamp hh:mm:ss:msmsms
-  cout << setfill('0') << setw(2) << local.tm_hour << ":" << setw(2)
-      << local.tm_min << ":" << setw(2) << local.tm_sec << ":" << setw(3) << ms
-      << " ";
-}
-
-void dumpHex(const string &text, const vector<uint8_t> &data)
-{
-  printTime();
-
-  cout << text;
-  for (auto b : data) {
-    cout << hex << setw(2) << setfill('0') << (int) b << " ";
-  }
-  cout << dec << endl;
-}
-
-void dumpData(const string &text, const vector<uint16_t> &data, bool useHex =
-    true)
-{
-  printTime();
-
-  cout << text;
-
-  if (useHex) {
-    for (auto b : data) {
-      cout << hex << setw(4) << setfill('0') << (int) b << " ";
-    }
-    cout << dec << endl;
-  } else {
-    for (auto b : data) {
-      cout << setw(5) << setfill('0') << (int) b << " ";
-    }
-    cout << endl;
-  }
-}
-
-bool readFrame(int sock, vector<uint8_t> &frame)
-{
-  uint8_t hdr[4];
-
-  if (recv(sock, hdr, 4, MSG_WAITALL) != 4)
+  sockaddr_in a { };
+  a.sin_family = AF_INET;
+  a.sin_port = port;
+  if (inet_pton(AF_INET, host.c_str(), &a.sin_addr) <= 0) {
+    cerr << "Invalid IP/host address: " << host << endl;
+    close(sock);
     return false;
+  }
 
-  frame.assign(hdr, hdr + 4);
+  if (connect(sock, (sockaddr*) &a, sizeof(a)) < 0) {
+    cerr << "Connection failed" << endl;
+    close(sock);
+    return false;
+  }
+  return true;
+}
 
+bool readFrame(vector<uint8_t> &frame)
+{
+  uint8_t hdr[HEADER_SIZE];
   uint8_t buf[4096];
 
-  int r = recv(sock, buf, sizeof(buf), MSG_DONTWAIT);
+  frame.clear();
 
-  if (r > 0)
-    frame.insert(frame.end(), buf, buf + r);
+  auto bytes = recv(sock, hdr, HEADER_SIZE, MSG_WAITALL);
+  if (bytes != HEADER_SIZE) {
+    return false;
+  }
+  frame.assign(hdr, hdr + HEADER_SIZE);
 
+  bytes = recv(sock, buf, sizeof(buf), MSG_DONTWAIT);
+  if (bytes > 0) {
+    frame.insert(frame.end(), buf, buf + bytes);
+  }
   return true;
 }
 
-vector<uint16_t> parsePayload(const vector<uint8_t> &p, int byteorder = 0)
+bool sendFrame(const vector<uint8_t> &frame)
 {
-  vector<uint16_t> d;
-
-  for (size_t i = 0; i + 2 < p.size(); i++) {
-    if (p[i] == 0x02) {
-      uint16_t v;
-
-      if (byteorder == 0) {
-        v = p[i + 1] | (p[i + 2] << 8);
-      } else if (byteorder == 1) {
-        v = p[i + 2] | (p[i + 1] << 8);
-      } else {
-        v = 0;
-      }
-      d.push_back(v);
-      i += 2;
-    } else {
-      cout << "decode error at " << to_string(i) << ": ";
-      cout << hex << setw(2) << setfill('0') << (int) p[i] << dec
-          << ", expecting 0x02.  aborting." << endl;
-      return d;
-    }
-  }
-
-  return d;
-}
-
-vector<uint16_t> parseWords(const vector<uint8_t> &p, int byteorder = 0)
-{
-  vector<uint16_t> d;
-
-  if (p.size() % 2 != 0) {
-    cout << "decode error data not mod 2" << endl;
-    return d;
-  }
-
-  for (size_t i = 0; i < p.size(); i += 2) {
-    uint16_t v;
-
-    if (byteorder == 0) {
-      v = p[i] | (p[i + 1] << 8);
-    } else if (byteorder == 1) {
-      v = p[i + 1] | (p[i] << 8);
-    } else {
-      v = 0;
-    }
-
-    d.push_back(v);
-  }
-
-  return d;
-}
-
-bool isIdle(const vector<uint8_t> &d)
-{
-  if (d.size() < 6) {
-    return false;
-  }
-
-  if (d[5] != 0) {
-    return false;
-  }
-  return true;
-
-//    for(auto v:d)
-//        if(v>400 && v<30000)
-//            return false;
-//    return true;
-}
-
-bool isEnd(const vector<uint8_t> &d)
-{
-  if (d.size() < 2) {
-    return false;
-  }
-
-  uint16_t terminator = d[d.size() - 2] << 8 | d[d.size() - 1];
-  if (terminator == 0x0130) {
+  auto bytes = send(sock, frame.data(), frame.size(), 0);
+  if (bytes == frame.size()) {
     return true;
   }
   return false;
 }
 
-bool poll_short_data(vector<uint16_t> &data, bool return_on_rx = false)
+bool pollSingleFrame(const std::string &file)
 {
-  vector<uint8_t> frame;
-  bool have_data = false;
+  frame::Single single;
+  std::vector<uint8_t> rx;
 
   cout << "poll single frame" << endl << "-------------" << endl;
 
   while (true) {
-    vector<uint8_t> poll = { 0x20, 0xA2, 0x80, 0x00 };
-    dumpHex("-> poll sections: ", poll);
-    send(s, poll.data(), poll.size(), 0);
+    auto tx = single.get();
+    cout << lib::writeHex("-> poll chunk: ", tx);
+    sendFrame(tx);
 
-    frame.clear();
-
-    if (!readFrame(s, frame)) {
+    if (!readFrame(rx)) {
       cout << "<- no/error data rx, abort" << endl;
       break;
     }
 
-    dumpHex("<- section frame: ", frame);
+    cout << lib::writeHex("<- rx chunk: ", rx);
 
-    if (frame.size() < 4) {
-      cout << "<- invalid size, dropping" << endl;
-      continue;
-    }
-    if (frame[2] == 0x02) {
-      printTime();
-      cout << "<- timeout" << endl;
-      return false;
-    }
-    if (frame[2] != 0x01) {
-      printTime();
-      cout << "<- fehler: " << to_string(frame[3]) << endl;
-      return false;
-    }
-    //todo check header valid
-
-    vector<uint8_t> payload(frame.begin() + 6, frame.end());
-    //auto d=parsePayload(payload, 0);
-    //dumpData("<- section frame (a): ",d);
-    //auto d1=parsePayload(payload, 1);
-    //dumpData("<- section frame (b): ",d1);
-    auto d = parsePayload(payload, 1);
-    dumpData("<- section frame (hex): ", d, true);
-    dumpData("<- section frame (dec): ", d, false);
-
-    data.insert(data.end(), d.begin(), d.end());
-
-    //byte 6 = 0 -- no more data
-    if (isIdle(frame)) {
-      cout << "<> idle detected -> end capture" << endl;
+    auto ret = single.addChunk(rx);
+    if (ret == frame::Single::Status::DONE) {
       break;
     }
-    have_data = true;
-
-    if (return_on_rx) {
-      break;
+    switch (ret) {
+      case frame::Single::Status::OK:
+        break;
+      case frame::Single::Status::ERR_TIMEOUT:
+        cout << lib::writeTime() << "<- server returned timeout" << endl;
+        return false;
+      case frame::Single::Status::ERR_RETURN:
+        cout << "<- server returned error: " << to_string(single.getError(rx))
+            << endl;
+        return false;
+      case frame::Single::Status::ERR_SIZE:
+        cout << "<- invalid size" << endl;
+        return false;
+      case frame::Single::Status::ERR_RESPONSE_FORMAT:
+        cout << "<- invalid msg format" << endl;
+        return false;
+      case frame::Single::Status::ERR_PAYLOAD_FORMAT:
+        cout << "<- invalid payload format" << endl;
+        return false;
+      default:
+        cout << "<- unexpected: " << to_string((int) ret) << endl;
+        return false;
     }
   }
 
-  return have_data;
+  auto payload = single.getPayload();
+  if (payload.empty()) {
+    cout << lib::writeTime() << "<- payload empty" << endl;
+    return false;
+  }
+
+  cout << lib::writeHex("<- single frame (hex): ", payload);
+  cout << lib::writeData("<- single frame (dec): ", payload);
+
+  //todo find what those two words do. might have something to do with the corresponding signal (??)
+  auto leftover = single.getQ();
+  cout << lib::writeHex("<- leftover words (hex): ", leftover);
+  cout << lib::writeData("<- leftover words (dec): ", leftover);
+
+  if (!file.empty()) {
+    //gnuplot
+    auto f = parser::parse_single_frame_mode(payload);
+    auto plot_data_frame = parser::to_gnuplot_frame(f);
+    parser::write_gnuplot_data(file, plot_data_frame);
+  }
+
+  return true;
 }
 
-void poll_long_data(vector<uint16_t> &pool)
+bool pollStream(const std::string &file, chrono::milliseconds timeout)
 {
-  vector<uint8_t> frame;
+  frame::Stream stream;
+  std::vector<uint8_t> rx;
 
-  cout << "poll stream data" << endl << "-------------" << endl;
+  cout << "poll stream" << endl << "-------------" << endl;
 
-  vector<uint8_t> poll = { 0x20, 0xA3, 0x80, 0x00 };
-  dumpHex("-> poll data: ", poll);
-  send(s, poll.data(), poll.size(), 0);
+  auto t_start = chrono::steady_clock::now();
 
-  if (!readFrame(s, frame)) {
-    cout << "<- no/error data rx, abort" << endl;
-    return;
+  while (true) {
+    auto tx = stream.get();
+    cout << lib::writeHex("-> poll chunk: ", tx);
+    sendFrame(tx);
+
+    if (!readFrame(rx)) {
+      cout << "<- no/error data rx, abort" << endl;
+      break;
+    }
+
+    cout << lib::writeHex("<- rx chunk: ", rx);
+
+    auto ret = stream.addChunk(rx);
+    switch (ret) {
+      case frame::Stream::Status::OK:
+        break;
+      case frame::Stream::Status::ERR_SIZE:
+        cout << "<- invalid size" << endl;
+        return false;
+      case frame::Stream::Status::ERR_FORMAT:
+        cout << "<- invalid msg format" << endl;
+        return false;
+      case frame::Stream::Status::ERR_TERM:
+        cout << "<- terminator missing" << endl;
+        return false;
+      default:
+        cout << "<- unexpected: " << to_string((int) ret) << endl;
+        return false;
+    }
+
+    auto t_now = chrono::steady_clock::now();
+    if ((t_now - t_start) > timeout) {
+      break;
+    }
   }
 
-  //endekennung 0x0130
-  if (!isEnd(frame)) {
-    cout << "<> endekennung fehlt" << endl;
-    return;
+  auto payload = stream.getPayload();
+  if (payload.empty()) {
+    cout << lib::writeTime() << "<- payload empty" << endl;
+    return false;
   }
 
-  dumpHex("<- data frame: ", frame);
+  cout << lib::writeHex("<- stream (hex): ", payload);
+  cout << lib::writeData("<- stream frame (dec): ", payload);
 
-  //endekennung entfernen
-  frame.pop_back();
-  frame.pop_back();
+  if (!file.empty()) {
+    //gnuplot
+    auto stream = parser::parse_streaming_mode(payload);
+    auto plot_data = parser::to_gnuplot_streaming(stream);
+    parser::write_gnuplot_data(file, plot_data);
+  }
 
-  vector<uint8_t> payload(frame.begin() + 5, frame.end());
-  //auto d=parsePayload(payload, 0);
-  //dumpData("<- section frame (a): ",d);
-  //auto d1=parseWords(payload, 1);
-  //dumpData("<- data frame (b): ",d1);
-  auto d = parseWords(payload, 1);
-  dumpData("<- section frame (hex): ", d, true);
-  dumpData("<- section frame (dec): ", d, false);
-
-  pool.insert(pool.end(), d.begin(), d.end());
+  return true;
 }
 
 int main(int argc, char **argv)
@@ -299,92 +241,60 @@ int main(int argc, char **argv)
 
   if (argc != 3) {
     cout << "usage: ircap ip port" << endl;
-    return 0;
+    return EXIT_SUCCESS;
   }
 
-  //handle ctrl+c
-  std::signal(SIGINT, handle_sigint);
-
-  s = socket(AF_INET, SOCK_STREAM, 0);
-
-  sockaddr_in a { };
-  a.sin_family = AF_INET;
-  a.sin_port = htons(atoi(argv[2]));
-  if (inet_pton(AF_INET, argv[1], &a.sin_addr) <= 0) {
-    perror("Invalid IP address");
-    close(s);
-    return 1;
-  }
-
-  if (connect(s, (sockaddr*) &a, sizeof(a)) < 0) {
-    perror("Connection failed");
-    close(s);
-    return 1;
+  auto host = string(argv[1]);
+  auto port = htons(atoi(argv[2]));
+  auto res = open(host, port);
+  if (!res) {
+    return EXIT_FAILURE;
   }
 
   cout << "connected" << endl;
 
   cout << endl << "opening connection" << endl << "-------------" << endl;
 
-  vector<uint8_t> start = { 0x20, 0xA1, 0x80, 0x01, 0x01, 0x00 };
-  dumpHex("-> capture started: ", start);
-  send(s, start.data(), start.size(), 0);
-  if (!readFrame(s, frame)) {
+  frame::Start start;
+  auto txStart = start.get();
+
+  cout << lib::writeHex("-> capture started: ", txStart);
+
+  sendFrame(txStart);
+  if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
-    return 1;
+    return EXIT_FAILURE;
   }
-  dumpHex("<- confirmation frame: ", frame);
+  cout << lib::writeHex("<- confirmation frame: ", frame);
+
+  res = start.check(frame);
+  if (!res) {
+    cout << "<- invalid confirmation, abort" << endl;
+    return EXIT_FAILURE;
+  }
 
   cout << "press remote" << endl;
 
-  auto t_start = chrono::steady_clock::now();
+  pollSingleFrame("frame_ir.dat");
 
-  auto have_data = poll_short_data(data, false);
-  if (have_data) {
-    dumpData("<- single frame (hex): ", data, true);
-    dumpData("<- single frame (dec): ", data, false);
-
-    //gnuplot
-    auto f = parser::parse_single_frame_mode(data);
-    auto plot_data_frame = parser::to_gnuplot_frame(f);
-    parser::write_gnuplot_data("frame_ir.dat", plot_data_frame);
-
-    data.clear();
-
-    while (true) {
-      poll_long_data(data);
-      received_command = true;
-
-      auto t_now = chrono::steady_clock::now();
-      if ((t_now - t_start) > 5s) {
-        break;
-      }
-    }
-  }
-
-  if (!data.empty()) {
-    dumpData("<- full stream (hex): ", data, true);
-    dumpData("<- full stream (dec): ", data, false);
-
-    //gnuplot
-    auto stream = parser::parse_streaming_mode(data);
-    auto plot_data = parser::to_gnuplot_streaming(stream);
-    parser::write_gnuplot_data("streaming_ir.dat", plot_data);
-  }
+  pollStream("streaming_ir.dat", 5s);
 
   cout << "closing connection" << endl << "-------------" << endl;
 
-  vector<uint8_t> stop = { 0x20, 0xA4, 0x80, 0x00 };
-  dumpHex("-> close connection: ", stop);
-  send(s, stop.data(), stop.size(), 0);
+  frame::Stop stop;
+  auto txStop = stop.get();
+
+  cout << lib::writeHex("-> close connection: ", txStop);
+  sendFrame(txStop);
   frame.clear();
-  if (!readFrame(s, frame)) {
+  if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
     return 1;
   }
-  dumpHex("<- confirmation frame: ", frame);
+  cout << lib::writeHex("<- confirmation frame: ", frame);
+  //ignore data
 
-  close(s);
+  close(sock);
 
   if (received_command) {
     cout << "command received!" << endl;
