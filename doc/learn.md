@@ -4,7 +4,7 @@
 
 Harmony 900 has a tcp server listening on 169.254.1.2:3074 after initialising the USB/network driver in Windows. No user/pass, plain binary data. This server implements the IR learning protocol. It supports two modes:
 - single frame mode. In this mode, the remote waits for IR reception and returns a single frame + inter-frame silence after reception is completed.
-- streaming mode. In this mode, the remote continuosly receives and returns data. In case no transmitter is active, silence is returned.
+- streaming mode. In this mode, the remote continuosly receives and returns data. In case no transmitter is active, silence is returned.  
 Both commands return raw timing values in microseconds.
 
 Be aware that on protocol violations the server will crash/become unresponsive. Reboot your remote.
@@ -42,13 +42,13 @@ Recv: 20 a2 01 05 01 00 02 xx xx 02 xx xx 02 xx xx 02 xx xx  — ACK OK, EoF + P
 Recv: 20 a2 02 00  — ACK Timeout
              └── status (timeout)
 ```
-Status:
-0x01 OK
-0x02 Timeout
+Status:  
+0x01 OK  
+0x02 Timeout  
 other ?? maybe other errors
 
-EoF:
-0x01 more data available
+EoF:  
+0x01 more data available  
 0x00 all data is read
 
 Usage: Poll using command 0xa2. When IR is received, the command will return the first data block. Then read using command 0xa2 until either state != OK or EoF is set. The command will always return four two byte payload words.
@@ -65,7 +65,7 @@ Send: 20 a3 80 00
 Recv: 20 a3 01 02 70 xx xx xx xx ... xx xx 01 30  — ACK + Payload
                       └── Payload           └── EoF
 ```
-EoF:
+EoF:  
 0x0130 end of frame
 
 Usage: Poll using command 0xa3. When the buffer is filled, the command will return. When no IR is active, the buffer will be filled with "silence" (takes longer). The command will always return 96 two byte payload words.
@@ -87,9 +87,9 @@ No further information about the function of the bytes, except for the command.
 
 ## Payloads
 
-Payload is always 16 bit big endian words ( v16 = array8[i+1] | (array8[i] << 8) ). Each Value represents a time in microseconds.
-Mark = Transmitter is on
-Pause = Transmitter is off.
+Payload is always 16 bit big endian words ( v16 = array8[i+1] | (array8[i] << 8) ). Each Value represents a time in microseconds.  
+Mark = Transmitter is on  
+Pause = Transmitter is off.  
 ToDo -- where is the carrier frequency??
 
 ### Single Frame
@@ -145,20 +145,20 @@ Decoding:
 
 ```
 
-Mark = 833us
+Mark = 833us  
 Pause = 1779us - 833us = 946us
 
-Mark = 1770us
+Mark = 1770us  
 Pause = 2667us - 1770us = 897us
 
 ...
 
-Mark = 881us
-Pause = 32768 - 881us = 31905us
-Mark = 0us
-Pause = 32768us
-Mark = 0us
-Pause = 26030us
+Mark = 881us  
+Pause = 32768 - 881us = 31905us  
+Mark = 0us  
+Pause = 32768us  
+Mark = 0us  
+Pause = 26030us  
 -> Pause = 31905us + 32768us + 26030us = 90721us
 ```
 RC5 Manchester
@@ -213,7 +213,7 @@ Appending all payload bytes leads to a similar structure as the single frame for
 ```
 
 The two words with unknown use are not present. Decoding works the same, except that the frame can repeat multiple times, depening on how long recording was active and how long the button on the source remote was pressed.
-Be aware that for some formats, the first frame is different to the repeats, so the stream must be running before pressing the button.
+Be aware that for some formats, the first frame is different to the repeats, so the stream must be running before pressing the button.  
 When no IR is active, "0000 8000" is placed to indicate no mark, 32ms pause
 
 Decoding:
