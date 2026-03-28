@@ -1,120 +1,163 @@
-#include <fcntl.h>
+//https://chatgpt.com/c/69b6d342-05b4-832a-a0fb-15bedba19922
+
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <vector>
 #include <iostream>
 #include <iomanip>
 #include <cstring>
-#include <cstdlib>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <fstream>
 
-void hexDump(const char* label, const uint8_t* data, size_t len) {
-    std::cout << label << " (" << len << " bytes): ";
-    for (size_t i = 0; i < len; ++i)
-        std::cout << std::hex << std::setfill('0') << std::setw(2)
-                  << static_cast<int>(data[i]) << " ";
-    std::cout << std::dec << std::endl;
+using namespace std;
+
+void hexDump(const string& label,const vector<uint8_t>& data)
+{
+    cout<<label<<" ("<<data.size()<<"): ";
+
+    for(auto b:data)
+        cout<<hex<<setw(2)<<setfill('0')<<(int)b<<" ";
+
+    cout<<dec<<endl;
 }
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <IP> <PORT>" << std::endl;
-        return 1;
+bool readFrame(int sock,vector<uint8_t>& frame)
+{
+    uint8_t hdr[4];
+
+    if(recv(sock,hdr,4,MSG_WAITALL)!=4)
+        return false;
+
+    frame.assign(hdr,hdr+4);
+
+    uint8_t buf[256];
+
+    int r=recv(sock,buf,sizeof(buf),MSG_DONTWAIT);
+
+    if(r>0)
+        frame.insert(frame.end(),buf,buf+r);
+
+    return true;
+}
+
+uint8_t checksum(const vector<uint8_t>& f)
+{
+    uint8_t s=0;
+
+    for(size_t i=0;i<f.size()-1;i++)
+        s+=f[i];
+
+    return s;
+}
+
+vector<uint16_t> extractDurations(const vector<uint8_t>& payload)
+{
+    vector<uint16_t> d;
+
+    for(size_t i=0;i+1<payload.size();i+=2)
+    {
+        uint16_t v=payload[i]|(payload[i+1]<<8);
+        d.push_back(v);
     }
 
-    const char* ip = argv[1];
-    int port = std::atoi(argv[2]);
+    return d;
+}
 
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        perror("Socket creation failed");
-        return 1;
+void decodeRC5(const vector<uint16_t>& d)
+{
+    cout<<"attempt RC5 decode"<<endl;
+
+    if(d.size()<20)
+    {
+        cout<<"too few pulses for RC5"<<endl;
+        return;
     }
 
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    if (inet_pton(AF_INET, ip, &addr.sin_addr) <= 0) {
-        perror("Invalid IP address");
-        close(sock);
-        return 1;
+    double avg=0;
+
+    for(auto v:d)
+        avg+=v;
+
+    avg/=d.size();
+
+    cout<<"avg duration "<<avg<<" us"<<endl;
+}
+
+int main(int argc,char*argv[])
+{
+    if(argc!=3)
+    {
+        cout<<"usage: prog ip port"<<endl;
+        return 0;
     }
 
-    if (connect(sock, (sockaddr*)&addr, sizeof(addr)) < 0) {
-        perror("Connection failed");
-        close(sock);
-        return 1;
+    int s=socket(AF_INET,SOCK_STREAM,0);
+
+    sockaddr_in a{};
+    a.sin_family=AF_INET;
+    a.sin_port=htons(atoi(argv[2]));
+    inet_pton(AF_INET,argv[1],&a.sin_addr);
+
+    connect(s,(sockaddr*)&a,sizeof(a));
+
+    cout<<"connected"<<endl;
+
+    uint8_t start[]={0x20,0xA1,0x80,0x01,0x01,0x00};
+
+    send(s,start,sizeof(start),0);
+
+    cout<<"sent start"<<endl;
+
+    sleep(1);
+
+    cout<<"press remote"<<endl;
+
+    vector<uint8_t> fullPayload;
+
+    for(int i=0;i<40;i++)
+    {
+        uint8_t poll[]={0x20,0xA2,0x80,0x00};
+
+        send(s,poll,sizeof(poll),0);
+
+        vector<uint8_t> frame;
+
+        if(!readFrame(s,frame))
+            break;
+
+        hexDump("frame",frame);
+
+        if(frame.size()<5)
+            continue;
+
+        uint8_t cmd=frame[1];
+
+        if(cmd!=0xA2)
+            continue;
+
+        vector<uint8_t> payload(frame.begin()+4,frame.end()-1);
+
+        hexDump("payload",payload);
+
+        fullPayload.insert(fullPayload.end(),payload.begin(),payload.end());
+
+        usleep(200000);
     }
 
-    std::cout << "Connected to " << ip << ":" << port << std::endl;
+    hexDump("full payload",fullPayload);
 
-    // Step 1: Start IR Learn
-    uint8_t start_cmd[] = { 0x20, 0xA1, 0x80, 0x01, 0x01, 0x00 };
-    if (send(sock, start_cmd, sizeof(start_cmd), 0) != sizeof(start_cmd)) {
-        perror("Failed to send start command");
-        close(sock);
-        return 1;
-    }
-    hexDump("SENT", start_cmd, sizeof(start_cmd));
+    auto durations=extractDurations(fullPayload);
 
-    uint8_t ack[4];
-    ssize_t received = recv(sock, ack, sizeof(ack), 0);
-    if (received != 4) {
-        perror("Failed to receive 4-byte ACK");
-        close(sock);
-        return 1;
-    }
-    hexDump("ACK", ack, 4);
+    cout<<"durations:"<<endl;
 
-    // Step 2: Wait 5 seconds
-    std::cout << "Fire remote now..." << std::endl;
-    sleep(5);
+    for(auto v:durations)
+        cout<<v<<" ";
 
-    // Step 3: Send Learn IR command
-    uint8_t learn_cmd[] = { 0x20, 0xA2, 0x80, 0x00 };
-    if (send(sock, learn_cmd, sizeof(learn_cmd), 0) != sizeof(learn_cmd)) {
-        perror("Failed to send learn command");
-        close(sock);
-        return 1;
-    }
-    hexDump("SENT", learn_cmd, sizeof(learn_cmd));
+    cout<<endl;
 
-    // Wait 5 seconds
-    std::cout << "Waiting 5 seconds for IR data..." << std::endl;
-    sleep(5);
+    decodeRC5(durations);
 
-    // Set socket to non-blocking
-    fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK);
+    uint8_t stop[]={0x20,0xA4,0x80,0x00};
 
-    // Read all available bytes
-    uint8_t result[1024]; // buffer large enough to hold expected data
-    size_t total_received = 0;
-    while (true) {
-        ssize_t bytes = recv(sock, result + total_received, sizeof(result) - total_received, 0);
-        if (bytes > 0) {
-            total_received += bytes;
-        } else {
-            break; // no more data or error
-        }
-    }
-    hexDump("IR DATA", result, total_received);
+    send(s,stop,sizeof(stop),0);
 
-    // Save binary output
-    std::ofstream fout("ir_capture.bin", std::ios::binary);
-    if (fout.is_open()) {
-        fout.write(reinterpret_cast<char*>(result), total_received);
-        fout.close();
-        std::cout << "Saved IR data to ir_capture.bin" << std::endl;
-    } else {
-        std::cerr << "Failed to write to ir_capture.bin" << std::endl;
-    }
-
-    // Step 4: Send Stop command
-    uint8_t stop_cmd[] = { 0x20, 0xA4, 0x80, 0x00 };
-    send(sock, stop_cmd, sizeof(stop_cmd), 0);  // even if it fails, continue
-    hexDump("SENT", stop_cmd, sizeof(stop_cmd));
-
-    close(sock);
-    std::cout << "IR learning session completed." << std::endl;
-    return 0;
+    close(s);
 }
