@@ -114,7 +114,7 @@ int main(int argc,char*argv[])
 
     for(int i=0;i<40;i++)
     {
-        uint8_t poll[]={0x20,0xA2,0x80,0x00};
+        uint8_t poll[]={0x20,0xA3,0x80,0x00};
 
         send(s,poll,sizeof(poll),0);
 
@@ -135,7 +135,7 @@ int main(int argc,char*argv[])
 
         vector<uint8_t> payload(frame.begin()+4,frame.end()-1);
 
-        hexDump("payload",payload);
+//        hexDump("payload",payload);
 
         fullPayload.insert(fullPayload.end(),payload.begin(),payload.end());
 
