@@ -39,13 +39,13 @@ Stream::Status Stream::addChunk(const std::vector<uint8_t> &data)
       || (data[3] != 0x02) || (data[4] != 0x70)) {
     return Status::ERR_FORMAT;
   }
-  //terminator
-  if ((data[data.size() - 2] != 0x01) || (data[data.size() - 1] != 0x30)) {
-    return Status::ERR_TERM;
-  }
   //data available, check size
   if (data.size() != VALID_CHUNK_SIZE) {
     return Status::ERR_FORMAT;
+  }
+  //terminator
+  if ((data[data.size() - 2] != 0x01) || (data[data.size() - 1] != 0x30)) {
+    return Status::ERR_TERM;
   }
 
   auto ret = parse( { data.begin() + 5, data.end() - 2 });

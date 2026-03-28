@@ -6,5 +6,7 @@ project(
   LANGUAGES CXX
 )
 set(CXX_STANDARD 23)
+enable_testing()
 
 add_subdirectory(src)
+add_subdirectory(test)
