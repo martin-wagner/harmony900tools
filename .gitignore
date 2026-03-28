@@ -1,5 +1,5 @@
 *.dat
-*.xy
+*.x
 build/*
 
 # Prerequisites
