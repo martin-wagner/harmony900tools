@@ -65,13 +65,13 @@ void dumpHex(const string &text, const vector<uint8_t>& data)
 }
 
 
-void dumpData(const string &text, const vector<uint16_t>& data, bool hex = true)
+void dumpData(const string &text, const vector<uint16_t>& data, bool useHex = true)
 {
     printTime();
 
     cout << text;
 
-    if (hex) {
+    if (useHex) {
         for (auto b : data) {
             cout << hex << setw(4) << setfill('0') << (int)b << " ";
         }
@@ -189,9 +189,10 @@ bool isEnd(const vector<uint8_t>& d)
     return false;
 }
 
-void poll_short_data()
+bool poll_short_data()
 {
     vector<uint8_t> frame;
+    bool have_data = false;
 
     cout<<"poll short data"<<endl<<"-------------"<<endl;
 
@@ -209,9 +210,19 @@ void poll_short_data()
 
         dumpHex("<- section frame: ",frame);
 
-        if(frame.size()<6) {
+        if(frame.size()<4) {
              cout<<"<- invalid size, dropping"<<endl;
             continue;
+        }
+        if(frame[2] == 0x02) {
+            printTime();
+             cout<<"<- timeout"<<endl;
+            return false;
+        }
+        if(frame[2] != 0x01) {
+            printTime();
+             cout<<"<- fehler: "<< to_string(frame[3]) << endl;
+            return false;
         }
         //todo check header valid
 
@@ -229,7 +240,9 @@ void poll_short_data()
             cout<<"<> idle detected -> end capture"<<endl;
             break;
         }
+        have_data = true;
     }
+    return have_data;
 }
 
 void poll_long_data()
@@ -238,47 +251,37 @@ void poll_long_data()
 
     cout<<"poll long data"<<endl<<"-------------"<<endl;
 
-    auto t_start = chrono::steady_clock::now();
-    while(true)
-    {
-        frame.clear();
+    vector<uint8_t> poll ={0x20,0xA3,0x80,0x00};
+    dumpHex("-> poll data: ", poll );
+    send(s,poll.data(),poll.size(),0);
 
-        vector<uint8_t> poll ={0x20,0xA3,0x80,0x00};
-        dumpHex("-> poll data: ", poll );
-        send(s,poll.data(),poll.size(),0);
-
-        if(!readFrame(s,frame)) {
-            cout<<"<- no/error data rx, abort" << endl;
-            break;
-        }
-
-        //endekennung 0x0130
-        if(!isEnd(frame)) {
-            cout<<"<> endekennung fehlt"<<endl;
-            break;
-        }
-
-        dumpHex("<- data frame: ",frame);
-
-        vector<uint8_t> payload(frame.begin()+5,frame.end());
-        //auto d=parsePayload(payload, 0);
-        //dumpData("<- section frame (a): ",d);
-        //auto d1=parseWords(payload, 1);
-        //dumpData("<- data frame (b): ",d1);
-        auto d=parseWords(payload, 1);
-        dumpData("<- section frame (hex): ",d, true);
-        dumpData("<- section frame (dec): ",d, false);
-
-         auto t_now = chrono::steady_clock::now();
-        if ((t_now - t_start) > 10s) {
-            break;
-        }
+    if(!readFrame(s,frame)) {
+        cout<<"<- no/error data rx, abort" << endl;
+        return;
     }
+
+    //endekennung 0x0130
+    if(!isEnd(frame)) {
+        cout<<"<> endekennung fehlt"<<endl;
+        return;
+    }
+
+    dumpHex("<- data frame: ",frame);
+
+    vector<uint8_t> payload(frame.begin()+5,frame.end());
+    //auto d=parsePayload(payload, 0);
+    //dumpData("<- section frame (a): ",d);
+    //auto d1=parseWords(payload, 1);
+    //dumpData("<- data frame (b): ",d1);
+    auto d=parseWords(payload, 1);
+    dumpData("<- section frame (hex): ",d, true);
+    dumpData("<- section frame (dec): ",d, false);
 }
 
 int main(int argc,char**argv)
 {
     vector<uint8_t> frame;
+    bool received_command = false;
 
     if(argc!=3)
     {
@@ -322,9 +325,21 @@ int main(int argc,char**argv)
 
     cout<<"press remote"<<endl;
 
-    poll_short_data();
+    auto t_start = chrono::steady_clock::now();
+    while(true)
+    {
+        auto have_data = poll_short_data();
+        if (!have_data) {
+            break;
+        }
+        poll_long_data();
+        received_command = true;
 
-    poll_long_data();
+        auto t_now = chrono::steady_clock::now();
+        if ((t_now - t_start) > 10s) {
+            break;
+        }
+    }
 
     cout<<"closing connection"<<endl<<"-------------"<<endl;
 
@@ -339,5 +354,11 @@ int main(int argc,char**argv)
     dumpHex("<- confirmation frame: ",frame);
 
     close(s);
+
+    if (received_command) {
+         cout<<"command received!" << endl;
+         return 0;
+    }
+    cout<<"silence..." << endl;
     return 0;
 }
