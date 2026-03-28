@@ -1,3 +1,7 @@
+*.dat
+*.xy
+build/*
+
 # Prerequisites
 *.d
 

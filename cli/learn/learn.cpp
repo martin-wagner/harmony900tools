@@ -274,10 +274,12 @@ void poll_long_data(vector<uint16_t> &pool)
         cout<<"<> endekennung fehlt"<<endl;
         return;
     }
-    frame.pop_back();
-    frame.pop_back();
 
     dumpHex("<- data frame: ",frame);
+
+    //endekennung entfernen
+    frame.pop_back();
+    frame.pop_back();
 
     vector<uint8_t> payload(frame.begin()+5,frame.end());
     //auto d=parsePayload(payload, 0);

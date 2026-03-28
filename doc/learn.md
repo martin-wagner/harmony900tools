@@ -4,7 +4,8 @@
 
 Harmony 900 has a tcp server listening on 169.254.1.2:3074 after initialising the USB/network driver in Windows. No user/pass, plain binary data. This server implements the IR learning protocol. It supports two modes:
 - single frame mode. In this mode, the remote waits for IR reception and returns a single frame + inter-frame silence after reception is completed.
-- streaming mode. In this mode, the remote continuosly receives and returns data. In case no transmitter is active, silence is returned.  
+- streaming mode. In this mode, the remote continuosly receives and returns data. In case no transmitter is active, silence is returned.
+
 Both commands return raw timing values in microseconds.
 
 Be aware that on protocol violations the server will crash/become unresponsive. Reboot your remote.
