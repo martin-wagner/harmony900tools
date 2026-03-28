@@ -4,36 +4,84 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include <iomanip>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
+#include <csignal>
+#include <atomic>
 
 using namespace std;
+using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-struct Frame
-{
-    uint8_t sync;
-    uint8_t cmd;
-    uint8_t type;
-    uint8_t len;
-    vector<uint8_t> payload;
-    uint8_t checksum;
-};
+volatile int s = -1;
 
-uint8_t checksum(const vector<uint8_t>& f)
-{
-    uint8_t s=0;
-    for(size_t i=0;i<f.size()-1;i++)
-        s+=f[i];
-    return s;
+void handle_sigint(int) {
+    auto s_l = s;
+    s = -1;
+    if (s_l < 0)  {
+        return;
+    }
+
+    vector<uint8_t> stop={0x20,0xA4,0x80,0x00};
+    send(s_l,stop.data(), stop.size() ,0);
+
+    cout << "ctrl+c detected, close connection" << endl;
+
+    close(s_l);
 }
 
-void dumpHex(const vector<uint8_t>& data)
+void printTime()
 {
-    for(auto b:data)
-        cout<<hex<<setw(2)<<setfill('0')<<(int)b<<" ";
-    cout<<dec<<endl;
+    using namespace std::chrono;
+
+    // get current time
+    auto now = system_clock::now();
+    auto secs = time_point_cast<seconds>(now);
+    auto ms = duration_cast<milliseconds>(now - secs).count();
+
+    // convert to calendar time
+    time_t tt = system_clock::to_time_t(secs);
+    tm local = *localtime(&tt);
+
+    // print timestamp hh:mm:ss:msmsms
+    cout << setfill('0')
+         << setw(2) << local.tm_hour << ":"
+         << setw(2) << local.tm_min  << ":"
+         << setw(2) << local.tm_sec  << ":"
+         << setw(3) << ms << " ";
+}
+
+void dumpHex(const string &text, const vector<uint8_t>& data)
+{
+    printTime();
+
+    cout << text;
+    for (auto b : data) {
+        cout << hex << setw(2) << setfill('0') << (int)b << " ";
+    }
+    cout << dec << endl;
+}
+
+
+void dumpData(const string &text, const vector<uint16_t>& data, bool hex = true)
+{
+    printTime();
+
+    cout << text;
+
+    if (hex) {
+        for (auto b : data) {
+            cout << hex << setw(4) << setfill('0') << (int)b << " ";
+        }
+        cout << dec << endl;
+    } else {
+        for (auto b : data) {
+            cout << setw(5) << setfill('0') << (int)b << " ";
+        }
+        cout << endl;
+    }
 }
 
 bool readFrame(int sock, vector<uint8_t>& frame)
@@ -55,7 +103,7 @@ bool readFrame(int sock, vector<uint8_t>& frame)
     return true;
 }
 
-vector<uint16_t> parsePayload(const vector<uint8_t>& p)
+vector<uint16_t> parsePayload(const vector<uint8_t>& p, int byteorder = 0)
 {
     vector<uint16_t> d;
 
@@ -63,88 +111,186 @@ vector<uint16_t> parsePayload(const vector<uint8_t>& p)
     {
         if(p[i]==0x02)
         {
-            uint16_t v=p[i+1]|(p[i+2]<<8);
+            uint16_t v;
+
+            if (byteorder == 0) {
+                v=p[i+1]|(p[i+2]<<8);
+            } else if (byteorder == 1) {
+                v=p[i+2]|(p[i+1]<<8);
+            } else {
+                v = 0;
+            }
             d.push_back(v);
             i+=2;
+        } else {
+            cout << "decode error at " << to_string(i) << ": ";
+            cout << hex << setw(2) << setfill('0') << (int)p[i] << dec << ", expecting 0x02.  aborting." << endl;
+            return d;
         }
     }
 
     return d;
 }
 
-bool isIdle(const vector<uint16_t>& d)
+vector<uint16_t> parseWords(const vector<uint8_t>& p, int byteorder = 0)
 {
-    for(auto v:d)
-        if(v>400 && v<30000)
-            return false;
+    vector<uint16_t> d;
+
+    if (p.size() % 2 != 0) {
+        cout << "decode error data not mod 2" << endl;
+        return d;
+    }
+
+    for (size_t i = 0; i < p.size(); i += 2) {
+        uint16_t v;
+
+        if (byteorder == 0) {
+            v = p[i] | (p[i+1] << 8);
+        } else if (byteorder == 1) {
+            v = p[i+1] | (p[i] << 8);
+        } else {
+            v = 0;
+        }
+
+        d.push_back(v);
+    }
+
+    return d;
+}
+
+
+bool isIdle(const vector<uint8_t>& d)
+{
+    if (d.size() < 6) {
+        return false;
+    }
+
+    if (d[5] != 0) {
+        return false;
+    }
     return true;
-}
-vector<int> decodeManchester(const vector<uint16_t>& t)
-{
-    vector<int> bits;
 
-    // Estimate half-bit duration from the smallest timing
-    if(t.empty()) return bits;
-    uint16_t min_t = *min_element(t.begin(), t.end());
-    double half = min_t; // use smallest pulse as approximate half-bit
-
-    for(auto v : t)
-    {
-        int count = round(v / half); // how many half-bits this pulse represents
-        for(int i=0;i<count;i++)
-            bits.push_back(1); // all ones initially, RC5 decode will take every other bit
-    }
-
-    return bits;
+//    for(auto v:d)
+//        if(v>400 && v<30000)
+//            return false;
+//    return true;
 }
 
-void decodeRC5(const vector<uint16_t>& timings)
+bool isEnd(const vector<uint8_t>& d)
 {
-    cout<<"---- RC5 decode attempt ----"<<endl;
-
-    auto bits = decodeManchester(timings);
-
-    if(bits.size()<28)
-    {
-        cout<<"not enough bits ("<<bits.size()<<")"<<endl;
-        return;
+    if (d.size() < 2) {
+        return false;
     }
 
-    // RC5 uses every other bit (first bit of each pair)
-    vector<int> rc5;
-    for(size_t i=0;i+1<bits.size();i+=2)
-        rc5.push_back(bits[i]);
-
-    if(rc5.size()<14)
-    {
-        cout<<"invalid frame"<<endl;
-        return;
+    uint16_t  terminator = d[d.size() - 2] << 8 | d[d.size() -1];
+    if (terminator == 0x0130) {
+        return true;
     }
+    return false;
+}
 
-    int toggle = rc5[2];
+void poll_short_data()
+{
+    vector<uint8_t> frame;
 
-    int addr=0;
-    for(int i=3;i<8;i++)
-        addr = (addr<<1)|rc5[i];
+    cout<<"poll short data"<<endl<<"-------------"<<endl;
 
-    int cmd=0;
-    for(int i=8;i<14;i++)
-        cmd = (cmd<<1)|rc5[i];
+    while(true) {
+        vector<uint8_t> poll ={0x20,0xA2,0x80,0x00};
+        dumpHex("-> poll sections: ", poll );
+        send(s,poll.data(),poll.size(),0);
 
-    cout<<"toggle: "<<toggle<<endl;
-    cout<<"device: "<<addr<<endl;
-    cout<<"command: "<<cmd<<endl;
+        frame.clear();
+
+        if(!readFrame(s,frame)) {
+            cout<<"<- no/error data rx, abort" << endl;
+            break;
+        }
+
+        dumpHex("<- section frame: ",frame);
+
+        if(frame.size()<6) {
+             cout<<"<- invalid size, dropping"<<endl;
+            continue;
+        }
+        //todo check header valid
+
+        vector<uint8_t> payload(frame.begin()+6,frame.end());
+        //auto d=parsePayload(payload, 0);
+        //dumpData("<- section frame (a): ",d);
+        //auto d1=parsePayload(payload, 1);
+        //dumpData("<- section frame (b): ",d1);
+        auto d=parsePayload(payload, 1);
+        dumpData("<- section frame (hex): ",d, true);
+        dumpData("<- section frame (dec): ",d, false);
+
+        //byte 6 = 0 -- no more data
+         if(isIdle(frame)) {
+            cout<<"<> idle detected -> end capture"<<endl;
+            break;
+        }
+    }
+}
+
+void poll_long_data()
+{
+    vector<uint8_t> frame;
+
+    cout<<"poll long data"<<endl<<"-------------"<<endl;
+
+    auto t_start = chrono::steady_clock::now();
+    while(true)
+    {
+        frame.clear();
+
+        vector<uint8_t> poll ={0x20,0xA3,0x80,0x00};
+        dumpHex("-> poll data: ", poll );
+        send(s,poll.data(),poll.size(),0);
+
+        if(!readFrame(s,frame)) {
+            cout<<"<- no/error data rx, abort" << endl;
+            break;
+        }
+
+        //endekennung 0x0130
+        if(!isEnd(frame)) {
+            cout<<"<> endekennung fehlt"<<endl;
+            break;
+        }
+
+        dumpHex("<- data frame: ",frame);
+
+        vector<uint8_t> payload(frame.begin()+5,frame.end());
+        //auto d=parsePayload(payload, 0);
+        //dumpData("<- section frame (a): ",d);
+        //auto d1=parseWords(payload, 1);
+        //dumpData("<- data frame (b): ",d1);
+        auto d=parseWords(payload, 1);
+        dumpData("<- section frame (hex): ",d, true);
+        dumpData("<- section frame (dec): ",d, false);
+
+         auto t_now = chrono::steady_clock::now();
+        if ((t_now - t_start) > 10s) {
+            break;
+        }
+    }
 }
 
 int main(int argc,char**argv)
 {
+    vector<uint8_t> frame;
+
     if(argc!=3)
     {
         cout<<"usage: ircap ip port"<<endl;
         return 0;
     }
 
-    int s=socket(AF_INET,SOCK_STREAM,0);
+    //handle ctrl+c
+    std::signal(SIGINT, handle_sigint);
+
+
+    s=socket(AF_INET,SOCK_STREAM,0);
 
     sockaddr_in a{};
     a.sin_family=AF_INET;
@@ -163,60 +309,35 @@ int main(int argc,char**argv)
 
     cout<<"connected"<<endl;
 
-    uint8_t start[]={0x20,0xA1,0x80,0x01,0x01,0x00};
-    send(s,start,sizeof(start),0);
+    cout<<endl<<"opening connection"<<endl<<"-------------"<<endl;
 
-    cout<<"capture started"<<endl;
-
-    sleep(1);
+    vector<uint8_t> start ={0x20,0xA1,0x80,0x01,0x01,0x00};
+    dumpHex("-> capture started: ", start);
+    send(s,start.data(), start.size() ,0);
+    if(!readFrame(s,frame)) {
+            cout<<"<- no confirmation, abort" << endl;
+            return 1;
+    }
+    dumpHex("<- confirmation frame: ",frame);
 
     cout<<"press remote"<<endl;
 
-    vector<uint16_t> capture;
+    poll_short_data();
 
-    while(true)
-    {
-        uint8_t poll[]={0x20,0xA2,0x80,0x00};
-        send(s,poll,sizeof(poll),0);
+    poll_long_data();
 
-        vector<uint8_t> frame;
+    cout<<"closing connection"<<endl<<"-------------"<<endl;
 
-        if(!readFrame(s,frame))
-            break;
-
-        cout<<"frame: ";
-        dumpHex(frame);
-
-        if(frame.size()<6)
-            continue;
-
-        vector<uint8_t> payload(frame.begin()+4,frame.end()-1);
-
- //       cout<<"payload: ";
-//        dumpHex(payload);
-
-        auto d=parsePayload(payload);
-
-        if(isIdle(d))
-        {
-            cout<<"idle detected -> end capture"<<endl;
-            break;
-        }
-
-        capture.insert(capture.end(),d.begin(),d.end());
+    vector<uint8_t> stop={0x20,0xA4,0x80,0x00};
+    dumpHex("-> close connection: ", stop);
+    send(s,stop.data(), stop.size() ,0);
+    frame.clear();
+    if(!readFrame(s,frame)) {
+            cout<<"<- no confirmation, abort" << endl;
+            return 1;
     }
-
-    cout<<"---- reconstructed timings ----"<<endl;
-
-    for(auto v:capture)
-        cout<<v<<" ";
-
-    cout<<endl;
-
-    decodeRC5(capture);
-
-    uint8_t stop[]={0x20,0xA4,0x80,0x00};
-    send(s,stop,sizeof(stop),0);
+    dumpHex("<- confirmation frame: ",frame);
 
     close(s);
+    return 0;
 }
