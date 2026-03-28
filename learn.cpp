@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -44,7 +45,7 @@ bool readFrame(int sock, vector<uint8_t>& frame)
 
     frame.assign(hdr,hdr+4);
 
-    uint8_t buf[32];
+    uint8_t buf[4096];
 
     int r=recv(sock,buf,sizeof(buf),MSG_DONTWAIT);
 
@@ -78,22 +79,20 @@ bool isIdle(const vector<uint16_t>& d)
             return false;
     return true;
 }
-
 vector<int> decodeManchester(const vector<uint16_t>& t)
 {
     vector<int> bits;
 
-    double half=889;
+    // Estimate half-bit duration from the smallest timing
+    if(t.empty()) return bits;
+    uint16_t min_t = *min_element(t.begin(), t.end());
+    double half = min_t; // use smallest pulse as approximate half-bit
 
-    for(auto v:t)
+    for(auto v : t)
     {
-        if(fabs(v-half)<300)
-            bits.push_back(1);
-        else if(fabs(v-half*2)<500)
-        {
-            bits.push_back(1);
-            bits.push_back(1);
-        }
+        int count = round(v / half); // how many half-bits this pulse represents
+        for(int i=0;i<count;i++)
+            bits.push_back(1); // all ones initially, RC5 decode will take every other bit
     }
 
     return bits;
@@ -103,17 +102,17 @@ void decodeRC5(const vector<uint16_t>& timings)
 {
     cout<<"---- RC5 decode attempt ----"<<endl;
 
-    auto bits=decodeManchester(timings);
+    auto bits = decodeManchester(timings);
 
     if(bits.size()<28)
     {
-        cout<<"not enough bits"<<endl;
+        cout<<"not enough bits ("<<bits.size()<<")"<<endl;
         return;
     }
 
+    // RC5 uses every other bit (first bit of each pair)
     vector<int> rc5;
-
-    for(size_t i=0;i<bits.size();i+=2)
+    for(size_t i=0;i+1<bits.size();i+=2)
         rc5.push_back(bits[i]);
 
     if(rc5.size()<14)
@@ -122,15 +121,15 @@ void decodeRC5(const vector<uint16_t>& timings)
         return;
     }
 
-    int toggle=rc5[2];
+    int toggle = rc5[2];
 
     int addr=0;
     for(int i=3;i<8;i++)
-        addr=(addr<<1)|rc5[i];
+        addr = (addr<<1)|rc5[i];
 
     int cmd=0;
     for(int i=8;i<14;i++)
-        cmd=(cmd<<1)|rc5[i];
+        cmd = (cmd<<1)|rc5[i];
 
     cout<<"toggle: "<<toggle<<endl;
     cout<<"device: "<<addr<<endl;
@@ -193,8 +192,8 @@ int main(int argc,char**argv)
 
         vector<uint8_t> payload(frame.begin()+4,frame.end()-1);
 
-        cout<<"payload: ";
-        dumpHex(payload);
+ //       cout<<"payload: ";
+//        dumpHex(payload);
 
         auto d=parsePayload(payload);
 
