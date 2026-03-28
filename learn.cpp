@@ -150,9 +150,17 @@ int main(int argc,char**argv)
     sockaddr_in a{};
     a.sin_family=AF_INET;
     a.sin_port=htons(atoi(argv[2]));
-    inet_pton(AF_INET,argv[1],&a.sin_addr);
+    if (inet_pton(AF_INET,argv[1],&a.sin_addr) <= 0) {
+        perror("Invalid IP address");
+        close(s);
+        return 1;
+    }
 
-    connect(s,(sockaddr*)&a,sizeof(a));
+    if (connect(s,(sockaddr*)&a,sizeof(a)) < 0) {
+        perror("Connection failed");
+        close(s);
+        return 1;
+    }
 
     cout<<"connected"<<endl;
 
@@ -162,6 +170,8 @@ int main(int argc,char**argv)
     cout<<"capture started"<<endl;
 
     sleep(1);
+
+    cout<<"press remote"<<endl;
 
     vector<uint16_t> capture;
 
