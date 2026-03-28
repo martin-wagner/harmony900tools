@@ -12,6 +12,8 @@
 #include <csignal>
 #include <atomic>
 
+#include "ir_parser1.cpp"
+
 using namespace std;
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
@@ -189,12 +191,12 @@ bool isEnd(const vector<uint8_t>& d)
     return false;
 }
 
-bool poll_short_data()
+bool poll_short_data(vector<uint16_t> &data, bool return_on_rx = false)
 {
     vector<uint8_t> frame;
     bool have_data = false;
 
-    cout<<"poll short data"<<endl<<"-------------"<<endl;
+    cout<<"poll single frame"<<endl<<"-------------"<<endl;
 
     while(true) {
         vector<uint8_t> poll ={0x20,0xA2,0x80,0x00};
@@ -235,21 +237,28 @@ bool poll_short_data()
         dumpData("<- section frame (hex): ",d, true);
         dumpData("<- section frame (dec): ",d, false);
 
+        data.insert(data.end(), d.begin(), d.end());
+
         //byte 6 = 0 -- no more data
          if(isIdle(frame)) {
             cout<<"<> idle detected -> end capture"<<endl;
             break;
         }
         have_data = true;
+
+        if (return_on_rx) {
+            break;
+        }
     }
+
     return have_data;
 }
 
-void poll_long_data()
+void poll_long_data(vector<uint16_t> &pool)
 {
     vector<uint8_t> frame;
 
-    cout<<"poll long data"<<endl<<"-------------"<<endl;
+    cout<<"poll stream data"<<endl<<"-------------"<<endl;
 
     vector<uint8_t> poll ={0x20,0xA3,0x80,0x00};
     dumpHex("-> poll data: ", poll );
@@ -265,6 +274,8 @@ void poll_long_data()
         cout<<"<> endekennung fehlt"<<endl;
         return;
     }
+    frame.pop_back();
+    frame.pop_back();
 
     dumpHex("<- data frame: ",frame);
 
@@ -276,11 +287,14 @@ void poll_long_data()
     auto d=parseWords(payload, 1);
     dumpData("<- section frame (hex): ",d, true);
     dumpData("<- section frame (dec): ",d, false);
+
+    pool.insert(pool.end(), d.begin(), d.end());
 }
 
 int main(int argc,char**argv)
 {
     vector<uint8_t> frame;
+    vector<uint16_t> data;
     bool received_command = false;
 
     if(argc!=3)
@@ -326,19 +340,39 @@ int main(int argc,char**argv)
     cout<<"press remote"<<endl;
 
     auto t_start = chrono::steady_clock::now();
-    while(true)
-    {
-        auto have_data = poll_short_data();
-        if (!have_data) {
-            break;
-        }
-        poll_long_data();
+
+    auto have_data = poll_short_data(data, false);
+    if (have_data) {
+        dumpData("<- single frame (hex): ",data, true);
+        dumpData("<- single frame (dec): ",data, false);
+
+        //gnuplot
+        auto f = parser::parse_single_frame_mode(data);
+        auto plot_data_frame = parser::to_gnuplot_frame(f);
+        parser::write_gnuplot_data("frame_ir.dat", plot_data_frame);
+
+        data.clear();
+
+       while(true)
+       {
+        poll_long_data(data);
         received_command = true;
 
         auto t_now = chrono::steady_clock::now();
-        if ((t_now - t_start) > 10s) {
+        if ((t_now - t_start) > 5s) {
             break;
         }
+     }
+    }
+
+    if (!data.empty()) {
+        dumpData("<- full stream (hex): ",data, true);
+        dumpData("<- full stream (dec): ",data, false);
+
+        //gnuplot
+        auto stream = parser::parse_streaming_mode(data);
+        auto plot_data = parser::to_gnuplot_streaming(stream);
+        parser::write_gnuplot_data("streaming_ir.dat", plot_data);
     }
 
     cout<<"closing connection"<<endl<<"-------------"<<endl;
