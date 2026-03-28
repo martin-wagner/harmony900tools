@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -78,21 +79,30 @@ int main(int argc, char* argv[]) {
     }
     hexDump("SENT", learn_cmd, sizeof(learn_cmd));
 
-    //todo use timeout, not bytes
-    uint8_t result[18];
-    received = recv(sock, result, sizeof(result), 0);
-    if (received != 18) {
-        //todo wait for timeout in server, flush rx/tx
-        perror("Failed to receive 18-byte IR data");
-        close(sock);
-        return 1;
+    // Wait 5 seconds
+    std::cout << "Waiting 5 seconds for IR data..." << std::endl;
+    sleep(5);
+
+    // Set socket to non-blocking
+    fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK);
+
+    // Read all available bytes
+    uint8_t result[1024]; // buffer large enough to hold expected data
+    size_t total_received = 0;
+    while (true) {
+        ssize_t bytes = recv(sock, result + total_received, sizeof(result) - total_received, 0);
+        if (bytes > 0) {
+            total_received += bytes;
+        } else {
+            break; // no more data or error
+        }
     }
-    hexDump("IR DATA", result, 18);
+    hexDump("IR DATA", result, total_received);
 
     // Save binary output
     std::ofstream fout("ir_capture.bin", std::ios::binary);
     if (fout.is_open()) {
-        fout.write(reinterpret_cast<char*>(result), 18);
+        fout.write(reinterpret_cast<char*>(result), total_received);
         fout.close();
         std::cout << "Saved IR data to ir_capture.bin" << std::endl;
     } else {
