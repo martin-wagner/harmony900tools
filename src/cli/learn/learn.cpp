@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <chrono>
 #include <iomanip>
@@ -15,17 +16,31 @@
 #include "single.h"
 #include "stream.h"
 #include "stop.h"
+#include "data.h"
 
-//todo ...
-#include "ir_parser1.cpp"
 
 using namespace std;
-using namespace std::literals;
+using namespace literals;
 // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 const int HEADER_SIZE = 4;
 
-std::atomic<int> sock = -1;
+atomic<int> sock = -1;
+
+bool writeFile(const string &filename, const string &data)
+{
+  ofstream file(filename);
+
+  if (!file.is_open()) {
+    return false;
+  }
+
+  file << data;
+
+  file.close();
+
+  return true;
+}
 
 void handleSigint(int)
 {
@@ -44,10 +59,10 @@ void handleSigint(int)
   close(s);
 }
 
-bool open(const std::string &host, uint16_t port)
+bool open(const string &host, uint16_t port)
 {
   //handle ctrl+c
-  std::signal(SIGINT, handleSigint);
+  signal(SIGINT, handleSigint);
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -97,10 +112,10 @@ bool sendFrame(const vector<uint8_t> &frame)
   return false;
 }
 
-bool pollSingleFrame(const std::string &file)
+bool pollSingleFrame(const string &file)
 {
   frame::Single single;
-  std::vector<uint8_t> rx;
+  vector<uint8_t> rx;
 
   cout << "poll single frame" << endl << "-------------" << endl;
 
@@ -150,9 +165,10 @@ bool pollSingleFrame(const std::string &file)
     cout << lib::writeTime() << "<- payload empty" << endl;
     return false;
   }
+  frame::TimingStream timingStream(payload);
 
-  cout << lib::writeHex("<- single frame (hex): ", payload);
-  cout << lib::writeData("<- single frame (dec): ", payload);
+  cout << "single frame (hex): " << timingStream.convertHexString() << endl;
+  cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
 
   //todo find what those two words do. might have something to do with the corresponding signal (??)
   auto leftover = single.getQ();
@@ -161,18 +177,17 @@ bool pollSingleFrame(const std::string &file)
 
   if (!file.empty()) {
     //gnuplot
-    auto f = parser::parse_single_frame_mode(payload);
-    auto plot_data_frame = parser::to_gnuplot_frame(f);
-    parser::write_gnuplot_data(file, plot_data_frame);
+    auto str = timingStream.convertGnuplot();
+    writeFile(file, str);
   }
 
   return true;
 }
 
-bool pollStream(const std::string &file, chrono::milliseconds timeout)
+bool pollStream(const string &file, chrono::milliseconds timeout)
 {
   frame::Stream stream;
-  std::vector<uint8_t> rx;
+  vector<uint8_t> rx;
 
   cout << "poll stream" << endl << "-------------" << endl;
 
@@ -219,15 +234,15 @@ bool pollStream(const std::string &file, chrono::milliseconds timeout)
     cout << lib::writeTime() << "<- payload empty" << endl;
     return false;
   }
+  frame::TimingStream timingStream(payload);
 
-  cout << lib::writeHex("<- stream (hex): ", payload);
-  cout << lib::writeData("<- stream frame (dec): ", payload);
+  cout << "single frame (hex): " << timingStream.convertHexString() << endl;
+  cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
 
   if (!file.empty()) {
     //gnuplot
-    auto stream = parser::parse_streaming_mode(payload);
-    auto plot_data = parser::to_gnuplot_streaming(stream);
-    parser::write_gnuplot_data(file, plot_data);
+    auto str = timingStream.convertGnuplot();
+    writeFile(file, str);
   }
 
   return true;
@@ -275,7 +290,7 @@ int main(int argc, char **argv)
 
   cout << "press remote" << endl;
 
-  pollSingleFrame("frame_ir.dat");
+  received_command = pollSingleFrame("frame_ir.dat");
 
   pollStream("streaming_ir.dat", 5s);
 

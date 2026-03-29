@@ -53,23 +53,7 @@
 	<storageModule moduleId="refreshScope"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
-			<target name="cmake" path="build/host/debug" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>cmake</buildCommand>
-				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
-				<buildTarget/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
-			</target>
-			<target name="learn" path="build/host/debug" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments>harmony900learnTool -j16</buildArguments>
-				<buildTarget/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
-			</target>
-			<target name="clean" path="build/host/debug" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="clean" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments/>
 				<buildTarget>clean</buildTarget>
@@ -77,39 +61,7 @@
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="clean" path="build/host/test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments/>
-				<buildTarget>clean</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
-			</target>
-			<target name="cmake" path="build/host/test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>cmake</buildCommand>
-				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
-				<buildTarget/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
-			</target>
-			<target name="build" path="build/host/test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments>-j16</buildArguments>
-				<buildTarget/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
-			</target>
-			<target name="run_tests" path="build/host/test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>ctest</buildCommand>
-				<buildArguments>--output-on-failure</buildArguments>
-				<buildTarget/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="cmake" path="build/host/release" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="cmake" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
 				<buildArguments>-DCMAKE_BUILD_TYPE=Release ../../..</buildArguments>
 				<buildTarget/>
@@ -117,7 +69,7 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="learn" path="build/host/release" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="learn" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>harmony900learnTool -j16</buildArguments>
 				<buildTarget/>
@@ -125,17 +77,9 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="clean" path="build/host/release" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments/>
-				<buildTarget>clean</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
-			</target>
 			<target name="_create" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
-				<buildArguments>-c "mkdir -p build/host/release &amp;&amp; mkdir -p build/host/debug &amp;&amp; mkdir -p build/host/test"</buildArguments>
+				<buildArguments>-c "mkdir -p build/release/host &amp;&amp; mkdir -p build/debug/host &amp;&amp; mkdir -p build/test/host"</buildArguments>
 				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -144,7 +88,6 @@
 			<target name="_meld" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "meld ."</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -152,10 +95,65 @@
 			<target name="_mrProper" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "rm -r ./build"</buildArguments>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="clean" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>clean</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="cmake" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>cmake</buildCommand>
+				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
 				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="learn" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>harmony900learnTool -j16</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="build" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j16</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="clean" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>clean</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="cmake" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>cmake</buildCommand>
+				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="run_tests" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>ctest</buildCommand>
+				<buildArguments>--output-on-failure</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
 			</target>
 		</buildTargets>
 	</storageModule>
