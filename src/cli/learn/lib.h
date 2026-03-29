@@ -10,6 +10,13 @@
 #include <iostream>
 #include <chrono>
 #include <iomanip>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/ioctl.h>
+#endif
+
+
 
 namespace lib
 {
@@ -90,6 +97,21 @@ inline std::string writeData(const std::string &text, const std::vector<uint16_t
   return str.str();
 }
 
-
+//terminal width in chars
+inline int getTerminalWidth()
+{
+#ifdef _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+    return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  }
+#else
+  struct winsize w;
+  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
+    return w.ws_col;
+  }
+#endif
+  return 80;
+}
 
 }

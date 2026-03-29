@@ -7,6 +7,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 #include "data.h"
 
@@ -17,7 +18,7 @@ namespace frame
 
 void TimingStream::setData(const vector<uint16_t> &raw)
 {
-  for (size_t i = 0; i < raw.size(); i += 2) {
+  for (int i = 0; i < raw.size(); i += 2) {
     if (i + 1 < raw.size()) {
       data.push_back(Block(raw[i], raw[i + 1]));
     }
@@ -56,28 +57,129 @@ string TimingStream::convertGnuplot(bool activeHigh)
   return str.str();
 }
 
-std::string TimingStream::convertHexString()
+string TimingStream::convertHexString()
 {
-  std::stringstream str;
+  stringstream str;
 
   for (const auto &block : data) {
-    str << std::hex << std::setw(4) << std::setfill('0') << block.mark_us << " "
-        << std::hex << std::setw(4) << std::setfill('0') << block.segment_us; //raw data, not mark/pause!
+    str << hex << setw(4) << setfill('0') << block.mark_us << " " << hex
+        << setw(4) << setfill('0') << block.segment_us << " "; //raw data, not mark/pause!
   }
-  str << std::dec;
+  str << dec;
 
   return str.str();
 }
 
-std::string TimingStream::convertIntString()
+string TimingStream::convertIntString()
 {
-  std::stringstream str;
+  stringstream str;
 
   for (const auto &block : data) {
     str << "MP" << block.mark_us << ":" << block.pause_us() << "; ";
   }
 
   return str.str();
+}
+
+static uint32_t gcd(uint32_t a, uint32_t b)
+{
+  while (b != 0) {
+    uint32_t t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
+}
+
+string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
+{
+  string header;
+  string top;
+  string bottom;
+  uint32_t used = 0;
+  uint32_t base = 250; //us per char //todo so am einfachsten.
+  bool level = !activeHigh;
+  bool truncated = false;
+  auto append = [&](const string &t, const string &b, uint32_t count = 1) {
+    if (used < width) {
+      top += t;
+      bottom += b;
+      used += count;
+    }
+  };
+  string truncationMarker = "...";
+  width = width - 3;
+
+  if (data.empty() || (width < 25)) {
+    return "";
+  }
+
+  header = "µs per div: " + to_string(base);
+
+  for (const auto &block : data) {
+    // divs, do round. for shorter pulse min 1 div, even on round-down
+    int mark_divs = max(1u, (block.mark_us + base / 2) / base);
+    if (block.mark_us == 0) {
+      //silence block, no pulse
+      mark_divs = 0;
+    }
+    int pause_divs = max(1u, (block.pause_us() + base / 2) / base);
+
+    // rising edge
+    if (!level && (mark_divs > 0)) {
+      append("┌", "┘");
+      level = activeHigh;
+      if (used >= width) {
+        truncated = true;
+        break;
+      }
+    }
+
+    for (int i = 1; i < mark_divs; i++) {
+      append("─", " ");
+      if (used >= width) {
+        truncated = true;
+        break;
+      }
+    }
+    if (used >= width) {
+      truncated = true;
+      break;
+    }
+
+    // falling edge
+    if (level && (mark_divs > 0)) {
+      append("┐", "└");
+      level = !activeHigh;
+      if (used >= width) {
+        truncated = true;
+        break;
+      }
+    }
+
+    for (int i = 1; i < pause_divs; i++) {
+      append(" ", "─");
+      if ((i > 4) && (pause_divs > 12)) {
+        //crop empty data
+        append("     ", "...──", 5);
+        break;
+      }
+      if (used >= width) {
+        truncated = true;
+        break;
+      }
+    }
+    if (used >= width) {
+      truncated = true;
+      break;
+    }
+  }
+
+  if (truncated) {
+    bottom += "\\++";
+  }
+
+  return header + '\n'+  top + '\n' + bottom + '\n';
 }
 
 }

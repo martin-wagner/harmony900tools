@@ -65,6 +65,7 @@ class TimingStream
     std::string convertGnuplot(bool activeHigh = true);
     std::string convertHexString();
     std::string convertIntString();
+    std::string convertAsciiPlot(uint32_t width = 100, bool activeHigh = true);
 
     const std::vector<Block> &timings()
     {

@@ -169,6 +169,7 @@ bool pollSingleFrame(const string &file)
 
   cout << "single frame (hex): " << timingStream.convertHexString() << endl;
   cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
+  cout << timingStream.convertAsciiPlot(lib::getTerminalWidth()) << endl;
 
   //todo find what those two words do. might have something to do with the corresponding signal (??)
   auto leftover = single.getQ();
@@ -238,6 +239,7 @@ bool pollStream(const string &file, chrono::milliseconds timeout)
 
   cout << "single frame (hex): " << timingStream.convertHexString() << endl;
   cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
+  cout << timingStream.convertAsciiPlot(lib::getTerminalWidth()) << endl;
 
   if (!file.empty()) {
     //gnuplot
