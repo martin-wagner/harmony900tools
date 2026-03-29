@@ -76,29 +76,21 @@ string TimingStream::convertIntString()
 
   for (const auto &block : data) {
     str << "MP" << block.mark_us << ":" << block.pause_us() << "; ";
+    //str << "MS" << block.mark_us << ":" << block.segment_us << "; ";
   }
 
   return str.str();
 }
 
-static uint32_t gcd(uint32_t a, uint32_t b)
-{
-  while (b != 0) {
-    uint32_t t = b;
-    b = a % b;
-    a = t;
-  }
-  return a;
-}
-
 string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
 {
+  //todo active high...
   string header;
   string top;
   string bottom;
   uint32_t used = 0;
   uint32_t base = 250; //us per char //todo so am einfachsten.
-  bool level = !activeHigh;
+  bool level = false;
   bool truncated = false;
   auto append = [&](const string &t, const string &b, uint32_t count = 1) {
     if (used < width) {
@@ -128,7 +120,7 @@ string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
     // rising edge
     if (!level && (mark_divs > 0)) {
       append("┌", "┘");
-      level = activeHigh;
+      level = true;
       if (used >= width) {
         truncated = true;
         break;
@@ -150,7 +142,7 @@ string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
     // falling edge
     if (level && (mark_divs > 0)) {
       append("┐", "└");
-      level = !activeHigh;
+      level = false;
       if (used >= width) {
         truncated = true;
         break;
@@ -179,7 +171,7 @@ string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
     bottom += "\\++";
   }
 
-  return header + '\n'+  top + '\n' + bottom + '\n';
+  return header + '\n' + top + '\n' + bottom + '\n';
 }
 
 }

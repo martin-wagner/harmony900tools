@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <csignal>
 #include <atomic>
+#include <getopt.h>
 
 #include "lib.h"
 #include "start.h"
@@ -18,14 +19,113 @@
 #include "stop.h"
 #include "data.h"
 
-
 using namespace std;
-using namespace literals;
-// enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 const int HEADER_SIZE = 4;
 
 atomic<int> sock = -1;
+
+// --- config ---
+
+struct Config
+{
+    int verbosity = 0;
+    string host = "169.254.1.2";
+    uint16_t port = 3074;
+    string fileSingle = "frame_ir.dat";
+    string fileStream = "streaming_ir.dat";
+    bool doSingle = true;
+    bool doStream = false;
+    int streamSeconds = 5;
+    bool activeHigh = true;
+} cfg;
+
+static void printHelp(const char *prog)
+{
+  cout << "Usage: " << prog << " [options]\n" << "\n" << "Options:\n"
+      << "  -h             Show this help\n"
+      << "  -v             Verbose (repeat for -vv)\n"
+      << "  -i <ip>        IP address         (default: 169.254.1.2)\n"
+      << "  -p <port>      Port               (default: 3074)\n"
+      << "  -f <file>      Single-frame file  (default: frame_ir.dat)\n"
+      << "  -F <file>      Stream file        (default: streaming_ir.dat)\n"
+      << "  -s[0|1]        Poll single frame  (default: on,  -s0 disables)\n"
+      << "  -S[0|1]        Poll stream        (default: off, -S1 enables)\n"
+      << "  -t <seconds>   Stream duration    (default: 5)\n"
+      << "  -l             Active-low signal  (default: active-high)\n" << "\n"
+      << "At least one of -s/-S (or their defaults) must be active.\n";
+}
+
+static bool parseArgs(int argc, char **argv, Config &cfg)
+{
+  int opt;
+  while ((opt = getopt(argc, argv, "hvi:p:f:F:s::S::t:l")) != -1) {
+    switch (opt) {
+      case 'h':
+        return false;
+      case 'v':
+        cfg.verbosity++;
+        break;
+      case 'i':
+        cfg.host = optarg;
+        break;
+      case 'p': {
+        int p = atoi(optarg);
+        if (p <= 0 || p > 65535) {
+          cerr << "Invalid port: " << optarg << endl;
+          return false;
+        }
+        cfg.port = static_cast<uint16_t>(p);
+        break;
+      }
+      case 'f':
+        cfg.fileSingle = optarg;
+        break;
+      case 'F':
+        cfg.fileStream = optarg;
+        break;
+      case 's': {
+        // -s or -s1 enables, -s0 disables
+        if (optarg != nullptr && string(optarg) == "0") {
+          cfg.doSingle = false;
+        } else {
+          cfg.doSingle = true;
+        }
+        break;
+      }
+      case 'S': {
+        if (optarg != nullptr && string(optarg) == "0") {
+          cfg.doStream = false;
+        } else {
+          cfg.doStream = true;
+        }
+        break;
+      }
+      case 't': {
+        int t = atoi(optarg);
+        if (t <= 0) {
+          cerr << "Invalid stream duration: " << optarg << endl;
+          return false;
+        }
+        cfg.streamSeconds = t;
+        break;
+      }
+      case 'l':
+        cfg.activeHigh = false;
+        break;
+      default:
+        return false;
+    }
+  }
+
+  if (!cfg.doSingle && !cfg.doStream) {
+    cerr << "Error: at least one of single frame or stream must be enabled."
+        << endl;
+    return false;
+  }
+
+  return true;
+}
 
 bool writeFile(const string &filename, const string &data)
 {
@@ -112,16 +212,20 @@ bool sendFrame(const vector<uint8_t> &frame)
   return false;
 }
 
-bool pollSingleFrame(const string &file)
+bool pollSingleFrame(const string &file, bool activeHigh = true)
 {
   frame::Single single;
   vector<uint8_t> rx;
 
-  cout << "poll single frame" << endl << "-------------" << endl;
+  if (cfg.verbosity > 0) {
+    cout << "poll single frame" << endl << "-------------" << endl;
+  }
 
   while (true) {
     auto tx = single.get();
-    cout << lib::writeHex("-> poll chunk: ", tx);
+    if (cfg.verbosity > 0) {
+      cout << lib::writeHex("-> poll chunk: ", tx);
+    }
     sendFrame(tx);
 
     if (!readFrame(rx)) {
@@ -129,7 +233,9 @@ bool pollSingleFrame(const string &file)
       break;
     }
 
-    cout << lib::writeHex("<- rx chunk: ", rx);
+    if (cfg.verbosity > 1) {
+      cout << lib::writeHex("<- rx chunk: ", rx);
+    }
 
     auto ret = single.addChunk(rx);
     if (ret == frame::Single::Status::DONE) {
@@ -167,36 +273,46 @@ bool pollSingleFrame(const string &file)
   }
   frame::TimingStream timingStream(payload);
 
-  cout << "single frame (hex): " << timingStream.convertHexString() << endl;
+  if (cfg.verbosity > 0) {
+    cout << "single frame (hex): " << timingStream.convertHexString() << endl;
+  }
   cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
-  cout << timingStream.convertAsciiPlot(lib::getTerminalWidth()) << endl;
+  cout << timingStream.convertAsciiPlot(lib::getTerminalWidth(), activeHigh)
+      << endl;
 
   //todo find what those two words do. might have something to do with the corresponding signal (??)
-  auto leftover = single.getQ();
-  cout << lib::writeHex("<- leftover words (hex): ", leftover);
-  cout << lib::writeData("<- leftover words (dec): ", leftover);
+  if (cfg.verbosity > 0) {
+    auto leftover = single.getQ();
+    cout << lib::writeHex("<- leftover words (hex): ", leftover);
+    cout << lib::writeData("<- leftover words (dec): ", leftover);
+  }
 
   if (!file.empty()) {
     //gnuplot
-    auto str = timingStream.convertGnuplot();
+    auto str = timingStream.convertGnuplot(activeHigh);
     writeFile(file, str);
   }
 
   return true;
 }
 
-bool pollStream(const string &file, chrono::milliseconds timeout)
+bool pollStream(const string &file, chrono::milliseconds timeout,
+    bool activeHigh = true)
 {
   frame::Stream stream;
   vector<uint8_t> rx;
 
-  cout << "poll stream" << endl << "-------------" << endl;
+  if (cfg.verbosity > 0) {
+    cout << "poll stream" << endl << "-------------" << endl;
+  }
 
   auto t_start = chrono::steady_clock::now();
 
   while (true) {
     auto tx = stream.get();
-    cout << lib::writeHex("-> poll chunk: ", tx);
+    if (cfg.verbosity > 0) {
+      cout << lib::writeHex("-> poll chunk: ", tx);
+    }
     sendFrame(tx);
 
     if (!readFrame(rx)) {
@@ -204,7 +320,9 @@ bool pollStream(const string &file, chrono::milliseconds timeout)
       break;
     }
 
-    cout << lib::writeHex("<- rx chunk: ", rx);
+    if (cfg.verbosity > 1) {
+      cout << lib::writeHex("<- rx chunk: ", rx);
+    }
 
     auto ret = stream.addChunk(rx);
     switch (ret) {
@@ -237,13 +355,16 @@ bool pollStream(const string &file, chrono::milliseconds timeout)
   }
   frame::TimingStream timingStream(payload);
 
-  cout << "single frame (hex): " << timingStream.convertHexString() << endl;
+  if (cfg.verbosity > 0) {
+    cout << "single frame (hex): " << timingStream.convertHexString() << endl;
+  }
   cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
-  cout << timingStream.convertAsciiPlot(lib::getTerminalWidth()) << endl;
+  cout << timingStream.convertAsciiPlot(lib::getTerminalWidth(), activeHigh)
+      << endl;
 
   if (!file.empty()) {
     //gnuplot
-    auto str = timingStream.convertGnuplot();
+    auto str = timingStream.convertGnuplot(activeHigh);
     writeFile(file, str);
   }
 
@@ -253,36 +374,47 @@ bool pollStream(const string &file, chrono::milliseconds timeout)
 int main(int argc, char **argv)
 {
   vector<uint8_t> frame;
-  vector<uint16_t> data;
   bool received_command = false;
 
-  if (argc != 3) {
-    cout << "usage: ircap ip port" << endl;
-    return EXIT_SUCCESS;
+  if (!parseArgs(argc, argv, cfg)) {
+    printHelp(argv[0]);
+    return EXIT_FAILURE;
   }
 
-  auto host = string(argv[1]);
-  auto port = htons(atoi(argv[2]));
-  auto res = open(host, port);
+  if (cfg.verbosity >= 1) {
+    cout << "host=" << cfg.host << " port=" << cfg.port << " single="
+        << cfg.doSingle << " stream=" << cfg.doStream << " streamSec="
+        << cfg.streamSeconds << " activeHigh=" << cfg.activeHigh
+        << " verbosity=" << cfg.verbosity << endl;
+  }
+
+  auto res = open(cfg.host, htons(cfg.port));
   if (!res) {
     return EXIT_FAILURE;
   }
 
-  cout << "connected" << endl;
-
-  cout << endl << "opening connection" << endl << "-------------" << endl;
+  if (cfg.verbosity > 0) {
+    cout << "connected" << endl;
+  }
+  if (cfg.verbosity > 1) {
+    cout << endl << "opening connection" << endl << "-------------" << endl;
+  }
 
   frame::Start start;
   auto txStart = start.get();
 
-  cout << lib::writeHex("-> capture started: ", txStart);
+  if (cfg.verbosity > 0) {
+    cout << lib::writeHex("-> capture started: ", txStart);
+  }
 
   sendFrame(txStart);
   if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
     return EXIT_FAILURE;
   }
-  cout << lib::writeHex("<- confirmation frame: ", frame);
+  if (cfg.verbosity > 1) {
+    cout << lib::writeHex("<- confirmation frame: ", frame);
+  }
 
   res = start.check(frame);
   if (!res) {
@@ -292,23 +424,34 @@ int main(int argc, char **argv)
 
   cout << "press remote" << endl;
 
-  received_command = pollSingleFrame("frame_ir.dat");
+  if (cfg.doSingle) {
+    received_command = pollSingleFrame(cfg.fileSingle, cfg.activeHigh);
+  }
 
-  pollStream("streaming_ir.dat", 5s);
+  if (cfg.doStream) {
+    pollStream(cfg.fileStream, chrono::seconds(cfg.streamSeconds),
+        cfg.activeHigh);
+  }
 
-  cout << "closing connection" << endl << "-------------" << endl;
+  if (cfg.verbosity > 0) {
+    cout << "closing connection" << endl << "-------------" << endl;
+  }
 
   frame::Stop stop;
   auto txStop = stop.get();
 
-  cout << lib::writeHex("-> close connection: ", txStop);
+  if (cfg.verbosity > 1) {
+    cout << lib::writeHex("-> close connection: ", txStop);
+  }
   sendFrame(txStop);
   frame.clear();
   if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
     return 1;
   }
-  cout << lib::writeHex("<- confirmation frame: ", frame);
+  if (cfg.verbosity > 1) {
+    cout << lib::writeHex("<- confirmation frame: ", frame);
+  }
   //ignore data
 
   close(sock);
@@ -317,6 +460,8 @@ int main(int argc, char **argv)
     cout << "command received!" << endl;
     return 0;
   }
-  cout << "silence..." << endl;
+  if (cfg.doSingle) {
+    cout << "silence..." << endl;
+  }
   return 0;
 }
