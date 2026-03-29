@@ -213,6 +213,7 @@ Appending all payload bytes leads to a similar structure as the single frame for
 00882 01779 01770 02666 00882 02667 00882 01779 00881 01777 01771 02660 00889 01786 00881 02667 00882 01770 01779 02676 00881 32768 00000 32768 00000 26030 00881 01779 ...
 ```
 
+todo das ist falsch. diese sind scheinbar immer an dem zuerst gelesenen typ vorgestellt. ?? untersuchen, doku anpassen... waere schon interessant was die machen...
 The two words with unknown use are not present. Decoding works the same, except that the frame can repeat multiple times, depening on how long recording was active and how long the button on the source remote was pressed.
 Be aware that for some formats, the first frame is different to the repeats, so the stream must be running before pressing the button.  
 When no IR is active, "0000 8000" is placed to indicate no mark, 32ms pause
