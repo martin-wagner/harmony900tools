@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace frame
+namespace trx
 {
 
 void TimingStream::setData(const vector<uint16_t> &raw)

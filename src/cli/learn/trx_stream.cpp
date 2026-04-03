@@ -5,11 +5,11 @@
  *      Author: martin
  */
 
-#include "stream.h"
+#include "trx_stream.h"
 
 using namespace std;
 
-namespace frame
+namespace trx
 {
 
 Stream::Status Stream::parse(const std::vector<uint8_t> &p)
@@ -29,19 +29,16 @@ Stream::Status Stream::parse(const std::vector<uint8_t> &p)
   return Status::OK;
 }
 
-Stream::Status Stream::addChunk(const std::vector<uint8_t> &data)
+Stream::Status Stream::addChunk(const std::vector<uint8_t> &data, bool first)
 {
-  if (data.size() < HEADER_MIN_SIZE) {
-    return Status::ERR_SIZE;
+  auto status = Base::check(data);
+  if (status !=  Status::OK) {
+    return status;
   }
-  //header
-  if ((data[0] != 0x20) || (data[1] != 0xA3) || (data[2] != 0x01)
-      || (data[3] != 0x02) || (data[4] != 0x70)) {
-    return Status::ERR_FORMAT;
-  }
-  //data available, check size
-  if (data.size() != VALID_CHUNK_SIZE) {
-    return Status::ERR_FORMAT;
+
+  //data available, check remaining header + size
+  if ((data.size() != VALID_CHUNK_SIZE) || (data[4] != 0x70)) {
+    return Status::ERR_RESPONSE_FORMAT;
   }
   //terminator
   if ((data[data.size() - 2] != 0x01) || (data[data.size() - 1] != 0x30)) {
@@ -52,6 +49,10 @@ Stream::Status Stream::addChunk(const std::vector<uint8_t> &data)
   if (ret != Status::OK) {
     return ret;
   }
+
+  //move bytes with unknown use
+  moveExcessBytes(first);
+
   return Status::OK;
 }
 

@@ -13,11 +13,11 @@
 #include <getopt.h>
 
 #include "lib.h"
-#include "start.h"
-#include "single.h"
-#include "stream.h"
-#include "stop.h"
 #include "data.h"
+#include "trx_single.h"
+#include "trx_start.h"
+#include "trx_stop.h"
+#include "trx_stream.h"
 
 using namespace std;
 
@@ -149,7 +149,7 @@ void handleSigint(int)
     return;
   }
 
-  frame::Stop stop;
+  trx::Stop stop;
   auto tx = stop.get();
 
   send(s, tx.data(), tx.size(), 0);
@@ -212,9 +212,9 @@ bool sendFrame(const vector<uint8_t> &frame)
   return false;
 }
 
-bool pollSingleFrame(const string &file, bool activeHigh = true)
+bool pollSingleFrame(const string &file, bool firstTask, bool activeHigh = true)
 {
-  frame::Single single;
+  trx::Single single;
   vector<uint8_t> rx;
 
   if (cfg.verbosity > 0) {
@@ -237,33 +237,34 @@ bool pollSingleFrame(const string &file, bool activeHigh = true)
       cout << lib::writeHex("<- rx chunk: ", rx);
     }
 
-    auto ret = single.addChunk(rx);
-    if (ret == frame::Single::Status::DONE) {
+    auto ret = single.addChunk(rx, firstTask);
+    if (ret == trx::Single::Status::DONE) {
       break;
     }
     switch (ret) {
-      case frame::Single::Status::OK:
+      case trx::Single::Status::OK:
         break;
-      case frame::Single::Status::ERR_TIMEOUT:
+      case trx::Single::Status::ERR_TIMEOUT:
         cout << lib::writeTime() << "<- server returned timeout" << endl;
         return false;
-      case frame::Single::Status::ERR_RETURN:
-        cout << "<- server returned error: " << to_string(single.getError(rx))
-            << endl;
+      case trx::Single::Status::ERR_UNKNOWN_RETURNCODE:
+        cout << "<- server returned error: "
+            << to_string(single.getErrorByte(rx)) << endl;
         return false;
-      case frame::Single::Status::ERR_SIZE:
+      case trx::Single::Status::ERR_SIZE:
         cout << "<- invalid size" << endl;
         return false;
-      case frame::Single::Status::ERR_RESPONSE_FORMAT:
+      case trx::Single::Status::ERR_RESPONSE_FORMAT:
         cout << "<- invalid msg format" << endl;
         return false;
-      case frame::Single::Status::ERR_PAYLOAD_FORMAT:
+      case trx::Single::Status::ERR_PAYLOAD_FORMAT:
         cout << "<- invalid payload format" << endl;
         return false;
       default:
         cout << "<- unexpected: " << to_string((int) ret) << endl;
         return false;
     }
+    firstTask = false;
   }
 
   auto payload = single.getPayload();
@@ -271,7 +272,7 @@ bool pollSingleFrame(const string &file, bool activeHigh = true)
     cout << lib::writeTime() << "<- payload empty" << endl;
     return false;
   }
-  frame::TimingStream timingStream(payload);
+  trx::TimingStream timingStream(payload);
 
   if (cfg.verbosity > 0) {
     cout << "single frame (hex): " << timingStream.convertHexString() << endl;
@@ -280,11 +281,12 @@ bool pollSingleFrame(const string &file, bool activeHigh = true)
   cout << timingStream.convertAsciiPlot(lib::getTerminalWidth(), activeHigh)
       << endl;
 
-  //todo find what those two words do. might have something to do with the corresponding signal (??)
   if (cfg.verbosity > 0) {
-    auto leftover = single.getQ();
-    cout << lib::writeHex("<- leftover words (hex): ", leftover);
-    cout << lib::writeData("<- leftover words (dec): ", leftover);
+    auto excess = single.getExcess();
+    if (excess.size() > 0) {
+      cout << lib::writeHex("<- excess words (hex): ", excess);
+      cout << lib::writeData("<- excess words (dec): ", excess);
+    }
   }
 
   if (!file.empty()) {
@@ -297,9 +299,9 @@ bool pollSingleFrame(const string &file, bool activeHigh = true)
 }
 
 bool pollStream(const string &file, chrono::milliseconds timeout,
-    bool activeHigh = true)
+    bool firstTask, bool activeHigh = true)
 {
-  frame::Stream stream;
+  trx::Stream stream;
   vector<uint8_t> rx;
 
   if (cfg.verbosity > 0) {
@@ -324,23 +326,33 @@ bool pollStream(const string &file, chrono::milliseconds timeout,
       cout << lib::writeHex("<- rx chunk: ", rx);
     }
 
-    auto ret = stream.addChunk(rx);
+    auto ret = stream.addChunk(rx, firstTask);
     switch (ret) {
-      case frame::Stream::Status::OK:
+      case trx::Stream::Status::OK:
         break;
-      case frame::Stream::Status::ERR_SIZE:
-        cout << "<- invalid size" << endl;
+      case trx::Single::Status::ERR_TIMEOUT:
+        cout << lib::writeTime() << "<- server returned timeout" << endl;
         return false;
-      case frame::Stream::Status::ERR_FORMAT:
+      case trx::Stream::Status::ERR_UNKNOWN_RETURNCODE:
         cout << "<- invalid msg format" << endl;
         return false;
-      case frame::Stream::Status::ERR_TERM:
+      case trx::Stream::Status::ERR_SIZE:
+        cout << "<- invalid size" << endl;
+        return false;
+      case trx::Single::Status::ERR_RESPONSE_FORMAT:
+        cout << "<- invalid msg format" << endl;
+        return false;
+      case trx::Single::Status::ERR_PAYLOAD_FORMAT:
+        cout << "<- invalid payload format" << endl;
+        return false;
+      case trx::Stream::Status::ERR_TERM:
         cout << "<- terminator missing" << endl;
         return false;
       default:
         cout << "<- unexpected: " << to_string((int) ret) << endl;
         return false;
     }
+    firstTask = false;
 
     auto t_now = chrono::steady_clock::now();
     if ((t_now - t_start) > timeout) {
@@ -353,7 +365,7 @@ bool pollStream(const string &file, chrono::milliseconds timeout,
     cout << lib::writeTime() << "<- payload empty" << endl;
     return false;
   }
-  frame::TimingStream timingStream(payload);
+  trx::TimingStream timingStream(payload);
 
   if (cfg.verbosity > 0) {
     cout << "single frame (hex): " << timingStream.convertHexString() << endl;
@@ -361,6 +373,14 @@ bool pollStream(const string &file, chrono::milliseconds timeout,
   cout << "single frame (tµs): " << timingStream.convertIntString() << endl;
   cout << timingStream.convertAsciiPlot(lib::getTerminalWidth(), activeHigh)
       << endl;
+
+  if (cfg.verbosity > 0) {
+    auto excess = stream.getExcess();
+    if (excess.size() > 0) {
+      cout << lib::writeHex("<- excess words (hex): ", excess);
+      cout << lib::writeData("<- excess words (dec): ", excess);
+    }
+  }
 
   if (!file.empty()) {
     //gnuplot
@@ -400,7 +420,7 @@ int main(int argc, char **argv)
     cout << endl << "opening connection" << endl << "-------------" << endl;
   }
 
-  frame::Start start;
+  trx::Start start;
   auto txStart = start.get();
 
   if (cfg.verbosity > 0) {
@@ -416,9 +436,10 @@ int main(int argc, char **argv)
     cout << lib::writeHex("<- confirmation frame: ", frame);
   }
 
-  res = start.check(frame);
-  if (!res) {
-    cout << "<- invalid confirmation, abort" << endl;
+  auto statusStart = start.check(frame);
+  if (statusStart != trx::Start::Status::OK) {
+    cout << "<- invalid confirmation (" << (int) statusStart << "), abort"
+        << endl;
     return EXIT_FAILURE;
   }
 
@@ -437,7 +458,7 @@ int main(int argc, char **argv)
     cout << "closing connection" << endl << "-------------" << endl;
   }
 
-  frame::Stop stop;
+  trx::Stop stop;
   auto txStop = stop.get();
 
   if (cfg.verbosity > 1) {
@@ -452,7 +473,12 @@ int main(int argc, char **argv)
   if (cfg.verbosity > 1) {
     cout << lib::writeHex("<- confirmation frame: ", frame);
   }
-  //ignore data
+  auto statusStop = stop.check(frame);
+  if (statusStop != trx::Stop::Status::OK) {
+    cout << "<- invalid confirmation (" << (int) statusStop << "), ignore"
+        << endl;
+    //ignore error
+  }
 
   close(sock);
 

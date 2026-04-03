@@ -64,7 +64,6 @@
 			<target name="cmake" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
 				<buildArguments>-DCMAKE_BUILD_TYPE=Release ../../..</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -72,6 +71,13 @@
 			<target name="learn" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>harmony900learnTool -j16</buildArguments>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="erase" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>sh</buildCommand>
+				<buildArguments>-c "rm -r ./*"</buildArguments>
 				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -80,7 +86,6 @@
 			<target name="_create" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "mkdir -p build/release/host &amp;&amp; mkdir -p build/debug/host &amp;&amp; mkdir -p build/test/host"</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -110,7 +115,6 @@
 			<target name="cmake" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
 				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -118,6 +122,13 @@
 			<target name="learn" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>harmony900learnTool -j16</buildArguments>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="erase" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>sh</buildCommand>
+				<buildArguments>-c "rm -r ./*"</buildArguments>
 				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -125,7 +136,7 @@
 			</target>
 			<target name="build" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments>-j16</buildArguments>
+				<buildArguments/>
 				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -141,19 +152,26 @@
 			</target>
 			<target name="cmake" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
-				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
-				<buildTarget/>
+				<buildArguments>-DCMAKE_BUILD_TYPE=Test ../../..</buildArguments>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
 			<target name="run_tests" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>ctest</buildCommand>
-				<buildArguments>--output-on-failure</buildArguments>
+				<buildCommand>sh</buildCommand>
+				<buildArguments>-c "make -j16 &amp;&amp; ctest --output-on-failure"</buildArguments>
 				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="erase" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>sh</buildCommand>
+				<buildArguments>-c "rm -r ./*"</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
 			</target>
 		</buildTargets>
 	</storageModule>

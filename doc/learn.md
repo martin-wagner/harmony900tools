@@ -15,6 +15,15 @@ Be aware that on protocol violations the server will crash/become unresponsive. 
 Not everything is fully understood. The script "/usr/local/share/lua/5.1/ethanol/SysService.lua" -- _ircap_ on the file system contains the base protocol in binary form.
 The protocol consists of start, data exchange and close commands. For data exchange single and stream are available.
 
+We can make the following assumptions:
+- the Header is always four bytes long
+- Byte 0 is always 0x20, maybe protocol type
+- Byte 1 is the command.
+- Byte 2 is 0x80 for request, 0x01 for OK, 0x02 for timeout response
+  - 0x80 = request, other response status
+- Byte 3 ???
+
+
 __Start capture__
 
 Command 0xA1
@@ -181,7 +190,7 @@ opening connection
 poll stream data
 -------------
 11:44:39:697 -> poll data: 20 a3 80 00
-11:44:40:046 <- data frame: 20 a3 01 02 70 03 72 06 f3 ... 06 f3 01 30
+11:44:40:046 <- data frame: 20 a3 01 02 70 03 72 00 22 ... 06 f3 01 30
 poll stream data
 -------------
 11:44:40:046 -> poll data: 20 a3 80 00
@@ -208,17 +217,28 @@ closing connection
 11:44:44:449 <- confirmation frame: 20 a4 01 00
 ```
 
-Appending all payload bytes leads to a similar structure as the single frame format:
+Appending all payload bytes leads to the same structure as the single frame format:
 ```
-00882 01779 01770 02666 00882 02667 00882 01779 00881 01777 01771 02660 00889 01786 00881 02667 00882 01770 01779 02676 00881 32768 00000 32768 00000 26030 00881 01779 ...
+00034 00882 00030 01779 01770 02666 00882 02667 00882 01779 00881 01777 01771 02660 00889 01786 00881 02667 00882 01770 01779 02676 00881 32768 00000 32768 00000 26030 00881 01779 ...
 ```
-
-todo das ist falsch. diese sind scheinbar immer an dem zuerst gelesenen typ vorgestellt. ?? untersuchen, doku anpassen... waere schon interessant was die machen...
-The two words with unknown use are not present. Decoding works the same, except that the frame can repeat multiple times, depening on how long recording was active and how long the button on the source remote was pressed.
-Be aware that for some formats, the first frame is different to the repeats, so the stream must be running before pressing the button.  
+Decoding works the same, except that the IR frame can repeat and/or start multiple times, depening on how long recording was active and how long/many times the button on the source remote was pressed. The two bytes with unknow use are not present if 'single frame' command was run before this.
+Be aware that for some formats, the first IR frame is different to the repeats, so the stream must be running before pressing the button.  
 When no IR is active, "0000 8000" is placed to indicate no mark, 32ms pause
 
 Decoding:
+```
+00034 00882 00030 01779 01770 02666 00882 02667 00882 01779 
+    │     │     │     │     │     │     │     │     └ rinse and repeat
+    │     │     │     │     │     │     │     └── Mark + Pause
+    │     │     │     │     │     │     └── Mark
+    │     │     │     │     │     └── Mark + Pause
+    │     │     │     │     └── Mark
+    │     │     │     └── Mark + Pause
+    │     │     └── ???
+    │     └── Mark
+    └── ???
+```
+Decoding response following to previous single frame read:
 ```
 00882 01779 01770 02666 00882 02667 00882 01779
     │     │     │     │     │     │     └ rinse and repeat

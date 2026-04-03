@@ -6,9 +6,9 @@
  */
 
 #include <gtest/gtest.h>
-#include "stream.h"
+#include "trx_stream.h"
 
-using namespace frame;
+using namespace trx;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -69,14 +69,14 @@ TEST(StreamAddChunk, ErrSizeTooSmall)
 {
     Stream s;
     std::vector<uint8_t> data = { 0x20, 0xA3, 0x01, 0x02 };  // 4 bytes < HEADER_MIN_SIZE=5
-    EXPECT_EQ(s.addChunk(data), Stream::Status::ERR_SIZE);
+    EXPECT_EQ(s.addChunk(data, false), Stream::Status::ERR_SIZE);
 }
 
 TEST(StreamAddChunk, ErrSizeEmpty)
 {
     Stream s;
     std::vector<uint8_t> data;
-    EXPECT_EQ(s.addChunk(data), Stream::Status::ERR_SIZE);
+    EXPECT_EQ(s.addChunk(data, false), Stream::Status::ERR_SIZE);
 }
 
 TEST(StreamAddChunk, ErrFormatBadByte0)
@@ -84,7 +84,7 @@ TEST(StreamAddChunk, ErrFormatBadByte0)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[0] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(StreamAddChunk, ErrFormatBadByte1)
@@ -92,7 +92,7 @@ TEST(StreamAddChunk, ErrFormatBadByte1)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[1] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(StreamAddChunk, ErrFormatBadByte2)
@@ -100,7 +100,7 @@ TEST(StreamAddChunk, ErrFormatBadByte2)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[2] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_UNKNOWN_RETURNCODE);
 }
 
 TEST(StreamAddChunk, ErrFormatBadByte3)
@@ -108,7 +108,7 @@ TEST(StreamAddChunk, ErrFormatBadByte3)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[3] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(StreamAddChunk, ErrFormatBadByte4)
@@ -116,7 +116,7 @@ TEST(StreamAddChunk, ErrFormatBadByte4)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[4] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(StreamAddChunk, ErrTermBadLastByte)
@@ -124,7 +124,7 @@ TEST(StreamAddChunk, ErrTermBadLastByte)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[kChunkSize - 1] = 0x00;  // corrupt last byte of terminator
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_TERM);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_TERM);
 }
 
 TEST(StreamAddChunk, ErrTermBadSecondLastByte)
@@ -132,7 +132,7 @@ TEST(StreamAddChunk, ErrTermBadSecondLastByte)
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
     chunk[kChunkSize - 2] = 0x00;  // corrupt first byte of terminator
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_TERM);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_TERM);
 }
 
 TEST(StreamAddChunk, ErrFormatWrongTotalSize)
@@ -144,7 +144,7 @@ TEST(StreamAddChunk, ErrFormatWrongTotalSize)
     chunk.insert(chunk.end(), payload.begin(), payload.end() - 2);
     chunk.insert(chunk.end(), kTerminator.begin(), kTerminator.end());
     // size = 5 + 190 + 2 = 197, not 199
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::ERR_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::ERR_RESPONSE_FORMAT);
 }
 
 // ---------------------------------------------------------------------------
@@ -156,14 +156,14 @@ TEST(StreamAddChunk, OkSilencePayload)
     // Silence = "0000 8000" repeating (learn.md: "no mark, 32ms pause")
     Stream s;
     auto chunk = makeValidChunk(fillPayload(0x0000));
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::OK);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::OK);
 }
 
 TEST(StreamAddChunk, OkRealFirstWords)
 {
     Stream s;
     auto chunk = makeValidChunk(makeRealFirstWords());
-    EXPECT_EQ(s.addChunk(chunk), Stream::Status::OK);
+    EXPECT_EQ(s.addChunk(chunk, false), Stream::Status::OK);
 }
 
 // ---------------------------------------------------------------------------
@@ -181,7 +181,7 @@ TEST(StreamPayload, WordCountAfterOneChunk)
 {
     // 192 payload bytes -> 96 words
     Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x0372)));
+    s.addChunk(makeValidChunk(fillPayload(0x0372)), false);
     EXPECT_EQ(s.getPayload().size(), 96u);
 }
 
@@ -189,7 +189,7 @@ TEST(StreamPayload, RealFirstTwoWords)
 {
     // From learn.md: first two stream words are 882 (0x0372) and 1779 (0x06f3)
     Stream s;
-    s.addChunk(makeValidChunk(makeRealFirstWords()));
+    s.addChunk(makeValidChunk(makeRealFirstWords()), false);
 
     auto p = s.getPayload();
     ASSERT_GE(p.size(), 2u);
@@ -201,7 +201,7 @@ TEST(StreamPayload, AllWordsFilledUniform)
 {
     // Fill with known word, verify all 96 parse correctly
     Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x06f3)));
+    s.addChunk(makeValidChunk(fillPayload(0x06f3)), false);
 
     auto p = s.getPayload();
     ASSERT_EQ(p.size(), 96u);
@@ -214,7 +214,7 @@ TEST(StreamPayload, SilenceWordValue)
 {
     // Silence: 0x0000 -> word = 0
     Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x0000)));
+    s.addChunk(makeValidChunk(fillPayload(0x0000)), false);
 
     auto p = s.getPayload();
     ASSERT_EQ(p.size(), 96u);
@@ -225,7 +225,7 @@ TEST(StreamPayload, MaxWordValue)
 {
     // 0x8000 -> word = 32768 (used for silence marker in learn.md)
     Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x8000)));
+    s.addChunk(makeValidChunk(fillPayload(0x8000)), false);
 
     auto p = s.getPayload();
     ASSERT_EQ(p.size(), 96u);
@@ -236,30 +236,23 @@ TEST(StreamPayload, TwoChunksAccumulate)
 {
     // Each chunk contributes 96 words, two chunks -> 192
     Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x0372)));
-    s.addChunk(makeValidChunk(fillPayload(0x06f3)));
+    s.addChunk(makeValidChunk(fillPayload(0x0372)), false);
+    s.addChunk(makeValidChunk(fillPayload(0x06f3)), false);
 
     EXPECT_EQ(s.getPayload().size(), 192u);
+    EXPECT_EQ(s.getExcess().size(), 0u);
 }
 
-TEST(StreamPayload, ClearPayloadResetsState)
+TEST(StreamPayload, TwoChunksAccumulateFirstInComms)
 {
+    // Each chunk contributes 96 words, two chunks -> 192
+    // first in this communication -> move two bytes
     Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x0372)));
-    s.clearPayload();
-    EXPECT_TRUE(s.getPayload().empty());
-}
+    s.addChunk(makeValidChunk(fillPayload(0x0372)), true);
+    s.addChunk(makeValidChunk(fillPayload(0x06f3)), false);
 
-TEST(StreamPayload, ReuseAfterClear)
-{
-    Stream s;
-    s.addChunk(makeValidChunk(fillPayload(0x0372)));
-    s.clearPayload();
-    s.addChunk(makeValidChunk(fillPayload(0x06f3)));
-
-    auto p = s.getPayload();
-    ASSERT_EQ(p.size(), 96u);
-    EXPECT_EQ(p[0], 0x06f3u);
+    EXPECT_EQ(s.getPayload().size(), 190u);
+    EXPECT_EQ(s.getExcess().size(), 2u);
 }
 
 // ---------------------------------------------------------------------------

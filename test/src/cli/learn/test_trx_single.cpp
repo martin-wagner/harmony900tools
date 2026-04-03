@@ -6,9 +6,9 @@
  */
 
 #include <gtest/gtest.h>
-#include "single.h"
+#include "trx_single.h"
 
-using namespace frame;
+using namespace trx;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -63,14 +63,14 @@ TEST(SingleAddChunk, ErrSizeTooSmall)
 {
     Single s;
     std::vector<uint8_t> data = { 0x20, 0xA2, 0x01 };
-    EXPECT_EQ(s.addChunk(data), Single::Status::ERR_SIZE);
+    EXPECT_EQ(s.addChunk(data, true), Single::Status::ERR_SIZE);
 }
 
 TEST(SingleAddChunk, ErrSizeEmpty)
 {
     Single s;
     std::vector<uint8_t> data;
-    EXPECT_EQ(s.addChunk(data), Single::Status::ERR_SIZE);
+    EXPECT_EQ(s.addChunk(data, true), Single::Status::ERR_SIZE);
 }
 
 TEST(SingleAddChunk, ErrResponseFormatBadByte0)
@@ -78,7 +78,7 @@ TEST(SingleAddChunk, ErrResponseFormatBadByte0)
     Single s;
     auto chunk = makeValidChunk(0x01, kRealPayload1);
     chunk[0] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::ERR_RESPONSE_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(SingleAddChunk, ErrResponseFormatBadByte1)
@@ -86,23 +86,23 @@ TEST(SingleAddChunk, ErrResponseFormatBadByte1)
     Single s;
     auto chunk = makeValidChunk(0x01, kRealPayload1);
     chunk[1] = 0x00;
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::ERR_RESPONSE_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(SingleAddChunk, ErrTimeout)
 {
     // data[2] == 0x02 -> timeout regardless of remaining bytes
     Single s;
-    std::vector<uint8_t> data = { 0x20, 0xA2, 0x02, 0x00 };
-    EXPECT_EQ(s.addChunk(data), Single::Status::ERR_TIMEOUT);
+    std::vector<uint8_t> data = { 0x20, 0xA2, 0x02, 0x05, 0x01 };
+    EXPECT_EQ(s.addChunk(data, true), Single::Status::ERR_TIMEOUT);
 }
 
 TEST(SingleAddChunk, ErrReturnUnknownStatus)
 {
     // data[2] != 0x01 and != 0x02 -> ERR_RETURN
     Single s;
-    std::vector<uint8_t> data = { 0x20, 0xA2, 0x03, 0x05 };
-    EXPECT_EQ(s.addChunk(data), Single::Status::ERR_RETURN);
+    std::vector<uint8_t> data = { 0x20, 0xA2, 0x03, 0x05, 0x01 };
+    EXPECT_EQ(s.addChunk(data, true), Single::Status::ERR_UNKNOWN_RETURNCODE);
 }
 
 TEST(SingleAddChunk, ErrResponseFormatWrongTotalSize)
@@ -111,7 +111,7 @@ TEST(SingleAddChunk, ErrResponseFormatWrongTotalSize)
     Single s;
     std::vector<uint8_t> data = { 0x20, 0xA2, 0x01, 0x05, 0x01, 0x01,
                                    0x02, 0x00, 0x23 };  // 9 bytes, not 18
-    EXPECT_EQ(s.addChunk(data), Single::Status::ERR_RESPONSE_FORMAT);
+    EXPECT_EQ(s.addChunk(data, true), Single::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(SingleAddChunk, ErrResponseFormatBadData3)
@@ -119,7 +119,7 @@ TEST(SingleAddChunk, ErrResponseFormatBadData3)
     Single s;
     auto chunk = makeValidChunk(0x01, kRealPayload1);
     chunk[3] = 0x00;  // must be 0x05
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::ERR_RESPONSE_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(SingleAddChunk, ErrResponseFormatBadData4)
@@ -127,7 +127,7 @@ TEST(SingleAddChunk, ErrResponseFormatBadData4)
     Single s;
     auto chunk = makeValidChunk(0x01, kRealPayload1);
     chunk[4] = 0x00;  // must be 0x01
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::ERR_RESPONSE_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::ERR_RESPONSE_FORMAT);
 }
 
 TEST(SingleAddChunk, ErrPayloadFormatBadMarkerByte)
@@ -136,7 +136,7 @@ TEST(SingleAddChunk, ErrPayloadFormatBadMarkerByte)
     std::vector<uint8_t> badPayload = kRealPayload1;
     badPayload[0] = 0x03;  // must be 0x02
     auto chunk = makeValidChunk(0x01, badPayload);
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::ERR_PAYLOAD_FORMAT);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::ERR_PAYLOAD_FORMAT);
 }
 
 // ---------------------------------------------------------------------------
@@ -147,14 +147,14 @@ TEST(SingleAddChunk, OkMoreData)
 {
     Single s;
     auto chunk = makeValidChunk(0x01, kRealPayload1);
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::OK);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::OK);
 }
 
 TEST(SingleAddChunk, DoneOnEofFlag)
 {
     Single s;
     auto chunk = makeValidChunk(0x00, kRealPayload1);
-    EXPECT_EQ(s.addChunk(chunk), Single::Status::DONE);
+    EXPECT_EQ(s.addChunk(chunk, true), Single::Status::DONE);
 }
 
 TEST(SingleAddChunk, RealFirstChunk)
@@ -164,7 +164,7 @@ TEST(SingleAddChunk, RealFirstChunk)
     std::vector<uint8_t> raw = { 0x20, 0xa2, 0x01, 0x05, 0x01, 0x01,
                                   0x02, 0x00, 0x23, 0x02, 0x03, 0x41,
                                   0x02, 0x00, 0x1e, 0x02, 0x06, 0xf3 };
-    EXPECT_EQ(s.addChunk(raw), Single::Status::OK);
+    EXPECT_EQ(s.addChunk(raw, true), Single::Status::OK);
 }
 
 TEST(SingleAddChunk, RealLastChunk)
@@ -174,14 +174,14 @@ TEST(SingleAddChunk, RealLastChunk)
     std::vector<uint8_t> raw = { 0x20, 0xa2, 0x01, 0x05, 0x01, 0x00,
                                   0x02, 0x00, 0x00, 0x02, 0x80, 0x00,
                                   0x02, 0x00, 0x00, 0x02, 0x65, 0xae };
-    EXPECT_EQ(s.addChunk(raw), Single::Status::DONE);
+    EXPECT_EQ(s.addChunk(raw, false), Single::Status::DONE);
 }
 
 // ---------------------------------------------------------------------------
-// getPayload() and getQ()
+// getPayload() and getExcess()
 // Spec (single.h / learn.md):
 //   raw payload words:   [w0,  w1,  w2,  w3,  w4, ...]
-//   getQ()     ->        [w0,  w2]        (unknown "???" bytes)
+//   getExcess()     ->        [w0,  w2]        (unknown "???" bytes)
 //   getPayload()  ->     [w1,  w3,  w4, ...] (timing values)
 // ---------------------------------------------------------------------------
 
@@ -189,21 +189,21 @@ TEST(SinglePayload, EmptyBeforeAnyChunk)
 {
     Single s;
     EXPECT_TRUE(s.getPayload().empty());
-    EXPECT_TRUE(s.getQ().empty());
+    EXPECT_TRUE(s.getExcess().empty());
 }
 
 TEST(SinglePayload, SingleChunkValues)
 {
     // After one chunk with kRealPayload1 words: 35, 833, 30, 1779
     Single s;
-    s.addChunk(makeValidChunk(0x01, kRealPayload1));
+    s.addChunk(makeValidChunk(0x01, kRealPayload1), true);
 
     auto p = s.getPayload();
     ASSERT_EQ(p.size(), 2u);
     EXPECT_EQ(p[0], 833u);   // w1
     EXPECT_EQ(p[1], 1779u);  // w3
 
-    auto q = s.getQ();
+    auto q = s.getExcess();
     ASSERT_EQ(q.size(), 2u);
     EXPECT_EQ(q[0], 35u);    // w0
     EXPECT_EQ(q[1], 30u);    // w2
@@ -215,10 +215,10 @@ TEST(SinglePayload, TwoChunksAccumulate)
     // chunk2: [1770, 2667, 881, 2666]
     // total raw:  [35, 833, 30, 1779, 1770, 2667, 881, 2666]
     // getPayload: [833, 1779, 1770, 2667, 881, 2666]
-    // getQ:       [35, 30]
+    // getExcess:       [35, 30]
     Single s;
-    s.addChunk(makeValidChunk(0x01, kRealPayload1));
-    s.addChunk(makeValidChunk(0x01, kRealPayload2));
+    s.addChunk(makeValidChunk(0x01, kRealPayload1), true);
+    s.addChunk(makeValidChunk(0x01, kRealPayload2), false);
 
     auto p = s.getPayload();
     ASSERT_EQ(p.size(), 6u);
@@ -229,7 +229,7 @@ TEST(SinglePayload, TwoChunksAccumulate)
     EXPECT_EQ(p[4], 881u);
     EXPECT_EQ(p[5], 2666u);
 
-    auto q = s.getQ();
+    auto q = s.getExcess();
     ASSERT_EQ(q.size(), 2u);
     EXPECT_EQ(q[0], 35u);
     EXPECT_EQ(q[1], 30u);
@@ -241,8 +241,8 @@ TEST(SinglePayload, EofChunkWithSilenceWords)
     // Combined with chunk1 raw: [35, 833, 30, 1779, 0, 32768, 0, 26030]
     // getPayload: [833, 1779, 0, 32768, 0, 26030]
     Single s;
-    s.addChunk(makeValidChunk(0x01, kRealPayload1));
-    s.addChunk(makeValidChunk(0x00, kRealPayloadEof));
+    s.addChunk(makeValidChunk(0x01, kRealPayload1), true);
+    s.addChunk(makeValidChunk(0x00, kRealPayloadEof), false);
 
     auto p = s.getPayload();
     ASSERT_EQ(p.size(), 6u);
@@ -252,29 +252,6 @@ TEST(SinglePayload, EofChunkWithSilenceWords)
     EXPECT_EQ(p[5], 26030u);
 }
 
-TEST(SinglePayload, ClearPayloadResetsState)
-{
-    Single s;
-    s.addChunk(makeValidChunk(0x01, kRealPayload1));
-    s.clearPayload();
-
-    EXPECT_TRUE(s.getPayload().empty());
-    EXPECT_TRUE(s.getQ().empty());
-}
-
-TEST(SinglePayload, ReuseAfterClear)
-{
-    Single s;
-    s.addChunk(makeValidChunk(0x01, kRealPayload1));
-    s.clearPayload();
-    s.addChunk(makeValidChunk(0x01, kRealPayload2));
-
-    auto p = s.getPayload();
-    ASSERT_EQ(p.size(), 2u);
-    EXPECT_EQ(p[0], 2667u);
-    EXPECT_EQ(p[1], 2666u);
-}
-
 // ---------------------------------------------------------------------------
 // getError()
 // ---------------------------------------------------------------------------
@@ -282,29 +259,29 @@ TEST(SinglePayload, ReuseAfterClear)
 TEST(SingleGetError, ReturnsByte2)
 {
     Single s;
-    std::vector<uint8_t> data = { 0x20, 0xA2, 0x02 };
-    EXPECT_EQ(s.getError(data), 0x02u);
+    std::vector<uint8_t> data = { 0x20, 0xA2, 0x02, 0x05, 0x01 };
+    EXPECT_EQ(s.getErrorByte(data), 0x02u);
 }
 
 TEST(SingleGetError, OkStatus)
 {
     Single s;
-    std::vector<uint8_t> data = { 0x20, 0xA2, 0x01, 0x00 };
-    EXPECT_EQ(s.getError(data), 0x01u);
+    std::vector<uint8_t> data = { 0x20, 0xA2, 0x01, 0x05, 0x01 };
+    EXPECT_EQ(s.getErrorByte(data), 0x01u);
 }
 
 TEST(SingleGetError, TooSmallReturns255)
 {
     Single s;
     std::vector<uint8_t> data = { 0x20, 0xA2 };
-    EXPECT_EQ(s.getError(data), 255u);
+    EXPECT_EQ(s.getErrorByte(data), 255u);
 }
 
 TEST(SingleGetError, EmptyReturns255)
 {
     Single s;
     std::vector<uint8_t> data;
-    EXPECT_EQ(s.getError(data), 255u);
+    EXPECT_EQ(s.getErrorByte(data), 255u);
 }
 
 // ---------------------------------------------------------------------------

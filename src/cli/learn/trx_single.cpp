@@ -5,11 +5,11 @@
  *      Author: martin
  */
 
-#include "single.h"
+#include "trx_single.h"
 
 using namespace std;
 
-namespace frame
+namespace trx
 {
 
 Single::Status Single::parse(const std::vector<uint8_t> &p)
@@ -35,26 +35,15 @@ Single::Status Single::parse(const std::vector<uint8_t> &p)
   return Status::OK;
 }
 
-Single::Status Single::addChunk(const std::vector<uint8_t> &data)
+Single::Status Single::addChunk(const std::vector<uint8_t> &data, bool first)
 {
-  if (data.size() < HEADER_MIN_SIZE) {
-    return Status::ERR_SIZE;
+  auto status = Base::check(data);
+  if (status !=  Status::OK) {
+    return status;
   }
-  //universal bytes of header
-  if ((data[0] != 0x20) || (data[1] != 0xA2)) {
-    return Status::ERR_RESPONSE_FORMAT;
-  }
-  //check for timeout
-  if (data[2] == 0x02) {
-    return Status::ERR_TIMEOUT;
-  }
-  //not ok
-  if (data[2] != 0x01) {
-    return Status::ERR_RETURN;
-  }
+
   //data available, check remaining header + size
-  if ((data.size() != VALID_CHUNK_SIZE) || (data[3] != 0x05)
-      || (data[4] != 0x01)) {
+  if ((data.size() != VALID_CHUNK_SIZE) || (data[4] != 0x01)) {
     return Status::ERR_RESPONSE_FORMAT;
   }
 
@@ -62,19 +51,15 @@ Single::Status Single::addChunk(const std::vector<uint8_t> &data)
   if (ret != Status::OK) {
     return ret;
   }
+
+  //move bytes with unknown use
+  moveExcessBytes(first);
+
   //check for end marker
   if (data[5] == 0) {
     return Status::DONE;
   }
   return Status::OK;
-}
-
-uint8_t Single::getError(const std::vector<uint8_t> &data)
-{
-  if (data.size() < 3) {
-    return 255;
-  }
-  return data[2];
 }
 
 }

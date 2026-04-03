@@ -9,8 +9,9 @@ set(LEARN_SRC_DIR ${CMAKE_SOURCE_DIR}/src/cli/learn)
 # test_single
 # ---------------------------------------------------------------------------
 add_executable(test_single
-    test_single.cpp
-    ${LEARN_SRC_DIR}/single.cpp
+    test_trx_single.cpp
+    ${LEARN_SRC_DIR}/trx_base.cpp
+    ${LEARN_SRC_DIR}/trx_single.cpp
 )
 
 target_include_directories(test_single
@@ -27,8 +28,9 @@ target_link_libraries(test_single
 # test_stream
 # ---------------------------------------------------------------------------
 add_executable(test_stream
-    test_stream.cpp
-    ${LEARN_SRC_DIR}/stream.cpp
+    test_trx_stream.cpp
+    ${LEARN_SRC_DIR}/trx_base.cpp
+    ${LEARN_SRC_DIR}/trx_stream.cpp
 )
 
 target_include_directories(test_stream
