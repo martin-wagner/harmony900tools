@@ -1,0 +1,59 @@
+# Harmony 900 universal remote control
+
+## Overview
+
+Everyone who has one today knows why :-).
+
+you can find some stuff here: [Reddit](https://www.reddit.com/r/logitechharmony/comments/1kxacmr/info_theres_hope_for_at_least_harmony_900_if_open/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+
+## System overview
+
+For a 2008/2009 embedded system, this thing is a beast. 
+
+- NXP/Freescale MC9328MX21S arm926 266MHz SoC
+- NXP/Freescale SC13213A Zigbee Coprocessor
+- 64MByte NVM
+- 8MByte RAM
+- runs QNX OS v6.3.2
+- has a unix shell and file system
+- comes with telnet, ftp (server and client), lua interpreter and flash (the Adobe variant, not the memory)
+- is detected as USB-to-Ethernet when plugged to a PC.
+
+![top side](img/top.jpg "Top side")
+![bottom side](img/bottom.jpg "Bottom side")
+
+## USB - Ethernet
+
+The remote implements standard networking. You can use all the nice tools :-)
+
+- you need to have the Logitech Harmony software installed to get the driver
+- you _really_ need to have this driver. This means Windows only. Linux detects the driver, but some init seems to be missing, no ports are opened. After connecting to windows with the logitech driver installed once (and doing nothing in there), communication on linux works also. You can use a VM or physical machine. No idea what the windows driver does. You need to run e.g. _ping_ in the background, otherwise the driver de-inits after a few minutes.
+- you can make a backup of your config using concordance (concordance.exe --dump-config=harmony.hex). You can use this backup to "clone" your remote.
+- telnet login is root, password ethanol (yes, really, remote codename is `vodka` btw)
+- it is listening on IP 169.254.1.2
+- sloginfo -c -w clears and follows the log (see the qnx docs)
+- /fs/etfs/scratch/log.txt also contains a log, just use tail -f /fs/etfs/scratch/log.txt
+
+### Filesystem
+
+The following files are interesting
+
+- your config lives in /usr/data/userconfig
+  - ActionLists.xml contains parameters for each IR command
+  - UserConfiguration.xml contains your devices and activities
+  - IrProto.bin contains raw IR protocol data
+  - SsIr.bin contains raw IR data streams
+- some more config lives in /usr/data/platformconfig
+  - User RF Settings (Harmony RF range extender / zigbee??).
+- lua scripts live in /usr/local/share/lua/5.1/ those are unobfurscated and do include comments.
+
+### Fun stuff
+
+Change level of backlight
+```
+curl --http0.9 http://169.254.1.2/system/backlightlevel --output -
+curl --http0.9 -X POST -d "25" http://169.254.1.2/system/backlightlevel --output -
+```
+### nmap
+
+
