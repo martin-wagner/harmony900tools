@@ -14,6 +14,7 @@
 #include <getopt.h>
 
 #include "cli/lib/lib.h"
+#include "cli/lib/data.h"
 #include "cli/lib/binary.h"
 //#include "data.h"
 //#include "trx_single.h"
@@ -35,11 +36,12 @@ struct Config
 //    string host = "169.254.1.2";
 //    uint16_t port = 3074;
     string ssIrFileName = "SsIr.bin";
+    string dumpFileName = "streamIr.dat";
 //    string fileStream = "streaming_ir.dat";
 //    bool doSingle = true;
 //    bool doStream = false;
 //    int streamSeconds = 5;
-//    bool activeHigh = true;
+    bool activeHigh = true;
 } cfg;
 
 static void printHelp(const char *prog)
@@ -50,11 +52,12 @@ static void printHelp(const char *prog)
 //      << "  -i <ip>        IP address         (default: 169.254.1.2)\n"
 //      << "  -p <port>      Port               (default: 3074)\n"
       << "  -f <file>      File to parse        (default: SsIr.bin)\n"
+      << "  -d <file>      File to dump output  (default: streamIr.dat, will be numbered)\n"
 //      << "  -F <file>      Stream file        (default: streaming_ir.dat)\n"
 //      << "  -s[0|1]        Poll single frame  (default: on,  -s0 disables)\n"
 //      << "  -S[0|1]        Poll stream        (default: off, -S1 enables)\n"
 //      << "  -t <seconds>   Stream duration    (default: 5)\n"
-//      << "  -l             Active-low signal  (default: active-high)\n" << "\n"
+      << "  -l             Active-low signal  (default: active-high)\n" << "\n"
 //      << "At least one of -s/-S (or their defaults) must be active.\n"
       ;
 }
@@ -62,7 +65,7 @@ static void printHelp(const char *prog)
 static bool parseArgs(int argc, char **argv, Config &cfg)
 {
   int opt;
-  while ((opt = getopt(argc, argv, "hvi:p:f:F:s::S::t:l")) != -1) {
+  while ((opt = getopt(argc, argv, "hvi:p:f:d:F:s::S::t:l")) != -1) {
     switch (opt) {
       case 'h':
         return false;
@@ -83,6 +86,9 @@ static bool parseArgs(int argc, char **argv, Config &cfg)
 //      }
       case 'f':
         cfg.ssIrFileName = optarg;
+        break;
+      case 'd':
+        cfg.dumpFileName = optarg;
         break;
 //      case 'F':
 //        cfg.fileStream = optarg;
@@ -113,9 +119,9 @@ static bool parseArgs(int argc, char **argv, Config &cfg)
 //        cfg.streamSeconds = t;
 //        break;
 //      }
-//      case 'l':
-//        cfg.activeHigh = false;
-//        break;
+      case 'l':
+        cfg.activeHigh = false;
+        break;
       default:
         return false;
     }
@@ -129,21 +135,21 @@ static bool parseArgs(int argc, char **argv, Config &cfg)
 
   return true;
 }
-//
-//bool writeFile(const string &filename, const string &data)
-//{
-//  ofstream file(filename);
-//
-//  if (!file.is_open()) {
-//    return false;
-//  }
-//
-//  file << data;
-//
-//  file.close();
-//
-//  return true;
-//}
+
+bool writeFile(const string &filename, const string &data)
+{
+  ofstream file(filename);
+
+  if (!file.is_open()) {
+    return false;
+  }
+
+  file << data;
+
+  file.close();
+
+  return true;
+}
 
 int main(int argc, char **argv)
 {
@@ -193,7 +199,7 @@ int main(int argc, char **argv)
   }
 
   for (int i = 0; i < offsets.size(); i++) {
-    cout << "----- raw command " << i << "-----" << endl;
+    cout << "----- raw command " << i << " -----" << endl;
 
     int start = offsets[i] + 5;
     int end = raw.size();
@@ -211,8 +217,8 @@ int main(int argc, char **argv)
     }
 
     if (cfg.verbosity > 1) {
-      cout << lib::writeHex("payload (hex)", payload);
-      cout << lib::writeData("payload (hex)", payload);
+      cout << lib::writeHex("payload (hex): ", payload);
+      cout << lib::writeData("payload (dec): ", payload);
     }
 
     double carrier_ns = static_cast<double>(payload[0]) / 1000000000;
@@ -221,24 +227,43 @@ int main(int argc, char **argv)
     cout << "clock: " << carrier_ns * 1000000 << "µs, " << clock_khz << "kHz"
         << endl;
 
-    if (payload[1] != 0) {
+    if ((payload[3] & 0x8000) == 0) {
       cout << "??? should be 0000: " << payload[1] << endl;
       return EXIT_FAILURE;
     }
 
     auto sampleCount = payload[2];
 
-    cout << "sample count: " << sampleCount << endl;
+    cout << "sample count: " << sampleCount << endl; //todo use to verify remaining
 
+    vector<uint16_t> samples;
+    if ((payload[3] & 0x8000) == 0) {
+      cout << "first timing not mark. adding one with 0µs.";
+      samples.push_back(0x8000);
+    }
     for (int j = 3; j < payload.size(); j++) {
       const uint16_t sample = payload[j];
-
       if ((sample & 0x8000) != 0) {
-        cout << "mark: " << (sample & 0x7fff) << endl;
+        samples.push_back((sample & 0x7fff));
       } else {
-        cout << "space: " << sample << endl;
-
+        samples.push_back(sample);
       }
+    }
+
+    auto timingStream = lib::TimingStream::fromMarkPause(samples);
+
+    if (cfg.verbosity > 0) {
+      cout << "stream IR (hex): " << timingStream.convertHexString() << endl;
+    }
+    cout << "stream IR (tµs): " << timingStream.convertIntString() << endl;
+    cout << timingStream.convertAsciiPlot(lib::getTerminalWidth(), cfg.activeHigh)
+        << endl;
+
+    if (!cfg.dumpFileName.empty()) {
+      auto filename = lib::enumerateFilename(cfg.dumpFileName, i);
+      //gnuplot
+      auto str = timingStream.convertGnuplot(cfg.activeHigh);
+      writeFile(filename, str);
     }
   }
 

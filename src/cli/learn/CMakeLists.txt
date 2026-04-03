@@ -3,7 +3,7 @@ set(sources
     trx_base.cpp
     trx_single.cpp
     trx_stream.cpp
-    data.cpp
+    ${CMAKE_SOURCE_DIR}/src/cli/lib/data.cpp
 )
 
 add_executable(harmony900learnTool ${sources})

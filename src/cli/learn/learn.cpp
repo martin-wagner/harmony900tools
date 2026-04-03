@@ -13,7 +13,7 @@
 #include <getopt.h>
 
 #include "cli/lib/lib.h"
-#include "data.h"
+#include "cli/lib/data.h"
 #include "trx_single.h"
 #include "trx_start.h"
 #include "trx_stop.h"
@@ -272,7 +272,7 @@ bool pollSingleFrame(const string &file, bool firstTask, bool activeHigh = true)
     cout << lib::writeTime() << "<- payload empty" << endl;
     return false;
   }
-  trx::TimingStream timingStream(payload);
+  auto timingStream = lib::TimingStream::fromMarkSegment(payload);
 
   if (cfg.verbosity > 0) {
     cout << "single frame (hex): " << timingStream.convertHexString() << endl;
@@ -365,7 +365,7 @@ bool pollStream(const string &file, chrono::milliseconds timeout,
     cout << lib::writeTime() << "<- payload empty" << endl;
     return false;
   }
-  trx::TimingStream timingStream(payload);
+  auto timingStream = lib::TimingStream::fromMarkSegment(payload);
 
   if (cfg.verbosity > 0) {
     cout << "single frame (hex): " << timingStream.convertHexString() << endl;

@@ -13,17 +13,27 @@
 
 using namespace std;
 
-namespace trx
+namespace lib
 {
 
-void TimingStream::setData(const vector<uint16_t> &raw)
+void TimingStream::setDataMarkSegment(const vector<uint16_t> &raw)
 {
   for (int i = 0; i < raw.size(); i += 2) {
     if (i + 1 < raw.size()) {
-      data.push_back(Block(raw[i], raw[i + 1]));
+      data.push_back(Block::fromMarkSegment(raw[i], raw[i + 1]));
     }
   }
 }
+
+void TimingStream::setDataMarkPause(const vector<uint16_t> &raw)
+{
+  for (int i = 0; i < raw.size(); i += 2) {
+    if (i + 1 < raw.size()) {
+      data.push_back(Block::fromMarkPause(raw[i], raw[i + 1]));
+    }
+  }
+}
+
 
 string TimingStream::convertGnuplot(bool activeHigh)
 {
@@ -47,7 +57,7 @@ string TimingStream::convertGnuplot(bool activeHigh)
     plotData.push_back( { time_us, 0 });
 
     // End of segment (prepare for next mark)
-    time_us += block.pause_us();
+    time_us += block.pause_us;
   }
 
   str << "time(µs) mark" << endl;
@@ -75,7 +85,7 @@ string TimingStream::convertIntString()
   stringstream str;
 
   for (const auto &block : data) {
-    str << "MP" << block.mark_us << ":" << block.pause_us() << "; ";
+    str << "MP" << block.mark_us << ":" << block.pause_us << "; ";
     //str << "MS" << block.mark_us << ":" << block.segment_us << "; ";
   }
 
@@ -115,7 +125,7 @@ string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
       //silence block, no pulse
       mark_divs = 0;
     }
-    int pause_divs = max(1u, (block.pause_us() + base / 2) / base);
+    int pause_divs = max(1u, (block.pause_us + base / 2) / base);
 
     // rising edge
     if (!level && (mark_divs > 0)) {

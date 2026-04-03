@@ -115,4 +115,19 @@ inline int getTerminalWidth()
   return 80;
 }
 
+std::string enumerateFilename(const std::string &filename, int number)
+{
+  std::size_t dot_pos = filename.find_last_of('.');
+
+  // no extension found
+  if (dot_pos == std::string::npos) {
+    return filename + std::to_string(number);
+  }
+
+  std::string name = filename.substr(0, dot_pos);
+  std::string ext = filename.substr(dot_pos);
+
+  return name + std::to_string(number) + ext;
+}
+
 }
