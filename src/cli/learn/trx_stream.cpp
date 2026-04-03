@@ -6,6 +6,7 @@
  */
 
 #include "trx_stream.h"
+#include "cli/lib/binary.h"
 
 using namespace std;
 
@@ -32,7 +33,7 @@ Stream::Status Stream::parse(const std::vector<uint8_t> &p)
 Stream::Status Stream::addChunk(const std::vector<uint8_t> &data, bool first)
 {
   auto status = Base::check(data);
-  if (status !=  Status::OK) {
+  if (status != Status::OK) {
     return status;
   }
 
@@ -45,9 +46,10 @@ Stream::Status Stream::addChunk(const std::vector<uint8_t> &data, bool first)
     return Status::ERR_TERM;
   }
 
-  auto ret = parse( { data.begin() + 5, data.end() - 2 });
-  if (ret != Status::OK) {
-    return ret;
+  auto ret = lib::parseHarmony16_network( { data.begin() + 5, data.end() - 2 },
+      payload);
+  if (ret != true) {
+    return Status::ERR_SIZE;
   }
 
   //move bytes with unknown use

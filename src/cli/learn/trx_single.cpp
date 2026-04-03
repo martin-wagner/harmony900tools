@@ -6,6 +6,7 @@
  */
 
 #include "trx_single.h"
+#include "cli/lib/binary.h"
 
 using namespace std;
 
@@ -24,10 +25,7 @@ Single::Status Single::parse(const std::vector<uint8_t> &p)
   //drop 0x02, 0xXX 0xXX big endian
   for (size_t i = 0; (i + 2) < p.size(); i += 3) {
     if (p[i] == 0x02) {
-      uint16_t a = p[i + 2];
-      uint16_t b = p[i + 1];
-      v = a | (b << 8);
-      payload.push_back(v);
+      payload.push_back(lib::parseHarmony16_network(p[i+1], p[i+2]));
     } else {
       return Status::ERR_PAYLOAD_FORMAT;
     }

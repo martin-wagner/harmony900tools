@@ -1,0 +1,59 @@
+/*
+ * binary.h
+ *
+ *  Created on: Apr 3, 2026
+ *      Author: martin
+ */
+
+
+#pragma once
+
+#include <cstdint>
+#include <vector>
+
+namespace lib {
+
+//use on network data stream: parseHarmony16(p[i], p[i+1])
+inline uint16_t parseHarmony16_network(uint8_t h, uint8_t l)
+{
+  return static_cast<uint16_t>(l) | (static_cast<uint16_t>(h) << 8);
+}
+
+
+inline bool parseHarmony16_network(const std::vector<uint8_t> &in, std::vector<uint16_t> &out)
+{
+  uint16_t v;
+
+  if ((in.size() % 2) != 0) {
+    return false;
+  }
+
+  for (size_t i = 0; i < in.size(); i += 2) {
+    out.push_back(parseHarmony16_network(in[i], in[i+1]));
+  }
+  return true;
+}
+
+//use on network data stream: parseHarmony16(p[i], p[i+1])
+inline uint16_t parseHarmony16_file(uint8_t h, uint8_t l)
+{
+  return static_cast<uint16_t>(h) | (static_cast<uint16_t>(l) << 8);
+}
+
+
+inline bool parseHarmony16_file(const std::vector<uint8_t> &in, std::vector<uint16_t> &out)
+{
+  uint16_t v;
+
+  if ((in.size() % 2) != 0) {
+    return false;
+  }
+
+  for (size_t i = 0; i < in.size(); i += 2) {
+    out.push_back(parseHarmony16_file(in[i], in[i+1]));
+  }
+  return true;
+}
+
+
+}

@@ -12,7 +12,7 @@
 #include <atomic>
 #include <getopt.h>
 
-#include "lib.h"
+#include "cli/lib/lib.h"
 #include "data.h"
 #include "trx_single.h"
 #include "trx_start.h"
@@ -468,7 +468,7 @@ int main(int argc, char **argv)
   frame.clear();
   if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
-    return 1;
+    return EXIT_FAILURE;
   }
   if (cfg.verbosity > 1) {
     cout << lib::writeHex("<- confirmation frame: ", frame);
@@ -484,10 +484,10 @@ int main(int argc, char **argv)
 
   if (received_command) {
     cout << "command received!" << endl;
-    return 0;
+    return EXIT_SUCCESS;
   }
   if (cfg.doSingle) {
     cout << "silence..." << endl;
   }
-  return 0;
+  return EXIT_SUCCESS;
 }

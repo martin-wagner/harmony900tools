@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <unistd.h>
 #include <iostream>
 #include <chrono>
 #include <iomanip>
