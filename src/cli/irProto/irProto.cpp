@@ -200,10 +200,9 @@ int main(int argc, char **argv)
   //easiest -> drop
   raw.erase(raw.begin(), raw.begin() + 5);
 
-
-
+  //iterate over protocol objects
   for (int i = 0; i < offsets.size(); i++) {
-    cout << "----- protocol command " << i << "-----" << endl;
+    cout << "----- protocol object " << i << "-----" << endl;
 
     int start = offsets[i];
     int end = raw.size();
@@ -211,48 +210,159 @@ int main(int argc, char **argv)
       end = offsets[i + 1];
     }
 
-    cout << lib::writeHex("irProto raw: ", vector<uint8_t>{ raw.begin() + start, raw.begin() + end });
+    if (cfg.verbosity > 1) {
+      cout
+          << lib::writeHex("protocol object raw: ",
+              vector<uint8_t> { raw.begin() + start, raw.begin() + end });
+      cout << "size: " << end - start << endl;
+    }
 
-//
-//    //payload data
-//    vector<uint16_t> payload;
-//    auto ret = lib::parseHarmony16_file(
-//        { raw.begin() + start, raw.begin() + end }, payload);
-//    if (ret != true) {
-//      cout << "irProto file size error" << endl;
-//      return EXIT_FAILURE;
-//    }
-//
-//    if (cfg.verbosity > 1) {
-//      cout << lib::writeHex("payload (hex)", payload);
-//      cout << lib::writeData("payload (hex)", payload);
-//    }
-//
-//    double carrier_ns = static_cast<double>(payload[0]) / 1000000000;
-//    double clock_khz = 1 / carrier_ns / 1000;
-//
-//    cout << "clock: " << carrier_ns * 1000000 << "µs, " << clock_khz << "kHz"
-//        << endl;
-//
-//    if (payload[1] != 0) {
-//      cout << "??? should be 0000: " << payload[1] << endl;
-//      return EXIT_FAILURE;
-//    }
-//
-//    auto sampleCount = payload[2];
-//
-//    cout << "sample count: " << sampleCount << endl;
-//
-//    for (int j = 3; j < payload.size(); j++) {
-//      const uint16_t sample = payload[j];
-//
-//      if ((sample & 0x8000) != 0) {
-//        cout << "mark: " << (sample & 0x7fff) << endl;
-//      } else {
-//        cout << "space: " << sample << endl;
-//
-//      }
-//    }
+    uint32_t unknown = raw[start];
+    if (unknown != 1) {
+      cout << "start byte not 1: " << hex << unknown << dec << endl;
+      return EXIT_FAILURE;
+    }
+
+    //carrier
+    auto carrier = lib::parseHarmony16_file(raw[start + 1], raw[start + 2]);
+
+    double carrier_ns = static_cast<double>(carrier) / 1000000000;
+    double clock_khz = 1 / carrier_ns / 1000;
+
+    cout << "clock: " << carrier_ns * 1000000 << "µs, " << clock_khz << "kHz"
+        << endl;
+
+    unknown = lib::parseHarmony16_file(raw[start + 3], raw[start + 4]);
+    if (unknown != 0) {
+      cout << "start word not 0: " << hex << unknown << dec << endl;
+      return EXIT_FAILURE;
+    }
+    unknown = raw[start + 5]; //duty cycle (??)
+    if (unknown != 50) {
+      cout << "start byte not 50: " << hex << unknown << dec << endl;
+      return EXIT_FAILURE;
+    }
+
+    uint8_t sectionCount = raw[start + 6];
+    cout << "section count: " << (int) sectionCount << endl;
+
+    //ende header
+
+    vector<uint16_t> protOffsets;
+    lib::parseHarmony16_file(
+        { raw.begin() + start + 7, raw.begin() + start + 7 + 2 * sectionCount },
+        protOffsets);
+
+    if (cfg.verbosity > 1) {
+      cout << lib::writeHex("in-protocol start offset (hex)", protOffsets);
+      cout << lib::writeData("in-protocol start offset (dec)", protOffsets);
+    }
+
+
+    for (int j = 0; j < sectionCount; ++j) {
+      cout << "--> protocol object item " << j << endl;
+
+      int protStart = protOffsets[j];
+      int protEnd = end;
+      if ((j + 1) < protOffsets.size()) {
+        protEnd = protOffsets[j + 1];
+      }
+
+      if (cfg.verbosity > 1) {
+        cout
+            << lib::writeHex("protocol object item raw: ",
+                vector<uint8_t> { raw.begin() + protStart, raw.begin() + protEnd });
+        cout << "size: " << protEnd - protStart << endl;
+      }
+      if ((protEnd - protStart) < 16) { //todo wie gross muss dieses ding mind. sein??
+        cout << "size error!!!!" << endl;
+        continue;
+      }
+
+
+      auto bit_count = lib::parseHarmony16_file(raw[protStart + 0], raw[protStart + 1]);
+      cout << "bitcount: " << bit_count << " : 0x" << hex << bit_count << dec  << endl;
+
+      auto code_mask = lib::parseHarmony16_file(raw[protStart + 2], raw[protStart + 3]);
+      cout << "codemask: " << code_mask <<  " : 0x" << hex << code_mask << dec << endl;
+
+      auto repeat_interval = lib::parseHarmony32_file(raw[protStart + 4], raw[protStart + 5], raw[protStart + 6], raw[protStart + 7]);
+      cout << "repeat: " << repeat_interval <<  " : 0x" << hex << repeat_interval << dec << endl;
+
+      auto body0 = raw[protStart + 8];
+      auto body1 = raw[protStart + 9];
+      cout << "body: " << hex << (int)body0 << " : " << (int)body1 << dec << endl;
+
+      //pointer to last segment
+      auto ptr3Offset = lib::parseHarmony16_file(raw[protStart + 10], raw[protStart + 11]);
+      cout << "offset ptr3 (data / hdr): " << ptr3Offset <<  " : " << hex << ptr3Offset << dec << endl;
+      //pointer to first segment
+      auto ptr1Offset = lib::parseHarmony16_file(raw[protStart + 12], raw[protStart + 13]);
+      cout << "offset ptr1 (start / bit0): " << ptr1Offset <<  " : " << hex << ptr1Offset << dec << endl;
+      //pointer to second segment (??optional, 0 if not used)
+      auto ptr2Offset = lib::parseHarmony16_file(raw[protStart + 14], raw[protStart + 15]);
+      cout << "offset ptr2 (stop / bit1): " << ptr2Offset <<  " : " << hex << ptr2Offset << dec << endl;
+
+
+      if (ptr1Offset != 0) {
+        auto listEnd = ptr2Offset;
+        if (listEnd == 0) {
+          listEnd = ptr3Offset;
+        }
+        if (listEnd == 0) {
+          listEnd = protEnd;
+        }
+
+        auto ptr1header = raw[ptr1Offset];
+        cout << "ptr1 counter: " << (int)ptr1header << endl;
+
+        vector<uint16_t> timings;
+        lib::parseHarmony16_file( { raw.begin() + ptr1Offset + 1, raw.begin() + listEnd }, timings);
+        cout << lib::writeHex("in-protocol ptr1 data (hex)", timings);
+        cout << lib::writeData("in-protocol ptr1 data (dec)", timings);
+        for (auto &t : timings) {
+          t = t & 0x7fff;
+        }
+        cout << lib::writeData("in-protocol ptr1 data, masked (dec)", timings);
+      }
+
+
+      if (ptr2Offset != 0) {
+        auto listEnd = ptr3Offset;
+        if (listEnd == 0) {
+          listEnd = protEnd;
+        }
+
+        auto ptr2header = raw[ptr2Offset];
+        cout << "ptr2 counter: " << (int)ptr2header << endl;
+
+        vector<uint16_t> timings;
+        lib::parseHarmony16_file( { raw.begin() + ptr2Offset + 1, raw.begin() + listEnd }, timings);
+        cout << lib::writeHex("in-protocol ptr2 data (hex)", timings);
+        cout << lib::writeData("in-protocol ptr2 data (dec)", timings);
+        for (auto &t : timings) {
+          t = t & 0x7fff;
+        }
+        cout << lib::writeData("in-protocol ptr1 data, masked (dec)", timings);
+      }
+
+      if (ptr3Offset != 0) {
+        auto listEnd = protEnd;
+
+        vector<uint16_t> timings;
+        lib::parseHarmony16_file( { raw.begin() + ptr3Offset, raw.begin() + listEnd }, timings);
+        cout << lib::writeHex("in-protocol ptr3 data (hex)", timings);
+        cout << lib::writeData("in-protocol ptr3 data (dec)", timings);
+        for (auto &t : timings) {
+          t = t & 0x7fff;
+        }
+        cout << "data 0-1 / 1-0" << endl;
+        cout << lib::writeData("in-protocol ptr1 data, masked (dec)", timings);
+      }
+
+
+    }
+
   }
 
   return EXIT_SUCCESS;
