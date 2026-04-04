@@ -115,7 +115,7 @@ inline int getTerminalWidth()
   return 80;
 }
 
-std::string enumerateFilename(const std::string &filename, int number)
+inline std::string enumerateFilename(const std::string &filename, int number)
 {
   std::size_t dot_pos = filename.find_last_of('.');
 

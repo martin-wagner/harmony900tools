@@ -16,7 +16,7 @@ using namespace std;
 namespace lib
 {
 
-void TimingStream::setDataMarkSegment(const vector<uint16_t> &raw)
+void TimingStream::addMarkSegment(const vector<uint16_t> &raw)
 {
   for (int i = 0; i < raw.size(); i += 2) {
     if (i + 1 < raw.size()) {
@@ -25,7 +25,7 @@ void TimingStream::setDataMarkSegment(const vector<uint16_t> &raw)
   }
 }
 
-void TimingStream::setDataMarkPause(const vector<uint16_t> &raw)
+void TimingStream::addMarkPause(const vector<uint16_t> &raw)
 {
   for (int i = 0; i < raw.size(); i += 2) {
     if (i + 1 < raw.size()) {
@@ -34,8 +34,18 @@ void TimingStream::setDataMarkPause(const vector<uint16_t> &raw)
   }
 }
 
+vector<uint16_t> TimingStream::convertMarkPause() const
+{
+  vector<uint16_t> stream;
 
-string TimingStream::convertGnuplot(bool activeHigh)
+  for (const auto &item : data) {
+    stream.push_back(item.mark_us);
+    stream.push_back(item.pause_us);
+  }
+  return stream;
+}
+
+string TimingStream::convertGnuplot(bool activeHigh) const
 {
   vector<pair<uint32_t, int>> plotData;
   uint32_t time_us = 0;
@@ -67,7 +77,7 @@ string TimingStream::convertGnuplot(bool activeHigh)
   return str.str();
 }
 
-string TimingStream::convertHexString()
+string TimingStream::convertHexString() const
 {
   stringstream str;
 
@@ -80,7 +90,7 @@ string TimingStream::convertHexString()
   return str.str();
 }
 
-string TimingStream::convertIntString()
+string TimingStream::convertIntString() const
 {
   stringstream str;
 
@@ -92,7 +102,7 @@ string TimingStream::convertIntString()
   return str.str();
 }
 
-string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh)
+string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh) const
 {
   //todo active high...
   string header;

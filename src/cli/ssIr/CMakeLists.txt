@@ -1,5 +1,6 @@
 set(sources
     ssIr.cpp
+    file.cpp
     ${CMAKE_SOURCE_DIR}/src/cli/lib/data.cpp
 )
 

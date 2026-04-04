@@ -41,15 +41,15 @@ class Block
     const uint16_t pause_us;
     const uint16_t segment_us;
 
-    std::chrono::microseconds mark()
+    std::chrono::microseconds mark() const
     {
       return std::chrono::microseconds(mark_us);
     }
-    std::chrono::microseconds segment()
+    std::chrono::microseconds segment() const
     {
       return std::chrono::microseconds(segment_us);
     }
-    std::chrono::microseconds pause()
+    std::chrono::microseconds pause() const
     {
       return std::chrono::microseconds(pause_us);
     }
@@ -62,31 +62,38 @@ class TimingStream
   protected:
     std::vector<Block> data;
 
-    TimingStream() {};
-    void setDataMarkSegment(const std::vector<uint16_t> &raw);
-    void setDataMarkPause(const std::vector<uint16_t> &raw);
-
   public:
+    TimingStream()
+    {
+    }
+
+    /** Stream lesen, Codierung Mark, Mark+Pause (=Periodendauer).
+     * Wir so in irlearn verwendet */
     static TimingStream fromMarkSegment(const std::vector<uint16_t> &raw)
     {
       TimingStream ts;
-      ts.setDataMarkSegment(raw);
+      ts.addMarkSegment(raw);
       return ts;
     }
 
+    /** Stream lesen, Codierung Mark, Pause */
     static TimingStream fromMarkPause(const std::vector<uint16_t> &raw)
     {
       TimingStream ts;
-      ts.setDataMarkPause(raw);
+      ts.addMarkPause(raw);
       return ts;
     }
 
-    std::string convertGnuplot(bool activeHigh = true);
-    std::string convertHexString();
-    std::string convertIntString();
-    std::string convertAsciiPlot(uint32_t width = 100, bool activeHigh = true);
+    void addMarkSegment(const std::vector<uint16_t> &raw);
+    void addMarkPause(const std::vector<uint16_t> &raw);
 
-    const std::vector<Block> &timings()
+    std::vector<uint16_t> convertMarkPause() const;
+    std::string convertGnuplot(bool activeHigh = true) const;
+    std::string convertHexString() const;
+    std::string convertIntString() const;
+    std::string convertAsciiPlot(uint32_t width = 100, bool activeHigh = true) const;
+
+    const std::vector<Block> &timings() const
     {
       return data;
     }

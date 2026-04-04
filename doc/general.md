@@ -56,4 +56,24 @@ curl --http0.9 -X POST -d "25" http://169.254.1.2/system/backlightlevel --output
 ```
 ### nmap
 
+```
+# nmap -Pn 169.254.1.2
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2026-04-03 12:43 CEST
+Nmap scan report for 169.254.1.2
+Host is up (0.0025s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT     STATE SERVICE
+9/tcp    open  discard
+21/tcp   open  ftp
+23/tcp   open  telnet
+80/tcp   open  http
+1100/tcp open  mctp
+1102/tcp open  adobeserver-1
+1600/tcp open  issd
+MAC Address: 02:0E:F7:CB:00:00 (Unknown)
 
+Nmap done: 1 IP address (1 host up) scanned in 709.53 seconds
+
+```
+
+port 3074 is missing (IR learning).

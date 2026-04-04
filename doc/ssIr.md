@@ -1,4 +1,4 @@
-# Harmony 900 IR learning protocol
+# Harmony 900 SsIr.bin
 
 ## Overview
 

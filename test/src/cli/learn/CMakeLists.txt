@@ -1,22 +1,23 @@
-
-
 # ---------------------------------------------------------------------------
 # Source location
 # ---------------------------------------------------------------------------
-set(LEARN_SRC_DIR ${CMAKE_SOURCE_DIR}/src/cli/learn)
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/cli/learn)
+set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/cli/lib)
 
 # ---------------------------------------------------------------------------
 # test_single
 # ---------------------------------------------------------------------------
 add_executable(test_single
     test_trx_single.cpp
-    ${LEARN_SRC_DIR}/trx_base.cpp
-    ${LEARN_SRC_DIR}/trx_single.cpp
+    ${LIB_DIR}/data.cpp
+    ${SRC_DIR}/trx_base.cpp
+    ${SRC_DIR}/trx_single.cpp
 )
 
 target_include_directories(test_single
     PRIVATE
-        ${LEARN_SRC_DIR}
+        ${CMAKE_SOURCE_DIR}/src
+        ${SRC_DIR}
 )
 
 target_link_libraries(test_single
@@ -29,13 +30,14 @@ target_link_libraries(test_single
 # ---------------------------------------------------------------------------
 add_executable(test_stream
     test_trx_stream.cpp
-    ${LEARN_SRC_DIR}/trx_base.cpp
-    ${LEARN_SRC_DIR}/trx_stream.cpp
+    ${SRC_DIR}/trx_base.cpp
+    ${SRC_DIR}/trx_stream.cpp
 )
 
 target_include_directories(test_stream
     PRIVATE
-        ${LEARN_SRC_DIR}
+        ${CMAKE_SOURCE_DIR}/src
+        ${SRC_DIR}
 )
 
 target_link_libraries(test_stream

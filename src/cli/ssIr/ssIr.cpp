@@ -14,8 +14,7 @@
 #include <getopt.h>
 
 #include "cli/lib/lib.h"
-#include "cli/lib/data.h"
-#include "cli/lib/binary.h"
+#include "file.h"
 //#include "data.h"
 //#include "trx_single.h"
 //#include "trx_start.h"
@@ -158,111 +157,55 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  ifstream ssIrFile(cfg.ssIrFileName, ios::binary);
-  if (!ssIrFile.is_open()) {
-    cout << "file open error" << endl;
+  if (cfg.verbosity > 1) {
+    //print raw hex, no parsing
+    ifstream ssIrFile(cfg.ssIrFileName, ios::binary);
+    if (!ssIrFile.is_open()) {
+      cout << "file open error" << endl;
+      return EXIT_FAILURE;
+    }
+
+    auto raw = std::vector<uint8_t>(std::istreambuf_iterator<char>(ssIrFile),
+        std::istreambuf_iterator<char>());
+
+    cout << lib::writeHex("ssIr input raw: ", raw);
+  }
+
+  ssIr::File streams;
+  auto status = streams.parse(cfg.ssIrFileName);
+  if (status != ssIr::Status::OK) {
+    cout << "file parser error: " << (int) status << endl;
     return EXIT_FAILURE;
   }
-
-  auto raw = std::vector<uint8_t>(std::istreambuf_iterator<char>(ssIrFile),
-      std::istreambuf_iterator<char>());
-
-  if (cfg.verbosity > 1) {
-    cout << lib::writeHex("ssIr raw: ", raw);
-  }
-
-  //5 byte header
-  if (cfg.verbosity > 0) {
-    //print header
-    cout << lib::writeHex("ssIr "
-        "Header: ", vector<uint8_t>(raw.begin(), raw.begin() + 5));
-  }
-  //raw[6] unknown use, = 1
-  if (cfg.verbosity > 0) {
-    cout << "Byte 6: " << raw[5] << endl;
-  }
-
-  //command count
-  auto arraySize = lib::parseHarmony16_file(raw[6], raw[7]);
-  cout << "ssIr Command count: " << arraySize << endl;
-
-  //start into array
-  //offset 5 for header
-  vector<uint16_t> offsets;
-  lib::parseHarmony16_file(
-      { raw.begin() + 8, raw.begin() + 8 + 2 * arraySize }, offsets);
-
-  if (cfg.verbosity > 1) {
-    cout << lib::writeHex("ssIr Command start offset (hex): ", offsets);
-    cout << lib::writeData("ssIr Command start offset (dec): ", offsets);
-    cout << "add 5 bytes to find start in hexdump" << endl;
-  }
-
-  for (int i = 0; i < offsets.size(); i++) {
-    cout << "----- raw command " << i << " -----" << endl;
-
-    int start = offsets[i] + 5;
-    int end = raw.size();
-    if ((i + 1) < offsets.size()) {
-      end = offsets[i + 1] + 5;
-    }
-
-    //payload data
-    vector<uint16_t> payload;
-    auto ret = lib::parseHarmony16_file(
-        { raw.begin() + start, raw.begin() + end }, payload);
-    if (ret != true) {
-      cout << "ssIr file size error" << endl;
-      return EXIT_FAILURE;
-    }
-
-    if (cfg.verbosity > 1) {
-      cout << lib::writeHex("payload (hex): ", payload);
-      cout << lib::writeData("payload (dec): ", payload);
-    }
-
-    double carrier_ns = static_cast<double>(payload[0]) / 1000000000;
-    double clock_khz = 1 / carrier_ns / 1000;
-
-    cout << "clock: " << carrier_ns * 1000000 << "µs, " << clock_khz << "kHz"
+  auto streamCount = streams.getStreamCount();
+  if (streamCount == 0) {
+    cout << "file is valid, but empty" << endl;
+  } else {
+    cout << "file is valid and contains " << streamCount << " IR streams"
         << endl;
+  }
 
-    if ((payload[3] & 0x8000) == 0) {
-      cout << "??? should be 0000: " << payload[1] << endl;
-      return EXIT_FAILURE;
-    }
+  for (int i = 0; i < streamCount; i++) {
+    auto &s = streams.accessStream(i);
 
-    auto sampleCount = payload[2];
+    cout << "----- IR stream " << i << " -----" << endl;
+    cout << "Clock: " << s.getClock() << "kHz" << endl;
 
-    cout << "sample count: " << sampleCount << endl; //todo use to verify remaining
+    auto &samples = s.accessStream();
 
-    vector<uint16_t> samples;
-    if ((payload[3] & 0x8000) == 0) {
-      cout << "first timing not mark. adding one with 0µs.";
-      samples.push_back(0x8000);
-    }
-    for (int j = 3; j < payload.size(); j++) {
-      const uint16_t sample = payload[j];
-      if ((sample & 0x8000) != 0) {
-        samples.push_back((sample & 0x7fff));
-      } else {
-        samples.push_back(sample);
-      }
-    }
-
-    auto timingStream = lib::TimingStream::fromMarkPause(samples);
+    cout << "Sample count: " << samples.timings().size() * 2 << endl;
 
     if (cfg.verbosity > 0) {
-      cout << "stream IR (hex): " << timingStream.convertHexString() << endl;
+      cout << "stream IR (hex): " << samples.convertHexString() << endl;
     }
-    cout << "stream IR (tµs): " << timingStream.convertIntString() << endl;
-    cout << timingStream.convertAsciiPlot(lib::getTerminalWidth(), cfg.activeHigh)
+    cout << "stream IR (tµs): " << samples.convertIntString() << endl;
+    cout << samples.convertAsciiPlot(lib::getTerminalWidth(), cfg.activeHigh)
         << endl;
 
     if (!cfg.dumpFileName.empty()) {
       auto filename = lib::enumerateFilename(cfg.dumpFileName, i);
       //gnuplot
-      auto str = timingStream.convertGnuplot(cfg.activeHigh);
+      auto str = samples.convertGnuplot(cfg.activeHigh);
       writeFile(filename, str);
     }
   }
