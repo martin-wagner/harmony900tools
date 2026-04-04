@@ -40,6 +40,11 @@ inline uint16_t parseHarmony16_file(uint8_t h, uint8_t l)
   return static_cast<uint16_t>(h) | (static_cast<uint16_t>(l) << 8);
 }
 
+inline uint32_t parseHarmony32_file(uint8_t h, uint8_t m1, uint8_t m2, uint8_t l)
+{
+  return static_cast<uint32_t>(h) | (static_cast<uint16_t>(m1) << 8)
+      | (static_cast<uint16_t>(m2) << 16) | (static_cast<uint16_t>(l) << 24);
+}
 
 inline bool parseHarmony16_file(const std::vector<uint8_t> &in, std::vector<uint16_t> &out)
 {
