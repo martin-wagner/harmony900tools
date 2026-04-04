@@ -93,6 +93,7 @@ vector<uint16_t> SerialStreamIr::serialise() const
   auto tmp = stream.convertMarkPause();
   for (int i = 0; i < tmp.size(); i++) {
     if ((tmp[i] & 0x8000) != 0) {
+      //todo what should we do here? we could insert a block to add the missing time (most likely blank mark + remaining pause time). simple -> crop
       //crop
       tmp[i] = 0x7fff;
     }
@@ -236,6 +237,14 @@ vector<uint8_t> File::serialise()
   raw.erase(raw.begin()); //remove fake byte
   raw.insert(raw.begin(), header.begin(), header.end());
   return raw;
+}
+
+void File::removeStream(int index)
+{
+  if ((index < 0) || (index >= static_cast<int>(streams.size()))) {
+    return;
+  }
+  streams.erase(streams.begin() + index);
 }
 
 Status File::serialise(const string &filename)

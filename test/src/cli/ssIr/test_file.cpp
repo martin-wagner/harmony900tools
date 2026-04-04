@@ -392,6 +392,108 @@ TEST(FileAppend, IndexReflectsPosition)
   EXPECT_EQ(index, 2);
 }
 
+// ---------------------------------------------------------------------------
+// File – removeStream
+// ---------------------------------------------------------------------------
+
+TEST(FileRemoveStream, RemovesOnlyStream)
+{
+    File f;
+    auto data = simpleMarkPause();
+    int index = -1;
+    f.appendStream(data, 38000.0, index);
+
+    f.removeStream(0);
+    EXPECT_EQ(f.getStreamCount(), 0);
+    EXPECT_TRUE(f.isEmpty());
+}
+
+TEST(FileRemoveStream, RemovesFirstOfTwo)
+{
+    File f;
+    auto data = simpleMarkPause();
+    std::vector<uint16_t> data2 = { 881, 946 };
+    int idx = -1;
+    f.appendStream(data,  38000.0, idx);
+    f.appendStream(data2, 36000.0, idx);
+
+    f.removeStream(0);
+
+    ASSERT_EQ(f.getStreamCount(), 1);
+    EXPECT_NEAR(f.accessStream(0).getClock(), 36000.0, 200.0);
+}
+
+TEST(FileRemoveStream, RemovesLastOfTwo)
+{
+    File f;
+    auto data = simpleMarkPause();
+    std::vector<uint16_t> data2 = { 881, 946 };
+    int idx = -1;
+    f.appendStream(data,  38000.0, idx);
+    f.appendStream(data2, 36000.0, idx);
+
+    f.removeStream(1);
+
+    ASSERT_EQ(f.getStreamCount(), 1);
+    EXPECT_NEAR(f.accessStream(0).getClock(), 38000.0, 200.0);
+}
+
+TEST(FileRemoveStream, RemovesMiddleOfThree)
+{
+    File f;
+    auto data = simpleMarkPause();
+    int idx = -1;
+    f.appendStream(data, 38000.0, idx);
+    f.appendStream(data, 36000.0, idx);
+    f.appendStream(data, 40000.0, idx);
+
+    f.removeStream(1);
+
+    ASSERT_EQ(f.getStreamCount(), 2);
+    EXPECT_NEAR(f.accessStream(0).getClock(), 38000.0, 200.0);
+    EXPECT_NEAR(f.accessStream(1).getClock(), 40000.0, 200.0);
+}
+
+TEST(FileRemoveStream, RemoveFromEmptyIsNoOp)
+{
+    File f;
+    f.removeStream(0);
+    EXPECT_EQ(f.getStreamCount(), 0);
+}
+
+TEST(FileRemoveStream, NegativeIndexIsNoOp)
+{
+    File f;
+    auto data = simpleMarkPause();
+    int idx = -1;
+    f.appendStream(data, 38000.0, idx);
+
+    f.removeStream(-1);
+    EXPECT_EQ(f.getStreamCount(), 1);
+}
+
+TEST(FileRemoveStream, IndexEqualToSizeIsNoOp)
+{
+    File f;
+    auto data = simpleMarkPause();
+    int idx = -1;
+    f.appendStream(data, 38000.0, idx);
+
+    f.removeStream(1); // size is 1, valid indices are 0..0
+    EXPECT_EQ(f.getStreamCount(), 1);
+}
+
+TEST(FileRemoveStream, IndexWayOutOfRangeIsNoOp)
+{
+    File f;
+    auto data = simpleMarkPause();
+    int idx = -1;
+    f.appendStream(data, 38000.0, idx);
+
+    f.removeStream(999);
+    EXPECT_EQ(f.getStreamCount(), 1);
+}
+
 // ===========================================================================
 // File – accessStream
 // ===========================================================================

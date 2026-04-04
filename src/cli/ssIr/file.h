@@ -35,7 +35,7 @@ class SerialStreamIr
     uint16_t filler = 0;
     lib::TimingStream stream;
 
-    const int HEADER_SIZE = 3;
+    static constexpr int HEADER_SIZE = 3;
 
     void setClock(double clock);
 
@@ -91,6 +91,9 @@ class File
      * @param index [out] position where stream was added
      */
     void appendStream(lib::TimingStream &stream, double clock, int &index);
+
+    /** remove a stream */
+    void removeStream(int index);
 
     /** serialise SsIr.bin file and place it in vector */
     std::vector<uint8_t> serialise();
