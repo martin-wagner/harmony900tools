@@ -119,15 +119,64 @@ static bool parseArgs(int argc, char **argv, Config &cfg)
 //  return true;
 //}
 
+void printItems(const string &name, int count, std::vector<uint16_t> items, bool guessCode = false)
+{
+  std::vector<char> code;
+
+  if (count == 0) {
+    cout << name << ": no data; ";
+    return;
+  }
+
+  cout << name << " Items: " << count;
+  if (count != items.size()) {
+    cout << " (doesn't match: " << items.size() << ")";
+  }
+  cout << "; ";
+
+  for (const auto &i : items) {
+    if ((i & 0x8000) != 0) {
+      cout << "M" << int(i & 0x7fff);
+      code.push_back('M');
+    } else {
+      cout << "P" << i;
+      code.push_back('P');
+    }
+    cout << ":";
+  }
+
+  cout << "; ";
+
+  if (!guessCode) {
+    return;
+  }
+
+  if (code.size() == 4) {
+    if (code[0] == 'M' && code[1] == 'P' && code[2] == 'P' && code[3] == 'M') {
+      cout << " -> Manchester A; ";
+      return;
+    }
+    if (code[0] == 'P' && code[1] == 'M' && code[2] == 'M' && code[3] == 'P') {
+      cout << " -> Manchester B; ";
+      return;
+    }
+    if (code[0] == 'M' && code[1] == 'P' && code[2] == 'M' && code[3] == 'P') {
+      cout << " -> Timing A; ";
+      return;
+    }
+    if (code[0] == 'P' && code[1] == 'M' && code[2] == 'P' && code[3] == 'M') {
+      cout << " -> Timing B; ";
+      return;
+    }
+  }
+}
+
 int main(int argc, char **argv)
 {
   if (!parseArgs(argc, argv, cfg)) {
     printHelp(argv[0]);
     return EXIT_FAILURE;
   }
-
-  //todo
-  cfg.verbosity = 2;
 
   ifstream irProtoFile(cfg.irProtoFileName, ios::binary);
   if (!irProtoFile.is_open()) {
@@ -195,14 +244,13 @@ int main(int argc, char **argv)
   if (cfg.verbosity > 1) {
     cout << lib::writeHex("irProto Command start offset (hex): ", offsets);
     cout << lib::writeData("irProto Command start offset (dec): ", offsets);
-    cout << "add 5 bytes to find start in hexdump" << endl;
   }
   //easiest -> drop
   raw.erase(raw.begin(), raw.begin() + 5);
 
   //iterate over protocol objects
   for (int i = 0; i < offsets.size(); i++) {
-    cout << "----- protocol object " << i << "-----" << endl;
+    cout << "----- protocol object " << i << " -----" << endl;
 
     int start = offsets[i];
     int end = raw.size();
@@ -248,120 +296,170 @@ int main(int argc, char **argv)
 
     //ende header
 
-    vector<uint16_t> protOffsets;
+    vector<uint16_t> sectionOffsets;
     lib::parseHarmony16_file(
         { raw.begin() + start + 7, raw.begin() + start + 7 + 2 * sectionCount },
-        protOffsets);
+        sectionOffsets);
 
     if (cfg.verbosity > 1) {
-      cout << lib::writeHex("in-protocol start offset (hex)", protOffsets);
-      cout << lib::writeData("in-protocol start offset (dec)", protOffsets);
+      cout << lib::writeHex("section start offset (hex)", sectionOffsets);
+      cout << lib::writeData("section start offset (dec)", sectionOffsets);
     }
 
-
     for (int j = 0; j < sectionCount; ++j) {
-      cout << "--> protocol object item " << j << endl;
+      cout << "--> section " << j << endl;
 
-      int protStart = protOffsets[j];
-      int protEnd = end;
-      if ((j + 1) < protOffsets.size()) {
-        protEnd = protOffsets[j + 1];
+      int sectionStart = sectionOffsets[j];
+      int sectionEnd = end;
+      if ((j + 1) < sectionOffsets.size()) {
+        sectionEnd = sectionOffsets[j + 1];
       }
 
       if (cfg.verbosity > 1) {
         cout
-            << lib::writeHex("protocol object item raw: ",
-                vector<uint8_t> { raw.begin() + protStart, raw.begin() + protEnd });
-        cout << "size: " << protEnd - protStart << endl;
+            << lib::writeHex("section object raw: ",
+                vector<uint8_t> { raw.begin() + sectionStart, raw.begin()
+                    + sectionEnd });
+        cout << "size: " << sectionEnd - sectionStart << endl;
       }
-      if ((protEnd - protStart) < 16) { //todo wie gross muss dieses ding mind. sein??
-        cout << "size error!!!!" << endl;
+      if ((sectionEnd - sectionStart) < 16) { //todo wie gross muss dieses ding mind. sein??
+        cout << "section size error!!!!" << endl;
         continue;
       }
 
+      auto bitCount = lib::parseHarmony16_file(raw[sectionStart + 0],
+          raw[sectionStart + 1]);
+      auto codeMask = lib::parseHarmony16_file(raw[sectionStart + 2],
+          raw[sectionStart + 3]);
+      auto repeatInterval = lib::parseHarmony32_file(raw[sectionStart + 4],
+          raw[sectionStart + 5], raw[sectionStart + 6], raw[sectionStart + 7]);
+      auto body0 = raw[sectionStart + 8];
+      auto body1 = raw[sectionStart + 9];
+      //order is weird
+      auto ptr1Offset = lib::parseHarmony16_file(raw[sectionStart + 12],
+          raw[sectionStart + 13]);
+      auto ptr2Offset = lib::parseHarmony16_file(raw[sectionStart + 14],
+          raw[sectionStart + 15]);
+      auto ptr3Offset = lib::parseHarmony16_file(raw[sectionStart + 10],
+          raw[sectionStart + 11]);
 
-      auto bit_count = lib::parseHarmony16_file(raw[protStart + 0], raw[protStart + 1]);
-      cout << "bitcount: " << bit_count << " : 0x" << hex << bit_count << dec  << endl;
+      if (cfg.verbosity > 0) {
+        cout << "section bit count: " << bitCount << " : 0x" << hex << bitCount
+            << dec << endl;
+        cout << "codemask: " << codeMask << " : 0x" << hex << codeMask << dec
+            << endl;
+        //interval from start to next start (? verify)
+        cout << "interval: " << repeatInterval << " : 0x" << hex
+            << repeatInterval << dec << endl;
+        cout << "body 0/1: " << hex << (int) body0 << " : " << (int) body1
+            << dec << endl;
+        cout << "offset ptr1 (start / bit0): " << ptr1Offset << " : " << hex
+            << ptr1Offset << dec << endl;
+        cout << "offset ptr2 (stop / bit1): " << ptr2Offset << " : " << hex
+            << ptr2Offset << dec << endl;
+        cout << "offset ptr3 (data / hdr): " << ptr3Offset << " : " << hex
+            << ptr3Offset << dec << endl;
+      }
 
-      auto code_mask = lib::parseHarmony16_file(raw[protStart + 2], raw[protStart + 3]);
-      cout << "codemask: " << code_mask <<  " : 0x" << hex << code_mask << dec << endl;
+      int ptr1ItemCount = 0;
+      vector<uint16_t> ptr1timings;
+      int ptr2ItemCount = 0;
+      vector<uint16_t> ptr2timings;
+      int ptr3ItemCount = 0;
+      vector<uint16_t> ptr3timings;
 
-      auto repeat_interval = lib::parseHarmony32_file(raw[protStart + 4], raw[protStart + 5], raw[protStart + 6], raw[protStart + 7]);
-      cout << "repeat: " << repeat_interval <<  " : 0x" << hex << repeat_interval << dec << endl;
-
-      auto body0 = raw[protStart + 8];
-      auto body1 = raw[protStart + 9];
-      cout << "body: " << hex << (int)body0 << " : " << (int)body1 << dec << endl;
-
-      //pointer to last segment
-      auto ptr3Offset = lib::parseHarmony16_file(raw[protStart + 10], raw[protStart + 11]);
-      cout << "offset ptr3 (data / hdr): " << ptr3Offset <<  " : " << hex << ptr3Offset << dec << endl;
-      //pointer to first segment
-      auto ptr1Offset = lib::parseHarmony16_file(raw[protStart + 12], raw[protStart + 13]);
-      cout << "offset ptr1 (start / bit0): " << ptr1Offset <<  " : " << hex << ptr1Offset << dec << endl;
-      //pointer to second segment (??optional, 0 if not used)
-      auto ptr2Offset = lib::parseHarmony16_file(raw[protStart + 14], raw[protStart + 15]);
-      cout << "offset ptr2 (stop / bit1): " << ptr2Offset <<  " : " << hex << ptr2Offset << dec << endl;
-
-
+      //start sequence (?)
       if (ptr1Offset != 0) {
-        auto listEnd = ptr2Offset;
-        if (listEnd == 0) {
-          listEnd = ptr3Offset;
-        }
-        if (listEnd == 0) {
-          listEnd = protEnd;
-        }
+        ptr1ItemCount = raw[ptr1Offset];
 
-        auto ptr1header = raw[ptr1Offset];
-        cout << "ptr1 counter: " << (int)ptr1header << endl;
+        auto start = raw.begin() + ptr1Offset + 1;
+        lib::parseHarmony16_file( { start, start + 2 * ptr1ItemCount },
+            ptr1timings);
 
-        vector<uint16_t> timings;
-        lib::parseHarmony16_file( { raw.begin() + ptr1Offset + 1, raw.begin() + listEnd }, timings);
-        cout << lib::writeHex("in-protocol ptr1 data (hex)", timings);
-        cout << lib::writeData("in-protocol ptr1 data (dec)", timings);
-        for (auto &t : timings) {
-          t = t & 0x7fff;
+        if (cfg.verbosity > 1) {
+          cout << "ptr1 item count: " << (int) ptr1ItemCount << endl;
+          cout << lib::writeHex("in-protocol ptr1 data (hex)", ptr1timings);
+          cout << lib::writeData("in-protocol ptr1 data (dec)", ptr1timings);
         }
-        cout << lib::writeData("in-protocol ptr1 data, masked (dec)", timings);
       }
 
-
+      //stop sequence (?)
       if (ptr2Offset != 0) {
-        auto listEnd = ptr3Offset;
-        if (listEnd == 0) {
-          listEnd = protEnd;
-        }
+        ptr2ItemCount = raw[ptr2Offset];
 
-        auto ptr2header = raw[ptr2Offset];
-        cout << "ptr2 counter: " << (int)ptr2header << endl;
+        auto start = raw.begin() + ptr2Offset + 1;
+        lib::parseHarmony16_file( { start, start + 2 * ptr2ItemCount },
+            ptr2timings);
 
-        vector<uint16_t> timings;
-        lib::parseHarmony16_file( { raw.begin() + ptr2Offset + 1, raw.begin() + listEnd }, timings);
-        cout << lib::writeHex("in-protocol ptr2 data (hex)", timings);
-        cout << lib::writeData("in-protocol ptr2 data (dec)", timings);
-        for (auto &t : timings) {
-          t = t & 0x7fff;
+        if (cfg.verbosity > 1) {
+          cout << "ptr2 item count: " << (int) ptr2ItemCount << endl;
+          cout << lib::writeHex("in-protocol ptr2 data (hex)", ptr2timings);
+          cout << lib::writeData("in-protocol ptr2 data (dec)", ptr2timings);
         }
-        cout << lib::writeData("in-protocol ptr1 data, masked (dec)", timings);
       }
 
+      //data coding 0 / 1 (todo order correct?), should always be 4 timing values (two for coding "0" and two for coding "1")
+      //coding seems to either use manchester or variable-length pairs
       if (ptr3Offset != 0) {
-        auto listEnd = protEnd;
-
-        vector<uint16_t> timings;
-        lib::parseHarmony16_file( { raw.begin() + ptr3Offset, raw.begin() + listEnd }, timings);
-        cout << lib::writeHex("in-protocol ptr3 data (hex)", timings);
-        cout << lib::writeData("in-protocol ptr3 data (dec)", timings);
-        for (auto &t : timings) {
-          t = t & 0x7fff;
+        lib::parseHarmony16_file(
+            { raw.begin() + ptr3Offset, raw.begin() + sectionEnd },
+            ptr3timings);
+        ptr3ItemCount = ptr3timings.size();
+        if (cfg.verbosity > 1) {
+          cout << "ptr1 item count: " << (int) ptr1ItemCount
+              << " (should always be 4)" << endl;
+          cout << lib::writeHex("in-protocol ptr3 data (hex)", ptr3timings);
+          cout << lib::writeData("in-protocol ptr3 data (dec)", ptr3timings);
         }
-        cout << "data 0-1 / 1-0" << endl;
-        cout << lib::writeData("in-protocol ptr1 data, masked (dec)", timings);
       }
 
+      cout << "Bits: " << bitCount << "; Mask: " << hex << codeMask << dec;
+      if (repeatInterval == 0xffffffff) {
+        cout << "; Interval: none; ";
+      } else {
+        cout << "; Interval: " << repeatInterval / 1000 << "ms; ";
+      }
+      //work marker (??)
+      switch (body0) {
+        case 0:
+          cout << "Repeat Frame; ";
+          break;
+        case 2:
+          cout << "Data Frame; ";
+          break;
+        default:
+          cout << "Body 0: " << hex << (int) body0 << dec << "; ";
+          break;
+      }
+
+      //payload marker (??)
+      switch (body1) {
+        case 0:
+          if (body0 != 0) {
+            cout << "Payload on repeat ???; ";
+          }
+          break;
+        case 1:
+          //2 payload samples are required (see data coding)
+          cout << "1 Payload Sample ???; ";
+          break;
+        case 2:
+          if (body0 == 0) {
+            cout << "no Payload ???; ";
+          }
+          break;
+        default:
+          cout << "Body 1: " << hex << (int) body0 << dec << "; ";
+          break;
+      }
+      printItems("SoF", ptr1ItemCount, ptr1timings);
+      printItems("EoF", ptr2ItemCount, ptr2timings);
+      printItems("D", 2 * body1, ptr3timings, true);
+
+      cout << endl;
 
     }
+    cout << "--------" << endl;
 
   }
 
