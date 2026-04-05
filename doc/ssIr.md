@@ -60,7 +60,7 @@ The payload contains the IR carrier clock frequency (ToDo verify this!) and mark
 Mark = Transmitter is on  
 Pause = Transmitter is off.  
 
-Space is detected by checking the MSB.
+Mark is detected by checking the MSB.
 
 
 ```
