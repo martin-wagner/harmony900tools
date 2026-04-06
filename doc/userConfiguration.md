@@ -62,3 +62,5 @@ Offset   Bytes       Value    Meaning
 ```
 The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. More bits are coded by adding another byte.
 todo verify -- ai generated...
+
+The UserConfiguration.xml also contains the info about if and where to place toggle bits. todo -- is this also available somwhere in the bit stream / IrProto.bin?

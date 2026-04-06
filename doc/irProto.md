@@ -2,7 +2,7 @@
 
 ## Overview
 
-SsIr.bin stores the protocols used in UserConfiguration.xml to serialise the data given as binary values. 
+IrProto.bin stores the protocols used in UserConfiguration.xml to serialise the data given as binary values. 
 
 ## General Structure
 
@@ -49,7 +49,7 @@ Header always contains
 
 The function of the header is unknown. The first 5 bytes are the file header and are excluded from offset calculation. The sixth bytes is always 1.
 
-## Command count
+## Protocol count
 
 This field contains the protocol count and is needed for the calculation of the offset table and array size.
 
@@ -70,11 +70,11 @@ This field contains the start offsets of the individual protocols. Each protocol
      └── start command 0 at 7+13 = raw[20]
 ```
 
-Each protocol uses all available space, e.g. command 0 uses raw[12] ... raw[785]. 
+Each protocol uses all available space, e.g. command 0 uses raw[20] ... raw[794]. 
 
 ## Protocols
 
-Each protocol consists of protocol-wide variables and one to n timing sections. The user parameters are set inside the (UserConfiguration.xml)](userConfig.md) file.
+Each protocol consists of protocol-wide variables and one to n timing sections. The user parameters are set inside the (UserConfiguration.xml)](userConfiguration.md) file.
 
 ## Protocol params
 
@@ -110,7 +110,7 @@ Each Timing section consists of parameters, yet another offset table and corresp
         └── ir protocol data bit count 48 (for this section, excluding start/stop)
 ```
 
-Mask: In Conjunction with the xml data bitmask, this seems to mask out bits. 0xff -- use as-is. Use case not fully understood.
+Mask: In Conjunction with the xml data bitstream, this seems to mask out bits. 0xff -- use as-is. Use case not fully understood.
 
 Ctrl0:  
 Frame Type
@@ -118,7 +118,7 @@ Frame Type
 - 0: This timing section contains parameters for a repeat frame (only SoF/EoF used, no data)  
 
 Ctrl1:  
-Payload Data coding for 0/1 data bitmask from xml
+Payload Data coding for 0/1 data bitstream from xml
 - 0: Data field is empty / not used (repeat frame)
 - 1: Data field contains one pair of timing values (usecase unknown. you can't code two binary states with this. Wii seems to use this, maybe only power-toggle?)
 - 2: Data field contains two pairs of timing values (first pair = binary "0", second pair binary "1" todo verify order is not 1/0).
