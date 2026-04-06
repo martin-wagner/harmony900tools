@@ -1,3 +1,6 @@
+#ifdef _WIN32
+  #include <windows.h>
+#endif
 #include <cstdint>
 #include <iostream>
 #include <fstream>
@@ -119,7 +122,8 @@ static bool parseArgs(int argc, char **argv, Config &cfg)
 //  return true;
 //}
 
-void printItems(const string &name, int count, std::vector<uint16_t> items, bool guessCode = false)
+void printItems(const string &name, int count, std::vector<uint16_t> items,
+    bool guessCode = false)
 {
   std::vector<char> code;
 
@@ -173,6 +177,10 @@ void printItems(const string &name, int count, std::vector<uint16_t> items, bool
 
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
+  SetConsoleOutputCP(CP_UTF8);
+#endif
+
   if (!parseArgs(argc, argv, cfg)) {
     printHelp(argv[0]);
     return EXIT_FAILURE;

@@ -1,5 +1,13 @@
-#include <arpa/inet.h>
-#include <unistd.h>
+#ifdef _WIN32
+  #define _WIN32_WINNT 0x0600   // Vista+ for inet_pton
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #include <windows.h>
+#else
+  #include <arpa/inet.h>
+  #include <unistd.h>
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -23,7 +31,22 @@ using namespace std;
 
 const int HEADER_SIZE = 4;
 
-atomic<int> sock = -1;
+// --- platform abstractions ---
+
+#ifdef _WIN32
+  using socket_t = SOCKET;
+  #define INVALID_SOCKET_VAL INVALID_SOCKET
+  static inline void closeSocket(socket_t s) { closesocket(s); }
+#else
+  using socket_t = int;
+  #define INVALID_SOCKET_VAL (-1)
+  static inline void closeSocket(socket_t s)
+  {
+    close(s);
+  }
+#endif
+
+atomic<socket_t> sock(INVALID_SOCKET_VAL);
 
 // --- config ---
 
@@ -144,40 +167,60 @@ bool writeFile(const string &filename, const string &data)
 
 void handleSigint(int)
 {
-  int s = sock.exchange(-1);
-  if (s < 0) {
+  socket_t s = sock.exchange(INVALID_SOCKET_VAL);
+  if (s == INVALID_SOCKET_VAL) {
     return;
   }
 
   trx::Stop stop;
   auto tx = stop.get();
 
-  send(s, tx.data(), tx.size(), 0);
+  send(s, reinterpret_cast<const char*>(tx.data()), static_cast<int>(tx.size()),
+      0);
 
   cout << "ctrl+c detected, close connection" << endl;
 
-  close(s);
+  closeSocket(s);
 }
 
-bool open(const string &host, uint16_t port)
+bool openConnection(const string &host, uint16_t port)
 {
+#ifdef _WIN32
+  WSADATA wsaData;
+  if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    cerr << "WSAStartup failed" << endl;
+    return false;
+  }
+#endif
+
   //handle ctrl+c
   signal(SIGINT, handleSigint);
 
-  sock = socket(AF_INET, SOCK_STREAM, 0);
+  socket_t s = socket(AF_INET, SOCK_STREAM, 0);
+  if (s == INVALID_SOCKET_VAL) {
+    cerr << "Failed to create socket" << endl;
+#ifdef _WIN32
+    WSACleanup();
+#endif
+    return false;
+  }
+
+  sock = s;
 
   sockaddr_in a { };
   a.sin_family = AF_INET;
   a.sin_port = port;
   if (inet_pton(AF_INET, host.c_str(), &a.sin_addr) <= 0) {
     cerr << "Invalid IP/host address: " << host << endl;
-    close(sock);
+    closeSocket(s);
+    sock = INVALID_SOCKET_VAL;
     return false;
   }
 
-  if (connect(sock, (sockaddr*) &a, sizeof(a)) < 0) {
+  if (connect(s, reinterpret_cast<sockaddr*>(&a), sizeof(a)) < 0) {
     cerr << "Connection failed" << endl;
-    close(sock);
+    closeSocket(s);
+    sock = INVALID_SOCKET_VAL;
     return false;
   }
   return true;
@@ -190,13 +233,27 @@ bool readFrame(vector<uint8_t> &frame)
 
   frame.clear();
 
-  auto bytes = recv(sock, hdr, HEADER_SIZE, MSG_WAITALL);
+  auto bytes = recv(sock, reinterpret_cast<char*>(hdr), HEADER_SIZE,
+  MSG_WAITALL);
   if (bytes != HEADER_SIZE) {
     return false;
   }
   frame.assign(hdr, hdr + HEADER_SIZE);
 
+#ifdef _WIN32
+  // MSG_DONTWAIT not available on Windows; use non-blocking mode temporarily
+  u_long nonBlocking = 1;
+  ioctlsocket(sock, FIONBIO, &nonBlocking);
+  bytes = recv(sock, reinterpret_cast<char*>(buf), sizeof(buf), 0);
+  u_long blocking = 0;
+  ioctlsocket(sock, FIONBIO, &blocking);
+  if (bytes == SOCKET_ERROR) {
+    bytes = 0;
+  }
+#else
   bytes = recv(sock, buf, sizeof(buf), MSG_DONTWAIT);
+#endif
+
   if (bytes > 0) {
     frame.insert(frame.end(), buf, buf + bytes);
   }
@@ -205,10 +262,18 @@ bool readFrame(vector<uint8_t> &frame)
 
 bool sendFrame(const vector<uint8_t> &frame)
 {
-  auto bytes = send(sock, frame.data(), frame.size(), 0);
-  if (bytes == frame.size()) {
+  auto bytes = send(sock, reinterpret_cast<const char*>(frame.data()),
+      static_cast<int>(frame.size()), 0);
+
+#ifdef _WIN32
+  if (bytes == static_cast<int>(frame.size())) {
     return true;
   }
+#else
+  if (bytes == static_cast<ssize_t>(frame.size())) {
+    return true;
+  }
+#endif
   return false;
 }
 
@@ -396,6 +461,10 @@ int main(int argc, char **argv)
   vector<uint8_t> frame;
   bool received_command = false;
 
+#ifdef _WIN32
+  SetConsoleOutputCP(CP_UTF8);
+#endif
+
   if (!parseArgs(argc, argv, cfg)) {
     printHelp(argv[0]);
     return EXIT_FAILURE;
@@ -408,7 +477,7 @@ int main(int argc, char **argv)
         << " verbosity=" << cfg.verbosity << endl;
   }
 
-  auto res = open(cfg.host, htons(cfg.port));
+  auto res = openConnection(cfg.host, htons(cfg.port));
   if (!res) {
     return EXIT_FAILURE;
   }
@@ -430,6 +499,9 @@ int main(int argc, char **argv)
   sendFrame(txStart);
   if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return EXIT_FAILURE;
   }
   if (cfg.verbosity > 1) {
@@ -440,6 +512,9 @@ int main(int argc, char **argv)
   if (statusStart != trx::Start::Status::OK) {
     cout << "<- invalid confirmation (" << (int) statusStart << "), abort"
         << endl;
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return EXIT_FAILURE;
   }
 
@@ -468,6 +543,9 @@ int main(int argc, char **argv)
   frame.clear();
   if (!readFrame(frame)) {
     cout << "<- no confirmation, abort" << endl;
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return EXIT_FAILURE;
   }
   if (cfg.verbosity > 1) {
@@ -480,7 +558,11 @@ int main(int argc, char **argv)
     //ignore error
   }
 
-  close(sock);
+  closeSocket(sock);
+
+#ifdef _WIN32
+  WSACleanup();
+#endif
 
   if (received_command) {
     cout << "command received!" << endl;

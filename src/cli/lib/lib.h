@@ -11,13 +11,12 @@
 #include <iostream>
 #include <chrono>
 #include <iomanip>
+#include <vector>
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/ioctl.h>
 #endif
-
-
 
 namespace lib
 {

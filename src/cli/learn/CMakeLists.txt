@@ -8,4 +8,7 @@ set(sources
 
 add_executable(harmony900learnTool ${sources})
 target_include_directories(harmony900learnTool PRIVATE ${CMAKE_SOURCE_DIR}/src)
-
+if(WIN32)
+    target_link_libraries(harmony900learnTool PRIVATE ws2_32)
+    target_compile_options(harmony900learnTool PRIVATE -finput-charset=UTF-8 -fexec-charset=UTF-8)
+endif()
