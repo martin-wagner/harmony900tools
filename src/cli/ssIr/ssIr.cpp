@@ -174,6 +174,13 @@ bool writeFile(const string &filename, const string &data)
   return true;
 }
 
+void printXmlHex(int i)
+{
+  cout << "xml: 0xFFFF" << std::uppercase << std::hex << std::setw(2)
+      << std::setfill('0') << (int) i << std::dec << std::nouppercase << "00"
+      << endl; //assume no more than 256cmds
+}
+
 int main(int argc, char **argv)
 {
   if (!parseArgs(argc, argv, cfg)) {
@@ -213,6 +220,7 @@ int main(int argc, char **argv)
     auto &s = streams.accessStream(i);
 
     cout << "----- IR stream " << i << " -----" << endl;
+    printXmlHex(i);
     cout << "Clock: " << s.getClock() << "kHz" << endl;
 
     auto &samples = s.accessStream();
@@ -249,7 +257,8 @@ int main(int argc, char **argv)
     }
     cout << "added stream at index " << addedIndex << " (total now: "
         << streams.getStreamCount() << ")" << " | samples: " << data.size()
-        << " | clock: " << cfg.addStreamClock << " Hz" << endl;
+        << " | clock: " << cfg.addStreamClock << " Hz | ";
+    printXmlHex(addedIndex);
   }
 
   // --- roundtrip / write back ---
