@@ -26,8 +26,19 @@ For a 2008/2009 embedded system, this thing is a beast.
 
 The remote implements standard networking. You can use all the nice tools :-)
 
-- you need to have the Logitech Harmony software installed to get the driver
-- you _really_ need to have this driver. This means Windows only. Linux detects the driver, but some init seems to be missing, no ports are opened. After connecting to windows with the logitech driver installed once (and doing nothing in there), communication on linux works also. You can use a VM or physical machine. No idea what the windows driver does. You need to run e.g. _ping_ in the background, otherwise the driver de-inits after a few minutes.
+### Linux
+
+The remote nees some basic USB setup (seems to be optional) and then waits for a dhcp server to assign an ip to it. Automated version:
+[Linux setup](tools/linux-plug-setup/install.md)  
+
+If you can't get this to work you can also have Windows initialise the device. After connecting to windows, just unplug and re-plug in Linux. You can use a VM or physical machine. You then need to run e.g. _ping_ in the background, otherwise the remote de-inits after a few minutes.
+
+### Windows
+
+You need to have the Logitech Harmony software installed to get the driver. This configures the interface ready-for-use.
+
+### General
+
 - you can make a backup of your config using concordance (concordance.exe --dump-config=harmony.hex). You can use this backup to "clone" your remote.
 - telnet login is root, password ethanol (yes, really, remote codename is `vodka` btw)
 - it is listening on IP 169.254.1.2

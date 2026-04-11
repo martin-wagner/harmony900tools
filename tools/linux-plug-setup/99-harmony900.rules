@@ -1,0 +1,6 @@
+# /etc/udev/rules.d/99-harmony900.rules
+# Trigger harmony_init.py when Harmony 900 is plugged in
+
+ACTION=="add", SUBSYSTEM=="usb", \
+    ATTR{idVendor}=="046d", ATTR{idProduct}=="c11f", \
+    RUN+="/usr/local/bin/harmony_init.py"

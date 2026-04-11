@@ -1,0 +1,23 @@
+[Unit]
+Description=DHCP server for Harmony 900 USB interface
+After=network.target
+# don't fail boot if usb0 isn't present yet
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+# restart on failure so replug recovers
+Restart=on-failure
+RestartSec=2
+ExecStart=/usr/sbin/dnsmasq \
+    --interface=usb0 \
+    --bind-interfaces \
+    --dhcp-range=169.254.1.2,169.254.1.2,255.255.255.0,1h \
+    --no-daemon \
+    --log-dhcp \
+    --leasefile-ro \
+    --log-facility=/var/log/harmony-dnsmasq.log
+
+[Install]
+# autostart on boot instead of script
+# WantedBy=multi-user.target
