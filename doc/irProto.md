@@ -32,7 +32,7 @@ hhhhh 1 ss oo oo oo ddddddd ddd ddddddddddd
     │ │  │  │  │          └── data[0]     
     │ │  │  │  └── start offset data[1]
     │ │  │  └── start offset data[0]
-    │ │  └── Command count (=data array count)
+    │ │  └── Protocol count (=data array count)
     │ └── ???
     └── Header
 ```
@@ -66,11 +66,11 @@ This field contains the start offsets of the individual protocols. Each protocol
 ```
 ... 07 00 0d 03 ...
      │     │      
-     │     └── start offset command 1 781+13 = raw[794]
-     └── start command 0 at 7+13 = raw[20]
+     │     └── start offset protocol 1 781+13 = raw[794]
+     └── start offset protocol 0 at 7+13 = raw[20]
 ```
 
-Each protocol uses all available space, e.g. command 0 uses raw[20] ... raw[794]. 
+Each protocol uses all available space, e.g. protocol 0 uses raw[20] ... raw[794]. 
 
 ## Protocols
 
@@ -100,8 +100,8 @@ Each Timing section consists of parameters, yet another offset table and corresp
 ```
 ... 30 00 ff ff ff ff ff ff 02 02 13 01 05 01 0a 01 dd dd dd ...
         │     │           │  │  │     │     │     │
-        │     │           │  │  │     │     │     └── start offset EoF timing section 1 266+13 = raw[279]
-        │     │           │  │  │     │     └── start offset SoF timing section 1 261+13 = raw[274]
+        │     │           │  │  │     │     │     └── start offset EoF timing section 266+13 = raw[279]
+        │     │           │  │  │     │     └── start offset SoF timing section 261+13 = raw[274]
         │     │           │  │  │     └── start offset Payload timing section 275+13 = raw[288]
         │     │           │  │  └── Ctrl 1
         │     │           │  └── Ctrl 0

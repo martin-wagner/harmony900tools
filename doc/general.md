@@ -29,7 +29,7 @@ The remote implements standard networking. You can use all the nice tools :-)
 ### Linux
 
 The remote nees some basic USB setup (seems to be optional) and then waits for a dhcp server to assign an ip to it. Automated version:
-[Linux setup](tools/linux-plug-setup/install.md)  
+[Linux setup](../tools/linux-plug-setup/install.md)  
 
 If you can't get this to work you can also have Windows initialise the device. After connecting to windows, just unplug and re-plug in Linux. You can use a VM or physical machine. You then need to run e.g. _ping_ in the background, otherwise the remote de-inits after a few minutes.
 

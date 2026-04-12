@@ -1,6 +1,6 @@
 set(sources
     irProto.cpp
-#    file.cpp
+    file.cpp
     ${CMAKE_SOURCE_DIR}/src/cli/lib/data.cpp
 )
 
