@@ -76,7 +76,7 @@ class File
 
     /** read stream count */
     int getStreamCount() const { return streams.size(); };
-    bool isEmpty() const { return (getStreamCount() <= 0); };
+    bool isEmpty() const { return streams.empty(); };
 
     /** access a single stream (e.g. for human-readable printout) */
     const SerialStreamIr &accessStream(int index) const;
@@ -96,10 +96,10 @@ class File
     void removeStream(int index);
 
     /** serialise SsIr.bin file and place it in vector */
-    std::vector<uint8_t> serialise();
+    std::vector<uint8_t> serialise() const;
 
     /** serialise SsIr.bin file and write file */
-    Status serialise(const std::string &filename);
+    Status serialise(const std::string &filename) const;
 
   private:
     Status parseObject(const std::vector<uint8_t> &raw, uint16_t startOffset, uint16_t endOffset);

@@ -208,7 +208,7 @@ void File::appendStream(lib::TimingStream &stream, double clock, int &index)
   streams.push_back(move(s));
 }
 
-vector<uint8_t> File::serialise()
+vector<uint8_t> File::serialise() const
 {
   int pos;
   vector<uint8_t> raw;
@@ -247,7 +247,7 @@ void File::removeStream(int index)
   streams.erase(streams.begin() + index);
 }
 
-Status File::serialise(const string &filename)
+Status File::serialise(const string &filename) const
 {
   ofstream file(filename, ios::binary | ios::trunc); // binary + overwrite
 
