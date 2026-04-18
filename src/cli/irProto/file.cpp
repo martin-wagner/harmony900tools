@@ -193,8 +193,7 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
     //ignore
   }
   mask = lib::parseHarmony16_file(data[2], data[3]);
-  interval = bitCount = lib::parseHarmony32_file(data[4], data[5], data[6],
-      data[7]);
+  interval = lib::parseHarmony32_file(data[4], data[5], data[6], data[7]);
   ctrl0 = static_cast<Ctrl0>(data[8]);
   switch (ctrl0) {
     case Ctrl0::IS_DATA_FRAME:
@@ -234,7 +233,7 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
   if ((pData >= HEADER_SIZE) && (pData < data.size())) {
     auto size = static_cast<int>(ctrl1) * 4;
     this->data = TimingSectionIrPayload(
-        { data.begin() + pSoF, data.begin() + pSoF + size });
+        { data.begin() + pData, data.begin() + pData + size });
   }
 }
 
@@ -329,6 +328,123 @@ void TimingSection::serialiseIrStream(std::vector<Item> out,
   }
   eof.serialiseIrStream(out);
 
+  //append interval pause. todo calculate actual pause time by subtracting all data timings
+  auto timing = static_cast<int64_t>(interval);
+  if ((timing != TimingSection::PAUSE_IN_EOF) && (timing > 0)) {
+    do {
+      if (timing > 0x7fff) {
+        out.push_back({false, 0x7fff});
+        timing = timing - 0x7fff;
+      } else {
+        out.push_back({false, timing});
+      }
+    } while (timing > 0);
+  }
+}
+
+IrProto::IrProto()
+{
+}
+
+IrProto::IrProto(const vector<uint8_t> &data, int offset)
+{
+  vector<uint16_t> offsetTable;
+
+  if (data.size() < HEADER_SIZE) {
+    cout << "Warning: IrProto.bin protocol section too small (" << data.size()
+        << " bytes)" << endl;
+    return;
+  }
+  if ((data[0] != START) || (data[3] != UNUSED) || (data[4] != UNUSED)
+      || (data[5] != SEPARATOR)) {
+    cout << "Warning: IrProto.bin protocol section header invalid" << endl;
+    return;
+  }
+  //again, include pointers
+  auto timingSectionCount = data[6];
+  if (data.size() < (HEADER_SIZE + 2 * timingSectionCount)) {
+    cout << "Warning: IrProto.bin protocol section too small (pointers, "
+        << data.size() << " bytes)" << endl;
+    return;
+  }
+
+  clockPeriod = lib::parseHarmony16_file(data[1], data[2]);
+
+  lib::parseHarmony16_file(
+      { data.begin() + HEADER_SIZE, data.begin() + HEADER_SIZE
+          + 2 * timingSectionCount }, offsetTable);
+
+  //offsets need to be within data
+  for (auto &o : offsetTable) {
+    o = o - offset;
+    if ((o) > data.size()) {
+      return;
+    }
+  }
+
+  for (int i = 0; i < offsetTable.size(); i++) {
+    auto start = offsetTable[i];
+    auto end = data.size();
+    if ((i + 1) < offsetTable.size()) {
+      end = offsetTable[i + 1];
+    }
+
+    auto s = TimingSection( { data.begin() + start, data.begin() + end },
+        offset + start);
+    sections.push_back(move(s));
+  }
+}
+
+const TimingSection& IrProto::accessSection(int index) const
+{
+  static const TimingSection s;
+
+  if (index >= sections.size()) {
+    return s;
+  }
+  return sections[index];
+}
+
+vector<uint8_t> IrProto::serialise(int offset) const
+{
+  vector<uint8_t> data;
+  vector<vector<uint8_t>> serialisedSections;
+
+  data.push_back(START);
+  lib::setHarmony16_file(clockPeriod, data);
+  data.push_back(UNUSED);
+  data.push_back(UNUSED);
+  data.push_back(SEPARATOR);
+  data.push_back(sections.size());
+
+  offset = offset + HEADER_SIZE + 2 * sections.size();
+  for (const auto &s : sections) {
+    lib::setHarmony16_file(offset, data);  //append section start offset
+
+    auto section = s.serialise(offset);
+    offset = offset + section.size();
+
+    serialisedSections.push_back(move(section));
+  }
+
+  //append sections
+  for (const auto &s : serialisedSections) {
+    data.insert(data.end(), s.begin(), s.end());
+  }
+
+  return data;
+}
+
+void IrProto::serialiseIrStream(std::vector<Item> out, Data &data) const
+{
+  //don't do convertion of single timings to actual stream here!
+  for (const auto &s : data) {
+    auto index = s.first;
+    if (index > sections.size()) {
+      continue;
+    }
+    sections[index].serialiseIrStream(out, s.second);
+  }
 
   //  auto stream = this->stream; //copy
   //
@@ -363,89 +479,7 @@ void TimingSection::serialiseIrStream(std::vector<Item> out,
   //    }
   //  } todo
 
-}
 
-IrProto::IrProto()
-{
-}
-
-IrProto::IrProto(const vector<uint8_t> &data, int offset)
-{
-  vector<uint16_t> offsetTable;
-
-  if (data.size() < HEADER_SIZE) {
-    cout << "Warning: IrProto.bin protocol section too small (" << data.size()
-        << " bytes)" << endl;
-    return;
-  }
-  if ((data[0] != START) || (data[3] != UNUSED) || (data[4] != UNUSED)
-      || (data[5] != SEPARATOR)) {
-    cout << "Warning: IrProto.bin protocol section header invalid" << endl;
-    return;
-  }
-  //again, include pointers
-  auto timingSectionCount = data[6];
-  if (data.size() < (HEADER_SIZE + 2 * timingSectionCount)) {
-    cout << "Warning: IrProto.bin protocol section too small (pointers, "
-        << data.size() << " bytes)" << endl;
-    return;
-  }
-
-  clockPeriod = lib::parseHarmony16_file(data[1], data[2]);
-
-  lib::parseHarmony16_file(
-      { data.begin() + HEADER_SIZE - 1, data.begin() + HEADER_SIZE - 1
-          + 2 * timingSectionCount }, offsetTable);
-
-  //offsets need to be within data
-  for (auto &o : offsetTable) {
-    o = o - offset;
-    if ((o) > data.size()) {
-      return;
-    }
-  }
-
-  for (int i = 0; i < offsetTable.size(); i++) {
-    auto start = offsetTable[i];
-    auto end = data.size();
-    if ((i + 1) < offsetTable.size()) {
-      end = offsetTable[i + 1];
-    }
-
-    auto s = TimingSection( { data.begin() + start, data.begin() + end },
-        offset + start);
-    sections.push_back(move(s));
-  }
-}
-
-vector<uint8_t> IrProto::serialise(int offset) const
-{
-  vector<uint8_t> data;
-  vector<vector<uint8_t>> serialisedSections;
-
-  data.push_back(START);
-  lib::setHarmony16_file(clockPeriod, data);
-  data.push_back(UNUSED);
-  data.push_back(UNUSED);
-  data.push_back(SEPARATOR);
-  data.push_back(sections.size());
-
-  offset = offset + HEADER_SIZE + 2 * sections.size();
-  for (const auto &s : sections) {
-    lib::setHarmony16_file(offset, data);  //append section start offset
-
-    auto section = s.serialise(offset);
-    offset = offset + section.size();
-
-    serialisedSections.push_back(move(section));
-  }
-
-  //append sections
-  for (const auto &s : serialisedSections) {
-    data.insert(data.end(), s.begin(), s.end());
-  }
-
-  return data;
 }
 
 File::File()

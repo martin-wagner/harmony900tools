@@ -228,7 +228,7 @@ int main(int argc, char **argv)
 
     cout << "----- IR stream " << i << " -----" << endl;
     printXmlHex(i);
-    cout << "Clock: " << s.getClock() << "kHz" << endl;
+    cout << "Clock: " << s.getClock() / 1000 << "kHz" << endl;
 
     auto &samples = s.accessStream();
 

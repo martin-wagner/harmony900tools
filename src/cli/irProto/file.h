@@ -53,6 +53,9 @@ class TimingSectionIrHeader
     /** check container is empty */
     bool isEmpty() const { return stream.empty(); };
 
+    /** access data */
+    const std::vector<Item> & accessStream() const { return stream; };
+
     /** serialise for writing to disk */
     std::vector<uint8_t> serialise() const;
 
@@ -73,11 +76,17 @@ class TimingSectionIrPayload
     /** add a block from IrProto.bin*/
     TimingSectionIrPayload(const std::vector<uint8_t> &data);
 
+    /** set data */
     void setFalsePair(std::vector<Item> timings);
     void setTruePair(std::vector<Item> timings);
 
+    /** access data */
+    const std::vector<Item> & accessFalsePair() const { return streamFalse; };
+    const std::vector<Item> & accessTruePair() const { return streamTrue; };
+
     bool haveFalse() const { return (!streamFalse.empty()); };
     bool haveTrue() const { return (!streamTrue.empty()); };
+    bool isEmpty() const { return (streamTrue.empty() && streamFalse.empty()); };
 
     /** serialise for writing to disk */
     std::vector<uint8_t> serialise() const;
@@ -139,6 +148,15 @@ class TimingSection
     void setData(const TimingSectionIrPayload &d);
     void setEoF(const TimingSectionIrHeader &eof);
 
+    uint16_t getBitCount() const { return bitCount;};
+    uint16_t getMask() const { return mask;};
+    uint32_t getTiming() const { return interval;};
+    Ctrl0 getCtrl0() const { return ctrl0;};
+    Ctrl1 getCtrl1() const { return ctrl1;};
+    const TimingSectionIrHeader &getSoF() const { return sof;};
+    const TimingSectionIrPayload &getData() const { return data;};
+    const TimingSectionIrHeader &getEoF() const { return eof;};
+
     /** serialise for writing to disk */
     std::vector<uint8_t> serialise(int offset) const;
 
@@ -150,7 +168,7 @@ class TimingSection
 class IrProto
 {
   protected:
-    static constexpr int HEADER_SIZE = 8;
+    static constexpr int HEADER_SIZE = 7;
     static constexpr uint8_t START = 0x01;       //assumption
     static constexpr uint8_t UNUSED = 0;         //assumption
     static constexpr uint8_t SEPARATOR = 0x32;   //assumption
@@ -165,7 +183,21 @@ class IrProto
     /** add a protocol block from IrProto.bin*/
     IrProto(const std::vector<uint8_t> &data, int offset);
 
+    /** read section count */
+    int getSectionCount() const { return sections.size(); };
+    bool isEmpty() const { return sections.empty(); };
+
+    /** access a single section */
+    const TimingSection &accessSection(int index) const;
+    double getClock() const { return 1.0 / static_cast<double>(clockPeriod) * 1000000000.0; };
+
+    /** serialise for writing to disk */
     std::vector<uint8_t> serialise(int offset) const;
+
+    /** input data section index + section data (if any) */
+    using Data = std::vector<std::pair<int, std::vector<bool>>>;
+    /** serialise for creating timing stream */
+    void serialiseIrStream(std::vector<Item> out, Data &data) const;
 };
 
 /** read/write IrProto.bin file */
