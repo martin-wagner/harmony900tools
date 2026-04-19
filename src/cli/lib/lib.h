@@ -97,6 +97,30 @@ inline std::string writeData(const std::string &text, const std::vector<uint16_t
   return str.str();
 }
 
+//convert hex string 0x123456789abcdef to vector<uint8_t> [12, 34, ...]
+inline std::vector<uint8_t> hexStringToBytes(const std::string &code)
+{
+  std::vector<uint8_t> data;
+  std::string hex = code;
+
+  // remove optional "0x" prefix
+  if (hex.rfind("0x", 0) == 0 || hex.rfind("0X", 0) == 0) {
+    hex = hex.substr(2);
+  }
+
+  if (hex.size() % 2 != 0) {
+    return data;
+  }
+
+  for (int i = 0; i < hex.size(); i += 2) {
+    auto byteStr = hex.substr(i, 2);
+    auto byte = static_cast<uint8_t>(stoul(byteStr, nullptr, 16));
+    data.push_back(byte);
+  }
+
+  return data;
+}
+
 //terminal width in chars
 inline int getTerminalWidth()
 {

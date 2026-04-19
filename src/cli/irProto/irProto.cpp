@@ -10,9 +10,8 @@
 
 #include "cli/lib/lib.h"
 #include "file.h"
-//#include "cli/lib/data.h"
+#include "code.h"
 #include "cli/lib/binary.h"
-//#include "cli/lib/crc32.h"
 
 using namespace std;
 
@@ -22,10 +21,9 @@ struct Config
 {
     int verbosity = 0;
     string irProtoFileName = "IrProto.bin";
-    string dumpFileName = "protoIr.dat";
+    string dumpFileName = "cmd.dat";
     string roundtripFileName = "";
-    vector<string> addprotocols;
-    double addStreamClock = 38000; //todo irProto::DEFAULT_CLOCK_HZ;
+    string commandHex = "";
     bool activeHigh = true;
 } cfg;
 
@@ -35,39 +33,34 @@ static void printHelp(const char *prog)
       << "  -h, --help                  Show this help\n"
       << "  -v, --verbose               Verbose (repeat for -vv)\n"
       << "  -f, --file <file>           File to parse                (default: IrProto.bin)\n"
-      << "  -d, --dump <file>           File to dump gnuplot output  (default: protoIr.dat, will be numbered)\n"
+      << "  -c, --command <hex>         Command string, corresponding to IrProto.bin\n"
+      << "  -d, --dump <file>           File to dump gnuplot output of command  (default: cmd.dat)\n"
       << "  -l, --active-low            Active-low signal            (default: active-high)\n"
       << "  -r, --roundtrip <file>      Serialise parsed file back to <file> (roundtrip test)\n"
-      << "  -s, --add-stream <string>   Append a stream in MP format (may be repeated)\n"
-      << "                              Requires --roundtrip to write the result.\n"
-      << "  -c, --clock <hz>            Carrier clock for added protocols (default: 38000)\n"
-      << "\n" << "MP stream format:\n"
-      << "  Alternating mark/pause pairs in microseconds, separated by semicolons.\n"
-      << "  Each pair: MP<mark>:<pause>\n" << "\n"
       << "Example -- roundtrip test:\n" << "  " << prog
       << " -f IrProto.bin --roundtrip out.bin\n" << "\n"
-      << "Example -- add a stream and write result:\n" << "  " << prog
-      << " -f IrProto.bin --add-stream \"MP832:939; MP1778:896; MP882:1786; MP882:896;\" --roundtrip out.bin\n"
-      << "\n" << "Example -- add two protocols with a custom clock:\n" << "  "
-      << prog << " -f IrProto.bin \\\n"
-      << "    --add-stream \"MP832:939; MP1778:896;\" \\\n"
-      << "    --add-stream \"MP500:500; MP1000:500;\" \\\n"
-      << "    --clock 38000 --roundtrip out.bin\n" << "\n";
+      << "Example -- command to IR:\n" << "  " << prog
+      << " -f IrProto.bin -c \"0x0000F401010100E1A2E817010100\" -d\n" << "\n";
 }
 
 static bool parseArgs(int argc, char **argv, Config &cfg)
 {
-  static struct option long_options[] = { { "help", no_argument, nullptr, 'h' },
-      { "verbose", no_argument, nullptr, 'v' }, { "file", required_argument,
-          nullptr, 'f' }, { "dump", required_argument, nullptr, 'd' }, {
-          "active-low", no_argument, nullptr, 'l' }, { "roundtrip",
-      required_argument, nullptr, 'r' }, { "add-stream", required_argument,
-          nullptr, 's' }, { "clock", required_argument, nullptr, 'c' }, {
-          nullptr, 0, nullptr, 0 } };
+  // @formatter:off
+  static struct option long_options[] = {
+      { "help",       no_argument,       nullptr, 'h' },
+      { "verbose",    no_argument,       nullptr, 'v' },
+      { "file",       required_argument, nullptr, 'f' },
+      { "dump",       required_argument, nullptr, 'd' },
+      { "active-low", no_argument,       nullptr, 'l' },
+      { "roundtrip",  required_argument, nullptr, 'r' },
+      { "command",    required_argument, nullptr, 'c' },
+      { nullptr, 0, nullptr, 0 }
+  };
+// @formatter:on
 
   int opt;
   int optionIndex = 0;
-  while ((opt = getopt_long(argc, argv, "hvf:d:lr:s:c:", long_options,
+  while ((opt = getopt_long(argc, argv, "hvf:d:lr:c:", long_options,
       &optionIndex)) != -1) {
     switch (opt) {
       case 'h':
@@ -87,40 +80,31 @@ static bool parseArgs(int argc, char **argv, Config &cfg)
       case 'r':
         cfg.roundtripFileName = optarg;
         break;
-      case 's':
-        cfg.addprotocols.push_back(optarg);
-        break;
       case 'c':
-        cfg.addStreamClock = stod(optarg);
+        cfg.commandHex = optarg;
         break;
       default:
         return false;
     }
   }
 
-  if (!cfg.addprotocols.empty() && cfg.roundtripFileName.empty()) {
-    cout
-        << "error: --add-stream requires --roundtrip <file> to write the result\n";
+  return true;
+}
+
+bool writeFile(const string &filename, const string &data)
+{
+  ofstream file(filename);
+
+  if (!file.is_open()) {
     return false;
   }
 
+  file << data;
+
+  file.close();
+
   return true;
 }
-//
-//bool writeFile(const string &filename, const string &data)
-//{
-//  ofstream file(filename);
-//
-//  if (!file.is_open()) {
-//    return false;
-//  }
-//
-//  file << data;
-//
-//  file.close();
-//
-//  return true;
-//}
 
 void printItems(const string &name, const vector<irProto::Item> &items,
     bool guessCode = false)
@@ -287,13 +271,43 @@ int main(int argc, char **argv)
       printItems("D", dataPrint, true);
       cout << endl;
     }
+  }
 
-//      if (!cfg.dumpFileName.empty()) {
-//        auto filename = lib::enumerateFilename(cfg.dumpFileName, i);
-//        // gnuplot
-//        auto str = samples.convertGnuplot(cfg.activeHigh);
-//        writeFile(filename, str);
-//      }
+  if (!cfg.commandHex.empty()) {
+    lib::TimingStream samples;
+    irProto::Code code;
+
+    auto status = code.parse(cfg.commandHex);
+    if (status != irProto::Status::OK) {
+      cout << "command parser error: " << (int) status << endl;
+      return EXIT_FAILURE;
+    }
+    auto data = code.getData();
+    auto index = code.getIndex();
+    status = protocols.serialiseIrStream(samples, index, data);
+    if (status != irProto::Status::OK) {
+      cout << "command encoding error: " << (int) status << endl;
+      return EXIT_FAILURE;
+    }
+
+    cout << "----- IR stream (Protocol " << index << ") -----" << endl;
+    cout << "Clock: " << protocols.accessProtocol(index).getClock() / 1000
+        << "kHz" << endl;
+
+    cout << "Sample count: " << samples.timings().size() * 2 << endl;
+
+    if (cfg.verbosity > 0) {
+      cout << "stream IR (hex): " << samples.convertHexString() << endl;
+    }
+    cout << "stream IR (tµs): " << samples.convertIntString() << endl;
+    cout << samples.convertAsciiPlot(lib::getTerminalWidth(), cfg.activeHigh)
+        << endl;
+
+    if (!cfg.dumpFileName.empty()) {
+      // gnuplot
+      auto str = samples.convertGnuplot(cfg.activeHigh);
+      writeFile(cfg.dumpFileName, str);
+    }
   }
 
   // --- roundtrip / write back ---

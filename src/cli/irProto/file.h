@@ -25,6 +25,7 @@ enum class Status {
   ERROR_OUTER_CRC,         //file wrapper crc
   ERROR_OUTER_FILE_FORMAT, //file wrapper format
   ERROR_SIZE,
+  ERROR_INDEX,
   ERROR_FILE_FORMAT,
   ERROR_PAYLOAD_FORMAT,
   ERROR_UNKNOWN
@@ -60,7 +61,7 @@ class TimingSectionIrHeader
     std::vector<uint8_t> serialise() const;
 
     /** serialise for creating timing stream */
-    void serialiseIrStream(std::vector<Item> out) const;
+    void serialiseIrStream(std::vector<Item> &out) const;
 };
 
 /** IR protocol part: Payload data encoding */
@@ -92,7 +93,7 @@ class TimingSectionIrPayload
     std::vector<uint8_t> serialise() const;
 
     /** serialise for creating timing stream */
-    void serialiseIrStream(bool booleanState, std::vector<Item> out) const;
+    void serialiseIrStream(bool booleanState, std::vector<Item> &out) const;
 };
 
 /**
@@ -161,7 +162,7 @@ class TimingSection
     std::vector<uint8_t> serialise(int offset) const;
 
     /** serialise for creating timing stream */
-    void serialiseIrStream(std::vector<Item> out, const std::vector<bool> &data) const;
+    void serialiseIrStream(std::vector<Item> &out, const std::vector<bool> &data) const;
 };
 
 /** One Item in IrProto.bin file */
@@ -189,6 +190,7 @@ class IrProto
 
     /** access a single section */
     const TimingSection &accessSection(int index) const;
+    /** get carrier clock */
     double getClock() const { return 1.0 / static_cast<double>(clockPeriod) * 1000000000.0; };
 
     /** serialise for writing to disk */
@@ -197,7 +199,7 @@ class IrProto
     /** input data section index + section data (if any) */
     using Data = std::vector<std::pair<int, std::vector<bool>>>;
     /** serialise for creating timing stream */
-    void serialiseIrStream(std::vector<Item> out, Data &data) const;
+    void serialiseIrStream(std::vector<Item> &out, const Data &data) const;
 };
 
 /** read/write IrProto.bin file */
@@ -210,6 +212,8 @@ class File
     static constexpr int HEADER_SIZE = 5; //last 0x01 of header above belongs to payload with unknown use.
 
     std::vector<IrProto> protocols;
+
+    static std::vector<Item> compress(std::vector<Item> items);
 
   public:
     /** create empty file */
@@ -227,8 +231,12 @@ class File
     /** access a single protocol */
     const IrProto &accessProtocol(int index) const;
 
-    /** append a protocol */
-    Status appendProtocol(const IrProto &proto);
+    /** append a protocol
+     *
+     * @param proto protocol ready-to-use
+     * @return index of added protocol
+     */
+    uint16_t appendProtocol(const IrProto &proto);
 
     /** remove a protocol */
     void removeProtocol(int index);
@@ -238,6 +246,9 @@ class File
 
     /** serialise IrProto.bin file and write file */
     Status serialise(const std::string &filename, uint32_t *crc = nullptr) const;
+
+    /** serialise to timing stream */
+    Status serialiseIrStream(lib::TimingStream &out, uint16_t index, const IrProto::Data &data) const;
 
   private:
     Status parseObject(const std::vector<uint8_t> &raw, uint16_t startOffset, uint16_t endOffset);

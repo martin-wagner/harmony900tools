@@ -163,5 +163,29 @@ Pause = Transmitter is off.
 
 Mark is detected by checking the MSB.
 
+## Protocols
+
+There seem to be three different kinds of protocols used.
+
+### Simple one section protocol
+
+This is the simplest way to implement a protocol. SoF, Data coding and EoF are in one section.
+
+### Data section + Repeat Section
+
+The Data frame is coded in section[0], like before, but an additional repeat section is given in section[1]. This seems to be used by the NEC extended 32 protocol (?).
+
+### Multi-timing protocols
+
+Multiple sections are given because the protocol uses different timings for different parts of the frame. The sections are appended to create one full frame. This seems to be used by the Sony SIRC protocol, this uses three sections (?).
+
+### Questions
+
+IrProto is not limited to those use-cases. 
+- are there repeat frames coded in anything but section[1]?
+- are there multi-section protocols with repeat frame?
+- is there a way for the upper layer to select specific sections / order for playback or just one after the other?
+
+
 
 

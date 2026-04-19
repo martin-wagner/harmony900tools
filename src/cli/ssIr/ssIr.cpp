@@ -54,13 +54,19 @@ static void printHelp(const char *prog)
 
 static bool parseArgs(int argc, char **argv, Config &cfg)
 {
-  static struct option long_options[] = { { "help", no_argument, nullptr, 'h' },
-      { "verbose", no_argument, nullptr, 'v' }, { "file", required_argument,
-          nullptr, 'f' }, { "dump", required_argument, nullptr, 'd' }, {
-          "active-low", no_argument, nullptr, 'l' }, { "roundtrip",
-      required_argument, nullptr, 'r' }, { "add-stream", required_argument,
-          nullptr, 's' }, { "clock", required_argument, nullptr, 'c' }, {
-          nullptr, 0, nullptr, 0 } };
+  // @formatter:off
+  static struct option long_options[] = {
+      {"help",       no_argument,       nullptr, 'h'},
+      {"verbose",    no_argument,       nullptr, 'v'},
+      {"file",       required_argument, nullptr, 'f'},
+      {"dump",       required_argument, nullptr, 'd'},
+      {"active-low", no_argument,       nullptr, 'l'},
+      {"roundtrip",  required_argument, nullptr, 'r'},
+      {"add-stream", required_argument, nullptr, 's'},
+      {"clock",      required_argument, nullptr, 'c'},
+      {nullptr,      0,                 nullptr,  0 }
+  };
+// @formatter:on
 
   int opt;
   int optionIndex = 0;

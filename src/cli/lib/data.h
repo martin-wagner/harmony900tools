@@ -16,7 +16,7 @@
 namespace lib {
 
 
-/* single data block */
+/** single data block */
 class Block
 {
   public:
@@ -55,7 +55,7 @@ class Block
     }
 };
 
-/* entire stream (single frame or actual stream) of
+/** entire stream (single frame or actual stream) of
  * timing data */
 class TimingStream
 {

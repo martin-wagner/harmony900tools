@@ -75,7 +75,7 @@ vector<uint8_t> TimingSectionIrHeader::serialise() const
   return data;
 }
 
-void TimingSectionIrHeader::serialiseIrStream(vector<Item> out) const
+void TimingSectionIrHeader::serialiseIrStream(vector<Item> &out) const
 {
   out.insert(out.end(), stream.begin(), stream.end());
 }
@@ -161,7 +161,7 @@ vector<uint8_t> TimingSectionIrPayload::serialise() const
 }
 
 void TimingSectionIrPayload::serialiseIrStream(bool booleanState,
-    vector<Item> out) const
+    vector<Item> &out) const
 {
   if (booleanState == true) {
     out.insert(out.end(), streamTrue.begin(), streamTrue.end());
@@ -317,28 +317,44 @@ vector<uint8_t> TimingSection::serialise(int offset) const
   return data;
 }
 
-void TimingSection::serialiseIrStream(std::vector<Item> out,
+void TimingSection::serialiseIrStream(vector<Item> &out,
     const vector<bool> &data) const
 {
-  //don't do convertion of single timings to actual stream here!
-  //protocol can append multiple timing sections into one frame.
-  sof.serialiseIrStream(out);
-  for (auto bit : data) {
-    this->data.serialiseIrStream(bit, out);
-  }
-  eof.serialiseIrStream(out);
+  vector<Item> tmp;
+  int tmsg = 0;
 
-  //append interval pause. todo calculate actual pause time by subtracting all data timings
-  auto timing = static_cast<int64_t>(interval);
-  if ((timing != TimingSection::PAUSE_IN_EOF) && (timing > 0)) {
+  if (data.size() < bitCount) {
+    return;
+  }
+
+  sof.serialiseIrStream(tmp);
+  //todo mask should somehow apply here. but how??
+  for (auto i = 0; i < bitCount; i++) {
+    this->data.serialiseIrStream(data[i], tmp);
+  }
+  eof.serialiseIrStream(tmp);
+
+  for (const auto& item : tmp) {
+    tmsg = tmsg + item.second;
+  }
+  out.insert(out.end(), tmp.begin(), tmp.end());
+
+  auto tinterval = static_cast<int64_t>(interval);
+  if ((tinterval != TimingSection::PAUSE_IN_EOF) && (tinterval > 0)) {
+    auto tpause = tinterval - tmsg;
+    if (tpause <= 0) {
+      //oops
+      cout << "Warning: IrProto.bin create IR stream negative pause" << endl;
+      tpause = 50000; //µs
+    }
     do {
-      if (timing > 0x7fff) {
-        out.push_back({false, 0x7fff});
-        timing = timing - 0x7fff;
+      if (tpause > 0x7fff) {
+        out.push_back( { false, 0x7fff });
       } else {
-        out.push_back({false, timing});
+        out.push_back( { false, tpause });
       }
-    } while (timing > 0);
+      tpause = tpause - 0x7fff;
+    } while (tpause > 0);
   }
 }
 
@@ -435,9 +451,8 @@ vector<uint8_t> IrProto::serialise(int offset) const
   return data;
 }
 
-void IrProto::serialiseIrStream(std::vector<Item> out, Data &data) const
+void IrProto::serialiseIrStream(vector<Item> &out, const Data &data) const
 {
-  //don't do convertion of single timings to actual stream here!
   for (const auto &s : data) {
     auto index = s.first;
     if (index > sections.size()) {
@@ -445,41 +460,39 @@ void IrProto::serialiseIrStream(std::vector<Item> out, Data &data) const
     }
     sections[index].serialiseIrStream(out, s.second);
   }
+}
 
-  //  auto stream = this->stream; //copy
-  //
-  //  while (stream.size() > 0) {
-  //    const auto &current = stream[0];
-  //
-  //    if (stream.size() > 1) {
-  //      const auto &next = stream[1];
-  //
-  //      if ((current.first == true) && (next.first == false)) {
-  //        //mark/pause, insert
-  //        out.addMarkPause( {current.second, next.second });
-  //        stream.erase(stream.begin(), stream.begin() + 2);
-  //      } else if ((current.first == true) && (next.first == true)) {
-  //        //mark/mark, add empty pause, insert
-  //        out.addMarkPause( {current.second, 0 });
-  //        stream.erase(stream.begin(), stream.begin() + 1);
-  //      } else {
-  //        //pause, add empty mark, insert
-  //        out.addMarkPause( {0, current.second });
-  //        stream.erase(stream.begin(), stream.begin() + 1);
-  //      }
-  //    } else {
-  //      if (current.first == true) {
-  //        //mark, add empty pause, insert
-  //        out.addMarkPause( {current.second, 0 });
-  //      } else {
-  //        //pause, add empty mark, insert
-  //        out.addMarkPause( {0, current.second });
-  //      }
-  //      stream.erase(stream.begin(), stream.begin() + 1);
-  //    }
-  //  } todo
+vector<Item> File::compress(vector<Item> items)
+{
+  vector<Item> ret;
 
+  //merge when mutliple timings have the same logic level
+  while (items.size() > 0) {
+    if (items.size() > 1) {
+      auto mark = items[0].first;
+      auto time_us = items[0].second;
+      auto next_mark = items[1].first;
+      auto next_time_us = items[1].second;
 
+      if ((mark == next_mark)) {
+        auto compressed = time_us + next_time_us;
+        if (compressed > 0x7fff) {
+          items[1].second = compressed - 0x7fff;
+          ret.push_back( { mark, 0x7fff });
+        } else {
+          //add to next timing
+          items[1].second = compressed;
+        }
+      } else {
+        ret.push_back(items[0]);
+      }
+    } else {
+      //last item
+      ret.push_back(items[0]);
+    }
+    items.erase(items.begin());
+  }
+  return ret;
 }
 
 File::File()
@@ -580,6 +593,12 @@ const IrProto& File::accessProtocol(int index) const
   return protocols.at(index);
 }
 
+uint16_t File::appendProtocol(const IrProto &proto)
+{
+  protocols.push_back(proto);
+  return (protocols.size() - 1);
+}
+
 void File::removeProtocol(int index)
 {
   if ((index < 0) || (index >= static_cast<int>(protocols.size()))) {
@@ -645,6 +664,53 @@ Status File::serialise(const string &filename, uint32_t *crc) const
 
   if (!file.good()) {
     return Status::ERROR_FILE;
+  }
+  return Status::OK;
+}
+
+Status File::serialiseIrStream(lib::TimingStream &out, uint16_t index,
+    const IrProto::Data &data) const
+{
+  vector<Item> items;
+
+  if (index > protocols.size()) {
+    return Status::ERROR_INDEX;
+  }
+
+  protocols[index].serialiseIrStream(items, data);
+  items = compress(items);
+
+  //we have list of coded bits (time + mark/pause).
+  //we need timing stream (time-mark + time-pause).
+  while (items.size() > 0) {
+    const auto mark = items[0].first;
+    const auto time_us = items[0].second;
+
+    if (!mark) {
+      //Block is always mark/pause, add empty mark
+      out.addMarkPause( { 0, time_us });
+      items.erase(items.begin());
+      continue;
+    }
+
+    if (items.size() > 1) {
+      const auto next_mark = items[1].first;
+      const auto next_time_us = items[1].second;
+
+      if (next_mark == true) {
+        //Block is always mark/pause, add empty pause
+        out.addMarkPause( { time_us, 0 });
+        items.erase(items.begin());
+      } else {
+        //insert mark/pause
+        out.addMarkPause( { time_us, next_time_us });
+        items.erase(items.begin(), items.begin() + 2);
+      }
+    } else {
+      //last item
+      out.addMarkPause( { time_us, 0 });
+      items.erase(items.begin());
+    }
   }
   return Status::OK;
 }
