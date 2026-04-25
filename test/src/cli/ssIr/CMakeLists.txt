@@ -9,7 +9,6 @@ set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/cli/lib)
 # ---------------------------------------------------------------------------
 add_executable(test_ssIr
     test_file.cpp
-    test_code.cpp
     ${LIB_DIR}/data.cpp
     ${SRC_DIR}/file.cpp
 )

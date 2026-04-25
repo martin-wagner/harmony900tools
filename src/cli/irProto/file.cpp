@@ -193,7 +193,8 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
     //ignore
   }
   if (data[3] != 0xff) {
-    cout << "Warning: IrProto.bin padding before toggle used (" << (int)data[2] << ")" << endl;
+    cout << "Warning: IrProto.bin padding before toggle used (" << (int) data[2]
+        << ")" << endl;
   }
   togglePos = data[2];
   interval = lib::parseHarmony32_file(data[4], data[5], data[6], data[7]);
@@ -223,20 +224,27 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
   pSoF = (int) lib::parseHarmony16_file(data[12], data[13]) - offset;
   pEoF = (int) lib::parseHarmony16_file(data[14], data[15]) - offset;
 
-  if ((pSoF >= HEADER_SIZE) && (pSoF < data.size())) {
+  if ((pSoF >= HEADER_SIZE) && (pSoF <= data.size())) {
     auto size = data[pSoF] * 2 + 1;
-    sof = TimingSectionIrHeader(
-        { data.begin() + pSoF, data.begin() + pSoF + size });
+    if ((pSoF + size) <= data.size()) {
+      sof = TimingSectionIrHeader(
+          { data.begin() + pSoF, data.begin() + pSoF + size });
+    }
+
   }
-  if ((pEoF >= HEADER_SIZE) && (pEoF < data.size())) {
+  if ((pEoF >= HEADER_SIZE) && (pEoF <= data.size())) {
     auto size = data[pEoF] * 2 + 1;
-    eof = TimingSectionIrHeader(
-        { data.begin() + pEoF, data.begin() + pEoF + size });
+    if ((pEoF + size) <= data.size()) {
+      eof = TimingSectionIrHeader(
+          { data.begin() + pEoF, data.begin() + pEoF + size });
+    }
   }
-  if ((pData >= HEADER_SIZE) && (pData < data.size())) {
+  if ((pData >= HEADER_SIZE) && (pData <= data.size())) {
     auto size = static_cast<int>(ctrl1) * 4;
-    this->data = TimingSectionIrPayload(
-        { data.begin() + pData, data.begin() + pData + size });
+    if ((pData + size) <= data.size()) {
+      this->data = TimingSectionIrPayload(
+          { data.begin() + pData, data.begin() + pData + size });
+    }
   }
 }
 
@@ -337,7 +345,7 @@ void TimingSection::serialiseIrStream(vector<Item> &out,
   }
   eof.serialiseIrStream(tmp);
 
-  for (const auto& item : tmp) {
+  for (const auto &item : tmp) {
     tmsg = tmsg + item.second;
   }
   out.insert(out.end(), tmp.begin(), tmp.end());
@@ -396,7 +404,7 @@ IrProto::IrProto(const vector<uint8_t> &data, int offset)
   //offsets need to be within data
   for (auto &o : offsetTable) {
     o = o - offset;
-    if ((o) > data.size()) {
+    if ((o) >= data.size()) {
       return;
     }
   }
@@ -443,7 +451,7 @@ vector<uint8_t> IrProto::serialise(int offset) const
     auto section = s.serialise(offset);
     offset = offset + section.size();
 
-    serialisedSections.push_back(move(section));
+    serialisedSections.push_back(section);
   }
 
   //append sections
@@ -458,7 +466,7 @@ void IrProto::serialiseIrStream(vector<Item> &out, const Data &data) const
 {
   for (const auto &s : data) {
     auto index = s.first;
-    if (index > sections.size()) {
+    if (index >= sections.size()) {
       continue;
     }
     sections[index].serialiseIrStream(out, s.second);
@@ -478,7 +486,7 @@ vector<Item> File::compress(vector<Item> items)
       auto next_time_us = items[1].second;
 
       if ((mark == next_mark)) {
-        auto compressed = time_us + next_time_us;
+        auto compressed = static_cast<uint32_t>(time_us) + next_time_us;
         if (compressed > 0x7fff) {
           items[1].second = compressed - 0x7fff;
           ret.push_back( { mark, 0x7fff });
@@ -540,7 +548,7 @@ Status File::parse(const string &filename)
   auto crc32 = lib::calcCrc32( { raw.begin() + WRAPPER_SIZE, raw.end() });
   auto expectedCrc32 = lib::parseHarmony32_file(raw[0], raw[1], raw[2], raw[3]);
   if (crc32 != expectedCrc32) {
-    cout << "Warning: IrProto.bin CRC mismatch, file: " << hex << expectedCrc32
+    cout << "Error: IrProto.bin CRC mismatch, file: " << hex << expectedCrc32
         << dec << endl;
     return Status::ERROR_OUTER_CRC;
   }
@@ -676,7 +684,7 @@ Status File::serialiseIrStream(lib::TimingStream &out, uint16_t index,
 {
   vector<Item> items;
 
-  if (index > protocols.size()) {
+  if (index >= protocols.size()) {
     return Status::ERROR_INDEX;
   }
 

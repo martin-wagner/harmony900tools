@@ -524,11 +524,13 @@ TEST_F(RealIrProtoTest, Proto6Section0SoFSingleItem)
 
 TEST_F(RealIrProtoTest, SerialisedBinaryMatchesOriginal)
 {
+  // Read original file bytes
   std::ifstream orig(binPath, std::ios::binary);
   ASSERT_TRUE(orig.is_open());
-  std::vector<uint8_t> expected(std::istreambuf_iterator<char>(orig),
-      std::istreambuf_iterator<char>());
+  std::vector<uint8_t> expected( { std::istreambuf_iterator<char>(orig),
+      std::istreambuf_iterator<char>() });
 
+  // Serialise and compare
   auto actual = file.serialise();
 
   ASSERT_EQ(actual.size(), expected.size())<< "Serialised size " << actual.size()
@@ -539,28 +541,30 @@ TEST_F(RealIrProtoTest, SerialisedBinaryMatchesOriginal)
         << " (got 0x" << std::hex << static_cast<int>(actual[i])
         << ", expected 0x" << static_cast<int>(expected[i]) << std::dec << ")";
     if (actual[i] != expected[i]) {
-      break;
+      break; // stop at first diff to keep output readable
     }
   }
 }
 
 TEST_F(RealIrProtoTest, WriteFileBinaryMatchesOriginal)
 {
-  auto outPath = (std::filesystem::temp_directory_path()
-      / "IrProto_roundtrip.bin").string();
+  auto outPath =
+      (std::filesystem::temp_directory_path() / "SsIr_roundtrip.bin").string();
 
   auto status = file.serialise(outPath);
   ASSERT_EQ(status, Status::OK);
 
+  // Read original
   std::ifstream orig(binPath, std::ios::binary);
   ASSERT_TRUE(orig.is_open());
-  std::vector<uint8_t> expected(std::istreambuf_iterator<char>(orig),
-      std::istreambuf_iterator<char>());
+  std::vector<uint8_t> expected( { std::istreambuf_iterator<char>(orig),
+      std::istreambuf_iterator<char>() });
 
+  // Read written file
   std::ifstream written(outPath, std::ios::binary);
   ASSERT_TRUE(written.is_open());
-  std::vector<uint8_t> actual(std::istreambuf_iterator<char>(written),
-      std::istreambuf_iterator<char>());
+  std::vector<uint8_t> actual( { std::istreambuf_iterator<char>(written),
+      std::istreambuf_iterator<char>() });
 
   ASSERT_EQ(actual.size(), expected.size())<< "Written file size " << actual.size()
   << " != original size " << expected.size();
@@ -598,8 +602,11 @@ TEST_F(RealIrProtoTest, LG_FlatCommandProducesTimingStream)
   EXPECT_EQ(status, Status::OK);
   // 32 data bits -> 32 mark/pause pairs + SoF(2) + EoF(1) + repeat section SoF/EoF
   EXPECT_FALSE(out.timings().empty());
-  // First item must be the SoF mark (8990us)
+  EXPECT_EQ(out.timings().size(), 39);
   EXPECT_EQ(out.timings()[0].mark_us, 8990u);
+  EXPECT_EQ(out.timings()[0].pause_us, 4490u);
+  EXPECT_EQ(out.timings()[15].mark_us, 568u);
+  EXPECT_EQ(out.timings()[15].pause_us, 1662u);
 }
 
 TEST_F(RealIrProtoTest, Samsung_SingleSectionCommandProducesTimingStream)
@@ -610,8 +617,11 @@ TEST_F(RealIrProtoTest, Samsung_SingleSectionCommandProducesTimingStream)
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
-  // SoF for proto 1 is mark=4500us
+  EXPECT_EQ(out.timings().size(), 105);
   EXPECT_EQ(out.timings()[0].mark_us, 4500u);
+  EXPECT_EQ(out.timings()[0].pause_us, 4500u);
+  EXPECT_EQ(out.timings()[72].mark_us, 600u);
+  EXPECT_EQ(out.timings()[72].pause_us, 500u);
 }
 
 TEST_F(RealIrProtoTest, Philips_MultiSectionCommandProducesTimingStream)
@@ -622,6 +632,11 @@ TEST_F(RealIrProtoTest, Philips_MultiSectionCommandProducesTimingStream)
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
+  EXPECT_EQ(out.timings().size(), 63);
+  EXPECT_EQ(out.timings()[0].mark_us, 2662u);
+  EXPECT_EQ(out.timings()[0].pause_us, 870u);
+  EXPECT_EQ(out.timings()[17].mark_us, 457u);
+  EXPECT_EQ(out.timings()[18].pause_us, 32767u);
 }
 
 TEST_F(RealIrProtoTest, VuPlus_SingleSectionCommandProducesTimingStream)
@@ -632,6 +647,11 @@ TEST_F(RealIrProtoTest, VuPlus_SingleSectionCommandProducesTimingStream)
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
+  EXPECT_EQ(out.timings().size(), 34);
+  EXPECT_EQ(out.timings()[0].mark_us, 2632u);
+  EXPECT_EQ(out.timings()[0].pause_us, 900u);
+  EXPECT_EQ(out.timings()[17].mark_us, 882u);
+  EXPECT_EQ(out.timings()[18].pause_us, 446u);
 }
 
 TEST_F(RealIrProtoTest, XBox_SingleSectionCommandProducesTimingStream)
@@ -642,7 +662,11 @@ TEST_F(RealIrProtoTest, XBox_SingleSectionCommandProducesTimingStream)
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
+  EXPECT_EQ(out.timings().size(), 78);
   EXPECT_EQ(out.timings()[0].mark_us, 3929u);
+  EXPECT_EQ(out.timings()[0].pause_us, 4000u);
+  EXPECT_EQ(out.timings()[22].mark_us, 500u);
+  EXPECT_EQ(out.timings()[22].pause_us, 2000u);
 }
 
 TEST_F(RealIrProtoTest, Led_SingleSectionCommandProducesTimingStream)
@@ -653,6 +677,11 @@ TEST_F(RealIrProtoTest, Led_SingleSectionCommandProducesTimingStream)
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
+  EXPECT_EQ(out.timings().size(), 42);
+  EXPECT_EQ(out.timings()[0].mark_us, 889u);
+  EXPECT_EQ(out.timings()[0].pause_us, 889u);
+  EXPECT_EQ(out.timings()[25].mark_us, 889u);
+  EXPECT_EQ(out.timings()[4].pause_us, 889u);
 }
 
 TEST_F(RealIrProtoTest, InvalidProtocolIndexReturnsError)

@@ -9,8 +9,10 @@ set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/cli/lib)
 # ---------------------------------------------------------------------------
 add_executable(test_irProto
     test_file.cpp
+    test_code.cpp
     ${LIB_DIR}/data.cpp
     ${SRC_DIR}/file.cpp
+    ${SRC_DIR}/code.cpp
 )
 
 target_include_directories(test_irProto
@@ -26,7 +28,7 @@ target_link_libraries(test_irProto
 
 # Inject path to the real irProto.bin so the fixture can find it
 target_compile_definitions(test_irProto PRIVATE
-    REAL_irProto_BIN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/irProto.bin"
+    REAL_IRPROTO_BIN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/IrProto.bin"
 )
 
 
