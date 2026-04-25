@@ -19,6 +19,10 @@ if(BUILD_TYPE_LOWER STREQUAL "test")
   enable_testing()
 endif()
 
+# add libs
+include(concordance.cmake)
+
+# add project
 add_subdirectory(src)
 
 if(INCLUDE_UNIT_TESTING)

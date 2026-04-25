@@ -1,6 +1,7 @@
 *.dat
 *.x
 build/*
+src_external/*
 
 # Prerequisites
 *.d
