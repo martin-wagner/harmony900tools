@@ -120,13 +120,13 @@ class TimingSection
       DATA_TWO_PAIRS = 2 //codes two binary states (true/false)
     };
 
-    static constexpr uint32_t MASK_NONE = 0xffff;
+    static constexpr uint32_t TOGGLE_NONE = 0xff;
     static constexpr uint32_t PAUSE_IN_EOF = 0xffffffff;
 
   protected:
     static constexpr int HEADER_SIZE = 16;
     uint16_t bitCount = 0;
-    uint16_t mask = MASK_NONE;
+    uint8_t togglePos = TOGGLE_NONE;
     uint32_t interval = PAUSE_IN_EOF; //us
     Ctrl0 ctrl0 = Ctrl0::IS_DATA_FRAME;
     Ctrl1 ctrl1 = Ctrl1::DATA_TWO_PAIRS;
@@ -141,7 +141,7 @@ class TimingSection
     TimingSection(const std::vector<uint8_t> &data, int offset);
 
     void setBitCount(uint16_t count);
-    void setMask(uint16_t mask = MASK_NONE);
+    void setToggle(uint16_t toggle = TOGGLE_NONE);
     void setTiming(uint32_t t_us = PAUSE_IN_EOF);
     void setCtrl0(Ctrl0 c);
     void setCtrl1(Ctrl1 c);
@@ -150,7 +150,8 @@ class TimingSection
     void setEoF(const TimingSectionIrHeader &eof);
 
     uint16_t getBitCount() const { return bitCount;};
-    uint16_t getMask() const { return mask;};
+    uint8_t getToggle() const { return togglePos;};
+    bool hasToggle() const { return (togglePos != TOGGLE_NONE);};
     uint32_t getTiming() const { return interval;};
     Ctrl0 getCtrl0() const { return ctrl0;};
     Ctrl1 getCtrl1() const { return ctrl1;};

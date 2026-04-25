@@ -99,17 +99,17 @@ Status Code::parseMultiSection(const std::vector<uint8_t> &data)
 {
   int i;
   int j;
-  auto tmp = data;
 
-  if (tmp.size() < (2 * dataSectionCount)) {
+  if (data.size() < (2 * dataSectionCount)) {
     return Status::ERROR_SIZE;
   }
 
   for (i = 0; i < dataFrameTxCount; i++) {
+    auto tmp = data;
     for (j = 0; j < dataSectionCount; j++) {
-      auto bits = bytesToBits( { tmp.begin(), tmp.begin() + 1 });
+      auto bits = bytesToBits( { tmp.begin(), tmp.begin() + 2 });
       sections.push_back(Section(j, bits));
-      tmp.erase(tmp.begin(), tmp.begin() + 1);
+      tmp.erase(tmp.begin(), tmp.begin() + 2);
     }
   }
 
@@ -132,9 +132,6 @@ Code::Code(const string &code)
 
 Status Code::parse(const string &code)
 {
-  int dataSectionCount;
-  int dataSectionBegin;
-
   sections.clear();
 
   auto data = lib::hexStringToBytes(code);

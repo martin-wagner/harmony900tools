@@ -192,7 +192,10 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
         << " bits)" << endl;
     //ignore
   }
-  mask = lib::parseHarmony16_file(data[2], data[3]);
+  if (data[2] != 0xff) {
+    cout << "Warning: IrProto.bin padding before toggle used (" << (int)data[2] << ")" << endl;
+  }
+  togglePos = lib::parseHarmony16_file(data[2], data[3]);
   interval = lib::parseHarmony32_file(data[4], data[5], data[6], data[7]);
   ctrl0 = static_cast<Ctrl0>(data[8]);
   switch (ctrl0) {
@@ -242,9 +245,9 @@ void TimingSection::setBitCount(uint16_t count)
   bitCount = count;
 }
 
-void TimingSection::setMask(uint16_t mask)
+void TimingSection::setToggle(uint16_t toggle)
 {
-  this->mask = mask;
+  togglePos = toggle;
 }
 
 void TimingSection::setTiming(uint32_t t_us)
@@ -282,7 +285,8 @@ vector<uint8_t> TimingSection::serialise(int offset) const
   vector<uint8_t> data;
 
   lib::setHarmony16_file(bitCount, data);
-  lib::setHarmony16_file(mask, data);
+  data.push_back(0xff);
+  data.push_back(togglePos);
   lib::setHarmony32_file(interval, data);
   data.push_back(static_cast<uint8_t>(ctrl0));
   data.push_back(static_cast<uint8_t>(ctrl1));
@@ -328,7 +332,6 @@ void TimingSection::serialiseIrStream(vector<Item> &out,
   }
 
   sof.serialiseIrStream(tmp);
-  //todo mask should somehow apply here. but how??
   for (auto i = 0; i < bitCount; i++) {
     this->data.serialiseIrStream(data[i], tmp);
   }

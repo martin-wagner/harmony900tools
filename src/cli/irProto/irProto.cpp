@@ -215,13 +215,17 @@ int main(int argc, char **argv)
       const auto &section = protocol.accessSection(j);
 
       cout << "--> section " << j << endl;
-      cout << "Bits: " << section.getBitCount() << "; Mask: " << hex
-          << section.getMask() << dec;
+      cout << "Bits: " << section.getBitCount() << "; ";
+      if (!section.hasToggle()) {
+        cout << "No Toggle; ";
+      } else {
+        cout << "Toggle bit: " << (int) section.getToggle() << "; ";
+      }
       auto timing = section.getTiming();
       if (timing == 0xffffffff) {
-        cout << "; Interval: none; ";
+        cout << "Interval: none; ";
       } else {
-        cout << "; Interval: " << timing / 1000 << "ms; ";
+        cout << "Interval: " << timing / 1000 << "ms; ";
       }
       auto ctrl0 = section.getCtrl0();
       switch (ctrl0) {
@@ -291,10 +295,21 @@ int main(int argc, char **argv)
     }
 
     cout << "----- IR stream (Protocol " << index << ") -----" << endl;
+    cout << "Type: " << code.getControlStr() << ", uses "
+        << code.getRepeatTypeStr() << endl;
     cout << "Clock: " << protocols.accessProtocol(index).getClock() / 1000
         << "kHz" << endl;
-
     cout << "Sample count: " << samples.timings().size() * 2 << endl;
+    if (cfg.verbosity > 0) {
+      cout << "Data: ";
+      for (const auto &s: data) {
+        cout << "S" << s.first << " ";
+        for (const auto &b : s.second) {
+          cout << b;
+        }
+        cout << "; ";
+      }
+    }
 
     if (cfg.verbosity > 0) {
       cout << "stream IR (hex): " << samples.convertHexString() << endl;

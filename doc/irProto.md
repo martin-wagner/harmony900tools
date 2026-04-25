@@ -99,18 +99,19 @@ Each Timing section consists of parameters, yet another offset table and corresp
 
 ```
 ... 30 00 ff ff ff ff ff ff 02 02 13 01 05 01 0a 01 dd dd dd ...
-        │     │           │  │  │     │     │     │
-        │     │           │  │  │     │     │     └── start offset EoF timing section 266+13 = raw[279]
-        │     │           │  │  │     │     └── start offset SoF timing section 261+13 = raw[274]
-        │     │           │  │  │     └── start offset Payload timing section 275+13 = raw[288]
-        │     │           │  │  └── Ctrl 1
-        │     │           │  └── Ctrl 0
-        │     │           └── time between Sof of this frame and SoF of the next frame in µs. -1 = pause coded in EoF data field
-        │     └── Mask
+        │     │  │        │  │  │     │     │     │
+        │     │  │        │  │  │     │     │     └── start offset EoF timing section 266+13 = raw[279]
+        │     │  │        │  │  │     │     └── start offset SoF timing section 261+13 = raw[274]
+        │     │  │        │  │  │     └── start offset Payload timing section 275+13 = raw[288]
+        │     │  │        │  │  └── Ctrl 1
+        │     │  │        │  └── Ctrl 0
+        │     │  │        └── time between Sof of this frame and SoF of the next frame in µs. -1 = pause coded in EoF data field
+        |     |  └── Bit position of toggle bit, 0xff = no toggle bit used
+        │     └── Padding (maybe second toggle bit pos?)
         └── ir protocol data bit count 48 (for this section, excluding start/stop)
 ```
 
-Mask: In Conjunction with the xml data bitstream, this seems to mask out bits. 0xff -- use as-is. Use case not fully understood.
+Toggle bit position is seen from time-on-wire (meaning a value of 0 is the first bit transmitted). 0xff before toggle might suggest this is a second toggle bit position with "unused" marker. I didn't find a protocol using two toggle bits.
 
 Ctrl0:  
 Frame Type

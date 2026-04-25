@@ -71,11 +71,35 @@ class Code
     /** irProto protocol index */
     int getIndex() const { return index; };
 
+    /** payload type selection byte */
+    uint8_t getControl() const { return static_cast<uint8_t>(ctrl); };
+
+    /** payload type selection byte */
+    std::string getControlStr() const
+    {
+      switch (ctrl) {
+        case Ctrl::FLAT:
+          return "Flat";
+        case Ctrl::SECTIONS_1:
+          return "Single Section";
+        default:
+          return "Multi Section (" + std::to_string(static_cast<uint8_t>(ctrl)) + ")";
+      }
+    };
+
     /** irProto protocol ticks */
     int getTicks() const { return ticks; };
 
     /** get carrier clock */
     double getClock() const { return (SYSCLOCK / ticks); };
+
+    std::string getRepeatTypeStr() const
+    {
+      if (haveRepeatFrame) {
+        return "Repeat Frame";
+      }
+      return "Repeats: " + std::to_string(dataFrameTxCount);
+    }
 
     /** create data item for coding with irProto data */
     const IrProto::Data getData() const;
