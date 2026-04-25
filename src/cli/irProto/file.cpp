@@ -192,10 +192,10 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
         << " bits)" << endl;
     //ignore
   }
-  if (data[2] != 0xff) {
+  if (data[3] != 0xff) {
     cout << "Warning: IrProto.bin padding before toggle used (" << (int)data[2] << ")" << endl;
   }
-  togglePos = lib::parseHarmony16_file(data[2], data[3]);
+  togglePos = data[2];
   interval = lib::parseHarmony32_file(data[4], data[5], data[6], data[7]);
   ctrl0 = static_cast<Ctrl0>(data[8]);
   switch (ctrl0) {
@@ -285,8 +285,8 @@ vector<uint8_t> TimingSection::serialise(int offset) const
   vector<uint8_t> data;
 
   lib::setHarmony16_file(bitCount, data);
-  data.push_back(0xff);
   data.push_back(togglePos);
+  data.push_back(0xff);
   lib::setHarmony32_file(interval, data);
   data.push_back(static_cast<uint8_t>(ctrl0));
   data.push_back(static_cast<uint8_t>(ctrl1));

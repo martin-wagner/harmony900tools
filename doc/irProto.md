@@ -106,8 +106,8 @@ Each Timing section consists of parameters, yet another offset table and corresp
         │     │  │        │  │  └── Ctrl 1
         │     │  │        │  └── Ctrl 0
         │     │  │        └── time between Sof of this frame and SoF of the next frame in µs. -1 = pause coded in EoF data field
-        |     |  └── Bit position of toggle bit, 0xff = no toggle bit used
-        │     └── Padding (maybe second toggle bit pos?)
+        |     |  └── Padding (maybe second toggle bit pos?)
+        │     └── Bit position of toggle bit, 0xff = no toggle bit used
         └── ir protocol data bit count 48 (for this section, excluding start/stop)
 ```
 
