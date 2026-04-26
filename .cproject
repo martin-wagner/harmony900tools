@@ -21,9 +21,29 @@
 							<builder id="cdt.managedbuild.target.gnu.builder.base.957367540" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1498448663" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.744007377" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1685632345" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtCore"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtGui"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtSvg"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtTest"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtTools"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtWidgets"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtXml"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1017041156" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1086507403" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.2138889806" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtCore"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtGui"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtSvg"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtTest"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtTools"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtWidgets"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtXml"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.820235247" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.896331356" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
@@ -34,6 +54,16 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.365246190" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.587747931" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtCore"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtGui"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtSvg"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtTest"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtTools"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtWidgets"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/qt6/QtXml"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1127142599" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
@@ -46,16 +76,21 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="harmony900tools.null.1667619692" name="harmony900tools"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1189904710;cdt.managedbuild.toolchain.gnu.base.1189904710.1913766127;cdt.managedbuild.tool.gnu.cpp.compiler.base.744007377;cdt.managedbuild.tool.gnu.cpp.compiler.input.1017041156">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1189904710;cdt.managedbuild.toolchain.gnu.base.1189904710.1913766127;cdt.managedbuild.tool.gnu.c.compiler.base.1086507403;cdt.managedbuild.tool.gnu.c.compiler.input.820235247">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
 			<target name="clean" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -96,6 +131,14 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
+			<target name="h900tool" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>h900tool -j16</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
 			<target name="_create" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "mkdir -p build/release/host &amp;&amp; mkdir -p build/release/x86-64-windows &amp;&amp; mkdir -p build/debug/host &amp;&amp; mkdir -p build/test/host"</buildArguments>
@@ -119,7 +162,6 @@
 			</target>
 			<target name="clean" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -160,17 +202,22 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
+			<target name="h900tool" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>h900tool</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
 			<target name="build" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
 			<target name="clean" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -186,7 +233,6 @@
 			<target name="run_tests" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "make -j16 &amp;&amp; ctest --output-on-failure"</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
@@ -236,6 +282,14 @@
 			<target name="ssIr" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "export PATH=/opt/mxe/usr/bin:$PATH &amp;&amp; make harmony900ssIrTool -j16"</buildArguments>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+			<target name="h900tool" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>sh</buildCommand>
+				<buildArguments>-c "export PATH=/opt/mxe/usr/bin:$PATH &amp;&amp; make h900tool -j16"</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>

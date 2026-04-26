@@ -1,42 +1,38 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
-QT_BEGIN_NAMESPACE
 class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QSessionManager;
-QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class MainWindow: public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    MainWindow();
+  protected:
+    int logLevel;
+
+  public:
+    MainWindow(int logLevel);
 
     void loadFile(const QString &fileName);
 
-protected:
+  protected:
     void closeEvent(QCloseEvent *event) override;
 
-private slots:
+  private slots:
     void newFile();
     void open();
     bool save();
     bool saveAs();
     void about();
     void documentWasModified();
-#ifndef QT_NO_SESSIONMANAGER
-    void commitData(QSessionManager &);
-#endif
+    void commitData(QSessionManager&);
 
-private:
+  private:
     void createActions();
     void createStatusBar();
     void readSettings();
@@ -50,4 +46,3 @@ private:
     QString curFile;
 };
 
-#endif

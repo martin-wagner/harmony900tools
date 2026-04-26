@@ -1,3 +1,6 @@
+# cli tools
+add_subdirectory(cli)
+
 # program name
 set(programName h900tool)
 
@@ -39,6 +42,9 @@ set_target_properties(${programName} PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+target_compile_definitions(${programName} PRIVATE PROGRAM_NAME="${programName}")
+target_compile_definitions(${programName} PRIVATE PROGRAM_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(${programName} PRIVATE QT_DEBUG_NO_OUTPUT)
 
 target_link_libraries(${programName} PRIVATE
     Qt6::Core
@@ -56,6 +62,7 @@ set(${programName}_resource_files
     ${resourcePath}/open.png
     ${resourcePath}/paste.png
     ${resourcePath}/save.png
+    ${resourcePath}/splash.png
 )
 
 qt_add_resources(${programName} "application"
