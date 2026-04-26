@@ -111,7 +111,7 @@ Each Timing section consists of parameters, yet another offset table and corresp
         └── ir protocol data bit count 48 (for this section, excluding start/stop)
 ```
 
-Toggle bit position is seen from time-on-wire (meaning a value of 0 is the first bit transmitted). 0xff before toggle might suggest this is a second toggle bit position with "unused" marker. I didn't find a protocol using two toggle bits.
+Toggle bit position is seen from time-on-wire (meaning a value of 0 is the first bit transmitted). 0xff after toggle might suggest this is a second toggle bit position with "unused" marker. I didn't find a protocol using two toggle bits.
 
 Ctrl0:  
 Frame Type
