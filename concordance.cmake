@@ -68,7 +68,7 @@ ExternalProject_Add(libconcord_ext
                     --disable-mime-update
 
     BUILD_COMMAND
-        make -C "${LIBCONCORD_BUILD}" -j4
+        make -C "${LIBCONCORD_BUILD}" -j${cpuCount}
 
     INSTALL_COMMAND
         make -C "${LIBCONCORD_BUILD}" install
@@ -119,7 +119,7 @@ ExternalProject_Add(concordance_exe
                     LDFLAGS=-L${LIBCONCORD_INSTALL}/lib
 
     BUILD_COMMAND
-        make -C "${CONCORDANCE_BUILD}" -j4
+        make -C "${CONCORDANCE_BUILD}" -j${cpuCount}
 
     INSTALL_COMMAND
         make -C "${CONCORDANCE_BUILD}" install
