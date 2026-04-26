@@ -27,6 +27,7 @@ qt_standard_project_setup(REQUIRES 6.8
 set(sources 
   main.cpp
   mainwindow.cpp
+  ui/logViewer.cpp
 )
 
 # executable
@@ -43,6 +44,7 @@ set_target_properties(${programName} PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+target_include_directories(${programName} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(${programName} PRIVATE PROGRAM_NAME="${programName}")
 target_compile_definitions(${programName} PRIVATE PROGRAM_VERSION="${PROJECT_VERSION}")
 target_compile_definitions(${programName} PRIVATE QT_DEBUG_NO_OUTPUT)
@@ -65,6 +67,7 @@ set(${programName}_resource_files
     ${resourcePath}/paste.png
     ${resourcePath}/save.png
     ${resourcePath}/splash.png
+    ${resourcePath}/icons8-scroll-lock-key-24.png
 )
 
 qt_add_resources(${programName} "application"

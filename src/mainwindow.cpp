@@ -1,6 +1,3 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 #include <QtWidgets>
 
 #include "mainwindow.h"
@@ -20,6 +17,8 @@ MainWindow::MainWindow(int logLevel) :
 
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
+
+  log->addMessage("Ready!");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -110,9 +109,7 @@ void MainWindow::createAds()
 
 void MainWindow::createWidgets()
 {
-
   textEdit = new QPlainTextEdit;
-
   ads::CDockWidget *dockLeft = new ads::CDockWidget(dockManager,
       tr("Left Panel"));
   dockLeft->setWidget(textEdit);
@@ -120,12 +117,20 @@ void MainWindow::createWidgets()
   dockMenu->addAction(dockLeft->toggleViewAction());
 
   auto textEdit2 = new QPlainTextEdit;
-
   ads::CDockWidget *dockRight = new ads::CDockWidget(dockManager,
       tr("Right Panel"));
   dockRight->setWidget(textEdit2);
   dockManager->addDockWidget(ads::RightDockWidgetArea, dockRight);
   dockMenu->addAction(dockRight->toggleViewAction());
+
+  log = new LogViewer;
+  log->setLoglevel(static_cast<LogLevel>(logLevel));
+  log->setStatusBar(statusBar());
+  ads::CDockWidget *dockLog = new ads::CDockWidget(dockManager,
+      tr("Log Viewer"));
+  dockLog->setWidget(log);
+  dockManager->addDockWidget(ads::BottomDockWidgetArea, dockLog);
+  dockMenu->addAction(dockLog->toggleViewAction());
 
   //widgets need to be available to restore docks
   auto settings = lib::getQSettings();

@@ -5,6 +5,8 @@
 
 #include <DockManager.h>
 
+#include "ui/logViewer.h"
+
 class QAction;
 class QMenu;
 class QPlainTextEdit;
@@ -61,6 +63,8 @@ class MainWindow: public QMainWindow
     QByteArray dockDefault = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?><QtAdvancedDockingSystem Version=\"1\" UserVersion=\"0\" Containers=\"1\"><Container Floating=\"0\"><Splitter Orientation=\"|\" Count=\"2\"><Area Tabs=\"1\" Current=\"Left Panel\"><Widget Name=\"Left Panel\" Closed=\"0\"/></Area><Area Tabs=\"1\" Current=\"Right Panel\"><Widget Name=\"Right Panel\" Closed=\"0\"/></Area><Sizes>715 524 </Sizes></Splitter></Container></QtAdvancedDockingSystem>"};
 
   private:
+    LogViewer *log;
+
     QPlainTextEdit *textEdit;
     QString curFile;
 };
