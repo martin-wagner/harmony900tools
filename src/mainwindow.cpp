@@ -15,6 +15,7 @@ MainWindow::MainWindow(int logLevel) :
   createAds();
   createWidgets();
   createActions();
+  applySettings();
 
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
@@ -145,6 +146,7 @@ void MainWindow::createActions()
 {
   //menubar / toolbar
 
+  //file
   QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
   QToolBar *fileToolBar = addToolBar(tr("File"));
   const QIcon newIcon = lib::getIcon(":/images/new.png", "document-new");
@@ -185,6 +187,7 @@ void MainWindow::createActions()
   exitAct->setShortcuts(QKeySequence::Quit);
   exitAct->setStatusTip(tr("Exit the application"));
 
+  //edit
   QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
   QToolBar *editToolBar = addToolBar(tr("Edit"));
 
@@ -215,6 +218,7 @@ void MainWindow::createActions()
   editMenu->addAction(pasteAct);
   editToolBar->addAction(pasteAct);
 
+  //view
   lockAction = dockMenu->addAction(tr("Lock UI"));
   lockAction->setCheckable(true);
   lockAction->setChecked(false);
@@ -232,8 +236,18 @@ void MainWindow::createActions()
   menuBar()->addMenu(dockMenu);
   //todo we can save / restore the default view / custom views
 
-  menuBar()->addSeparator();
+  //settings
+  QMenu *settingsMenu = menuBar()->addMenu(tr("&Settings"));
+  QAction *settingsAct = new QAction(tr("&Settings"), this);
+  connect(settingsAct, &QAction::triggered, this, &MainWindow::showSettings);
+  settingsMenu->addAction(settingsAct);
+  QAction *resetAct = new QAction(tr("&Revert settings"), this);
+  resetAct->setToolTip(tr("Revert all settings to default values"));
+  connect(resetAct, &QAction::triggered, this, &MainWindow::resetSettings);
+  settingsMenu->addAction(resetAct);
 
+  //help
+  menuBar()->addSeparator();
   QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this,
       &MainWindow::about);
@@ -257,10 +271,72 @@ void MainWindow::createActions()
 
   connect(qApp, &QGuiApplication::commitDataRequest, this,
       &MainWindow::commitData);
+
+  connect(settings, &Settings::settingsAccepted, this,
+      &MainWindow::applySettings);
 }
 
 void MainWindow::readSettings()
 {
+  settings = new Settings(this);
+  // @formatter:off
+  settings->addSetting({
+      .key          = "username",
+      .label        = "Username",
+      .helpText     = "Your display name in the application.",
+      .type         = SettingType::String,
+      .defaultValue = "user",
+  });
+
+  settings->addSetting({
+      .key          = "darkMode",
+      .label        = "Dark mode",
+      .helpText     = "Enable dark colour scheme.",
+      .type         = SettingType::Bool,
+      .defaultValue = false,
+  });
+
+  // ── Network tab ───────────────────────────────────────────────────────────
+
+  settings->addSetting({
+      .key          = "port",
+      .label        = "Port",
+      .helpText     = "TCP port to listen on.",
+      .type         = SettingType::Int,
+      .defaultValue = 8080,
+      .tab          = "Network",
+      .minValue     = 1024,
+      .maxValue     = 65535,
+  });
+
+  settings->addSetting({
+      .key          = "timeout",
+      .label        = "Timeout (s)",
+      .helpText     = "Connection timeout in seconds.",
+      .type         = SettingType::Double,
+      .defaultValue = 30.0,
+      .tab          = "Network",
+      .minValue     = 0.1,
+      .maxValue     = 300.0,
+  });
+
+  settings->addSetting({
+      .key      = "protocol",
+      .label    = "Protocol",
+      .helpText = "Transport protocol.",
+      .type     = SettingType::MultiSelection,
+      .defaultValue = 0,   // matches itemData below
+      .tab      = "Network",
+      .options  = {
+          { "TCP",  0 },
+          { "UDP",  1 },
+          { "QUIC", 2 },
+      },
+  });
+// @formatter:on
+
+  //todo settings dialog doesn't save settings in qsettings
+
   auto settings = lib::getQSettings();
   const QByteArray geometry =
       settings.value("geometry", QByteArray()).toByteArray();
@@ -378,6 +454,25 @@ void MainWindow::commitData(QSessionManager &manager)
     if (textEdit->document()->isModified())
       save();
   }
+}
+
+void MainWindow::showSettings()
+{
+  settings->show();
+  settings->raise();
+  settings->activateWindow();  // bring to front if already open
+}
+
+void MainWindow::resetSettings()
+{
+  //todo
+}
+
+void MainWindow::applySettings()
+{
+  //todo
+
+  qDebug() << "Settings accepted:";
 }
 
 void MainWindow::onLockUI(bool locked)

@@ -28,6 +28,7 @@ set(sources
   main.cpp
   mainwindow.cpp
   ui/logViewer.cpp
+  ui/settings.cpp
 )
 
 # executable

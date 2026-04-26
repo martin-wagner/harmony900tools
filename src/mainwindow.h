@@ -6,6 +6,7 @@
 #include <DockManager.h>
 
 #include "ui/logViewer.h"
+#include "ui/settings.h"
 
 class QAction;
 class QMenu;
@@ -35,6 +36,9 @@ class MainWindow: public QMainWindow
     void about();
     void documentWasModified();
     void commitData(QSessionManager&);
+    void showSettings();
+    void applySettings();
+    void resetSettings();
     //ads view stuff
     void onLockUI(bool locked);
     void onSaveView();
@@ -64,6 +68,7 @@ class MainWindow: public QMainWindow
 
   private:
     LogViewer *log;
+    Settings *settings;
 
     QPlainTextEdit *textEdit;
     QString curFile;
