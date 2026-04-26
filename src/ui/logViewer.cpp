@@ -7,8 +7,8 @@
 #include <QApplication>
 #include <QScrollBar>
 #include <QDateTime>
-#include <QIcon>
 
+#include "lib/icon.h"
 #include "logViewer.h"
 
 LogViewer::LogViewer(QWidget *parent) :
@@ -35,13 +35,13 @@ void LogViewer::buildToolBar()
 
   // Copy
   auto *copyAction = toolBar->addAction(
-      QIcon::fromTheme("edit-copy", QIcon(":/res/copy.png")), tr("Copy"));
+      lib::getIcon(":/res/copy.png", "edit-copy"), tr("Copy"));
   copyAction->setToolTip(tr("Copy log to clipboard"));
   connect(copyAction, &QAction::triggered, this, &LogViewer::onCopy);
 
   // Clear
   auto *clearAction = toolBar->addAction(
-      QIcon::fromTheme("edit-clear", QIcon(":/res/clear.png")), tr("Clear"));
+      lib::getIcon(":/res/clear.png", "edit-clear"), tr("Clear"));
   clearAction->setToolTip(tr("Clear log"));
   connect(clearAction, &QAction::triggered, this, &LogViewer::onClear);
 
@@ -49,8 +49,8 @@ void LogViewer::buildToolBar()
 
   // Scroll-lock
   scrollLock = toolBar->addAction(
-      QIcon::fromTheme("object-locked",
-          QIcon(":/res/icons8-scroll-lock-key-24.png")), tr("Scroll Lock"));
+      lib::getIcon(":/res/icons8-scroll-lock-key-24.png", "object-locked"),
+      tr("Scroll Lock"));
   scrollLock->setToolTip(tr("Toggle scroll lock"));
   scrollLock->setCheckable(true);
   scrollLock->setChecked(false);
