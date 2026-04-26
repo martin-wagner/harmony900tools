@@ -10,10 +10,8 @@
 
 const int defaultDebugLevel = 5;
 
-
 #include <chrono>
 #include <thread>
-
 
 int main(int argc, char *argv[])
 {
@@ -51,8 +49,9 @@ int main(int argc, char *argv[])
   }
 
   MainWindow mainWin(debugLevel);
-  if (!parser.positionalArguments().isEmpty())
+  if (!parser.positionalArguments().isEmpty()) {
     mainWin.loadFile(parser.positionalArguments().first());
+  }
   mainWin.show();
   splash.finish(&mainWin);
   return app.exec();

@@ -4,24 +4,19 @@
 #include <QtWidgets>
 
 #include "mainwindow.h"
+#include "lib/settings.h"
+
+using namespace std;
 
 MainWindow::MainWindow(int logLevel) :
     logLevel(logLevel), textEdit(new QPlainTextEdit)
 {
-  setCentralWidget(textEdit);
-
-  createActions();
-  createStatusBar();
-
   readSettings();
 
-  connect(textEdit->document(), &QTextDocument::contentsChanged, this,
-      &MainWindow::documentWasModified);
-
-#ifndef QT_NO_SESSIONMANAGER
-  connect(qApp, &QGuiApplication::commitDataRequest, this,
-      &MainWindow::commitData);
-#endif
+  createStatusBar();
+  createAds();
+  createWidgets();
+  createActions();
 
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
@@ -86,8 +81,63 @@ void MainWindow::documentWasModified()
   setWindowModified(textEdit->document()->isModified());
 }
 
+void MainWindow::createStatusBar()
+{
+  statusBar()->showMessage(tr("Ready"));
+}
+
+void MainWindow::createAds()
+{
+  // Must be set before creating CDockManager
+  // @formatter:off
+  ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::XmlCompressionEnabled, false);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::AllTabsHaveCloseButton, true);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaDynamicTabsMenuButtonVisibility, true);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::EqualSplitOnInsertion, true);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
+  ads::CDockManager::setConfigFlag(ads::CDockManager::DisableTabTextEliding, true);
+// @formatter:on
+  dockManager = new ads::CDockManager(this);
+
+  auto settings = lib::getQSettings();
+  dockManager->loadPerspectives(settings);
+
+  dockMenu = new QMenu(tr("&View"), this);
+}
+
+void MainWindow::createWidgets()
+{
+
+  textEdit = new QPlainTextEdit;
+
+  ads::CDockWidget *dockLeft = new ads::CDockWidget(dockManager,
+      tr("Left Panel"));
+  dockLeft->setWidget(textEdit);
+  dockManager->addDockWidget(ads::LeftDockWidgetArea, dockLeft);
+  dockMenu->addAction(dockLeft->toggleViewAction());
+
+  auto textEdit2 = new QPlainTextEdit;
+
+  ads::CDockWidget *dockRight = new ads::CDockWidget(dockManager,
+      tr("Right Panel"));
+  dockRight->setWidget(textEdit2);
+  dockManager->addDockWidget(ads::RightDockWidgetArea, dockRight);
+  dockMenu->addAction(dockRight->toggleViewAction());
+
+  //widgets need to be available to restore docks
+  auto settings = lib::getQSettings();
+  auto docks = settings.value("dock");
+  if (docks.isValid() && (docks.toString() != "")) {
+    dockManager->restoreState(docks.toByteArray());
+  }
+}
+
 void MainWindow::createActions()
 {
+  //menubar / toolbar
 
   QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
   QToolBar *fileToolBar = addToolBar(tr("File"));
@@ -135,7 +185,6 @@ void MainWindow::createActions()
   QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
   QToolBar *editToolBar = addToolBar(tr("Edit"));
 
-#ifndef QT_NO_CLIPBOARD
   const QIcon cutIcon = QIcon::fromTheme("edit-cut", QIcon(":/images/cut.png"));
   QAction *cutAct = new QAction(cutIcon, tr("Cu&t"), this);
   cutAct->setShortcuts(QKeySequence::Cut);
@@ -165,9 +214,10 @@ void MainWindow::createActions()
   editMenu->addAction(pasteAct);
   editToolBar->addAction(pasteAct);
 
-  menuBar()->addSeparator();
+  menuBar()->addMenu(dockMenu);
+  //todo we can save / restore the default view / custom views
 
-#endif // !QT_NO_CLIPBOARD
+  menuBar()->addSeparator();
 
   QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this,
@@ -178,25 +228,27 @@ void MainWindow::createActions()
       &QApplication::aboutQt);
   aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
 
-#ifndef QT_NO_CLIPBOARD
+  //signal / slot
+
   cutAct->setEnabled(false);
   copyAct->setEnabled(false);
   connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct,
       &QAction::setEnabled);
   connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct,
       &QAction::setEnabled);
-#endif // !QT_NO_CLIPBOARD
+
+
+  connect(textEdit->document(), &QTextDocument::contentsChanged, this,
+      &MainWindow::documentWasModified);
+
+  connect(qApp, &QGuiApplication::commitDataRequest, this,
+      &MainWindow::commitData);
 }
 
-void MainWindow::createStatusBar()
-{
-  statusBar()->showMessage(tr("Ready"));
-}
 
 void MainWindow::readSettings()
 {
-  QSettings settings(QCoreApplication::organizationName(),
-      QCoreApplication::applicationName());
+  auto settings = lib::getQSettings();
   const QByteArray geometry =
       settings.value("geometry", QByteArray()).toByteArray();
   if (geometry.isEmpty()) {
@@ -206,14 +258,17 @@ void MainWindow::readSettings()
         (availableGeometry.height() - height()) / 2);
   } else {
     restoreGeometry(geometry);
+    restoreState(settings.value("window").toByteArray());
   }
 }
 
 void MainWindow::writeSettings()
 {
-  QSettings settings(QCoreApplication::organizationName(),
-      QCoreApplication::applicationName());
+  auto settings = lib::getQSettings();
   settings.setValue("geometry", saveGeometry());
+  settings.setValue("window", saveState());
+  settings.setValue("dock",  dockManager->saveState());
+  dockManager->savePerspectives(settings);
 }
 
 bool MainWindow::maybeSave()
@@ -246,13 +301,9 @@ void MainWindow::loadFile(const QString &fileName)
   }
 
   QTextStream in(&file);
-#ifndef QT_NO_CURSOR
   QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
   textEdit->setPlainText(in.readAll());
-#ifndef QT_NO_CURSOR
   QGuiApplication::restoreOverrideCursor();
-#endif
 
   setCurrentFile(fileName);
   statusBar()->showMessage(tr("File loaded"), 2000);

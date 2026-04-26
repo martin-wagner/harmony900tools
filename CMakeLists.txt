@@ -34,6 +34,7 @@ endif()
 
 # add libs
 include(concordance.cmake)
+include(ads.cmake)
 
 # add project
 add_subdirectory(src)

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include <DockManager.h>
+
 class QAction;
 class QMenu;
 class QPlainTextEdit;
@@ -33,14 +35,20 @@ class MainWindow: public QMainWindow
     void commitData(QSessionManager&);
 
   private:
-    void createActions();
     void createStatusBar();
+    void createAds();
+    void createWidgets();
+    void createActions();
     void readSettings();
     void writeSettings();
     bool maybeSave();
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
+
+  private:
+    ads::CDockManager* dockManager;
+    QMenu *dockMenu;
 
     QPlainTextEdit *textEdit;
     QString curFile;

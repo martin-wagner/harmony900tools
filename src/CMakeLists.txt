@@ -33,6 +33,7 @@ set(sources
 qt_add_executable(${programName} ${sources})
 
 add_dependencies(${programName} libconcord_ext)
+add_dependencies(${programName} qtadvanceddocking-qt6)
 
 if(ltoEnabled)
   set_property(TARGET ${programName} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -51,6 +52,7 @@ target_link_libraries(${programName} PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Svg
+    qtadvanceddocking-qt6
 )
 
 # Resources:
