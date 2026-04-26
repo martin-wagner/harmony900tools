@@ -33,6 +33,13 @@ class MainWindow: public QMainWindow
     void about();
     void documentWasModified();
     void commitData(QSessionManager&);
+    //ads view stuff
+    void onLockUI(bool locked);
+    void onSaveView();
+    void onLoadView();
+    void onLoadDefaultView();
+    void onDeleteView();
+    void onCopyViewToClipboard();
 
   private:
     void createStatusBar();
@@ -49,7 +56,11 @@ class MainWindow: public QMainWindow
   private:
     ads::CDockManager* dockManager;
     QMenu *dockMenu;
+    QAction *lockAction;
 
+    QByteArray dockDefault = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?><QtAdvancedDockingSystem Version=\"1\" UserVersion=\"0\" Containers=\"1\"><Container Floating=\"0\"><Splitter Orientation=\"|\" Count=\"2\"><Area Tabs=\"1\" Current=\"Left Panel\"><Widget Name=\"Left Panel\" Closed=\"0\"/></Area><Area Tabs=\"1\" Current=\"Right Panel\"><Widget Name=\"Right Panel\" Closed=\"0\"/></Area><Sizes>715 524 </Sizes></Splitter></Container></QtAdvancedDockingSystem>"};
+
+  private:
     QPlainTextEdit *textEdit;
     QString curFile;
 };

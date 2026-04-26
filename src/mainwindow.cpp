@@ -214,6 +214,20 @@ void MainWindow::createActions()
   editMenu->addAction(pasteAct);
   editToolBar->addAction(pasteAct);
 
+  lockAction = dockMenu->addAction(tr("Lock UI"));
+  lockAction->setCheckable(true);
+  lockAction->setChecked(false);
+  connect(lockAction, &QAction::toggled, this, &MainWindow::onLockUI);
+
+  dockMenu->addSeparator();
+  dockMenu->addAction(tr("Save View..."), this, &MainWindow::onSaveView);
+  dockMenu->addAction(tr("Load View..."), this, &MainWindow::onLoadView);
+  dockMenu->addAction(tr("Load Default View"), this,
+      &MainWindow::onLoadDefaultView);
+  dockMenu->addAction(tr("Delete View..."), this, &MainWindow::onDeleteView);
+  dockMenu->addAction(tr("Copy View to Clipboard"), this,
+      &MainWindow::onCopyViewToClipboard);
+
   menuBar()->addMenu(dockMenu);
   //todo we can save / restore the default view / custom views
 
@@ -237,14 +251,12 @@ void MainWindow::createActions()
   connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct,
       &QAction::setEnabled);
 
-
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
       &MainWindow::documentWasModified);
 
   connect(qApp, &QGuiApplication::commitDataRequest, this,
       &MainWindow::commitData);
 }
-
 
 void MainWindow::readSettings()
 {
@@ -267,7 +279,7 @@ void MainWindow::writeSettings()
   auto settings = lib::getQSettings();
   settings.setValue("geometry", saveGeometry());
   settings.setValue("window", saveState());
-  settings.setValue("dock",  dockManager->saveState());
+  settings.setValue("dock", dockManager->saveState());
   dockManager->savePerspectives(settings);
 }
 
@@ -365,4 +377,72 @@ void MainWindow::commitData(QSessionManager &manager)
     if (textEdit->document()->isModified())
       save();
   }
+}
+
+void MainWindow::onLockUI(bool locked)
+{
+  if (locked) {
+    dockManager->lockDockWidgetFeaturesGlobally();
+  } else {
+    dockManager->lockDockWidgetFeaturesGlobally(
+        ads::CDockWidget::NoDockWidgetFeatures);
+  }
+}
+
+void MainWindow::onSaveView()
+{
+  QString name = QInputDialog::getText(this, tr("Save View"), tr("View name:"));
+  if (name.isEmpty()) {
+    return;
+  }
+  dockManager->addPerspective(name);
+}
+
+void MainWindow::onLoadView()
+{
+  bool ok;
+
+  QStringList views = dockManager->perspectiveNames();
+  if (views.isEmpty()) {
+    QMessageBox::information(this, tr("Load View"),
+        tr("No saved views found."));
+    return;
+  }
+  ok = false;
+  QString name = QInputDialog::getItem(this, tr("Load View"),
+      tr("Select view:"), views, 0, false, &ok);
+  if (!ok || name.isEmpty()) {
+    return;
+  }
+  dockManager->openPerspective(name);
+}
+
+void MainWindow::onLoadDefaultView()
+{
+  dockManager->restoreState(dockDefault);
+}
+
+void MainWindow::onDeleteView()
+{
+  bool ok;
+
+  QStringList views = dockManager->perspectiveNames();
+  if (views.isEmpty()) {
+    QMessageBox::information(this, tr("Delete View"),
+        tr("No saved views found."));
+    return;
+  }
+  ok = false;
+  QString name = QInputDialog::getItem(this, tr("Delete View"),
+      tr("Select view:"), views, 0, false, &ok);
+  if (!ok || name.isEmpty()) {
+    return;
+  }
+  dockManager->removePerspective(name);
+}
+
+void MainWindow::onCopyViewToClipboard()
+{
+  QString view = dockManager->saveState();
+  QApplication::clipboard()->setText(view);
 }
