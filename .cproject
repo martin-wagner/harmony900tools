@@ -91,14 +91,16 @@
 		<buildTargets>
 			<target name="clean" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="cmake" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_cmake" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
 				<buildArguments>-DCMAKE_BUILD_TYPE=Release ../../..</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -110,9 +112,10 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="erase" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_erase" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "rm -r ./*"</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -134,7 +137,6 @@
 			<target name="h900tool" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>h900tool -j16</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -162,14 +164,16 @@
 			</target>
 			<target name="clean" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="cmake" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_cmake" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
 				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -181,9 +185,10 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="erase" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_erase" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "rm -r ./*"</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -202,7 +207,7 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="h900tool" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="h900tool_singlecore" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments>h900tool</buildArguments>
 				<buildTarget/>
@@ -210,22 +215,33 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
+			<target name="h900tool" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>h900tool -j16</buildArguments>
+				<buildTarget/>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
 			<target name="build" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
 			<target name="clean" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="cmake" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_cmake" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
 				<buildArguments>-DCMAKE_BUILD_TYPE=Test ../../..</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -237,9 +253,10 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="erase" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_erase" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "rm -r ./*"</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -251,16 +268,18 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="cmake" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_cmake" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "export PATH=/opt/mxe/usr/bin:$PATH &amp;&amp; x86_64-w64-mingw32.shared-cmake -DCMAKE_INSTALL_PREFIX=./bin -DCMAKE_BUILD_TYPE=Release ../../..</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="erase" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="_erase" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "rm -r ./*"</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -289,7 +308,6 @@
 			<target name="h900tool" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "export PATH=/opt/mxe/usr/bin:$PATH &amp;&amp; make h900tool -j16"</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>

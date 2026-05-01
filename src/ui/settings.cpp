@@ -14,17 +14,20 @@
 #include <QPushButton>
 #include <QAbstractButton>
 #include <QFrame>
+#include <QMessageBox>
+
+#include "lib/settings.h"
 
 static const QString kDefaultTab = QStringLiteral("General");
 
 // ── ctor ──────────────────────────────────────────────────────────────────────
 
 Settings::Settings(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent), settings(lib::getQSettings())
 {
   createView();
   setWindowTitle(tr("Settings"));
-  resize(340, 360);
+  resize(480, 360);
 }
 
 // ── public ────────────────────────────────────────────────────────────────────
@@ -112,6 +115,13 @@ void Settings::addSetting(const SettingDef &def)
     }
     form->addRow(rowLabel, editor);
     editors.insert(def.key, editor);
+
+    //load from qsettings
+    if (settings.contains(def.key)) {
+      QMap<QString, QVariant> persisted;
+      persisted.insert(def.key, settings.value(def.key));
+      setValues(persisted);
+    }
   }
 }
 
@@ -122,11 +132,6 @@ QMap<QString, QVariant> Settings::values() const
     result.insert(def.key, widgetValue(def.key));
   }
   return result;
-}
-
-QVariant Settings::value(const QString &key) const
-{
-  return widgetValue(key);
 }
 
 void Settings::setValues(const QMap<QString, QVariant> &vals)
@@ -164,11 +169,18 @@ void Settings::setValues(const QMap<QString, QVariant> &vals)
 
 void Settings::onApply()
 {
+  saveToQSettings();
   emit settingsAccepted(values());
 }
 
 void Settings::onRestoreDefaults()
 {
+  QMessageBox::StandardButton reply;
+  reply = QMessageBox::question(this, tr("Reset"),
+      tr("Reset settings to default?"), QMessageBox::Yes | QMessageBox::No);
+  if (reply != QMessageBox::Yes) {
+    return;
+  }
   for (const auto &def : defs) {
     applyDef(def, true);
   }
@@ -285,6 +297,26 @@ void Settings::applyDef(const SettingDef &def, bool useDefault)
       }
     }
   }
+}
+
+void Settings::saveToQSettings()
+{
+  const QMap<QString, QVariant> vals = values();
+  for (auto it = vals.constBegin(); it != vals.constEnd(); ++it) {
+    settings.setValue(it.key(), it.value());
+  }
+  settings.sync();
+}
+
+void Settings::loadFromQSettings()
+{
+  QMap<QString, QVariant> vals;
+  for (const auto &def : defs) {
+    if (settings.contains(def.key)) {
+      vals.insert(def.key, settings.value(def.key));
+    }
+  }
+  setValues(vals);
 }
 
 QVariant Settings::widgetValue(const QString &key) const

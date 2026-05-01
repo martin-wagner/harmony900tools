@@ -1,6 +1,3 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 #include <QApplication>
 #include <QSplashScreen>
 #include <QCommandLineParser>
@@ -22,7 +19,7 @@ int main(int argc, char *argv[])
   QSplashScreen splash(pixmap);
   splash.show();
   app.processEvents();
-  QCoreApplication::setOrganizationName("");
+  QCoreApplication::setOrganizationName("io.github.martin-wagner");
   QCoreApplication::setOrganizationDomain(
       "https://github.com/martin-wagner/harmony900tools");
   QCoreApplication::setApplicationName (PROGRAM_NAME);

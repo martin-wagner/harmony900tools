@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QList>
 #include <QMap>
+#include <QSettings>
 
 class QTabWidget;
 class QDialogButtonBox;
@@ -13,9 +14,13 @@ class QWidget;
 class QAbstractButton;
 
 // ── Setting descriptor ────────────────────────────────────────────────────────
-enum class SettingType
-{
-  String, Int, Double, Bool, MultiSelection   // combo box
+
+enum class SettingType {
+    String,
+    Int,
+    Double,
+    Bool,
+    MultiSelection   // combo box
 };
 
 struct SettingDef
@@ -50,7 +55,6 @@ class Settings: public QDialog
 
     // Read / write current values (key → value).
     QMap<QString, QVariant> values() const;
-    QVariant value(const QString &key) const;
     void setValues(const QMap<QString, QVariant> &vals);
 
   signals:
@@ -67,12 +71,15 @@ class Settings: public QDialog
     QWidget* getOrCreateTab(const QString &tabName);
     QFormLayout* layoutForTab(const QString &tabName);
     void applyDef(const SettingDef &def, bool useDefault);
+    void saveToQSettings();
+    void loadFromQSettings();
 
     // Returns the current widget value for a key.
     QVariant widgetValue(const QString &key) const;
 
     QTabWidget *tabWidget = nullptr;
     QDialogButtonBox *buttonBox = nullptr;
+    QSettings settings;
 
     QList<SettingDef> defs;
 

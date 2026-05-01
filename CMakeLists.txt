@@ -8,7 +8,7 @@ project(
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(-Wall)
+add_compile_options(-Wall -Wno-sign-compare)
 
 set(INCLUDE_UNIT_TESTING OFF)
 
@@ -37,8 +37,11 @@ include(concordance.cmake)
 include(ads.cmake)
 
 # add project
-add_subdirectory(src)
+if(NOT INCLUDE_UNIT_TESTING)
+  add_subdirectory(src)
+endif()
 
+# add unit tests
 if(INCLUDE_UNIT_TESTING)
   add_subdirectory(test)
 endif()

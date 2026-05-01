@@ -465,7 +465,14 @@ void MainWindow::showSettings()
 
 void MainWindow::resetSettings()
 {
-  //todo
+  QMessageBox::StandardButton reply;
+  reply = QMessageBox::question(this, tr("Reset"),
+      tr("Reset ALL settings to default and exit program without saving?"),
+      QMessageBox::Yes | QMessageBox::No);
+  if (reply == QMessageBox::Yes) {
+    lib::resetQSettings();
+    QCoreApplication::exit(); // not calling closeEvent
+  }
 }
 
 void MainWindow::applySettings()
