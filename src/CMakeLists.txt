@@ -37,6 +37,7 @@ qt_add_executable(${programName} ${sources})
 
 add_dependencies(${programName} libconcord_ext)
 add_dependencies(${programName} qtadvanceddocking-qt6)
+add_dependencies(${programName} version_info)
 
 if(ltoEnabled)
   set_property(TARGET ${programName} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -46,9 +47,9 @@ set_target_properties(${programName} PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
-target_include_directories(${programName} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${programName} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(${programName} PRIVATE "${CMAKE_BINARY_DIR}/generated")
 target_compile_definitions(${programName} PRIVATE PROGRAM_NAME="${programName}")
-target_compile_definitions(${programName} PRIVATE PROGRAM_VERSION="${PROJECT_VERSION}")
 target_compile_definitions(${programName} PRIVATE QT_DEBUG_NO_OUTPUT)
 
 target_link_libraries(${programName} PRIVATE
@@ -70,6 +71,7 @@ set(${programName}_resource_files
     ${resourcePath}/save.png
     ${resourcePath}/splash.png
     ${resourcePath}/icons8-scroll-lock-key-24.png
+    ${resourcePath}/harmony-900-color-screen.png
 )
 
 qt_add_resources(${programName} "application"
@@ -84,3 +86,6 @@ qt_add_resources(${programName} "application"
 #    BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
 #    LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
 #)
+
+#always last!
+#include(CPack)

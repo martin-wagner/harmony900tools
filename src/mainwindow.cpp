@@ -4,6 +4,7 @@
 #include "lib/settings.h"
 #include "lib/icon.h"
 #include "defaults.h"
+#include "version.h"
 
 using namespace std;
 
@@ -76,10 +77,11 @@ bool MainWindow::saveAs()
 
 void MainWindow::about()
 {
-  QMessageBox::about(this, tr("About Application"),
-      tr("The <b>Application</b> example demonstrates how to "
-          "write modern GUI applications using Qt, with a menu bar, "
-          "toolbars, and a status bar."));
+  QMessageBox::about(this, tr("About %1").arg(QString(PROGRAM_NAME)),
+      tr("<b>%1</b> helps you to program your Logitech Harmony "
+          "remote control without the always-online (now always-offline) "
+          "software. <br/><br/> %2").arg(QString(PROGRAM_NAME)).arg(
+          infoText()));
 }
 
 void MainWindow::documentWasModified()
@@ -119,6 +121,10 @@ void MainWindow::createWidgets()
   //context needs to be available for widgets
   ctx = make_unique<Context>(*settings, *user);
 
+  //mainwindow
+  setWindowTitle(
+      QString(PROGRAM_NAME) + " " + QString::fromUtf8(BuildInfo::versionFull));
+
   //create widgets
   textEdit = new QPlainTextEdit;
   ads::CDockWidget *dockLeft = new ads::CDockWidget(dockManager,
@@ -137,6 +143,7 @@ void MainWindow::createWidgets()
   log = new LogViewer;
   log->setLoglevel(static_cast<LogLevel>(logLevel));
   log->setStatusBar(statusBar());
+  log->addEntry(LogLevel::Info, infoText(), ContentType::Html);
   ads::CDockWidget *dockLog = new ads::CDockWidget(dockManager,
       tr("Log Viewer"));
   dockLog->setWidget(log);
@@ -298,8 +305,6 @@ void MainWindow::readSettings()
     settings->setValue(defaults::loglevel().key, logLevel);
   }
 
-
-
   // @formatter:off
   settings->addSetting({
       .key          = "username",
@@ -458,6 +463,31 @@ void MainWindow::setCurrentFile(const QString &fileName)
   if (curFile.isEmpty())
     shownName = "untitled.txt";
   setWindowFilePath(shownName);
+}
+
+QString MainWindow::infoText()
+{
+  // @formatter:off
+  const QString text = QString(
+      "Version: %1.%2.%3%4<br>"
+      "Git hash: %5<br>"
+      "Compiler: %6<br>"
+      "Build user: %7<br>"
+      "Host OS: %8<br>"
+      "Build date: %9 %10"
+  )
+  .arg(BuildInfo::versionMajor)
+  .arg(BuildInfo::versionMinor)
+  .arg(BuildInfo::versionPatch)
+  .arg(BuildInfo::versionDirty ? " (dirty)" : "")
+  .arg(QString::fromUtf8(BuildInfo::gitHash.data(),         BuildInfo::gitHash.size()))
+  .arg(QString::fromUtf8(BuildInfo::compilerVersion.data(), BuildInfo::compilerVersion.size()))
+  .arg(QString::fromUtf8(BuildInfo::buildUser.data(),       BuildInfo::buildUser.size()))
+  .arg(QString::fromUtf8(BuildInfo::hostOs.data(),          BuildInfo::hostOs.size()))
+  .arg(__DATE__)
+  .arg(__TIME__);
+// @formatter:on
+  return text;
 }
 
 QString MainWindow::strippedName(const QString &fullFileName)

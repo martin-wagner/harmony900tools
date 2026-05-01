@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.28)
 
 project(
   harmony900
-  VERSION 0.1
   LANGUAGES CXX
 )
 
@@ -35,6 +34,7 @@ endif()
 # add libs
 include(concordance.cmake)
 include(ads.cmake)
+include(version.cmake)
 
 # add project
 if(NOT INCLUDE_UNIT_TESTING)

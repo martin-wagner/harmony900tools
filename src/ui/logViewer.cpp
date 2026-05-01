@@ -190,7 +190,7 @@ void LogViewer::rebuildView()
       textBrowser->append(entry.message);
 #endif
     } else if (entry.contentType == ContentType::Html) {
-      textBrowser->append(entry.message);
+      textBrowser->append(formatEntryHtml(entry));
     } else {
       textBrowser->append(formatEntry(entry));
     }
@@ -216,6 +216,19 @@ QString LogViewer::formatEntry(const LogEntry &entry)
   return QString("<span style='color:#888;'>%1</span> "
       "<span style='color:%2; font-weight:bold;'>[%3]</span> "
       "<span>%4</span>").arg(timestamp, color, name, escaped);
+}
+
+// Returns a header prefix + raw HTML body for an HTML log entry.
+QString LogViewer::formatEntryHtml(const LogEntry &entry)
+{
+  const QString timestamp = QDateTime::currentDateTime().toString(
+      "hh:mm:ss.zzz");
+  const QString color = levelColor(entry.level);
+  const QString name = logLevelName(entry.level);
+
+  return QString("<span style='color:#888;'>%1</span> "
+      "<span style='color:%2; font-weight:bold;'>[%3]</span> "
+      "%4").arg(timestamp, color, name, entry.message);
 }
 
 QString LogViewer::levelColor(LogLevel level)

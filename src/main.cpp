@@ -4,6 +4,7 @@
 #include <QCommandLineOption>
 
 #include "mainwindow.h"
+#include "version.h"
 
 const int defaultDebugLevel = 5;
 
@@ -23,7 +24,8 @@ int main(int argc, char *argv[])
   QCoreApplication::setOrganizationDomain(
       "https://github.com/martin-wagner/harmony900tools");
   QCoreApplication::setApplicationName (PROGRAM_NAME);
-  QCoreApplication::setApplicationVersion (PROGRAM_VERSION);
+  QCoreApplication::setApplicationVersion(
+      QString::fromUtf8(BuildInfo::versionString));
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());
   parser.addHelpOption();
@@ -45,6 +47,7 @@ int main(int argc, char *argv[])
   }
 
   MainWindow mainWin(parser.isSet(debugOption), debugLevel);
+  mainWin.setWindowIcon(QIcon(":/res/harmony-900-color-screen.png"));
   if (!parser.positionalArguments().isEmpty()) {
     mainWin.loadFile(parser.positionalArguments().first());
   }

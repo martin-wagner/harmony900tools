@@ -59,6 +59,7 @@ class MainWindow: public QMainWindow
     bool maybeSave();
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
+    QString infoText();
     QString strippedName(const QString &fullFileName);
 
   private:

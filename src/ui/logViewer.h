@@ -65,6 +65,7 @@ class LogViewer: public QWidget
     void rebuildView();
     void trimEntries();
     static QString formatEntry(const LogEntry &entry);
+    static QString formatEntryHtml(const LogEntry &entry);
     static QString levelColor(LogLevel level);
 
     QTextBrowser *textBrowser = nullptr;
