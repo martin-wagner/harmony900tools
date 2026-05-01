@@ -116,6 +116,10 @@ void MainWindow::createAds()
 
 void MainWindow::createWidgets()
 {
+  //context needs to be available for widgets
+  ctx = make_unique<Context>(*settings, *user);
+
+  //create widgets
   textEdit = new QPlainTextEdit;
   ads::CDockWidget *dockLeft = new ads::CDockWidget(dockManager,
       tr("Left Panel"));

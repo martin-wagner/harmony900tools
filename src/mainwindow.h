@@ -8,6 +8,7 @@
 #include "ui/logViewer.h"
 #include "ui/settings.h"
 #include "lib/users.h"
+#include "context.h"
 
 class QAction;
 class QMenu;
@@ -69,6 +70,7 @@ class MainWindow: public QMainWindow
     LogViewer *log;
     Settings *settings;
     lib::UserLevel *user;
+    std::unique_ptr<Context> ctx;
 
     QPlainTextEdit *textEdit;
     QString curFile;
