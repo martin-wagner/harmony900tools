@@ -1,0 +1,35 @@
+[Icon Theme]
+Name=BreezeConverted
+Comment=Converted Breeze Icons
+Directories=64x64/actions,64x64/apps,64x64/places,64x64/status,64x64/devices,64x64/mimetypes
+
+[64x64/actions]
+Size=64
+Context=actions
+Type=Fixed
+
+[64x64/apps]
+Size=64
+Context=apps
+Type=Fixed
+
+[64x64/places]
+Size=64
+Context=places
+Type=Fixed
+
+[64x64/status]
+Size=64
+Context=status
+Type=Fixed
+
+[64x64/devices]
+Size=64
+Context=devices
+Type=Fixed
+
+[64x64/mimetypes]
+Size=64
+Context=mimetypes
+Type=Fixed
+
