@@ -11,11 +11,16 @@ class QToolBar;
 class QStatusBar;
 class QAction;
 
+enum class ContentType
+{
+  PlainText, Markdown, Html,
+};
+
 struct LogEntry
 {
     LogLevel level;
-    QString message;    // plain text or markdown
-    bool isMarkdown;
+    QString message;
+    ContentType contentType = ContentType::PlainText;
 };
 
 class LogViewer: public QWidget
@@ -40,8 +45,8 @@ class LogViewer: public QWidget
     LogLevel getLogLevel();
 
   public slots:
-    // Add a log entry. Message may be plain text or markdown.
-    void addEntry(LogLevel level, const QString &message, bool isMarkdown = false);
+    // Add a log entry with explicit content type.
+    void addEntry(LogLevel level, const QString &message, ContentType contentType = ContentType::PlainText);
 
     // Convenience overload: plain text shorthand.
     void addMessage(LogLevel level, const QString &message);

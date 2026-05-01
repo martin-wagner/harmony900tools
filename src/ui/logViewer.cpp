@@ -54,7 +54,8 @@ void LogViewer::buildToolBar()
   scrollLock->setToolTip(tr("Toggle scroll lock"));
   scrollLock->setCheckable(true);
   scrollLock->setChecked(false);
-  connect(scrollLock, &QAction::toggled, this, &LogViewer::onScrollLockToggled);
+  connect(scrollLock, &QAction::toggled, this,
+      &LogViewer::onScrollLockToggled);
 }
 
 void LogViewer::setStatusBar(QStatusBar *statusBar)
@@ -68,7 +69,7 @@ void LogViewer::setMarkdown(const QString &markdown)
   LogEntry entry;
   entry.level = LogLevel::Notice;
   entry.message = markdown;
-  entry.isMarkdown = true;
+  entry.contentType = ContentType::Markdown;
   entries.append(entry);
   rebuildView();
 }
@@ -96,7 +97,7 @@ LogLevel LogViewer::getLogLevel()
 }
 
 void LogViewer::addEntry(LogLevel level, const QString &message,
-    bool isMarkdown)
+    ContentType contentType)
 {
   if (level > loglevel) {
     return;
@@ -105,22 +106,22 @@ void LogViewer::addEntry(LogLevel level, const QString &message,
   LogEntry entry;
   entry.level = level;
   entry.message = message;
-  entry.isMarkdown = isMarkdown;
+  entry.contentType = contentType;
   entries.append(entry);
 
   trimEntries();
 
-  if (isMarkdown) {
-    // Rebuild the whole view when markdown is added – mixing HTML+markdown
-    // inline is fragile, so we re-render from scratch.
-    rebuildView();
-  } else {
+  if (contentType == ContentType::PlainText) {
     // Append a single formatted line without full rebuild for performance.
     textBrowser->append(formatEntry(entry));
+  } else {
+    // Markdown and HTML both require a full rebuild to render correctly.
+    rebuildView();
   }
 
   if (statusBar != nullptr) {
-    statusBar->showMessage(QString("%1").arg(message), 10000);
+    statusBar->showMessage(
+        QString("[%1] %2").arg(logLevelName(level)).arg(message), 10000);
   }
 
   if (!scrollLocked) {
@@ -133,12 +134,12 @@ void LogViewer::addEntry(LogLevel level, const QString &message,
 
 void LogViewer::addMessage(LogLevel level, const QString &message)
 {
-  addEntry(level, message, false);
+  addEntry(level, message);
 }
 
 void LogViewer::addMessage(const QString &message)
 {
-  addEntry(LogLevel::Notice, message, false);
+  addEntry(LogLevel::Notice, message);
 }
 
 void LogViewer::onCopy()
@@ -177,7 +178,7 @@ void LogViewer::rebuildView()
   textBrowser->clear();
 
   for (const LogEntry &entry : entries) {
-    if (entry.isMarkdown) {
+    if (entry.contentType == ContentType::Markdown) {
       // QTextBrowser supports a subset of HTML; convert markdown via Qt.
       // Qt 6.4+ has QTextDocument::setMarkdown – use it if available,
       // otherwise fall back to plain-text append.
@@ -188,6 +189,8 @@ void LogViewer::rebuildView()
 #else
       textBrowser->append(entry.message);
 #endif
+    } else if (entry.contentType == ContentType::Html) {
+      textBrowser->append(entry.message);
     } else {
       textBrowser->append(formatEntry(entry));
     }
