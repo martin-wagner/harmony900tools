@@ -35,27 +35,30 @@ void LogViewer::buildToolBar()
 
   // Copy
   auto *copyAction = toolBar->addAction(
-      lib::getIcon(":/res/copy.png", "edit-copy"), tr("Copy"));
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-copy.png",
+          "edit-copy"), tr("Copy"));
   copyAction->setToolTip(tr("Copy log to clipboard"));
   connect(copyAction, &QAction::triggered, this, &LogViewer::onCopy);
 
   // Clear
   auto *clearAction = toolBar->addAction(
-      lib::getIcon(":/res/clear.png", "edit-clear"), tr("Clear"));
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-clear.png",
+          "edit-clear"), tr("Clear"));
   clearAction->setToolTip(tr("Clear log"));
   connect(clearAction, &QAction::triggered, this, &LogViewer::onClear);
 
   toolBar->addSeparator();
 
   // Scroll-lock
-  scrollLock = toolBar->addAction(
-      lib::getIcon(":/res/icons8-scroll-lock-key-24.png", "object-locked"),
-      tr("Scroll Lock"));
+  scrollLock =
+      toolBar->addAction(
+          lib::getIcon(
+              ":/res/icons/BreezeConverted/64x64/actions/gnumeric-object-scrollbar.png",
+              "gnumeric-object-scrollbar"), tr("Scroll Lock"));
   scrollLock->setToolTip(tr("Toggle scroll lock"));
   scrollLock->setCheckable(true);
   scrollLock->setChecked(false);
-  connect(scrollLock, &QAction::toggled, this,
-      &LogViewer::onScrollLockToggled);
+  connect(scrollLock, &QAction::toggled, this, &LogViewer::onScrollLockToggled);
 }
 
 void LogViewer::setStatusBar(QStatusBar *statusBar)

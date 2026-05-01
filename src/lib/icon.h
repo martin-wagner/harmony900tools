@@ -15,6 +15,8 @@ namespace lib
 inline QIcon getIcon(const QString &icon, const QString &fromTheme = "")
 {
   return QIcon::fromTheme(fromTheme, QIcon(icon));
+  //for testing
+  //return QIcon(icon);
 }
 
 }

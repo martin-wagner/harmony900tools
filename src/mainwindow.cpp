@@ -165,7 +165,9 @@ void MainWindow::createActions()
   //file
   QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
   QToolBar *fileToolBar = addToolBar(tr("File"));
-  const QIcon newIcon = lib::getIcon(":/images/new.png", "document-new");
+  const QIcon newIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/document-new.png",
+      "document-new");
   QAction *newAct = new QAction(newIcon, tr("&New"), this);
   newAct->setShortcuts(QKeySequence::New);
   newAct->setStatusTip(tr("Create a new file"));
@@ -173,7 +175,9 @@ void MainWindow::createActions()
   fileMenu->addAction(newAct);
   fileToolBar->addAction(newAct);
 
-  const QIcon openIcon = lib::getIcon(":/images/open.png", "document-open");
+  const QIcon openIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/document-open.png",
+      "document-open");
   QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
   openAct->setShortcuts(QKeySequence::Open);
   openAct->setStatusTip(tr("Open an existing file"));
@@ -181,7 +185,9 @@ void MainWindow::createActions()
   fileMenu->addAction(openAct);
   fileToolBar->addAction(openAct);
 
-  const QIcon saveIcon = lib::getIcon(":/images/save.png", "document-save");
+  const QIcon saveIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/document-save.png",
+      "document-save");
   QAction *saveAct = new QAction(saveIcon, tr("&Save"), this);
   saveAct->setShortcuts(QKeySequence::Save);
   saveAct->setStatusTip(tr("Save the document to disk"));
@@ -189,7 +195,9 @@ void MainWindow::createActions()
   fileMenu->addAction(saveAct);
   fileToolBar->addAction(saveAct);
 
-  const QIcon saveAsIcon = lib::getIcon("", "document-save-as");
+  const QIcon saveAsIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/document-save-as.png",
+      "document-save-as");
   QAction *saveAsAct = fileMenu->addAction(saveAsIcon, tr("Save &As..."), this,
       &MainWindow::saveAs);
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
@@ -197,7 +205,9 @@ void MainWindow::createActions()
 
   fileMenu->addSeparator();
 
-  const QIcon exitIcon = lib::getIcon("", "application-exit");
+  const QIcon exitIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/application-exit.png",
+      "application-exit");
   QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this,
       &QWidget::close);
   exitAct->setShortcuts(QKeySequence::Quit);
@@ -207,7 +217,8 @@ void MainWindow::createActions()
   QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
   QToolBar *editToolBar = addToolBar(tr("Edit"));
 
-  const QIcon cutIcon = lib::getIcon(":/images/cut.png", "edit-cut");
+  const QIcon cutIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/edit-cut.png", "edit-cut");
   QAction *cutAct = new QAction(cutIcon, tr("Cu&t"), this);
   cutAct->setShortcuts(QKeySequence::Cut);
   cutAct->setStatusTip(tr("Cut the current selection's contents to the "
@@ -216,7 +227,8 @@ void MainWindow::createActions()
   editMenu->addAction(cutAct);
   editToolBar->addAction(cutAct);
 
-  const QIcon copyIcon = lib::getIcon(":/images/copy.png", "edit-copy");
+  const QIcon copyIcon = lib::getIcon(
+      "/res/icons/BreezeConverted/64x64/actions/edit-copy.png", "edit-copy");
   QAction *copyAct = new QAction(copyIcon, tr("&Copy"), this);
   copyAct->setShortcuts(QKeySequence::Copy);
   copyAct->setStatusTip(tr("Copy the current selection's contents to the "
@@ -225,7 +237,8 @@ void MainWindow::createActions()
   editMenu->addAction(copyAct);
   editToolBar->addAction(copyAct);
 
-  const QIcon pasteIcon = lib::getIcon(":/images/paste.png", "edit-paste");
+  const QIcon pasteIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/edit-paste.png", "edit-paste");
   QAction *pasteAct = new QAction(pasteIcon, tr("&Paste"), this);
   pasteAct->setShortcuts(QKeySequence::Paste);
   pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "

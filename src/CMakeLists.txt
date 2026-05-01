@@ -62,16 +62,20 @@ target_link_libraries(${programName} PRIVATE
 
 # Resources:
 set(resourcePath "../res/")
+set(iconPath "${resourcePath}icons/BreezeConverted/64x64/")
 set(${programName}_resource_files
-    ${resourcePath}/copy.png
-    ${resourcePath}/cut.png
-    ${resourcePath}/new.png
-    ${resourcePath}/open.png
-    ${resourcePath}/paste.png
-    ${resourcePath}/save.png
     ${resourcePath}/splash.png
-    ${resourcePath}/icons8-scroll-lock-key-24.png
     ${resourcePath}/harmony-900-color-screen.png
+    ${iconPath}/actions/edit-copy.png
+    ${iconPath}/actions/edit-paste.png
+    ${iconPath}/actions/edit-cut.png
+    ${iconPath}/actions/edit-clear.png
+    ${iconPath}/actions/gnumeric-object-scrollbar.png
+    ${iconPath}/actions/document-new.png
+    ${iconPath}/actions/document-open.png
+    ${iconPath}/actions/document-save.png
+    ${iconPath}/actions/document-save-as.png
+    ${iconPath}/actions/application-exit.png
 )
 
 qt_add_resources(${programName} "application"
