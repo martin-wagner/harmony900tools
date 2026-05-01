@@ -230,7 +230,6 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
       sof = TimingSectionIrHeader(
           { data.begin() + pSoF, data.begin() + pSoF + size });
     }
-
   }
   if ((pEoF >= HEADER_SIZE) && (pEoF <= data.size())) {
     auto size = data[pEoF] * 2 + 1;

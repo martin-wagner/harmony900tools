@@ -15,8 +15,6 @@ namespace trx
 
 Single::Status Single::parse(const std::vector<uint8_t> &p)
 {
-  uint16_t v;
-
   //0x02 0xXX 0xXX -> size mod 3
   if ((p.size() % 3) != 0) {
     return Status::ERR_SIZE;

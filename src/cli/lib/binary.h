@@ -22,8 +22,6 @@ inline uint16_t parseHarmony16_network(uint8_t h, uint8_t l)
 
 inline bool parseHarmony16_network(const std::vector<uint8_t> &in, std::vector<uint16_t> &out)
 {
-  uint16_t v;
-
   if ((in.size() % 2) != 0) {
     return false;
   }
@@ -48,8 +46,6 @@ inline uint32_t parseHarmony32_file(uint8_t h, uint8_t m1, uint8_t m2, uint8_t l
 
 inline bool parseHarmony16_file(const std::vector<uint8_t> &in, std::vector<uint16_t> &out)
 {
-  uint16_t v;
-
   if ((in.size() % 2) != 0) {
     return false;
   }

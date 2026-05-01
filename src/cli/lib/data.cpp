@@ -52,10 +52,8 @@ string TimingStream::convertGnuplot(bool activeHigh) const
   stringstream str;
 
   uint32_t markValue = 1;
-  uint32_t pauseValue = 0;
   if (!activeHigh) {
     markValue = 0;
-    pauseValue = 1;
   }
 
   for (const auto &block : data) {
