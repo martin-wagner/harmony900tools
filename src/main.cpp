@@ -29,9 +29,8 @@ int main(int argc, char *argv[])
   parser.addHelpOption();
   parser.addVersionOption();
   QCommandLineOption debugOption(QStringList() << "d" << "debug",
-      "Activate debug output (0=emergency .. 7=debug, default "
-          + QString::number(defaultDebugLevel) + ")", "level",
-      QString::number(defaultDebugLevel));
+      "Activate debug output (0=emergency .. 7=debug, default: "
+          "use setting from gui", QString::number(defaultDebugLevel));
   parser.addOption(debugOption);
   parser.process(app);
 
@@ -45,7 +44,7 @@ int main(int argc, char *argv[])
     debugLevel = val;
   }
 
-  MainWindow mainWin(debugLevel);
+  MainWindow mainWin(parser.isSet(debugOption), debugLevel);
   if (!parser.positionalArguments().isEmpty()) {
     mainWin.loadFile(parser.positionalArguments().first());
   }

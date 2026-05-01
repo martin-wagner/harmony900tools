@@ -25,6 +25,7 @@ qt_standard_project_setup(REQUIRES 6.8
 
 # sources
 set(sources 
+  lib/users.h  #moc for headers
   main.cpp
   mainwindow.cpp
   ui/logViewer.cpp

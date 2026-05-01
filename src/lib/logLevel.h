@@ -28,3 +28,8 @@ inline const char* logLevelName(LogLevel level) {
         default:                  return "UNKNOWN";
     }
 }
+
+inline const char* logLevelName(int level)
+{
+  return logLevelName(static_cast<LogLevel>(level));
+}

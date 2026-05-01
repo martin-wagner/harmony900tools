@@ -7,6 +7,7 @@
 
 #include "ui/logViewer.h"
 #include "ui/settings.h"
+#include "lib/users.h"
 
 class QAction;
 class QMenu;
@@ -18,10 +19,10 @@ class MainWindow: public QMainWindow
   Q_OBJECT
 
   protected:
-    int logLevel;
+    int logLevel = -1;
 
   public:
-    MainWindow(int logLevel);
+    MainWindow(bool haveLogLevel, int logLevel);
 
     void loadFile(const QString &fileName);
 
@@ -64,13 +65,13 @@ class MainWindow: public QMainWindow
     QMenu *dockMenu;
     QAction *lockAction;
 
-    QByteArray dockDefault = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?><QtAdvancedDockingSystem Version=\"1\" UserVersion=\"0\" Containers=\"1\"><Container Floating=\"0\"><Splitter Orientation=\"|\" Count=\"2\"><Area Tabs=\"1\" Current=\"Left Panel\"><Widget Name=\"Left Panel\" Closed=\"0\"/></Area><Area Tabs=\"1\" Current=\"Right Panel\"><Widget Name=\"Right Panel\" Closed=\"0\"/></Area><Sizes>715 524 </Sizes></Splitter></Container></QtAdvancedDockingSystem>"};
-
   private:
     LogViewer *log;
     Settings *settings;
+    lib::UserLevel *user;
 
     QPlainTextEdit *textEdit;
     QString curFile;
+
 };
 

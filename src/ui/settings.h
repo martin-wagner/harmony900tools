@@ -55,7 +55,9 @@ class Settings: public QDialog
 
     // Read / write current values (key → value).
     QMap<QString, QVariant> values() const;
+    QVariant value(const QString &key) const;
     void setValues(const QMap<QString, QVariant> &vals);
+    void setValue(const QString &key, QVariant val);
 
   signals:
     // Emitted on OK and Apply with the current value map.

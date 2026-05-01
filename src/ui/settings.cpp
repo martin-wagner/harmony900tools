@@ -134,6 +134,11 @@ QMap<QString, QVariant> Settings::values() const
   return result;
 }
 
+QVariant Settings::value(const QString &key) const
+{
+  return widgetValue(key);
+}
+
 void Settings::setValues(const QMap<QString, QVariant> &vals)
 {
   for (const auto &def : defs) {
@@ -163,6 +168,13 @@ void Settings::setValues(const QMap<QString, QVariant> &vals)
       }
     }
   }
+}
+
+void Settings::setValue(const QString &key, QVariant val)
+{
+  QMap<QString, QVariant> m;
+  m[key] = val;
+  setValues(m);
 }
 
 // ── private slots ─────────────────────────────────────────────────────────────

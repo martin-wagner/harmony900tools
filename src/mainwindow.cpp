@@ -3,12 +3,17 @@
 #include "mainwindow.h"
 #include "lib/settings.h"
 #include "lib/icon.h"
+#include "defaults.h"
 
 using namespace std;
 
-MainWindow::MainWindow(int logLevel) :
-    logLevel(logLevel), textEdit(new QPlainTextEdit)
+MainWindow::MainWindow(bool haveLogLevel, int logLevel) :
+    textEdit(new QPlainTextEdit)
 {
+  if (haveLogLevel) {
+    this->logLevel = logLevel;
+  }
+
   readSettings();
 
   createStatusBar();
@@ -279,6 +284,18 @@ void MainWindow::createActions()
 void MainWindow::readSettings()
 {
   settings = new Settings(this);
+  user = new lib::UserLevel(*settings, this);
+
+  settings->addSetting(defaults::loglevel());
+  if (logLevel < 0) {
+    logLevel = settings->value(defaults::loglevel().key).toInt();
+  } else {
+    //keep cli value
+    settings->setValue(defaults::loglevel().key, logLevel);
+  }
+
+
+
   // @formatter:off
   settings->addSetting({
       .key          = "username",
@@ -477,9 +494,15 @@ void MainWindow::resetSettings()
 
 void MainWindow::applySettings()
 {
-  //todo
+  logLevel = settings->value(defaults::loglevel().key).toInt();
+  log->setLoglevel(static_cast<LogLevel>(logLevel));
+  log->addMessage("Setting loglevel to " + QString(logLevelName(logLevel)));
 
-  qDebug() << "Settings accepted:";
+  auto userlevel = settings->value(defaults::userlevel().key).toInt();
+  user->setLevel(static_cast<lib::UserLevel::Level>(userlevel));
+  log->addMessage("Setting userlevel to " + user->levelToString());
+
+  //todo weitere
 }
 
 void MainWindow::onLockUI(bool locked)
@@ -522,7 +545,7 @@ void MainWindow::onLoadView()
 
 void MainWindow::onLoadDefaultView()
 {
-  dockManager->restoreState(dockDefault);
+  dockManager->restoreState(defaults::adsDock);
 }
 
 void MainWindow::onDeleteView()
