@@ -30,6 +30,8 @@ set(sources
   mainwindow.cpp
   ui/logViewer.cpp
   ui/settings.cpp
+  ui/concordTest.cpp
+  wrappers/concordWrapper.cpp
 )
 
 # executable
@@ -58,6 +60,7 @@ target_link_libraries(${programName} PRIVATE
     Qt6::Widgets
     Qt6::Svg
     qtadvanceddocking-qt6
+    Libconcord::libconcord
 )
 
 # Resources:

@@ -133,12 +133,12 @@ void MainWindow::createWidgets()
   dockManager->addDockWidget(ads::LeftDockWidgetArea, dockLeft);
   dockMenu->addAction(dockLeft->toggleViewAction());
 
-  auto textEdit2 = new QPlainTextEdit;
-  ads::CDockWidget *dockRight = new ads::CDockWidget(dockManager,
-      tr("Right Panel"));
-  dockRight->setWidget(textEdit2);
-  dockManager->addDockWidget(ads::RightDockWidgetArea, dockRight);
-  dockMenu->addAction(dockRight->toggleViewAction());
+  concordTest = new ConcordTest(*ctx.get(), this);
+  ads::CDockWidget *dockConcordTest = new ads::CDockWidget(dockManager,
+      tr("Test LibConcord"));
+  dockConcordTest->setWidget(concordTest);
+  dockManager->addDockWidget(ads::RightDockWidgetArea, dockConcordTest);
+  dockMenu->addAction(dockConcordTest->toggleViewAction());
 
   log = new LogViewer;
   log->setLoglevel(static_cast<LogLevel>(logLevel));
@@ -303,6 +303,9 @@ void MainWindow::createActions()
 
   connect(settings, &Settings::settingsAccepted, this,
       &MainWindow::applySettings);
+
+  connect(concordTest, &ConcordTest::writeLog, log, &LogViewer::addEntry);
+  connect(concordTest, &ConcordTest::writeMsg, log, &LogViewer::addMessage);
 }
 
 void MainWindow::readSettings()

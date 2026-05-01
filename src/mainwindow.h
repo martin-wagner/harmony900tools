@@ -7,6 +7,7 @@
 
 #include "ui/logViewer.h"
 #include "ui/settings.h"
+#include "ui/concordTest.h"
 #include "lib/users.h"
 #include "context.h"
 
@@ -72,6 +73,8 @@ class MainWindow: public QMainWindow
     Settings *settings;
     lib::UserLevel *user;
     std::unique_ptr<Context> ctx;
+
+    ConcordTest *concordTest;
 
     QPlainTextEdit *textEdit;
     QString curFile;

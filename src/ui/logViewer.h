@@ -49,7 +49,6 @@ class LogViewer: public QWidget
     void addEntry(LogLevel level, const QString &message, ContentType contentType = ContentType::PlainText);
 
     // Convenience overload: plain text shorthand.
-    void addMessage(LogLevel level, const QString &message);
     void addMessage(const QString &message);
 
   signals:

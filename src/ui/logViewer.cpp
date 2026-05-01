@@ -135,11 +135,6 @@ void LogViewer::addEntry(LogLevel level, const QString &message,
   emit entryAdded(level, message);
 }
 
-void LogViewer::addMessage(LogLevel level, const QString &message)
-{
-  addEntry(level, message);
-}
-
 void LogViewer::addMessage(const QString &message)
 {
   addEntry(LogLevel::Notice, message);
