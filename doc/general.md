@@ -41,6 +41,7 @@ You need to have the Logitech Harmony software installed to get the driver. This
 
 - you can make a backup of your config using concordance (concordance.exe --dump-config=harmony.hex). You can use this backup to "clone" your remote.
 - telnet login is root, password ethanol (yes, really, remote codename is `vodka` btw)
+- for the harmony 1000 it is root, password cognac
 - it is listening on IP 169.254.1.2
 - sloginfo -c -w clears and follows the log (see the qnx docs)
 - /fs/etfs/scratch/log.txt also contains a log, just use tail -f /fs/etfs/scratch/log.txt
