@@ -13,11 +13,11 @@ Be aware that on protocol violations the server will crash/become unresponsive. 
 ## Protocol
 
 Not everything is fully understood. The script "/usr/local/share/lua/5.1/ethanol/SysService.lua" -- _ircap_ on the file system contains the base protocol in binary form.
-The protocol consists of start, data exchange and close commands. For data exchange single and stream are available.
+The protocol consists of start, data exchange and close commands. For data exchange single and stream are available. For further details have a look on the concordance doc (protocol_z, NETUSB), this is complete except for learning.
 
 We can make the following assumptions:
 - the Header is always four bytes long
-- Byte 0 is always 0x20, maybe protocol type
+- Byte 0 is 0x20 (left nibble Service Family Client 0x2, right nibble = 0x0)
 - Byte 1 is the command.
 - Byte 2 is 0x80 for request, 0x01 for OK, 0x02 for timeout response
   - 0x80 = request, other response status
@@ -149,12 +149,14 @@ Decoding:
     │     │     │     │     │     └── Mark + Pause
     │     │     │     │     └── Mark
     │     │     │     └── Mark + Pause
-    │     │     └── ???
+    │     │     └── carrier cycle count of first mark
     │     └── Mark
     └── ???
+    
+
+Clock = 30 * 1000000 / 833 = 36.014kHz
 
 ```
-
 Mark = 833us  
 Pause = 1779us - 833us = 946us
 
@@ -177,7 +179,7 @@ RC5 Manchester
 1   1   0   0   1   1   1   0   0   0   1   1   0   0
 ```
 
-The content/use of the two "???" is unknown.
+The content/use of the "???" is unknown.
 
 ### Stream
 
@@ -234,7 +236,7 @@ Decoding:
     │     │     │     │     │     └── Mark + Pause
     │     │     │     │     └── Mark
     │     │     │     └── Mark + Pause
-    │     │     └── ???
+    │     │     └── carrier cycle count of first mark
     │     └── Mark
     └── ???
 ```

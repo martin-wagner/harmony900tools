@@ -52,8 +52,12 @@ Stream::Status Stream::addChunk(const std::vector<uint8_t> &data, bool first)
     return Status::ERR_SIZE;
   }
 
-  //move bytes with unknown use
+  //move non-timing words
   moveExcessBytes(first);
+  //calculate clock
+  if (first) {
+    clock = static_cast<double>(excess[1]) * 1000000.0 / payload[0];
+  }
 
   return Status::OK;
 }

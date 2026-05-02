@@ -48,8 +48,12 @@ Single::Status Single::addChunk(const std::vector<uint8_t> &data, bool first)
     return ret;
   }
 
-  //move bytes with unknown use
+  //move non-timimg words
   moveExcessBytes(first);
+  //calculate clock
+  if (first) {
+    clock = static_cast<double>(excess[1]) * 1000000.0 / payload[0];
+  }
 
   //check for end marker
   if (data[5] == 0) {

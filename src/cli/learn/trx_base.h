@@ -31,6 +31,7 @@ class Base
 
   protected:
     std::vector<uint16_t> payload;
+    double clock = 0;
     std::vector<uint16_t> excess;
 
     //static values from child classes
@@ -72,7 +73,13 @@ class Base
       return payload;
     }
 
-    /** read words with unknown use. size() == 0 -> nothing available */
+    /** get IR clock */
+    virtual const double getClock()
+    {
+      return clock;
+    }
+
+    /** read non-timing related words. word = unknown use */
     virtual const std::vector<uint16_t> &getExcess()
     {
       return excess;

@@ -207,6 +207,9 @@ TEST(SinglePayload, SingleChunkValues)
     ASSERT_EQ(q.size(), 2u);
     EXPECT_EQ(q[0], 35u);    // w0
     EXPECT_EQ(q[1], 30u);    // w2
+
+    auto c = s.getClock();
+    EXPECT_FLOAT_EQ(c, 36014.40576);
 }
 
 TEST(SinglePayload, TwoChunksAccumulate)
@@ -233,6 +236,9 @@ TEST(SinglePayload, TwoChunksAccumulate)
     ASSERT_EQ(q.size(), 2u);
     EXPECT_EQ(q[0], 35u);
     EXPECT_EQ(q[1], 30u);
+
+    auto c = s.getClock();
+    EXPECT_FLOAT_EQ(c, 36014.40576);
 }
 
 TEST(SinglePayload, EofChunkWithSilenceWords)

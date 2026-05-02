@@ -353,6 +353,7 @@ bool pollSingleFrame(const string &file, bool firstTask, bool activeHigh = true)
       cout << lib::writeData("<- excess words (dec): ", excess);
     }
   }
+  cout << "IR Clock: " << single.getClock() << "Hz" << endl;
 
   if (!file.empty()) {
     //gnuplot
@@ -446,6 +447,7 @@ bool pollStream(const string &file, chrono::milliseconds timeout,
       cout << lib::writeData("<- excess words (dec): ", excess);
     }
   }
+  cout << "IR Clock: " << stream.getClock() << "Hz" << endl;
 
   if (!file.empty()) {
     //gnuplot
