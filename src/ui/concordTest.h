@@ -48,6 +48,7 @@ class ConcordTest: public QWidget
 
   private:
     QString formatTime(bool fixMonth = false);
+    void cleanup();
 
   private:
     QGridLayout *layout;

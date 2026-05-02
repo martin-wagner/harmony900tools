@@ -2,7 +2,7 @@
 # External dependency versions
 # ===========================================================================
 set(CONCORDANCE_GIT_URL  "https://github.com/martin-wagner/concordance.git")
-set(CONCORDANCE_GIT_HASH "bfed07b")
+set(CONCORDANCE_GIT_HASH "8ff5af5f6d7191adcc6963c56bbdbcda826da8be")
 
 # ===========================================================================
 # Paths

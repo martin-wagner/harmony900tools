@@ -16,7 +16,7 @@ ConcordTest::ConcordTest(Context &ctx, QWidget *parent) :
 
 ConcordTest::~ConcordTest()
 {
-  onCloseConnection();
+  cleanup();
 }
 
 void ConcordTest::onOpenConnection()
@@ -34,17 +34,14 @@ void ConcordTest::onOpenConnection()
     labelConnection->setText(tr("error"));
     return;
   }
-  labelConnection->setText(tr("connected"));
   connectionIsOpen = true;
+  labelConnection->setText(tr("connected"));
   emit writeMsg(tr("Connection OK"));
 }
 
 void ConcordTest::onCloseConnection()
 {
-  if (!connectionIsOpen) {
-    return;
-  }
-  concord->deinitConcord();
+  cleanup();
   emit writeMsg(tr("Connection closed"));
   labelConnection->setText(tr("dsconnected"));
 }
@@ -342,4 +339,13 @@ QString ConcordTest::formatTime(bool fixMonth)
   return QString("%1.%2.%3 %4:%5:%6 %7").arg(day, 2, 10, QChar('0')).arg(month,
       2, 10, QChar('0')).arg(year).arg(hour, 2, 10, QChar('0')).arg(min, 2, 10,
       QChar('0')).arg(sec, 2, 10, QChar('0')).arg(tz);
+}
+
+void ConcordTest::cleanup()
+{
+  if (!connectionIsOpen) {
+    return;
+  }
+  connectionIsOpen = false;
+  concord->deinitConcord();
 }
