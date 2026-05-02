@@ -15,7 +15,7 @@ set(programName h900tool)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg LinguistTools
                  OPTIONAL_COMPONENTS
 )
-find_package(Boost REQUIRED)
+find_package(Boost CONFIG REQUIRED)
 
 # setup
 qt_standard_project_setup(REQUIRES 6.8

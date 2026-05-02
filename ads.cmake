@@ -7,4 +7,5 @@ FetchContent_Declare(
     BINARY_DIR     ${CMAKE_BINARY_DIR}/src_external/Qt-Advanced-Docking-System
 )
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(QT_VERSION_MAJOR 6)
 FetchContent_MakeAvailable(QtADS)

@@ -22,6 +22,25 @@ set(CONCORDANCE_STAMP    "${CMAKE_BINARY_DIR}/concordance_exe/stamp")
 include(ExternalProject)
 
 # ===========================================================================
+# MXE windows cross-compile
+# ===========================================================================
+if (CMAKE_CROSSCOMPILING AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(MXE_BUILD TRUE)
+  set(AUTOTOOLS_HOST_FLAG "--host=x86_64-w64-mingw32.shared")
+endif()
+
+# ===========================================================================
+# Platform-specific library filenames
+# ===========================================================================
+if (MXE_BUILD)
+    set(LIBCONCORD_LINK_LIB  "${LIBCONCORD_INSTALL}/lib/libconcord.dll.a")
+    set(LIBCONCORD_BYPRODUCT "${LIBCONCORD_INSTALL}/bin/libconcord-6.dll")
+else()
+    set(LIBCONCORD_LINK_LIB  "${LIBCONCORD_INSTALL}/lib/libconcord.so.6")
+    set(LIBCONCORD_BYPRODUCT "${LIBCONCORD_INSTALL}/lib/libconcord.so.6")
+endif()
+
+# ===========================================================================
 # Clone step — downloads into src_external/, nothing else.
 # We use a dedicated no-op ExternalProject just for the clone so the
 # source directory is decoupled from the build directories below.
@@ -66,6 +85,7 @@ ExternalProject_Add(libconcord_ext
         COMMAND "${EXTERNAL_SRC_DIR}/libconcord/configure"
                     --prefix=${LIBCONCORD_INSTALL}
                     --disable-mime-update
+                    ${AUTOTOOLS_HOST_FLAG}
 
     BUILD_COMMAND
         make -C "${LIBCONCORD_BUILD}" -j${cpuCount}
@@ -75,16 +95,19 @@ ExternalProject_Add(libconcord_ext
 
     UPDATE_DISCONNECTED TRUE
 
-    BUILD_BYPRODUCTS
-        "${LIBCONCORD_INSTALL}/lib/libconcord.so"
-        "${LIBCONCORD_INSTALL}/lib/libconcord.so.6"
+    BUILD_BYPRODUCTS "${LIBCONCORD_BYPRODUCT}"
 )
 
 # Imported target for use by downstream targets in this CMake project.
-add_library(Libconcord::libconcord SHARED IMPORTED)
+if (MXE_BUILD)
+  # fixes "IMPORTED_IMPLIB not set" error
+  add_library(Libconcord::libconcord UNKNOWN IMPORTED)
+else()
+  add_library(Libconcord::libconcord SHARED IMPORTED)
+endif()
 add_dependencies(Libconcord::libconcord libconcord_ext)
 set_target_properties(Libconcord::libconcord PROPERTIES
-    IMPORTED_LOCATION             "${LIBCONCORD_INSTALL}/lib/libconcord.so.6"
+    IMPORTED_LOCATION             "${LIBCONCORD_LINK_LIB}"
     INTERFACE_INCLUDE_DIRECTORIES "${LIBCONCORD_INSTALL}/include"
 )
 # Include dir doesn't exist at configure time; pre-create it so CMake doesn't
@@ -117,6 +140,8 @@ ExternalProject_Add(concordance_exe
                     --prefix=${CONCORDANCE_INSTALL}
                     CFLAGS=-I${LIBCONCORD_INSTALL}/include
                     LDFLAGS=-L${LIBCONCORD_INSTALL}/lib
+                    LDFLAGS=-L${LIBCONCORD_INSTALL}/bin
+                    ${AUTOTOOLS_HOST_FLAG}
 
     BUILD_COMMAND
         make -C "${CONCORDANCE_BUILD}" -j${cpuCount}
