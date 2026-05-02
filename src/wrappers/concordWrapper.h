@@ -99,6 +99,7 @@ class ConcordWrapper: public QObject
     const char* getRawErrorString(int err);
     QString errorToString(int err) const;
     const char* cbStageStr(int stage);
+    QString stageToString(int stage) const;
     void freeBlob(uint8_t *ptr);
     int readAndParseFile(const char *filename, int *type);
     void freeOpfileObj();

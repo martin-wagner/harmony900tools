@@ -21,7 +21,7 @@ void ConcordWrapper::staticCallback(uint32_t stage, uint32_t count,
 {
   ConcordWrapper *self = static_cast<ConcordWrapper*>(arg);
   if (self != nullptr) {
-    Q_EMIT self->progressUpdated(stage, count, current, total, counterType,
+    emit self->progressUpdated(stage, count, current, total, counterType,
         stages);
   }
 }
@@ -184,6 +184,15 @@ const char* ConcordWrapper::getRawErrorString(int err)
 QString ConcordWrapper::errorToString(int err) const
 {
   const char *raw = lc_strerror(err);
+  if (raw != nullptr) {
+    return QString::fromUtf8(raw);
+  }
+  return QString();
+}
+
+QString ConcordWrapper::stageToString(int stage) const
+{
+  const char *raw = lc_cb_stage_str(stage);
   if (raw != nullptr) {
     return QString::fromUtf8(raw);
   }

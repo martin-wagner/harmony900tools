@@ -29,6 +29,8 @@ class ConcordTest: public QWidget
     void onGetInfo();
     void onGetTime();
     void onSetTime();
+    void onReadConfig();
+    void onWriteConfig();
 
     void onProgressUpdated(uint32_t stage, uint32_t count, uint32_t current,
         uint32_t total, uint32_t counterType, const uint32_t *stages);
@@ -58,6 +60,10 @@ class ConcordTest: public QWidget
     QPushButton *buttonGetInfo;
     QPushButton *buttonGetTime;
     QPushButton *buttonSetTime;
+
+    QPushButton *buttonReadConfigFromRemote;
+    QPushButton *buttonWriteConfigToRemote;
+    QLabel *labelFileSize;
 
     //QLineEdit *editSetIpAddress;
 
