@@ -3,6 +3,7 @@
 
 #include "concordTest.h"
 #include "wrappers/concordWrapper.h"
+#include "cli/lib/data.h"
 
 using namespace std;
 
@@ -253,6 +254,58 @@ void ConcordTest::onWriteConfig()
       ContentType::PlainText);
 }
 
+void ConcordTest::onLearnIr()
+{
+  uint32_t carrier;
+  uint32_t *data_ret;
+  uint32_t data_len;
+
+  if (!connectionIsOpen) {
+    return;
+  }
+
+  //get identity
+  auto ret = concord->getIdentity();
+  if (ret != 0) {
+    auto err = concord->errorToString(ret);
+    emit writeLog(LogLevel::Error,
+        tr("libconcord get info error: %1 (%2)").arg(err).arg(ret),
+        ContentType::PlainText);
+    return;
+  }
+
+  //learn
+  ret = concord->learnFromRemote(&carrier, &data_ret, &data_len);
+  if (ret != 0) {
+    auto err = concord->errorToString(ret);
+    emit writeLog(LogLevel::Error,
+        tr("libconcord learn error: %1 (%2)").arg(err).arg(ret),
+        ContentType::PlainText);
+    return;
+  }
+
+  //labelFileSize->setText(tr("%1 bytes").arg(size));
+  emit writeLog(LogLevel::Debug,
+      tr("libconcord received %1 ir words").arg(data_len),
+      ContentType::PlainText);
+
+  std::vector<uint16_t> data;
+  for (int i = 0; i < data_len; ++i) {
+    data.push_back(data_ret[i]);
+  }
+
+  emit writeLog(LogLevel::Debug,
+      tr("libconcord IR Carrier %1kHz").arg((double) carrier / 1000.0),
+      ContentType::PlainText);
+
+  auto stream = lib::TimingStream::fromMarkPause(data);
+  auto visual = stream.convertAsciiPlot(250);
+
+  emit writeLog(LogLevel::Debug,
+      tr("libconcord IR Data: %1").arg(QString::fromStdString(visual)),
+      ContentType::PlainText);
+}
+
 void ConcordTest::onProgressUpdated(uint32_t stage, uint32_t count,
     uint32_t current, uint32_t total, uint32_t counterType,
     const uint32_t *stages)
@@ -299,6 +352,12 @@ void ConcordTest::createWidgets()
   labelFileSize = new QLabel(tr("File Size"), this);
   layout->addWidget(labelFileSize, 4, 2);
 
+  buttonLearnIr = new QPushButton(tr("Learn IR"), this);
+  layout->addWidget(buttonLearnIr, 5, 0);
+  labelFileSize = new QLabel(tr("File Size"), this);
+  labelIrData = new QLabel(tr("IR Data"), this);
+  layout->addWidget(labelIrData, 5, 1, 1, 2);
+
 }
 
 void ConcordTest::createActions()
@@ -314,6 +373,7 @@ void ConcordTest::createActions()
       &ConcordTest::onReadConfig);
   connect(buttonWriteConfigToRemote, &QPushButton::clicked, this,
       &ConcordTest::onWriteConfig);
+  connect(buttonLearnIr, &QPushButton::clicked, this, &ConcordTest::onLearnIr);
 
   connect(concord.get(), &LibConcord::ConcordWrapper::progressUpdated, this,
       &ConcordTest::onProgressUpdated);

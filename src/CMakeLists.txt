@@ -32,6 +32,7 @@ set(sources
   ui/settings.cpp
   ui/concordTest.cpp
   wrappers/concordWrapper.cpp
+  cli/lib/data.cpp
 )
 
 # executable
