@@ -30,7 +30,7 @@ void ConcordTest::onOpenConnection()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord connection error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord connection error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     labelConnection->setText(tr("error"));
     return;
@@ -57,7 +57,7 @@ void ConcordTest::onGetInfo()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord get info error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -67,9 +67,9 @@ void ConcordTest::onGetInfo()
   emit writeLog(LogLevel::Debug, tr("model: %1").arg(concord->getModel()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("codename: %1").arg(concord->getCodename()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("skin: %1").arg(concord->getSkin()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("fw version: %1.%2").arg(concord->getFwVerMaj()).arg(concord->getFwVerMin()), ContentType::PlainText);
+  emit writeLog(LogLevel::Debug, tr("fw version: %1.%2").arg(concord->getFwVerMaj(), concord->getFwVerMin()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("fw type: %1").arg(concord->getFwType()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("hw version: %1.%2.%3").arg(concord->getHwVerMaj()).arg(concord->getHwVerMin()).arg(concord->getHwVerMic()), ContentType::PlainText);
+  emit writeLog(LogLevel::Debug, tr("hw version: %1.%2.%3").arg(concord->getHwVerMaj(), concord->getHwVerMin(), concord->getHwVerMic()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("flash size: %1").arg(concord->getFlashSize()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("flash mfg: %1").arg(concord->getFlashMfg()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("flash id: %1").arg(concord->getFlashId()), ContentType::PlainText);
@@ -85,7 +85,7 @@ void ConcordTest::onGetInfo()
   emit writeLog(LogLevel::Debug, tr("USB PID: 0x%1").arg(concord->getUsbPid(), 4, 16, QChar('0')), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("USB BCD: 0x%1").arg(concord->getUsbBcd(), 4, 16, QChar('0')), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("serial: %1").arg(concord->getSerial(false)), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("config bytes used: %1 / %2").arg(concord->getConfigBytesUsed()).arg(concord->getConfigBytesTotal()), ContentType::PlainText);
+  emit writeLog(LogLevel::Debug, tr("config bytes used: %1 / %2").arg(concord->getConfigBytesUsed(), concord->getConfigBytesTotal()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("config dump supported: %1").arg(concord->isConfigDumpSupported()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("config update supported: %1").arg(concord->isConfigUpdateSupported()), ContentType::PlainText);
   emit writeLog(LogLevel::Debug, tr("firmware dump supported: %1").arg(concord->isFirmwareDumpSupported()), ContentType::PlainText);
@@ -103,7 +103,7 @@ void ConcordTest::onGetTime()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord get time error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord get time error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -119,7 +119,7 @@ void ConcordTest::onSetTime()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord set time error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord set time error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -140,7 +140,7 @@ void ConcordTest::onReadConfig()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord get info error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -150,7 +150,7 @@ void ConcordTest::onReadConfig()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord read config error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord read config error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -166,7 +166,7 @@ void ConcordTest::onReadConfig()
     if (ret != 0) {
       auto err = concord->errorToString(ret);
       emit writeLog(LogLevel::Error,
-          tr("libconcord write file error: %1 (%2)").arg(err).arg(ret),
+          tr("libconcord write file error: %1 (%2)").arg(err, ret),
           ContentType::PlainText);
       return;
     }
@@ -185,7 +185,7 @@ void ConcordTest::onReadConfig()
     if (ret != 0) {
       auto err = concord->errorToString(ret);
       emit writeLog(LogLevel::Error,
-          tr("libconcord write file error: %1 (%2)").arg(err).arg(ret),
+          tr("libconcord write file error: %1 (%2)").arg(err, ret),
           ContentType::PlainText);
       return;
     }
@@ -218,7 +218,7 @@ void ConcordTest::onWriteConfig()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord read file error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord read file error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -234,7 +234,7 @@ void ConcordTest::onWriteConfig()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord get info error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -244,7 +244,7 @@ void ConcordTest::onWriteConfig()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord update config error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord update config error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -254,7 +254,7 @@ void ConcordTest::onWriteConfig()
       ContentType::PlainText);
 }
 
-void ConcordTest::onLearnIr()
+void ConcordTest::onLearnIrSingle()
 {
   uint32_t carrier;
   uint32_t *data_ret;
@@ -269,17 +269,21 @@ void ConcordTest::onLearnIr()
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord get info error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
 
+  labelIrData->setText("Press Button");
+  QApplication::processEvents();
+
   //learn
+  concord->setLearningMode(0, 0); //todo magic value
   ret = concord->learnFromRemote(&carrier, &data_ret, &data_len);
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
-        tr("libconcord learn error: %1 (%2)").arg(err).arg(ret),
+        tr("libconcord learn error: %1 (%2)").arg(err, ret),
         ContentType::PlainText);
     return;
   }
@@ -304,6 +308,66 @@ void ConcordTest::onLearnIr()
   emit writeLog(LogLevel::Debug,
       tr("libconcord IR Data: %1").arg(QString::fromStdString(visual)),
       ContentType::PlainText);
+
+  labelIrData->setText("Done");
+}
+
+void ConcordTest::onLearnIrStream()
+{
+  uint32_t carrier;
+  uint32_t *data_ret;
+  uint32_t data_len;
+
+  if (!connectionIsOpen) {
+    return;
+  }
+
+  //get identity
+  auto ret = concord->getIdentity();
+  if (ret != 0) {
+    auto err = concord->errorToString(ret);
+    emit writeLog(LogLevel::Error,
+        tr("libconcord get info error: %1 (%2)").arg(err, ret),
+        ContentType::PlainText);
+    return;
+  }
+
+  labelIrData->setText("Press Button");
+  QApplication::processEvents();
+
+  //learn
+  concord->setLearningMode(1, 2500); //todo magic value
+  ret = concord->learnFromRemote(&carrier, &data_ret, &data_len);
+  if (ret != 0) {
+    auto err = concord->errorToString(ret);
+    emit writeLog(LogLevel::Error,
+        tr("libconcord learn error: %1 (%2)").arg(err, ret),
+        ContentType::PlainText);
+    return;
+  }
+
+  //labelFileSize->setText(tr("%1 bytes").arg(size));
+  emit writeLog(LogLevel::Debug,
+      tr("libconcord received %1 ir words").arg(data_len),
+      ContentType::PlainText);
+
+  std::vector<uint16_t> data;
+  for (int i = 0; i < data_len; ++i) {
+    data.push_back(data_ret[i]);
+  }
+
+  emit writeLog(LogLevel::Debug,
+      tr("libconcord IR Carrier %1kHz").arg((double) carrier / 1000.0),
+      ContentType::PlainText);
+
+  auto stream = lib::TimingStream::fromMarkPause(data);
+  auto visual = stream.convertAsciiPlot(250);
+
+  emit writeLog(LogLevel::Debug,
+      tr("libconcord IR Data: %1").arg(QString::fromStdString(visual)),
+      ContentType::PlainText);
+
+  labelIrData->setText("Done");
 }
 
 void ConcordTest::onProgressUpdated(uint32_t stage, uint32_t count,
@@ -352,11 +416,12 @@ void ConcordTest::createWidgets()
   labelFileSize = new QLabel(tr("File Size"), this);
   layout->addWidget(labelFileSize, 4, 2);
 
-  buttonLearnIr = new QPushButton(tr("Learn IR"), this);
-  layout->addWidget(buttonLearnIr, 5, 0);
-  labelFileSize = new QLabel(tr("File Size"), this);
+  buttonLearnIrSingle = new QPushButton(tr("Learn IR Single"), this);
+  layout->addWidget(buttonLearnIrSingle, 5, 0);
+  buttonLearnIrStream = new QPushButton(tr("Learn IR Stream"), this);
+  layout->addWidget(buttonLearnIrStream, 5, 1);
   labelIrData = new QLabel(tr("IR Data"), this);
-  layout->addWidget(labelIrData, 5, 1, 1, 2);
+  layout->addWidget(labelIrData, 5, 2);
 
 }
 
@@ -373,7 +438,10 @@ void ConcordTest::createActions()
       &ConcordTest::onReadConfig);
   connect(buttonWriteConfigToRemote, &QPushButton::clicked, this,
       &ConcordTest::onWriteConfig);
-  connect(buttonLearnIr, &QPushButton::clicked, this, &ConcordTest::onLearnIr);
+  connect(buttonLearnIrSingle, &QPushButton::clicked, this,
+      &ConcordTest::onLearnIrSingle);
+  connect(buttonLearnIrStream, &QPushButton::clicked, this,
+      &ConcordTest::onLearnIrStream);
 
   connect(concord.get(), &LibConcord::ConcordWrapper::progressUpdated, this,
       &ConcordTest::onProgressUpdated);

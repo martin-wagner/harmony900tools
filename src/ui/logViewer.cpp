@@ -25,6 +25,8 @@ LogViewer::LogViewer(QWidget *parent) :
   textBrowser->setReadOnly(true);
   textBrowser->setOpenLinks(false);
   textBrowser->setFont(QFont("Monospace", 9));
+  textBrowser->setLineWrapMode(QTextEdit::NoWrap);
+  textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   layout->addWidget(textBrowser);
 }
 

@@ -409,6 +409,11 @@ void ConcordWrapper::freeKeyNames(char **keyNames, uint32_t length)
   }
 }
 
+int ConcordWrapper::setLearningMode(int mode, uint32_t timeout_ms)
+{
+  return set_learning_mode(mode, timeout_ms);
+}
+
 int ConcordWrapper::learnFromRemote(uint32_t *carrierClock, uint32_t **irSignal,
     uint32_t *irSignalLength)
 {

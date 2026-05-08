@@ -31,7 +31,8 @@ class ConcordTest: public QWidget
     void onSetTime();
     void onReadConfig();
     void onWriteConfig();
-    void onLearnIr();
+    void onLearnIrSingle();
+    void onLearnIrStream();
 
     void onProgressUpdated(uint32_t stage, uint32_t count, uint32_t current,
         uint32_t total, uint32_t counterType, const uint32_t *stages);
@@ -67,7 +68,8 @@ class ConcordTest: public QWidget
     QPushButton *buttonWriteConfigToRemote;
     QLabel *labelFileSize;
 
-    QPushButton *buttonLearnIr;
+    QPushButton *buttonLearnIrSingle;
+    QPushButton *buttonLearnIrStream;
     QLabel *labelIrData;
 
     //QLineEdit *editSetIpAddress;

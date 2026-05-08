@@ -32,6 +32,9 @@ constexpr int FileTypeConfiguration = 2;
 constexpr int FileTypeFirmware = 3;
 constexpr int FileTypeLearnIr = 4;
 
+constexpr int LearnSingle = 0;
+constexpr int LearnStream = 1;
+
 constexpr int CallbackCounterTypeSteps = 5;
 constexpr int CallbackCounterTypeBytes = 6;
 
@@ -143,6 +146,7 @@ class ConcordWrapper: public QObject
 
     int getKeyNames(char ***keyNames, uint32_t *length);
     void freeKeyNames(char **keyNames, uint32_t length);
+    int setLearningMode(int mode, uint32_t timeout_ms);
     int learnFromRemote(uint32_t *carrierClock, uint32_t **irSignal, uint32_t *irSignalLength);
     void freeIrSignal(uint32_t *irSignal);
     int encodeForPosting(uint32_t carrierClock, const uint32_t *irSignal, uint32_t irSignalLength, char **encodedSignal);
