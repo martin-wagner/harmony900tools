@@ -208,13 +208,16 @@ QString LogViewer::formatEntry(const LogEntry &entry)
   const QString color = levelColor(entry.level);
   const QString name = logLevelName(entry.level);
 
-  // Escape HTML special chars in the message.
-  QString escaped = entry.message.toHtmlEscaped();
+  // Escape HTML special chars, then manually preserve whitespace and newlines.
+  // QTextBrowser does not reliably support display:inline on <pre>.
+  QString escaped =
+      entry.message.toHtmlEscaped().replace(" ", "&nbsp;").replace("\n",
+          "<br>");
 
-  // Wrap in <pre> to preserve all whitespace and newlines as-is.
-  return QString("<span style='color:#888;'>%1</span> "
+  auto str = QString("<span style='color:#888;'>%1</span> "
       "<span style='color:%2; font-weight:bold;'>[%3]</span> "
-      "<pre style='display:inline; margin:0; padding:0;'>%4</pre>").arg(timestamp, color, name, escaped);
+      "<span>%4</span>").arg(timestamp, color, name, escaped);
+  return str;
 }
 
 // Returns a header prefix + raw HTML body for an HTML log entry.
