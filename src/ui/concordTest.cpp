@@ -1,9 +1,10 @@
-#include <memory>
-//plain c functions -- never use outside cpp file (->global namespace)
-
 #include "concordTest.h"
+
+#include <memory>
+
+//plain c functions -- never use outside cpp file (->global namespace)
 #include "wrappers/concordWrapper.h"
-#include "cli/lib/data.h"
+#include "bin/data.h"
 
 using namespace std;
 

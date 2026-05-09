@@ -28,11 +28,11 @@ set(sources
   lib/users.h  #moc for headers
   main.cpp
   mainwindow.cpp
+  bin/data.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp
   wrappers/concordWrapper.cpp
-  cli/lib/data.cpp
 )
 
 # executable

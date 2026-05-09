@@ -21,7 +21,7 @@
 #include <getopt.h>
 
 #include "cli/lib/lib.h"
-#include "cli/lib/data.h"
+#include "bin/data.h"
 #include "trx_single.h"
 #include "trx_start.h"
 #include "trx_stop.h"

@@ -8,7 +8,8 @@
 #include <fstream>
 
 #include "file.h"
-#include "cli/lib/binary.h"
+
+#include "lib/endian.h"
 
 using namespace std;
 

@@ -6,8 +6,9 @@
  */
 
 #include "code.h"
+
+#include "lib/endian.h"
 #include "cli/lib/lib.h"
-#include "cli/lib/binary.h"
 
 using namespace std;
 

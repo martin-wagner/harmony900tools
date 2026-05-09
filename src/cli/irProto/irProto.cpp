@@ -1,3 +1,4 @@
+
 #ifdef _WIN32
   #include <windows.h>
 #endif
@@ -9,9 +10,9 @@
 #include <getopt.h>
 
 #include "cli/lib/lib.h"
-#include "file.h"
-#include "code.h"
-#include "cli/lib/binary.h"
+#include "bin/irProto/file.h"
+#include "bin/irProto/code.h"
+#include "lib/endian.h"
 
 using namespace std;
 

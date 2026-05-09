@@ -6,7 +6,8 @@
  */
 
 #include "trx_single.h"
-#include "cli/lib/binary.h"
+
+#include "lib/endian.h"
 
 using namespace std;
 

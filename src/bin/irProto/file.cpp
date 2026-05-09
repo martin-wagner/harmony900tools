@@ -8,8 +8,9 @@
 #include <fstream>
 
 #include "file.h"
-#include "cli/lib/binary.h"
-#include "cli/lib/crc32.h"
+
+#include "lib/endian.h"
+#include "lib/crc32.h"
 
 using namespace std;
 

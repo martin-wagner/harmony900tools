@@ -9,7 +9,7 @@
 #include <getopt.h>
 
 #include "cli/lib/lib.h"
-#include "file.h"
+#include "bin/ssIr/file.h"
 
 using namespace std;
 
