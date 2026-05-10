@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include "mainwindow.h"
+#include "comm/concord.h"
 #include "lib/settings.h"
 #include "lib/icon.h"
 #include "defaults.h"
@@ -18,6 +19,8 @@ MainWindow::MainWindow(bool haveLogLevel, int logLevel) :
   readSettings();
 
   createStatusBar();
+  createLog();
+  createData();
   createAds();
   createWidgets();
   createActions();
@@ -94,6 +97,21 @@ void MainWindow::createStatusBar()
   statusBar()->showMessage(tr("Ready"));
 }
 
+void MainWindow::createLog()
+{
+  log = new LogViewer;
+  log->setLoglevel(static_cast<LogLevel>(logLevel));
+  log->setStatusBar(statusBar());
+  log->addEntry(LogLevel::Info, infoText(), ContentType::Html);
+}
+
+void MainWindow::createData()
+{
+  ctx = make_unique<Context>(*settings, *user);
+
+  concord = new Concord(*ctx, this);
+}
+
 void MainWindow::createAds()
 {
   // Must be set before creating CDockManager
@@ -118,9 +136,6 @@ void MainWindow::createAds()
 
 void MainWindow::createWidgets()
 {
-  //context needs to be available for widgets
-  ctx = make_unique<Context>(*settings, *user);
-
   //mainwindow
   setWindowTitle(
       QString(PROGRAM_NAME) + " " + QString::fromUtf8(BuildInfo::versionFull));
@@ -133,17 +148,14 @@ void MainWindow::createWidgets()
   dockManager->addDockWidget(ads::LeftDockWidgetArea, dockLeft);
   dockMenu->addAction(dockLeft->toggleViewAction());
 
-  concordTest = new ConcordTest(*ctx.get(), this);
+  concordTest = new ConcordTest(*ctx.get(), *concord, this);
   ads::CDockWidget *dockConcordTest = new ads::CDockWidget(dockManager,
       tr("Test LibConcord"));
   dockConcordTest->setWidget(concordTest);
   dockManager->addDockWidget(ads::RightDockWidgetArea, dockConcordTest);
   dockMenu->addAction(dockConcordTest->toggleViewAction());
 
-  log = new LogViewer;
-  log->setLoglevel(static_cast<LogLevel>(logLevel));
-  log->setStatusBar(statusBar());
-  log->addEntry(LogLevel::Info, infoText(), ContentType::Html);
+  //log viewer already created
   ads::CDockWidget *dockLog = new ads::CDockWidget(dockManager,
       tr("Log Viewer"));
   dockLog->setWidget(log);
@@ -303,6 +315,9 @@ void MainWindow::createActions()
 
   connect(settings, &Settings::settingsAccepted, this,
       &MainWindow::applySettings);
+
+  connect(concord, &Concord::writeLog, log, &LogViewer::addEntry);
+  connect(concord, &Concord::writeMsg, log, &LogViewer::addMessage);
 
   connect(concordTest, &ConcordTest::writeLog, log, &LogViewer::addEntry);
   connect(concordTest, &ConcordTest::writeMsg, log, &LogViewer::addMessage);

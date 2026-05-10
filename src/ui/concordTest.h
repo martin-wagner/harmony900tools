@@ -4,19 +4,15 @@
 #include <QString>
 
 #include "context.h"
+#include "comm/concord.h"
 #include "logViewer.h"
-
-namespace LibConcord
-{
-   class ConcordWrapper;
-}
 
 class ConcordTest: public QWidget
 {
   Q_OBJECT
 
   public:
-    explicit ConcordTest(Context &ctx, QWidget *parent = nullptr);
+    explicit ConcordTest(Context &ctx, Concord &concord, QWidget *parent = nullptr);
     ~ConcordTest();
 
   signals:
@@ -34,10 +30,13 @@ class ConcordTest: public QWidget
     void onLearnIrSingle();
     void onLearnIrStream();
 
-    void onProgressUpdated(uint32_t stage, uint32_t count, uint32_t current,
-        uint32_t total, uint32_t counterType, const uint32_t *stages);
-
-    void onIpChanged();
+    void onUpdateProgress(const QString text, int step, int of);
+    void onDisconnected(int time_s);
+    void onDone(bool success, const QString &msg);
+    void onTime(const QString time);
+    void onLearnWindowIsOpen(bool waits);
+    void onLearnDone(const lib::TimingStream &t, uint32_t carrier);
+    void onReadUserConfigDone(bool success);
 
   protected:
     void createWidgets();
@@ -45,11 +44,9 @@ class ConcordTest: public QWidget
 
   private:
     Context &ctx;
-    std::unique_ptr<LibConcord::ConcordWrapper> concord;
-    bool connectionIsOpen = false;
+    Concord &concord;
 
   private:
-    QString formatTime(bool fixMonth = false);
     void cleanup();
 
   private:
@@ -72,10 +69,6 @@ class ConcordTest: public QWidget
     QPushButton *buttonLearnIrStream;
     QLabel *labelIrData;
 
-    //QLineEdit *editSetIpAddress;
-
-    QTextBrowser *textBrowser = nullptr;
-    QToolBar *toolBar = nullptr;
-    QStatusBar *statusBar = nullptr;
-    QAction *scrollLock = nullptr;
+    QMessageBox* disconnectMsg = nullptr;
+    QMessageBox* waitMsg = nullptr;
 };

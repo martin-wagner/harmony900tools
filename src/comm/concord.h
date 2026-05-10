@@ -55,9 +55,9 @@ class Concord: public QWidget
 
     /** starts reading the user config from the remote */
     bool readUserConfig();
-    /** write user config to file */
+    /** write user config to file (needs to be read before) */
     int writeUserConfigFile(const QString &file, bool includeHeader = false);
-    /** get user config data */
+    /** get user config data (needs to be read before) */
     std::vector<uint8_t> getUserConfig();
 
     /** starts writing user config file to the remote */
@@ -82,6 +82,8 @@ class Concord: public QWidget
     void learnWindowIsOpen(bool waits);
     /** learn command is done */
     void learnDone(const lib::TimingStream &t, uint32_t carrier);
+    /** reading is done */
+    void readUserConfigDone(bool success);
 
   /* private */ signals:
     void doStart();
@@ -98,6 +100,7 @@ class Concord: public QWidget
   protected:
     void createActions();
     void createWorkerActions();
+    void cleanup();
 
   private:
     Context &ctx;
@@ -112,6 +115,6 @@ class Concord: public QWidget
     void stopThread();
     QTimer threadSupervisorTimer;
     int counter = 0;
-    const int COUNTER_THRESHOLD = 5; // n * timer reset value
+    const int COUNTER_THRESHOLD = 10; // n * timer reset value
 
 };

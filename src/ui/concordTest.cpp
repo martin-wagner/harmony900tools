@@ -8,9 +8,8 @@
 
 using namespace std;
 
-ConcordTest::ConcordTest(Context &ctx, QWidget *parent) :
-    QWidget(parent), ctx(ctx), concord(
-        make_unique<LibConcord::ConcordWrapper>(this))
+ConcordTest::ConcordTest(Context &ctx, Concord &concord, QWidget *parent) :
+    QWidget(parent), ctx(ctx), concord(concord)
 {
   createWidgets();
   createActions();
@@ -23,368 +22,176 @@ ConcordTest::~ConcordTest()
 
 void ConcordTest::onOpenConnection()
 {
-  if (connectionIsOpen) {
-    onCloseConnection();
-  }
-
-  auto ret = concord->initConcord();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord connection error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    labelConnection->setText(tr("error"));
+  if (concord.isInitialised()) {
     return;
   }
-  connectionIsOpen = true;
-  labelConnection->setText(tr("connected"));
-  emit writeMsg(tr("Connection OK"));
+  auto ret = concord.connectRemote();
+  if (ret) {
+    labelConnection->setText(tr("connected"));
+  }
 }
 
 void ConcordTest::onCloseConnection()
 {
+  concord.disconnectRemote();
   cleanup();
-  emit writeMsg(tr("Connection closed"));
   labelConnection->setText(tr("dsconnected"));
 }
 
 void ConcordTest::onGetInfo()
 {
-  if (!connectionIsOpen) {
+  if (!concord.isInitialised()) {
     return;
   }
 
-  auto ret = concord->getIdentity();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-  // @formatter:off
-  emit writeLog(LogLevel::Debug, tr("libconcord OK"), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("mfg: %1").arg(concord->getMfg()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("model: %1").arg(concord->getModel()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("codename: %1").arg(concord->getCodename()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("skin: %1").arg(concord->getSkin()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("fw version: %1.%2").arg(concord->getFwVerMaj(), concord->getFwVerMin()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("fw type: %1").arg(concord->getFwType()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("hw version: %1.%2.%3").arg(concord->getHwVerMaj(), concord->getHwVerMin(), concord->getHwVerMic()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("flash size: %1").arg(concord->getFlashSize()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("flash mfg: %1").arg(concord->getFlashMfg()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("flash id: %1").arg(concord->getFlashId()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("flash part num: %1").arg(concord->getFlashPartNum()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("arch: %1").arg(concord->getArch()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("proto: %1").arg(concord->getProto()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("HID mfg: %1").arg(concord->getHidMfgStr()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("HID product: %1").arg(concord->getHidProdStr()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("HID IRL: %1").arg(concord->getHidIrl()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("HID ORL: %1").arg(concord->getHidOrl()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("HID FRL: %1").arg(concord->getHidFrl()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("USB VID: 0x%1").arg(concord->getUsbVid(), 4, 16, QChar('0')), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("USB PID: 0x%1").arg(concord->getUsbPid(), 4, 16, QChar('0')), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("USB BCD: 0x%1").arg(concord->getUsbBcd(), 4, 16, QChar('0')), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("serial: %1").arg(concord->getSerial(false)), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("config bytes used: %1 / %2").arg(concord->getConfigBytesUsed(), concord->getConfigBytesTotal()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("config dump supported: %1").arg(concord->isConfigDumpSupported()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("config update supported: %1").arg(concord->isConfigUpdateSupported()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("firmware dump supported: %1").arg(concord->isFirmwareDumpSupported()), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("firmware update supported (direct): %1").arg(concord->isFirmwareUpdateSupported(true)), ContentType::PlainText);
-  emit writeLog(LogLevel::Debug, tr("firmware update supported (indirect): %1").arg(concord->isFirmwareUpdateSupported(false)), ContentType::PlainText);
-// @formatter:on
+  auto mnf = concord.mnf();
+  auto model = concord.model();
+  auto fwVersion = concord.fwVersion();
+  auto hwVersion = concord.hwVersion();
+
+  QMessageBox msgBox(QMessageBox::Warning, tr("Info"),
+      tr("You are connected to a %1 %2 (FW: %3, HW: %4)").arg(mnf, model,
+          fwVersion, hwVersion), QMessageBox::Ok, this);
+  msgBox.exec();
 }
 
 void ConcordTest::onGetTime()
 {
-  if (!connectionIsOpen) {
-    return;
-  }
-  auto ret = concord->getTime();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord get time error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-  emit writeMsg(tr("Harmony Time: %1").arg(formatTime(true)));
+  concord.readTime();
 }
 
 void ConcordTest::onSetTime()
 {
-  if (!connectionIsOpen) {
-    return;
-  }
-  auto ret = concord->setTime();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord set time error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-  emit writeMsg(tr("Set Harmony Time: %1").arg(formatTime()));
+  concord.setTime();
 }
 
 void ConcordTest::onReadConfig()
 {
-  uint8_t *config;
-  uint32_t size = 0;
+  concord.readUserConfig();
+}
 
-  if (!connectionIsOpen) {
+void ConcordTest::onWriteConfig()
+{
+  if (!concord.isInitialised()) {
     return;
   }
 
-  //get identity
-  auto ret = concord->getIdentity();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
+  QString file = QFileDialog::getOpenFileName(this, tr("Open File"),
+      QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"), nullptr,
+      QFileDialog::DontUseNativeDialog);
+  if (file.isEmpty()) {
+    return;
+  }
+  auto size = QFile(file).size();
+  if (size == 0) {
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setText(tr("File is empty"));
+    msgBox.exec();
     return;
   }
 
-  //read data
-  ret = concord->readConfigFromRemote(&config, &size);
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord read config error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
+  concord.updateUserConfig(file);
+}
+
+void ConcordTest::onLearnIrSingle()
+{
+  concord.learnCommand();
+}
+
+void ConcordTest::onLearnIrStream()
+{
+  concord.learnStream(2500);
+}
+
+void ConcordTest::onUpdateProgress(const QString text, int step, int of)
+{
+  emit writeMsg("implement me!");
+}
+
+void ConcordTest::onDisconnected(int time_s)
+{
+  if (disconnectMsg) {
+    return; // already shown
+  }
+
+  disconnectMsg = new QMessageBox(QMessageBox::Warning, tr("Disconnected"),
+      tr("Connection to your Harmony is lost. Reconnect "
+          "your remote, wait 10s and click \"OK\"\n\n"
+          "If you didn't disconnect your remote, disconnect it now, remove\n"
+          "and reinsert the battery, wait for the main "
+          "screen to show, reconnect it and then click \"OK\""), QMessageBox::Ok);
+  disconnectMsg->setAttribute(Qt::WA_DeleteOnClose);
+
+  connect(disconnectMsg, &QObject::destroyed, this, [this]() {
+    disconnectMsg = nullptr;
+  });
+
+  disconnectMsg->show();
+}
+
+void ConcordTest::onDone(bool success, const QString &msg)
+{
+  emit writeMsg(msg);
+  labelConnection->setText(msg);
+}
+
+void ConcordTest::onTime(const QString time)
+{
+  QMessageBox msgBox(QMessageBox::Warning, tr("Info"),
+      tr("Harmony Time: %1").arg(time), QMessageBox::Ok, this);
+  msgBox.exec();
+}
+
+void ConcordTest::onLearnWindowIsOpen(bool waits)
+{
+  if (waits) {
+    if (waitMsg == nullptr) {
+      waitMsg = new QMessageBox(this);
+      waitMsg->setIcon(QMessageBox::Information);
+      waitMsg->setWindowTitle(tr("Info"));
+      waitMsg->setText(tr("Press button on source remote"));
+      waitMsg->setStandardButtons(QMessageBox::NoButton);
+      waitMsg->setModal(false);
+    }
+    waitMsg->show();
+  } else {
+    if (waitMsg) {
+      waitMsg->hide();
+    }
+  }
+}
+
+void ConcordTest::onLearnDone(const lib::TimingStream &t, uint32_t carrier)
+{
+  if (t.timings().size() > 0) {
+    emit writeMsg("Learned Command");
+    labelConnection->setText("Learned Command");
+  } else {
+    emit writeMsg("Learn Error");
+    labelConnection->setText("Learn Error");
+  }
+}
+
+void ConcordTest::onReadUserConfigDone(bool success)
+{
+  if (!success) {
     return;
   }
-  labelFileSize->setText(tr("%1 bytes").arg(size));
 
   QString filePathXml = QFileDialog::getSaveFileName(this,
       tr("Save XML + Zip Config"), QDir::homePath(),
       tr("hex Files (*.hex);;All Files (*)"));
   if (!filePathXml.isEmpty()) {
     //write xml + zip file
-    ret = concord->writeConfigToFile(config, size,
-        filePathXml.toStdString().c_str(), false);
+    auto ret = concord.writeUserConfigFile(filePathXml, true);
     if (ret != 0) {
-      auto err = concord->errorToString(ret);
       emit writeLog(LogLevel::Error,
-          tr("libconcord write file error: %1 (%2)").arg(err, ret),
+          tr("write file error"),
           ContentType::PlainText);
       return;
     }
-    emit writeLog(LogLevel::Debug,
-        tr("libconcord written %1 bytes to %2").arg(size).arg(filePathXml),
-        ContentType::PlainText);
   }
-
-  QString filePathZip = QFileDialog::getSaveFileName(this,
-      tr("Save Zip Config"), QDir::homePath(),
-      tr("zip Files (*.zip);;All Files (*)"));
-  if (!filePathZip.isEmpty()) {
-    //write zip file
-    ret = concord->writeConfigToFile(config, size,
-        filePathZip.toStdString().c_str(), true);
-    if (ret != 0) {
-      auto err = concord->errorToString(ret);
-      emit writeLog(LogLevel::Error,
-          tr("libconcord write file error: %1 (%2)").arg(err, ret),
-          ContentType::PlainText);
-      return;
-    }
-    emit writeLog(LogLevel::Debug,
-        tr("libconcord written %1 bytes to %2").arg(size).arg(filePathZip),
-        ContentType::PlainText);
-  }
-
-  //todo memleak on error / early return
-  concord->freeBlob(config);
-}
-
-void ConcordTest::onWriteConfig()
-{
-  uint32_t size = 0;
-  int type;
-
-  if (!connectionIsOpen) {
-    return;
-  }
-
-  QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"),
-      QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"));
-  if (filePath.isEmpty()) {
-    return;
-  }
-  size = QFile(filePath).size();
-
-  auto ret = concord->readAndParseFile(filePath.toStdString().c_str(), &type);
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord read file error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-  if (type != 2) { //todo LC_FILE_TYPE_CONFIGURATION fehlt im wrapper
-    emit writeLog(LogLevel::Error,
-        tr("libconcord file type not config: %1").arg(type),
-        ContentType::PlainText);
-    return;
-  }
-
-  //get identity
-  ret = concord->getIdentity();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-
-  //write data
-  ret = concord->updateConfiguration(false);
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord update config error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-  labelFileSize->setText(tr("%1 bytes").arg(size));
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord sent %1 bytes to remote").arg(size),
-      ContentType::PlainText);
-}
-
-void ConcordTest::onLearnIrSingle()
-{
-  uint32_t carrier;
-  uint32_t *data_ret;
-  uint32_t data_len;
-
-  if (!connectionIsOpen) {
-    return;
-  }
-
-  //get identity
-  auto ret = concord->getIdentity();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-
-  labelIrData->setText("Press Button");
-  QApplication::processEvents();
-
-  //learn
-  concord->setLearningMode(0, 0); //todo magic value
-  ret = concord->learnFromRemote(&carrier, &data_ret, &data_len);
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord learn error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-
-  //labelFileSize->setText(tr("%1 bytes").arg(size));
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord received %1 ir words").arg(data_len),
-      ContentType::PlainText);
-
-  std::vector<uint16_t> data;
-  for (int i = 0; i < data_len; ++i) {
-    data.push_back(data_ret[i]);
-  }
-
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord IR Carrier %1kHz").arg((double) carrier / 1000.0),
-      ContentType::PlainText);
-
-  auto stream = lib::TimingStream::fromMarkPause(data);
-  auto visual = stream.convertAsciiPlot(250);
-
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord IR Data: %1").arg(QString::fromStdString(visual)),
-      ContentType::PlainText);
-
-  labelIrData->setText("Done");
-}
-
-void ConcordTest::onLearnIrStream()
-{
-  uint32_t carrier;
-  uint32_t *data_ret;
-  uint32_t data_len;
-
-  if (!connectionIsOpen) {
-    return;
-  }
-
-  //get identity
-  auto ret = concord->getIdentity();
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord get info error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-
-  labelIrData->setText("Press Button");
-  QApplication::processEvents();
-
-  //learn
-  concord->setLearningMode(1, 2500); //todo magic value
-  ret = concord->learnFromRemote(&carrier, &data_ret, &data_len);
-  if (ret != 0) {
-    auto err = concord->errorToString(ret);
-    emit writeLog(LogLevel::Error,
-        tr("libconcord learn error: %1 (%2)").arg(err, ret),
-        ContentType::PlainText);
-    return;
-  }
-
-  //labelFileSize->setText(tr("%1 bytes").arg(size));
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord received %1 ir words").arg(data_len),
-      ContentType::PlainText);
-
-  std::vector<uint16_t> data;
-  for (int i = 0; i < data_len; ++i) {
-    data.push_back(data_ret[i]);
-  }
-
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord IR Carrier %1kHz").arg((double) carrier / 1000.0),
-      ContentType::PlainText);
-
-  auto stream = lib::TimingStream::fromMarkPause(data);
-  auto visual = stream.convertAsciiPlot(250);
-
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord IR Data: %1").arg(QString::fromStdString(visual)),
-      ContentType::PlainText);
-
-  labelIrData->setText("Done");
-}
-
-void ConcordTest::onProgressUpdated(uint32_t stage, uint32_t count,
-    uint32_t current, uint32_t total, uint32_t counterType,
-    const uint32_t *stages)
-{
-  emit writeLog(LogLevel::Debug,
-      tr("libconcord progress: stage: %1 (%2), count: %3, current: %4, "
-          "total: %5, counterType: %6").arg(concord->stageToString(stage)).arg(
-          stage).arg(count).arg(current).arg(total).arg(counterType),
-      ContentType::PlainText);
-}
-
-void ConcordTest::onIpChanged()
-{
-  emit writeMsg("hello world!");
 }
 
 void ConcordTest::createWidgets()
@@ -444,37 +251,18 @@ void ConcordTest::createActions()
   connect(buttonLearnIrStream, &QPushButton::clicked, this,
       &ConcordTest::onLearnIrStream);
 
-  connect(concord.get(), &LibConcord::ConcordWrapper::progressUpdated, this,
-      &ConcordTest::onProgressUpdated);
-
-//  connect(editSetIpAddress, &QLineEdit::textChanged, this,
-//      &ConcordTest::onIpChanged);
-}
-
-QString ConcordTest::formatTime(bool fixMonth)
-{
-  int sec = concord->getTimeSecond();
-  int min = concord->getTimeMinute();
-  int hour = concord->getTimeHour();
-  int day = concord->getTimeDay();
-  //int dow   = concord->getTimeDow();
-  int month = concord->getTimeMonth();
-  int year = concord->getTimeYear();
-  const char *tz = concord->getTimeTimezone();
-  if (fixMonth) {
-    month = month + 1;
-  }
-
-  return QString("%1.%2.%3 %4:%5:%6 %7").arg(day, 2, 10, QChar('0')).arg(month,
-      2, 10, QChar('0')).arg(year).arg(hour, 2, 10, QChar('0')).arg(min, 2, 10,
-      QChar('0')).arg(sec, 2, 10, QChar('0')).arg(tz);
+  connect(&concord, &Concord::updateProgress, this,
+      &ConcordTest::onUpdateProgress);
+  connect(&concord, &Concord::disconnected, this, &ConcordTest::onDisconnected);
+  connect(&concord, &Concord::done, this, &ConcordTest::onDone);
+  connect(&concord, &Concord::time, this, &ConcordTest::onTime);
+  connect(&concord, &Concord::learnWindowIsOpen, this,
+      &ConcordTest::onLearnWindowIsOpen);
+  connect(&concord, &Concord::learnDone, this, &ConcordTest::onLearnDone);
+  connect(&concord, &Concord::readUserConfigDone, this,
+      &ConcordTest::onReadUserConfigDone);
 }
 
 void ConcordTest::cleanup()
 {
-  if (!connectionIsOpen) {
-    return;
-  }
-  connectionIsOpen = false;
-  concord->deinitConcord();
 }

@@ -15,6 +15,7 @@ class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QSessionManager;
+class Concord;
 
 class MainWindow: public QMainWindow
 {
@@ -52,6 +53,8 @@ class MainWindow: public QMainWindow
 
   private:
     void createStatusBar();
+    void createLog();
+    void createData();
     void createAds();
     void createWidgets();
     void createActions();
@@ -74,6 +77,7 @@ class MainWindow: public QMainWindow
     lib::UserLevel *user;
     std::unique_ptr<Context> ctx;
 
+    Concord *concord;
     ConcordTest *concordTest;
 
     QPlainTextEdit *textEdit;

@@ -14,8 +14,8 @@ class Worker: public QObject
         QObject *parent = nullptr) :
         concord(concord), lock(lock)
     {
-
     }
+
     ~Worker()
     {
       cleanup();
@@ -26,18 +26,13 @@ class Worker: public QObject
       return connectionIsReady;
     }
 
-    bool isPingActive()
-    {
-      return pingActive;
-    }
-
     bool isBusy()
     {
       if (lock.try_lock()) {
         lock.unlock();
-        return true;
+        return false;
       }
-      return false;
+      return true;
     }
 
     //use while mutex is locked!
@@ -55,20 +50,31 @@ class Worker: public QObject
     void time(const QString time);
     void learnWindowIsOpen(bool waits);
     void learnDone(const lib::TimingStream &t, uint32_t carrier);
+    void readUserConfigDone(bool success);
+    void pingResponse();
 
   public slots:
     void run()
     {
       QEventLoop loop;
 
+      if (concord == nullptr) {
+        emit writeLog(LogLevel::Error, tr("libconcord nullptr"),
+            ContentType::PlainText);
+        return;
+      }
+
+      pingTimer = new QTimer(this); //here so it is part of the thread!
+      pingTimer->setTimerType(Qt::VeryCoarseTimer);
+      pingTimer->setSingleShot(true);
+      connect(pingTimer, &QTimer::timeout, this, &Worker::onPingTimeout);
+
+      createActions();
+
       auto ret = connectRemote();
       if (!ret) {
         return;
       }
-
-      pingTimer.setSingleShot(true);
-      connect(&pingTimer, &QTimer::timeout, this, &Worker::onPingTimeout);
-      resetTimer();
 
       while (!QThread::currentThread()->isInterruptionRequested()) {
         loop.processEvents(QEventLoop::AllEvents);
@@ -172,12 +178,14 @@ class Worker: public QObject
         emit writeLog(LogLevel::Error,
             tr("libconcord read config error: %1 (%2)").arg(err).arg(ret),
             ContentType::PlainText);
+        emit readUserConfigDone(false);
         emit done(false, QString(err));
         return;
       }
       if (config == nullptr) {
         emit writeLog(LogLevel::Error, tr("libconcord nullptr"),
             ContentType::PlainText);
+        emit readUserConfigDone(false);
         emit done(false, tr("Config data nullptr"));
         return;
       }
@@ -185,6 +193,7 @@ class Worker: public QObject
       readConfig = make_unique<vector<uint8_t>>(config, config + size);
       concord->freeBlob(config);
 
+      emit readUserConfigDone(true);
       emit done(true, tr("OK"));
     }
 
@@ -209,16 +218,31 @@ class Worker: public QObject
   protected slots:
     void onPingTimeout()
     {
+      int ret;
+
       if (isBusy()) {
         resetTimer();
         return;
       }
-      // ping remote. if disconnected, this will block for infinte time
-      lock_guard<mutex> m(lock);
-      pingActive = true;
-      concord->getTime();
-      pingActive = false;
-      resetTimer();
+      // ping remote. if disconnected, this will block for infinte time. on broken pipe
+      // will return error code
+
+      {
+        lock_guard<mutex> m(lock);
+        ret = concord->getTime();
+        resetTimer();
+        if (ret == 0) {
+          emit pingResponse();
+        }
+      }
+
+      if (ret != 0) { //no useful error code
+        emit writeLog(LogLevel::Error,
+            tr("libconcord error, resetting connection"),
+            ContentType::PlainText);
+        cleanup();
+        connectRemote();
+      }
     }
 
     void onProgressUpdated(uint32_t stage, uint32_t count, uint32_t current,
@@ -238,20 +262,29 @@ class Worker: public QObject
 
     void resetTimer()
     {
-      pingTimer.start(1000);
+      pingTimer->start(1000 + rand() % 100); //don't be too precise
+    }
+
+    void createActions()
+    {
+      connect(concord.get(), &LibConcord::ConcordWrapper::progressUpdated, this,
+          &Worker::onProgressUpdated);
+      connect(this, &Worker::done, [this](bool success) {
+        if (!success) {
+          return;
+        }
+        resetTimer();
+        emit pingResponse();
+      });
+      connect(this, &Worker::updateProgress, [this]() {
+        resetTimer();
+        emit pingResponse();
+      });
     }
 
     bool connectRemote()
     {
       lock_guard<mutex> m(lock);
-
-      if (concord == nullptr) {
-        emit writeLog(LogLevel::Error, tr("libconcord nullptr"),
-            ContentType::PlainText);
-        return false;
-      }
-      connect(concord.get(), &LibConcord::ConcordWrapper::progressUpdated, this,
-          &Worker::onProgressUpdated);
 
       auto ret = concord->initConcord();
       if (ret != 0) {
@@ -303,17 +336,16 @@ class Worker: public QObject
       emit writeLog(LogLevel::Debug, tr("firmware update supported (indirect): %1").arg(concord->isFirmwareUpdateSupported(false)), ContentType::PlainText);
 // @formatter:on
 
-      emit writeMsg(tr("Connection OK"));
+      resetTimer();
+
       connectionIsReady = true;
       return true;
     }
 
     void cleanup()
     {
-      pingTimer.stop();
-      pingActive = false;
+      pingTimer->stop();
       connectionIsReady = false;
-      concord = nullptr;
       readConfig = nullptr;
     }
 
@@ -378,20 +410,18 @@ class Worker: public QObject
     unique_ptr<vector<uint8_t>> readConfig;
     atomic<bool> connectionIsReady = false;
 
-    QTimer pingTimer;
-    atomic<bool> pingActive = false;
+    QTimer *pingTimer = nullptr;
 };
 
 Concord::Concord(Context &ctx, QWidget *parent) :
-    QWidget(parent), ctx(ctx), concord(
-        make_unique<LibConcord::ConcordWrapper>(this))
+    QWidget(parent), ctx(ctx)
 {
   createActions();
 }
 
 Concord::~Concord()
 {
-  disconnectRemote();
+  cleanup();
 }
 
 bool Concord::isInitialised()
@@ -460,6 +490,7 @@ bool Concord::connectRemote()
     disconnectRemote();
   }
 
+  concord = make_unique<LibConcord::ConcordWrapper>(this);
   auto ret = concord->initConcord();
   if (ret != 0) {
     auto err = concord->errorToString(ret);
@@ -469,7 +500,7 @@ bool Concord::connectRemote()
     return false;
   }
   ret = startThread();
-  if (ret != 0) {
+  if (!ret) {
     emit writeLog(LogLevel::Error, tr("concord start thread failed"),
         ContentType::PlainText);
     return false;
@@ -480,13 +511,8 @@ bool Concord::connectRemote()
 
 void Concord::disconnectRemote()
 {
-  if (!isInitialised()) {
-    return;
-  }
-  connectionIsOpen = false;
-  stopThread();
-  concord->deinitConcord();
-  concord = nullptr;
+  cleanup();
+  emit writeMsg(tr("Connection closed"));
 }
 
 bool Concord::setTime()
@@ -553,7 +579,7 @@ int Concord::writeUserConfigFile(const QString &file, bool includeHeader)
   }
 
   auto ret = concord->writeConfigToFile(data->data(), data->size(),
-      file.toStdString().c_str(), includeHeader);
+      file.toStdString().c_str(), !includeHeader);
   if (ret != 0) {
     auto err = concord->errorToString(ret);
     emit writeLog(LogLevel::Error,
@@ -663,10 +689,17 @@ bool Concord::updateUserConfigData(const std::vector<uint8_t> &data,
 
 void Concord::onTimeout()
 {
-  if (worker->isPingActive()) {
-    counter++;
-  } else {
+  if (!isInitialised()) {
+    threadSupervisorTimer.stop();
     counter = 0;
+    return;
+  }
+
+  counter++;
+
+  if (counter > 1) {
+    emit writeLog(LogLevel::Warning,
+        tr("concord pings missed: %1").arg(counter), ContentType::PlainText);
   }
 
   if (counter > COUNTER_THRESHOLD) {
@@ -700,8 +733,22 @@ void Concord::createWorkerActions()
   connect(worker, &Worker::learnWindowIsOpen, this,
       &Concord::learnWindowIsOpen);
   connect(worker, &Worker::learnDone, this, &Concord::learnDone);
+  connect(worker, &Worker::readUserConfigDone, this,
+      &Concord::readUserConfigDone);
+  connect(worker, &Worker::pingResponse, [this]() {counter = 0;});
 
   connect(&threadSupervisorTimer, &QTimer::timeout, this, &Concord::onTimeout);
+}
+
+void Concord::cleanup()
+{
+  if (!isInitialised()) {
+    return;
+  }
+  connectionIsOpen = false;
+  stopThread();
+  concord->deinitConcord();
+  concord = nullptr;
 }
 
 bool Concord::startThread()
@@ -713,7 +760,9 @@ bool Concord::startThread()
   emit doStart();
 
   counter = 0;
-  threadSupervisorTimer.start();
+  QTimer::singleShot(10000, this, [this]() {
+    threadSupervisorTimer.start(1000);
+  });
   return true;
 }
 
@@ -725,7 +774,7 @@ void Concord::stopThread()
 
   workerThread.requestInterruption();
   workerThread.quit();
-  workerThread.wait(1000);
+  workerThread.wait(5000);
   worker = nullptr;
 }
 
