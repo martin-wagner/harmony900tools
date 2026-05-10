@@ -29,6 +29,7 @@ set(sources
   main.cpp
   mainwindow.cpp
   bin/data.cpp
+  comm/concord.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp
