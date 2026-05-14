@@ -694,7 +694,7 @@ void Concord::onTimeout()
 
   counter++;
 
-  if (counter > 1) {
+  if (counter > 2) {
     emit writeLog(LogLevel::Warning,
         tr("concord pings missed: %1").arg(counter), ContentType::PlainText);
   }

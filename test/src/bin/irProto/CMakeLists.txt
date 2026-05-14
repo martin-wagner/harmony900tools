@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------------------
 # Source location
 # ---------------------------------------------------------------------------
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/cli/irProto)
-set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/cli/lib)
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/bin/irProto)
+set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 
 # ---------------------------------------------------------------------------
 # test_irProto
