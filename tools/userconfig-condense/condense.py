@@ -33,6 +33,37 @@ Output files (in <folder>/accumulated/):
     activity_enter_actions.txt
     activity_roles.txt
     activity_power.txt
+
+  New items:
+    device_ids.txt
+        Unique device ID numbers across all files (simple enum).
+
+    device_hardbutton_labels.txt
+        All button Label values from ControlGroup name="HardButtons" (simple enum).
+
+    device_hardbutton_labels_nonempty.txt
+        HardButton labels that are non-empty, with source info.
+        Empty file if none found.
+
+    device_actionid_no_hold.txt
+        ActionIds from HardButtons and Misc groups where the suffix is NOT _Hold,
+        with source info. Empty file if none found.
+
+    activity_hardbutton_labels_nonempty.txt
+        HardButton labels that are non-empty in activities, with source info.
+        Empty file if none found.
+
+    activity_actionid_no_hold.txt
+        ActionIds from activity HardButtons and Misc groups without _Hold suffix.
+        Empty file if none found.
+
+    activity_role_presentation_nonempty.txt
+        Role <Presentation> elements that contain non-empty content, with source.
+        Empty file if none found.
+
+    activity_power_missing_devices.txt
+        Activities where the Power section does not cover all devices in the file.
+        Empty file if all Power sections are complete.
 """
 
 import sys
@@ -111,6 +142,7 @@ class Accumulator:
         self.discrete_action_tags: set = set()
         self.relative_action_tags: set = set()
         self.controlgroup_names: set = set()
+        self.button_names: set = set()
 
         # --- key → values maps ---
         self.device_properties: dict = defaultdict(set)
@@ -123,6 +155,16 @@ class Accumulator:
         self.activity_enter_actions: list = []
         self.activity_roles: list = []
         self.activity_power: list = []
+
+        # --- new items ---
+        self.device_ids: set = set()
+        self.device_hardbutton_labels: set = set()
+        self.device_hardbutton_labels_nonempty: list = []
+        self.device_actionid_no_hold: list = []
+        self.activity_hardbutton_labels_nonempty: list = []
+        self.activity_actionid_no_hold: list = []
+        self.activity_role_presentation_nonempty: list = []
+        self.activity_power_missing_devices: list = []
 
     # -----------------------------------------------------------------------
     # Device processing
@@ -149,6 +191,11 @@ class Accumulator:
             if name:
                 self.controlgroup_names.add(name)
 
+            for btn in cg.findall("Button"):
+                btn_name = btn.get("name")
+                if btn_name:
+                    self.button_names.add(btn_name)
+
         # States
         self._process_device_states(dev, filepath, src)
 
@@ -157,6 +204,14 @@ class Accumulator:
 
         # Command timing
         self._process_device_command_timing(dev, filepath, src)
+
+        # New: device ID
+        dev_id = dev.findtext("Id")
+        if dev_id:
+            self.device_ids.add(dev_id)
+
+        # New: HardButton labels + ActionId suffix check
+        self._process_device_buttons(dev, filepath, src)
 
     def _process_device_states(self, dev, filepath: Path, src: str):
         states = dev.findall("States/State")
@@ -240,6 +295,47 @@ class Accumulator:
         lines.append("")
         self.device_numeric.append("\n".join(lines))
 
+    def _process_device_buttons(self, dev, filepath: Path, src: str):
+        """Collect HardButton labels and check ActionId suffixes for Misc+HardButtons."""
+        # HardButton labels (enum + nonempty-with-source)
+        hb_nonempty = []
+        hb_cg = dev.find("Presentation/ControlGroup[@name='HardButtons']")
+        if hb_cg is not None:
+            for btn in hb_cg.findall("Button"):
+                label = (btn.findtext("Label") or "").strip()
+                self.device_hardbutton_labels.add(label)
+                if label:
+                    pos = btn.findtext("Position") or "?"
+                    hb_nonempty.append(f"  pos={pos}  label={label!r}")
+
+        if hb_nonempty:
+            self.device_hardbutton_labels_nonempty.append(
+                f"[{src}]\n" + "\n".join(hb_nonempty) + "\n"
+            )
+
+        # ActionId suffix check across both HardButtons and Misc
+        no_hold = []
+        for cg_name in ("HardButtons", "Misc"):
+            cg = dev.find(f"Presentation/ControlGroup[@name='{cg_name}']")
+            if cg is None:
+                continue
+            for btn in cg.findall("Button"):
+                action_id = (btn.findtext("ActionId") or "").strip()
+                if not action_id:
+                    continue
+                if not action_id.endswith("_Hold"):
+                    label = (btn.findtext("Label") or "").strip()
+                    pos = btn.findtext("Position") or "?"
+                    no_hold.append(
+                        f"  group={cg_name}  pos={pos}  label={label!r}"
+                        f"  actionId={action_id!r}"
+                    )
+
+        if no_hold:
+            self.device_actionid_no_hold.append(
+                f"[{src}]\n" + "\n".join(no_hold) + "\n"
+            )
+
     def _process_device_command_timing(self, dev, filepath: Path, src: str):
         cmds = dev.find("Commands")
         if cmds is None:
@@ -272,7 +368,7 @@ class Accumulator:
     # Activity processing
     # -----------------------------------------------------------------------
 
-    def process_activity(self, act, filepath: Path):
+    def process_activity(self, act, filepath: Path, file_device_ids: set):
         src = source_tag(filepath, act, "Presentation/Label")
 
         # Type
@@ -293,6 +389,11 @@ class Accumulator:
             if name:
                 self.controlgroup_names.add(name)
 
+            for btn in cg.findall("Button"):
+                btn_name = btn.get("name")
+                if btn_name:
+                    self.button_names.add(btn_name)
+
         # EnterActions
         self._process_activity_enter_actions(act, filepath, src)
 
@@ -300,7 +401,13 @@ class Accumulator:
         self._process_activity_roles(act, filepath, src)
 
         # Power
-        self._process_activity_power(act, filepath, src)
+        self._process_activity_power(act, filepath, src, file_device_ids)
+
+        # New: activity button labels + ActionId suffix check
+        self._process_activity_buttons(act, filepath, src)
+
+        # New: role presentation non-empty check
+        self._process_activity_role_presentation(act, filepath, src)
 
     def _process_activity_enter_actions(self, act, filepath: Path, src: str):
         actions = act.findall("EnterActions/Action")
@@ -327,7 +434,7 @@ class Accumulator:
         lines.append("")
         self.activity_roles.append("\n".join(lines))
 
-    def _process_activity_power(self, act, filepath: Path, src: str):
+    def _process_activity_power(self, act, filepath: Path, src: str, file_device_ids: set):
         power = act.find("Power")
         if power is None:
             return
@@ -342,6 +449,76 @@ class Accumulator:
             "",
         ]
         self.activity_power.append("\n".join(lines))
+
+        # Completeness check: every device in this file must appear in On or Off
+        if file_device_ids:
+            covered = set(ons) | set(offs)
+            missing = file_device_ids - covered
+            if missing:
+                self.activity_power_missing_devices.append(
+                    f"[{src}]\n"
+                    f"  Missing device IDs: {sorted(missing)}\n"
+                )
+
+    def _process_activity_buttons(self, act, filepath: Path, src: str):
+        """Collect activity HardButton labels and check ActionId suffixes."""
+        hb_nonempty = []
+        hb_cg = act.find("Presentation/ControlGroup[@name='HardButtons']")
+        if hb_cg is not None:
+            for btn in hb_cg.findall("Button"):
+                label = (btn.findtext("Label") or "").strip()
+                if label:
+                    pos = btn.findtext("Position") or "?"
+                    hb_nonempty.append(f"  pos={pos}  label={label!r}")
+
+        if hb_nonempty:
+            self.activity_hardbutton_labels_nonempty.append(
+                f"[{src}]\n" + "\n".join(hb_nonempty) + "\n"
+            )
+
+        # ActionId suffix check across HardButtons and Misc
+        no_hold = []
+        for cg_name in ("HardButtons", "Misc"):
+            cg = act.find(f"Presentation/ControlGroup[@name='{cg_name}']")
+            if cg is None:
+                continue
+            for btn in cg.findall("Button"):
+                action_id = (btn.findtext("ActionId") or "").strip()
+                if not action_id:
+                    continue
+                if not action_id.endswith("_Hold"):
+                    label = (btn.findtext("Label") or "").strip()
+                    pos = btn.findtext("Position") or "?"
+                    no_hold.append(
+                        f"  group={cg_name}  pos={pos}  label={label!r}"
+                        f"  actionId={action_id!r}"
+                    )
+
+        if no_hold:
+            self.activity_actionid_no_hold.append(
+                f"[{src}]\n" + "\n".join(no_hold) + "\n"
+            )
+
+    def _process_activity_role_presentation(self, act, filepath: Path, src: str):
+        """Collect Role <Presentation> elements that contain non-empty content."""
+        nonempty = []
+        for role in act.findall("Role"):
+            rname = role.findtext("Name") or ""
+            pres = role.find("Presentation")
+            if pres is None:
+                continue
+            # Non-empty means: has child elements, or non-blank text content
+            has_children = len(list(pres)) > 0
+            has_text = (pres.text or "").strip() != ""
+            if has_children or has_text:
+                import xml.etree.ElementTree as _ET
+                pres_str = _ET.tostring(pres, encoding="unicode").strip()
+                nonempty.append(f"  role={rname!r}  presentation={pres_str}")
+
+        if nonempty:
+            self.activity_role_presentation_nonempty.append(
+                f"[{src}]\n" + "\n".join(nonempty) + "\n"
+            )
 
     # -----------------------------------------------------------------------
     # Shared helpers
@@ -377,11 +554,18 @@ def process_file(filepath: Path, acc: Accumulator):
 
     root = tree.getroot()
 
+    # Collect device IDs for this file first (needed for power completeness check)
+    file_device_ids = set()
+    for dev in root.findall("Device"):
+        dev_id = dev.findtext("Id")
+        if dev_id:
+            file_device_ids.add(dev_id)
+
     for dev in root.findall("Device"):
         acc.process_device(dev, filepath)
 
     for act in root.findall("Activity"):
-        acc.process_activity(act, filepath)
+        acc.process_activity(act, filepath, file_device_ids)
 
 
 def write_outputs(out_dir: Path, acc: Accumulator):
@@ -410,6 +594,17 @@ def write_outputs(out_dir: Path, acc: Accumulator):
     write_complex(out_dir / "activity_enter_actions.txt",  acc.activity_enter_actions)
     write_complex(out_dir / "activity_roles.txt",          acc.activity_roles)
     write_complex(out_dir / "activity_power.txt",          acc.activity_power)
+
+    # --- new items ---
+    write_enum(out_dir / "device_ids.txt",                          acc.device_ids)
+    write_enum(out_dir / "device_hardbutton_labels.txt",            acc.device_hardbutton_labels)
+    write_complex(out_dir / "device_hardbutton_labels_nonempty.txt", acc.device_hardbutton_labels_nonempty)
+    write_complex(out_dir / "device_actionid_no_hold.txt",           acc.device_actionid_no_hold)
+    write_complex(out_dir / "activity_hardbutton_labels_nonempty.txt", acc.activity_hardbutton_labels_nonempty)
+    write_complex(out_dir / "activity_actionid_no_hold.txt",          acc.activity_actionid_no_hold)
+    write_complex(out_dir / "activity_role_presentation_nonempty.txt", acc.activity_role_presentation_nonempty)
+    write_complex(out_dir / "activity_power_missing_devices.txt",     acc.activity_power_missing_devices)
+    write_enum(out_dir / "button_names.txt",          acc.button_names)
 
 
 def main():

@@ -23,7 +23,7 @@ Each `<Device>` represents one piece of AV equipment the remote can control. Dev
 │   │       └── <ActionId> "<DeviceId>_<CommandName>_Hold"
 │   └── <ControlGroup name="HardButtons"> Physical remote button mappings
 │       └── <Button name=...> × N  name of hard button this command will be assigned to.
-│           ├── <Label>    Button label (always empty(?))
+│           ├── <Label>    Button label, always empty
 │           └── <ActionId> "<DeviceId>_<CommandName>_Hold"
 ├── <Properties>           Capability and behaviour flags
 │   └── <Property name="...">  value </Property> × N
@@ -126,9 +126,53 @@ May be absent on devices where all buttons where mapped to hard buttons.
 
 #### `<ControlGroup name="HardButtons">`
 
-Physical button assignments — which physical remote key triggers which device command. Always present. \todo gibts welche die nicht leer sind? Button labels are often empty (the physical button has a fixed icon), with only the `<ActionId>` being relevant.
+Physical button assignments — which physical remote key triggers which device command. Always present. Button labels are always empty.
 
-\todo liste aller hardbuttons. das sollte vollstaendig werden...
+Harmony 900 has the following hard buttons:
+
+- Blue
+- ChannelDown
+- ChannelUp
+- DirectionDown
+- DirectionLeft
+- DirectionRight
+- DirectionUp
+- DownArrow
+- Exit
+- FastForward
+- Green
+- Guide
+- Info
+- Menu
+- Number0
+- Number1
+- Number2
+- Number3
+- Number4
+- Number5
+- Number6
+- Number7
+- Number8
+- Number9
+- NumberEnter
+- NumberPlus
+- Pause
+- Play
+- PrevChannel
+- Record
+- Red
+- Rewind
+- Select
+- SkipBack
+- SkipForward
+- Stop
+- UpArrow
+- VolumeDown
+- VolumeMute
+- VolumeUp
+- Yellow
+
+You can't map the activities and help button.
 
 #### `<Button>`
 
@@ -138,7 +182,7 @@ Physical button assignments — which physical remote key triggers which device 
 | `<Position>` | integer ≥ 0 | Display/layout order |
 | `<ActionId>` | string | Format: `<DeviceId>_<CommandName>_Hold` |
 
-The `_Hold` suffix indicates the default trigger mode. The ActionId ties back to a `<Command>/<Name>` in the same device's command list.
+The `_Hold` suffix is always present.
 
 ---
 

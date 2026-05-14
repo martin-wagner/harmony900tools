@@ -54,7 +54,7 @@ The type drives which UI modes, button labels, and properties are applicable. Fo
 │   │       ├── <Position> Zero-based display order
 │   │       └── <ActionId> <DeviceId>_<CommandName>_Hold"
 │   └── <ControlGroup name="HardButtons"> Physical remote button mappings
-│           ├── <Label>    Button label (always empty(?))
+│           ├── <Label>    Button label, always empty
 │           └── <ActionId> "<DeviceId>_<CommandName>_Hold"
 ├── <EnterActions>         Ordered sequence of actions on activity start
 │   └── <Action> × N
@@ -71,7 +71,7 @@ The type drives which UI modes, button labels, and properties are applicable. Fo
 ├── <Role> × N             Functional device assignments  [ABSENT on PowerOff]
 │   ├── <Name>             Role type (DEFAULT, DISPLAY, VOLUME, ...)
 │   ├── <DeviceId>         References a Device Id
-│   └── <Presentation>     Role-specific label overrides (always empty in practice)
+│   └── <Presentation>     Role-specific label overrides, always empty
 └── <Power>                Complete desired power state for all devices
     ├── <On> × N           Device IDs that must be powered On
     └── <Off> × N          Device IDs that must be powered Off
@@ -191,7 +191,7 @@ Roles bind a functional slot to a specific device. The remote firmware uses role
 | `PASSTHROUGH` | Additional device that also receives context-relevant commands | Optional. |
 | `PASSTHROUGH2`…`PASSTHROUGH4` | Further passthrough devices | Optional, sequentially numbered. |
 
-The `<Presentation>` inside each Role is always empty in practice (null labels). It appears to be a placeholder for role-specific label overrides. \todo korrekt?
+The `<Presentation>` inside each Role is always empty.
 
 **A device can hold multiple roles simultaneously.** Examples:
 - `Listen to Radio`: AV Receiver is both `DEFAULT` and `VOLUME` – it is the primary device *and* handles its own volume.
