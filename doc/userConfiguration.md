@@ -2,116 +2,94 @@
 
 ## Overview
 
-the UserConfiguration.xml contains your user config (most of the devices, all of your activities). It is stored as condensed xml. 
+The UserConfiguration.xm is a single XML document with `<Root>` as top-level element. It stores approx. 90% of the info the Harmony software needs to describe one user's remote setup: meta info, the remote controller, all controlled devices, all activities. It contains part of the IR protocols.  
+Other relevant files are:
+- actionList.xml
+- irProto.bin
+- ssIr.bin
 
-use e.g.
+---
+
+The file is stored as condensed xml. use e.g.
 ```
 xmllint --format UserConfiguration.xml > UserConfiguration-pretty.xml' 
 ```
 to make it human-readable. Don't forget to name it back before writing a modified file to your remote!
 
+**Top-Level Structure**
+
+```
+<Root>
+  <Properties>        # file meta: version, hash, last update timestamp
+  <User>              # user ID, preferences, name
+  <Controller>        # the remote itself
+  <Device> × N        # one entry per controlled device
+  <Activity> × M      # one entry per activity (watch mode)
+  <Protocols>         # IR protocol definitions used across all devices
+```
+
+For some of the values, it's unknown wether they are actually used by the remote or if they are just a hint for the online harmony software. This is especially true for the `<Properties>`.
+
+## `<Properties>`
+
+Simple key/value bag for file-level metadata.
+
+| Property | Example value |
+|---|---|
+| `version` | `1.0` |
+| `ProtocolCacheHash` | `0x960E98B9` |
+| `LastUpdated` | `20260406 143318` |
+
+## `<User>`
+
+Holds language info and the user's display name. Other fields seem to be optional.
+
+| Language | LocaleId | 
+|---|---|
+| English-US | enu |
+| German | deu |
+
+## `<Controller>`
+
+Describes the physical remote control itself – manufacturer, model, type. In this config it is labeled as a "Harmony 1000-ish" by Logitech.
+
+Be aware that the Harmony 1000 uses a completly different setup type!
+
+## `<Device>`
+
+One `<Device>` element per piece of AV equipment. Examples:
+
+| your label | Type | Manufacturer / Model |
+|---|---|---|
+| TV | Television | LG ... |
+| Video recorder | Vcr | Samsung SV... |
+| 4k bd | DvdCd | Panasonic DP-... |
+| PVR VU | Pvr | Vu+ ... |
+| AV Receiver-Room 1 | Receiver | Onkyo TX-NR... |
+| and so on... |  |  |
+
+For more details see [device.md](device.md)
+
+## `<Activity>`
+
+One `<Activity>` element per watch/use mode. Examples:
+
+| Label | Type |
+|---|---|
+| PowerOff | PowerOff |
+| Watch TV | VirtualTelevisionN |
+| Listen to Radio | VirtualRadioSimple |
+| Watch movie | VirtualDvd |
+| and so on... |  |
+
+PowerOff is a dummy activity and is always present.
+
+For more details see [activity.md](activity.md)
+
+## `<Protocols>`
+
+Only actual info seems to be `<ToggleBitX>`, which is redundant to irProto.bin.
+
 ## Hash
 
 The xml contains the IrProto.bin crc32 in two places. After changing IrProto.bin you need to update the _ProtocolCacheHash_ and _Hash_ members accordingly.
-
-## Commands
-
-The remote can reference protocols in irProto.bin and commands in SsIr.bin. Index begins at [0]!
-
-### ssIr
-
-A command in ssIr is referenced by inserting the command number like in the following example:
-
-```
- <Command>
-   <Name>Off</Name>A
-   <Data>
-     <Protocol>-1</Protocol>
-     <Code>0xFFFF0200</Code>
-   </Data>
- </Command>
-```
-where ssIr is selected as protocol _-1_ and the command is indexed by "0x0002".
-
-### irProto
-
-A protocol in irProto is referenced by inserting the protocol number like in the following example:
-
-```
- <Command>
-   <Name>PowerOff</Name>
-   <Data>
-     <Protocol>7</Protocol>
-     <Code>0x0700F401030001009C6000</Code>
-   </Data>
- </Command>
-```
-where _7_ is the protocol index and _0x07..._ is the parameter for command encoding.
-
-| Offset |    Bytes     |  Value  |  Meaning|
-| ---|---|---|---|
-|[0:1]  |    07 00     |  7      |  Protocol index → IrProto.bin|
-|[2:3]  |    F4 01     |  500    |  Carrier period in system clock ticks (LE16)|
-|       |              |         |  500 ticks @ 18 MHz = 27.778 µs = 36.000 kHz |
-|[4]    |    03        |  3      |  Repeats|
-|[5]    |    00        |  0      |  Special repeat frame (true = 1, false = 0)|
-|       |              |         |  Either repeats or repeat frame should be used.|
-|[6]    |    01        |  S1     |  Control|
-|       |              |         |  - 0 = Flat data coding|
-|       |              |         |  - 1 = Single section data coding|
-|       |              |         |  - >1 = Multi section data coding|
-|[7...e-1] |           |  payload | Depends on Control|
-|[e]    |    00        |  0      |  Trailing zero / terminator|
-
-The header is always 6 bytes + terminator byte long. The payload size depends on the control.
-
-Values in _Control_ are assumptions. Could as well be a direct reference to a protocol/protocol family
-- 0 = NEC (or generic + repeat)
-- 1 = Generic (toggle info in <CodeSequence index>)
-- 2 = ???
-- 3 = Philips RC-6
-...
-
-** Control _Flat_ **
-
-`0x0000F401010100 -->20DF18E70101<-- 00`
-
-|Offset    | Bytes      | Value   | Meaning|
-|---|---|---|---|
-|[7...e-3] | 20DF18E7   | bits    | Payload. The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. More bits are coded by adding another byte.|
-|[7...e-2] | 01         | 1       | unknown (always 1)|
-|[7...e-1] | 01         | 1       | unknown (always 1)|
-
-
-** Control _Single Section_ **
-
-`0x0100F401030001 -->005F5F11EE<-- 00`
-
-|Offset    | Bytes       | Value   | Meaning|
-|---|---|---|---|
-|[7]       | 00          | 0       | unknown (always 0)|
-|[8...e-1] | 5F5F11EE    | bits    | Payload. The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. More bits are coded by adding another byte.|
-
-** Control _Multi Section_ **
-
-Each section is two bytes long and maps directly to the section in IrProto.bin.
-
-`0x0200F401030003 -->0070010002B992<-- 00`
-
-|Offset    | Bytes       | Value   | Meaning|
-|---|---|---|---|
-|[7]       | 00          | 0       | unknown (always 0)|
-|[8:9]     | 70 01       | bits    | Payload section 1. The bit stream is MSB aligned, so in conjunction with the bit count and mask in irProto you get the valid bit stream.|
-|[10:11]   | 00 02       | bits    |  Payload section 2. ...|
-|[12:13]   | B9 92       | bits    |  Payload section 3. ...|
-
-I have one sample of this, for a device using the Philips RC-6 code. 
-- Section 0 codes 4 bit start in the first byte (first nibble 0x7, second nibble ??). Use of second byte (0x02) unknown.
-- Section 1 codes 1 bit, but in RC-6 this is the toggle. Maybe second byte == 1 -> toggle?
-- Section 2 is data.
-RC-6 and Philips RCMM seem to be the only protocols to have different encodings for true/false within a single frame.
-
-
-
-
-
