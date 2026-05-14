@@ -286,17 +286,7 @@ class Worker: public QObject
     {
       lock_guard<mutex> m(lock);
 
-      auto ret = concord->initConcord();
-      if (ret != 0) {
-        auto err = concord->errorToString(ret);
-        emit writeLog(LogLevel::Error,
-            tr("libconcord connection error: %1 (%2)").arg(err).arg(ret),
-            ContentType::PlainText);
-        return false;
-      }
-      emit writeMsg(tr("Connection OK"));
-
-      ret = concord->getIdentity();
+      auto ret = concord->getIdentity();
       if (ret != 0) {
         auto err = concord->errorToString(ret);
         emit writeLog(LogLevel::Error,
@@ -336,15 +326,20 @@ class Worker: public QObject
       emit writeLog(LogLevel::Debug, tr("firmware update supported (indirect): %1").arg(concord->isFirmwareUpdateSupported(false)), ContentType::PlainText);
 // @formatter:on
 
+      emit writeMsg(tr("Remote is ready"));
+
       resetTimer();
 
       connectionIsReady = true;
+      emit done(true, "OK");
       return true;
     }
 
     void cleanup()
     {
-      pingTimer->stop();
+      if (pingTimer != nullptr) {
+        pingTimer->stop();
+      }
       connectionIsReady = false;
       readConfig = nullptr;
     }
@@ -432,7 +427,7 @@ bool Concord::isInitialised()
 bool Concord::isBusy()
 {
   if (isInitialised()) {
-    worker->isBusy();
+    return worker->isBusy();
   }
   return false;
 }
@@ -499,6 +494,8 @@ bool Concord::connectRemote()
         ContentType::PlainText);
     return false;
   }
+  emit writeMsg(tr("Init OK"));
+
   ret = startThread();
   if (!ret) {
     emit writeLog(LogLevel::Error, tr("concord start thread failed"),
@@ -518,7 +515,7 @@ void Concord::disconnectRemote()
 bool Concord::setTime()
 {
   if (!isInitialised()) {
-    return "";
+    return false;
   }
 
   emit doSetTime();
@@ -528,7 +525,7 @@ bool Concord::setTime()
 bool Concord::readTime()
 {
   if (!isInitialised()) {
-    return "";
+    return false;
   }
 
   emit doReadTime();
@@ -538,7 +535,7 @@ bool Concord::readTime()
 bool Concord::learnCommand()
 {
   if (!isInitialised()) {
-    return "";
+    return false;
   }
 
   emit doLearnCommand();
@@ -548,7 +545,7 @@ bool Concord::learnCommand()
 bool Concord::learnStream(int time_ms)
 {
   if (!isInitialised()) {
-    return "";
+    return false;
   }
 
   emit doLearnStream(time_ms);
@@ -558,7 +555,7 @@ bool Concord::learnStream(int time_ms)
 bool Concord::readUserConfig()
 {
   if (!isInitialised()) {
-    return "";
+    return false;
   }
 
   emit doReadUserConfig();
@@ -637,7 +634,7 @@ int Concord::updateUserConfig(const QString &file)
   return 0;
 }
 
-bool Concord::updateUserConfigData(const std::vector<uint8_t> &data,
+int Concord::updateUserConfigData(const std::vector<uint8_t> &data,
     bool containsHeader)
 {
   int type;

@@ -69,6 +69,8 @@ class ConcordTest: public QWidget
     QPushButton *buttonLearnIrStream;
     QLabel *labelIrData;
 
+    QProgressBar *progressBar;
+
     QMessageBox* disconnectMsg = nullptr;
     QMessageBox* waitMsg = nullptr;
 };

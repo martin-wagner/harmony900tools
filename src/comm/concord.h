@@ -63,7 +63,7 @@ class Concord: public QWidget
     /** starts writing user config file to the remote */
     int updateUserConfig(const QString &file);
     /** starts writing user config data to the remote */
-    bool updateUserConfigData(const std::vector<uint8_t> &data, bool containsHeader = false);
+    int updateUserConfigData(const std::vector<uint8_t> &data, bool containsHeader = false);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);

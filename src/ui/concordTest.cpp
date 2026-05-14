@@ -25,6 +25,9 @@ void ConcordTest::onOpenConnection()
   if (concord.isInitialised()) {
     return;
   }
+
+  onUpdateProgress("Connecting...", 0, 0);
+
   auto ret = concord.connectRemote();
   if (ret) {
     labelConnection->setText(tr("connected"));
@@ -67,6 +70,8 @@ void ConcordTest::onSetTime()
 
 void ConcordTest::onReadConfig()
 {
+  onUpdateProgress("Read Config...", 0, 0);
+
   concord.readUserConfig();
 }
 
@@ -91,22 +96,41 @@ void ConcordTest::onWriteConfig()
     return;
   }
 
+  onUpdateProgress("Write Config...", 0, 0);
+
   concord.updateUserConfig(file);
 }
 
 void ConcordTest::onLearnIrSingle()
 {
+  onUpdateProgress("Learn command...", 0, 0);
+
   concord.learnCommand();
 }
 
 void ConcordTest::onLearnIrStream()
 {
+  onUpdateProgress("Learn command...", 0, 0);
+
   concord.learnStream(2500);
 }
 
 void ConcordTest::onUpdateProgress(const QString text, int step, int of)
 {
-  emit writeMsg("implement me!");
+  int percent;
+
+  if (of <= 0) {
+    // unknown duration -> busy/activity indicator
+    progressBar->setRange(0, 0);
+  } else {
+    // normal progress mode
+    progressBar->setRange(0, 100);
+
+    percent = (step * 100) / of;
+    percent = qBound(0, percent, 100);
+    progressBar->setValue(percent);
+  }
+  progressBar->setFormat(text);
 }
 
 void ConcordTest::onDisconnected(int time_s)
@@ -120,7 +144,8 @@ void ConcordTest::onDisconnected(int time_s)
           "your remote, wait 10s and click \"OK\"\n\n"
           "If you didn't disconnect your remote, disconnect it now, remove\n"
           "and reinsert the battery, wait for the main "
-          "screen to show, reconnect it and then click \"OK\""), QMessageBox::Ok);
+          "screen to show, reconnect it and then click \"OK\""),
+      QMessageBox::Ok);
   disconnectMsg->setAttribute(Qt::WA_DeleteOnClose);
 
   connect(disconnectMsg, &QObject::destroyed, this, [this]() {
@@ -134,6 +159,13 @@ void ConcordTest::onDone(bool success, const QString &msg)
 {
   emit writeMsg(msg);
   labelConnection->setText(msg);
+  progressBar->setRange(0, 100);
+  progressBar->setValue(100);
+  if (success) {
+    progressBar->setFormat(tr("%1: OK").arg(progressBar->text()));
+  } else {
+    progressBar->setFormat(tr("Error in %1").arg(progressBar->text()));
+  }
 }
 
 void ConcordTest::onTime(const QString time)
@@ -186,8 +218,7 @@ void ConcordTest::onReadUserConfigDone(bool success)
     //write xml + zip file
     auto ret = concord.writeUserConfigFile(filePathXml, true);
     if (ret != 0) {
-      emit writeLog(LogLevel::Error,
-          tr("write file error"),
+      emit writeLog(LogLevel::Error, tr("write file error"),
           ContentType::PlainText);
       return;
     }
@@ -230,6 +261,14 @@ void ConcordTest::createWidgets()
   layout->addWidget(buttonLearnIrStream, 5, 1);
   labelIrData = new QLabel(tr("IR Data"), this);
   layout->addWidget(labelIrData, 5, 2);
+
+  progressBar = new QProgressBar(this);
+  progressBar->setMinimum(0);
+  progressBar->setMaximum(100);
+  progressBar->setValue(0);
+  progressBar->setTextVisible(true);
+  progressBar->setFormat("");
+  layout->addWidget(progressBar, 6, 0, 1, 3);
 
 }
 
