@@ -1,6 +1,6 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
- * test_single.cpp
- *
  * Unit tests for frame::Single
  * Protocol reference: learn.md "Read single frame"
  */

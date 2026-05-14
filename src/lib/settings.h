@@ -1,9 +1,4 @@
-/*
- * settings.h
- *
- *  Created on: Apr 26, 2026
- *      Author: martin
- */
+// SPDX-License-Identifier: LGPL-2.1-or-later
 
 #pragma once
 

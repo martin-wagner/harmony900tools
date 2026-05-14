@@ -1,9 +1,4 @@
-/*
- * test_file.cpp
- *
- * Unit tests for ssIr::SerialStreamIr and ssIr::File
- *
- */
+// SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include <gtest/gtest.h>
 #include <cstdio>

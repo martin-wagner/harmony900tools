@@ -1,6 +1,6 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
- * test_data.cpp
- *
  * Unit tests for lib::Block and lib::TimingStream
  * Skips visual/string converters (gnuplot, hex, int, ascii).
  */

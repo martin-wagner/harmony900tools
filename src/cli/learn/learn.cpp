@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #ifdef _WIN32
   #define _WIN32_WINNT 0x0600   // Vista+ for inet_pton
   #include <winsock2.h>

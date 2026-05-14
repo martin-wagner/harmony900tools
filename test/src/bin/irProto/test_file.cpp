@@ -1,6 +1,6 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
- * test_irproto.cpp
- *
  * Unit tests for irProto::File, IrProto, TimingSection,
  * TimingSectionIrHeader, TimingSectionIrPayload, and Code.
  *

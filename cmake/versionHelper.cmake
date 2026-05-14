@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
 # git_version.cmake
 # Called via cmake -P or add_custom_target at build time.
 # Required input variables (pass with -D):

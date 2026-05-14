@@ -1,9 +1,4 @@
-/*
- * lib.h
- *
- *  Created on: Mar 28, 2026
- *      Author: martin
- */
+// SPDX-License-Identifier: LGPL-2.1-or-later
 
 #pragma once
 

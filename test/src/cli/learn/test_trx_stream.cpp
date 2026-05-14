@@ -1,6 +1,6 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
- * test_stream.cpp
- *
  * Unit tests for frame::Stream
  * Protocol reference: learn.md "Read stream"
  */

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
 set(sources
     irProto.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/irProto/file.cpp

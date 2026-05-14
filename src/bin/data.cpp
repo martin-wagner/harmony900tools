@@ -1,9 +1,4 @@
-/*
- * data.cpp
- *
- *  Created on: Mar 29, 2026
- *      Author: martin
- */
+// SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include <sstream>
 #include <iomanip>

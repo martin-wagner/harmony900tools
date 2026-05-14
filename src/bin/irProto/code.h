@@ -1,9 +1,4 @@
-/*
- * code.h
- *
- *  Created on: Apr 4, 2026
- *      Author: martin
- */
+// SPDX-License-Identifier: LGPL-2.1-or-later
 
 #pragma once
 

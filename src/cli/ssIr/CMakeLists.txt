@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
 set(sources
     ssIr.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/ssIr/file.cpp
