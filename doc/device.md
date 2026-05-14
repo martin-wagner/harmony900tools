@@ -4,8 +4,6 @@
 
 Each `<Device>` represents one piece of AV equipment the remote can control. Devices have no dependencies on each other and no dependencies on activities. They are referenced by their `<Id>` from activity configuration.
 
-They are referenced by their `<Id>` from activity configuration.
-
 ---
 
 ## Top-level Tree
@@ -148,28 +146,29 @@ The `_Hold` suffix indicates the default trigger mode. The ActionId ties back to
 
 All properties are `<Property name="...">value</Property>` elements. Boolean values are `true`/`false` (lowercase) or occasionally `True`/`False` (mixed case – inconsistency in the data).
 
-| Property | Type |  Values seen | Meaning |
-|---|---|---|---|---|
-| `AlwaysOn` | bool |  `true`, `false` | Hint that the device is typically left on. Does **not** guarantee it's always in the On list of every activity – the activity's Power section is authoritative. |
-|`AudioSwitch`||||
-| `AutoPower` | bool |`false` | TV-specific. Whether the TV auto-powers via CEC or similar. |
-| `Dimmer` | bool| `false`, `true` | Whether the light device supports dimming. |
-| `HasBands` | bool | `true` | Device supports AM/FM band switching (Receiver, MediaCenterPC). |
-| `HasPresets` | bool | `true` | Device supports named channel/station presets. |
-| `IsDisplayDevice` | bool  | `true` | Marks the device as a display/screen. Drives which device gets the DISPLAY role. |
-| `IsNewDevice` | bool  | `true` | Set when a device was recently added. Likely a UI hint. |
-| `ManualPower` | bool  | `true`, `false` | `false` = remote auto-controls power via state machine. `true` = device must be powered manually; no `Power` State will be present. |
-| `MenuOnDevice` | bool | `false` | Menu/UI is rendered on the device itself (not the remote). |
-| `NumDiscs` | integer |  `1`, `5` | Number of disc slots. |
-| `NumLights` | integer |  `1`, `12` | Number of individually controllable light channels. |
-|`OnScreenGuide`||`false`||
-| `PvrType` | string |  `Generic` | PVR/DVR class. |
-| `RecordMedia Fixed Disc` | bool |  `true` | Device has a fixed internal disc for recording. |
-| `RecordMedia Removable Videotape` | bool |  `true` | Device uses removable tape (VCR-specific). |
-| `RevertInput` | bool |  `true` | TV-specific. Possibly reverts input on power cycle. |
-| `Scart` | bool |  `True` | TV has a SCART connector. |
-| `TunerInput` | string  | `Tuner` | Names the input that connects to an antenna/tuner signal. |
-|`VideoSwitch`||`true``||
+| Property                          | Type    | Values seen     | Meaning                                                                                                                                                         |
+| --------------------------------- | ------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AlwaysOn`                        | bool    | `true`, `false` | Hint that the device is typically left on. Does **not** guarantee it's always in the On list of every activity — the activity's Power section is authoritative. |
+| `AudioSwitch`                     | bool    |                 |                                                                                                            |
+| `AutoPower`                       | bool    | `false`         | TV-specific. Whether the TV auto-powers via CEC or similar.                                                                                                     |
+| `Dimmer`                          | bool    | `false`, `true` | Whether the light device supports dimming.                                                                                                                      |
+| `HasBands`                        | bool    | `true`          | Device supports AM/FM band switching (Receiver, MediaCenterPC).                                                                                                 |
+| `HasPresets`                      | bool    | `true`          | Device supports named channel/station presets.                                                                                                                  |
+| `IsDisplayDevice`                 | bool    | `true`          | Marks the device as a display/screen. Drives which device gets the DISPLAY role.                                                                                |
+| `IsNewDevice`                     | bool    | `true`          | Set when a device was recently added. Likely a UI hint.                                                                                                         |
+| `ManualPower`                     | bool    | `true`, `false` | `false` = remote auto-controls power via state machine. `true` = device must be powered manually; no `Power` state will be present.                             |
+| `MenuOnDevice`                    | bool    | `false`         | Menu/UI is rendered on the device itself (not the remote).                                                                                                      |
+| `NumDiscs`                        | integer | `1`, `5`        | Number of disc slots.                                                                                                                                           |
+| `NumLights`                       | integer | `1`, `12`       | Number of individually controllable light channels.                                                                                                             |
+| `OnScreenGuide`                   | bool    | `false`         |                                                                                                                    |
+| `PvrType`                         | string  | `Generic`       | PVR/DVR class.                                                                                                                                                  |
+| `RecordMedia Fixed Disc`          | bool    | `true`          | Device has a fixed internal disc for recording.                                                                                                                 |
+| `RecordMedia Removable Videotape` | bool    | `true`          | Device uses removable tape (VCR-specific).                                                                                                                      |
+| `RevertInput`                     | bool    | `true`          | TV-specific. Possibly reverts input on power cycle.                                                                                                             |
+| `Scart`                           | bool    | `true`          | TV has a SCART connector.                                                                                                                                       |
+| `TunerInput`                      | string  | `Tuner`         | Names the input that connects to an antenna/tuner signal.                                                                                                       |
+| `VideoSwitch`                     | bool    | `true`          |                                                                                                          |
+
 
 This list is most likely incomplete.
 
@@ -279,18 +278,18 @@ No per-command timing overrides exist – all commands in a device share these d
 
 **All subsequent entries** are real commands:
 
-The remote can reference protocols in irProto.bin and commands in SsIr.bin. Index begins at [0]!
+The xml config can reference protocols in irProto.bin and commands in SsIr.bin. Index begins at [0]!
 
 | Field | Notes |
 |---|---|
 | `<Name>` | Command name; must match the suffix in `<ActionId>` references |
 | `<Data>/<Protocol>` | Integer index into irProto.bin list. `-1` = escape for ssIr.bin raw command list |
-| `<Data>/<Code>` | Hex-encoded IR code blob – opaque binary, format defined in the protocol entry. Or integer index for command in raw command list |
+| `<Data>/<Code>` | Hex-encoded command for irproto or integer index for command in raw command list |
 
 
 #### ssIr
 
-A command in ssIr is referenced by inserting the command number like in the following example:
+A raw command in ssIr is referenced by inserting the command number like in the following example:
 
 ```
  <Command>

@@ -10,19 +10,19 @@ One special activity (`PowerOff`, id=`-1`) always exists and turns everything of
 
 ---
 
-## Activity types found
+## Activity types
 
 | Type | Description |
-|---|---|---|
-| `PowerOff` | Special: turns all devices off. Id always `-1`. |
+|---|---|
+| `PowerOff` | Special: turns all devices off. ID always `-1`. |
 | `VirtualCdMulti` | Disc playback (CD 1 ... n) |
 | `VirtualDvd` | Disc playback (BD/DVD) |
-| `VirtualGameConsole` |Gaming |
+| `VirtualGameConsole` | Gaming |
 | `VirtualGeneric` | Catch-all for activities with no dedicated template |
 | `VirtualMusicServer` | ?? |
 | `VirtualPvr` | Live TV / satellite viewing / recording |
-| `VirtualRadioSimple` |  Radio with simple controls |
-| `VirtualSatelliteMusic`  | Satellite radio / music |
+| `VirtualRadioSimple` | Radio with simple controls |
+| `VirtualSatelliteMusic` | Satellite radio / music |
 | `VirtualTelevisionN` | Live TV / satellite viewing |
 | `VirtualVcr` | VHS playback |
 
@@ -104,17 +104,15 @@ All properties are `<Property name="...">value</Property>`. Absent on `PowerOff`
 | `ActivityStartPage` | `Transport`, `Numbers`, `GameController` | Which UI tab is shown first when the activity is active. `Transport` = play/pause/skip. `Numbers` = keypad. `GameController` = game buttons. |
 | `ControlGroup_Hard Buttons` | `True` | Enables the HardButtons control group in the activity UI. Always `True`. |
 | `PowerOffUnusedDevices` | `True` | Remote auto-powers-off devices in the Off list when switching to this activity. Always `True`. |
-| `TrainingWheels` | `True` | First-use guidance mode. Always `True` in these configs. |
-| `UnusedDevicesHelp` | `False` | Show/hide help for unused devices. Always `False`. |
+| `TrainingWheels` | `True` | ?? WTF |
+| `UnusedDevicesHelp` | `False` | ?? |
 
 #### Common optional properties
 
 | Property | Values | Activity types | Meaning |
 |---|---|---|---|
-| `ActivityStartPage` | `GameController`, `Numbers`, `Transport` | \todo | \todo |
 | `ChannelButtonBehaviour` | `BasicChannels` | TV |  How channel up/down work. |
-| `ControlGroup_Hard Buttons` | `BasicChannels` | `True` | \todo |
-| `ControlGroup_Soft Buttons` | `True` | most | Enables the Misc soft-button panel \todo false? |
+| `ControlGroup_Soft Buttons` | `True` | most | Enables the Misc soft-button panel ?? false? |
 | `EnableSmartMenu` | `True` | Dvd | Enable smart disc menu navigation. |
 | `EnableSmartZoom` | `True` | Dvd | Enable smart zoom feature. |
 | `GuideButtonMode` | `TunerProgramGuide` | Tv |  What the Guide button does. |
@@ -130,13 +128,10 @@ All properties are `<Property name="...">value</Property>`. Absent on `PowerOff`
 | `MaxTvContentDays` | 14 | ?? | ?? |
 | `MediaButtonMode` | `ShowMedia` | TV, Dvd, Radio | Behaviour of the media buttons. |
 | `PlayOnEnter` | `True`, `False` | Dvd, Vcr | Whether to auto-start playback when switching to this activity. |
-| `PowerOffUnusedDevices` | `True`, `False` | ?? | ?? |
 | `RetainStop` | `False` | ?? | ?? |
 | `ScrollChannelsByPage` | `True` | ?? | ?? |
 | `ScrollShowsByPage` | `True` | ?? | ?? |
 | `StopOnExit` | `True`, `False` | Dvd, Vcr | Whether to send Stop when leaving this activity. |
-| `TrainingWheels` | `True`, `False` | ?? |  ?? WTF |
-| `UnusedDevicesHelp` | `False` | ?? | ?? |
 
 ---
 
@@ -174,7 +169,7 @@ An ordered sequence of `<Action>` elements executed top-to-bottom when switching
 
 The `SetValue` for inputs fires DiscreteActions which send IR.
 
-In theory, `<Power>` and SetValue startup state machine should make your setup ready-to-operate. In practice, this can fail. For commands that don't toggle/use sequences, sending them a second time makes this more robust against errors.
+In theory, `<Power>` and SetValue startup state machine should make your setup ready-to-operate. In practice, this can fail. For commands that don't toggle/use sequences, sending them a second time makes this more robust against errors. SetValue was created by the logitech sofware wizard, the other ones by manually adding them.
 
 ---
 
@@ -237,7 +232,7 @@ Runs on switch-in. Sets device states and sends IR sequences. Power-on is handle
 The Role assignments determine which device receives button presses. The HardButtons and Misc control groups define the button layout. The device's own state machine tracks input/mode changes that happen while the activity is active.
 
 **3. Leaving (LeaveActions)**
-Runs on switch-out. Tthe next activity's Power section diff determines what to power off, and `StopOnExit`/`PlayOnEnter` \todo really? properties handle playback state.
+Runs on switch-out. Sets device states and sends IR sequences. The next activity's Power section diff determines what to power off, and `StopOnExit`/`PlayOnEnter` \todo really? properties handle playback state.
 
 ---
 
