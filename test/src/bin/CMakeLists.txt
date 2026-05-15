@@ -9,8 +9,8 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 # test_data
 # ---------------------------------------------------------------------------
 add_executable(test_data
-    test_data.cpp
-    ${SRC_DIR}/data.cpp
+    test_timing.cpp
+    ${SRC_DIR}/timing.cpp
 )
 
 target_include_directories(test_data
@@ -34,3 +34,4 @@ gtest_discover_tests(test_data)
 
 add_subdirectory(irProto)
 add_subdirectory(ssIr)
+add_subdirectory(learn)

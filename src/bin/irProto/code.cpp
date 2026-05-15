@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace binary
+{
 namespace irProto
 {
 
@@ -175,11 +177,11 @@ const IrProto::Data Code::getData() const
 {
   IrProto::Data data;
 
-  for (const auto& s : sections) {
-    data.push_back( { s.getIndex(), s.getData()});
+  for (const auto &s : sections) {
+    data.push_back( { s.getIndex(), s.getData() });
   }
   return data;
 }
 
 }
-
+}

@@ -4,7 +4,7 @@ set(sources
     irProto.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/irProto/file.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/irProto/code.cpp
-    ${CMAKE_SOURCE_DIR}/src/bin/data.cpp
+    ${CMAKE_SOURCE_DIR}/src/bin/timing.cpp
 )
 
 add_executable(harmony900irProtoTool ${sources})

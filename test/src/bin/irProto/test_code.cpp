@@ -25,6 +25,7 @@
 
 #include "code.h"
 
+using namespace binary;
 using namespace irProto;
 
 // ===========================================================================

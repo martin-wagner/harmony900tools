@@ -4,6 +4,7 @@
 
 #include "trx_base.h"
 
+namespace binary {
 namespace trx {
 
 //see learn.md _read stream_
@@ -34,5 +35,5 @@ class Stream : public Base
 
 
 }
-
+}
 

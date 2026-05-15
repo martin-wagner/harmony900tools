@@ -4,6 +4,7 @@
 
 #include "file.h"
 
+namespace binary {
 namespace irProto {
 
 /** single timing section */
@@ -101,5 +102,5 @@ class Code
 };
 
 }
-
+}
 

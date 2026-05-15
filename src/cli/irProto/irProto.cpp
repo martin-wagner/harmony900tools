@@ -16,6 +16,7 @@
 #include "lib/endian.h"
 
 using namespace std;
+using namespace binary;
 
 // --- config ---
 
@@ -280,7 +281,7 @@ int main(int argc, char **argv)
   }
 
   if (!cfg.commandHex.empty()) {
-    lib::TimingStream samples;
+    TimingStream samples;
     irProto::Code code;
 
     auto status = code.parse(cfg.commandHex);
@@ -304,7 +305,7 @@ int main(int argc, char **argv)
     cout << "Sample count: " << samples.timings().size() * 2 << endl;
     if (cfg.verbosity > 0) {
       cout << "Data: ";
-      for (const auto &s: data) {
+      for (const auto &s : data) {
         cout << "S" << s.first << " ";
         for (const auto &b : s.second) {
           cout << b;

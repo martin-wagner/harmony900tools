@@ -7,6 +7,7 @@
 
 #include "file.h"
 
+using namespace binary;
 using namespace ssIr;
 
 // ---------------------------------------------------------------------------
@@ -114,7 +115,7 @@ TEST(SerialStreamIrDataClock, EmptyData)
 
 TEST(SerialStreamIrTimingStream, TakesOwnership)
 {
-  auto ts = lib::TimingStream::fromMarkPause(simpleMarkPause());
+  auto ts = TimingStream::fromMarkPause(simpleMarkPause());
   SerialStreamIr s(ts, 38000.0);
   ASSERT_EQ(s.accessStream().timings().size(), 2u);
   EXPECT_EQ(s.accessStream().timings()[0].mark_us, 833u);
@@ -357,7 +358,7 @@ TEST(FileAppend, AppendVectorOddSizeRejected)
 TEST(FileAppend, AppendTimingStream)
 {
   File f;
-  auto ts = lib::TimingStream::fromMarkPause(simpleMarkPause());
+  auto ts = TimingStream::fromMarkPause(simpleMarkPause());
   int index = -1;
   f.appendStream(ts, 38000.0, index);
   EXPECT_EQ(f.getStreamCount(), 1);

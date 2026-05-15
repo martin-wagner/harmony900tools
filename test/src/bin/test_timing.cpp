@@ -6,9 +6,9 @@
  */
 
 #include <gtest/gtest.h>
-#include "data.h"
+#include "timing.h"
 
-using namespace lib;
+using namespace binary;
 
 // ---------------------------------------------------------------------------
 // Block::fromMarkSegment

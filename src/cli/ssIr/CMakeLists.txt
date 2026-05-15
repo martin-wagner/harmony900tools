@@ -3,7 +3,7 @@
 set(sources
     ssIr.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/ssIr/file.cpp
-    ${CMAKE_SOURCE_DIR}/src/bin/data.cpp
+    ${CMAKE_SOURCE_DIR}/src/bin/timing.cpp
 )
 
 add_executable(harmony900ssIrTool ${sources})

@@ -7,7 +7,7 @@
 #include <chrono>
 #include <string>
 
-namespace lib {
+namespace binary {
 
 
 /** single data block */

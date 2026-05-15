@@ -9,6 +9,8 @@
 
 using namespace std;
 
+namespace binary
+{
 namespace irProto
 {
 
@@ -674,7 +676,7 @@ Status File::serialise(const string &filename, uint32_t *crc) const
   return Status::OK;
 }
 
-Status File::serialiseIrStream(lib::TimingStream &out, uint16_t index,
+Status File::serialiseIrStream(binary::TimingStream &out, uint16_t index,
     const IrProto::Data &data) const
 {
   vector<Item> items;
@@ -733,5 +735,6 @@ Status File::parseObject(const vector<uint8_t> &raw, uint16_t startOffset,
   return Status::OK;
 }
 
+}
 }
 

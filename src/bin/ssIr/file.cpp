@@ -8,6 +8,8 @@
 
 using namespace std;
 
+namespace binary
+{
 namespace ssIr
 {
 
@@ -26,7 +28,7 @@ SerialStreamIr::SerialStreamIr(const vector<uint16_t> &data, double clock)
 {
   setClock(clock);
 
-  stream = lib::TimingStream::fromMarkPause(data);
+  stream = TimingStream::fromMarkPause(data);
 }
 
 SerialStreamIr::SerialStreamIr(vector<uint16_t> data)
@@ -61,10 +63,10 @@ SerialStreamIr::SerialStreamIr(vector<uint16_t> data)
     }
     data[i] = data[i] & 0x7fff;
   }
-  stream = lib::TimingStream::fromMarkPause(data);
+  stream = TimingStream::fromMarkPause(data);
 }
 
-SerialStreamIr::SerialStreamIr(lib::TimingStream &stream, double clock)
+SerialStreamIr::SerialStreamIr(TimingStream &stream, double clock)
 {
   setClock(clock);
 
@@ -196,7 +198,7 @@ Status File::appendStream(vector<uint16_t> &data, double clock, int &index)
   return Status::OK;
 }
 
-void File::appendStream(lib::TimingStream &stream, double clock, int &index)
+void File::appendStream(TimingStream &stream, double clock, int &index)
 {
   index = streams.size();
 
@@ -276,5 +278,6 @@ Status File::parseObject(const vector<uint8_t> &raw, uint16_t startOffset,
   return Status::OK;
 }
 
+}
 }
 

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <vector>
 
+namespace binary {
 namespace trx {
 
 class Base
@@ -81,4 +82,5 @@ class Base
 
 };
 
+}
 }

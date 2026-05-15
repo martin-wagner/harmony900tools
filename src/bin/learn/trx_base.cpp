@@ -4,6 +4,7 @@
 
 using namespace std;
 
+namespace binary {
 namespace trx
 {
 
@@ -49,4 +50,4 @@ void Base::moveExcessBytes(bool check)
 }
 
 }
-
+}

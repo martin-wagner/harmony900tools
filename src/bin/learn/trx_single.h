@@ -4,6 +4,7 @@
 
 #include "trx_base.h"
 
+namespace binary {
 namespace trx {
 
 //see learn.md _read single frame_
@@ -33,5 +34,5 @@ class Single : public Base
 
 
 }
-
+}
 

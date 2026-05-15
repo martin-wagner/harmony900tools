@@ -14,6 +14,7 @@
 #include "bin/ssIr/file.h"
 
 using namespace std;
+using namespace binary;
 
 // --- config ---
 

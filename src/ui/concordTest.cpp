@@ -6,7 +6,7 @@
 
 //plain c functions -- never use outside cpp file (->global namespace)
 #include "wrappers/concordWrapper.h"
-#include "bin/data.h"
+#include "bin/timing.h"
 
 using namespace std;
 
@@ -196,7 +196,7 @@ void ConcordTest::onLearnWindowIsOpen(bool waits)
   }
 }
 
-void ConcordTest::onLearnDone(const lib::TimingStream &t, uint32_t carrier)
+void ConcordTest::onLearnDone(const binary::TimingStream &t, uint32_t carrier)
 {
   if (t.timings().size() > 0) {
     emit writeMsg("Learned Command");

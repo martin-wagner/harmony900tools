@@ -3,8 +3,9 @@
 #pragma once
 
 #include "cli/lib/lib.h"
-#include "bin/data.h"
+#include "bin/timing.h"
 
+namespace binary {
 namespace ssIr {
 
 /** UR Default Carrier clock. Use this if not available, will work 95% of times.
@@ -27,7 +28,7 @@ class SerialStreamIr
   protected:
     uint16_t clockPeriod = 26316;//ns -- 38kHz
     uint16_t filler = 0;
-    lib::TimingStream stream;
+    TimingStream stream;
 
     static constexpr int HEADER_SIZE = 3;
 
@@ -38,12 +39,12 @@ class SerialStreamIr
     /** add a stream, alternating mark<us>, pause<us> + clock */
     SerialStreamIr(const std::vector<uint16_t> &data, double clock /* hz */);
     /** add a stream + clock */
-    SerialStreamIr(lib::TimingStream &stream, double clock /* hz */);
+    SerialStreamIr(TimingStream &stream, double clock /* hz */);
     /** add a raw stream from SsIr.bin file */
     SerialStreamIr(std::vector<uint16_t> data);
 
     void addData(std::vector<uint16_t> &data);
-    const lib::TimingStream &accessStream() const { return stream; };
+    const TimingStream &accessStream() const { return stream; };
     double getClock() const { return 1.0 / static_cast<double>(clockPeriod) * 1000000000.0; };
 
     std::vector<uint16_t> serialise() const;
@@ -84,7 +85,7 @@ class File
     /** add a ready-to-use stream, e.g. from irlearn. takes ownership!
      * @param index [out] position where stream was added
      */
-    void appendStream(lib::TimingStream &stream, double clock, int &index);
+    void appendStream(TimingStream &stream, double clock, int &index);
 
     /** remove a stream */
     void removeStream(int index);
@@ -100,6 +101,7 @@ class File
 
 };
 
+}
 }
 
 

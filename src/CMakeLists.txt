@@ -30,7 +30,7 @@ set(sources
   lib/users.h  #moc for headers
   main.cpp
   mainwindow.cpp
-  bin/data.cpp
+  bin/timing.cpp
   comm/concord.cpp
   ui/logViewer.cpp
   ui/settings.cpp

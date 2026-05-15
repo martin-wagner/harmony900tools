@@ -4,11 +4,11 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "data.h"
+#include "timing.h"
 
 using namespace std;
 
-namespace lib
+namespace binary
 {
 
 void TimingStream::addMarkSegment(const vector<uint16_t> &raw)

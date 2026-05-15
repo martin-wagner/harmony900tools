@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Source location
 # ---------------------------------------------------------------------------
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/cli/learn)
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/bin/learn)
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 
 # ---------------------------------------------------------------------------
@@ -11,7 +11,7 @@ set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 # ---------------------------------------------------------------------------
 add_executable(test_single
     test_trx_single.cpp
-    ${LIB_DIR}/data.cpp
+    ${LIB_DIR}/timing.cpp
     ${SRC_DIR}/trx_base.cpp
     ${SRC_DIR}/trx_single.cpp
 )

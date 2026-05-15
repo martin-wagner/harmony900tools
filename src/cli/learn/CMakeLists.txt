@@ -2,10 +2,10 @@
 
 set(sources
     learn.cpp
-    trx_base.cpp
-    trx_single.cpp
-    trx_stream.cpp
-    ${CMAKE_SOURCE_DIR}/src/bin/data.cpp
+    ${CMAKE_SOURCE_DIR}/src/bin/learn/trx_base.cpp
+    ${CMAKE_SOURCE_DIR}/src/bin/learn/trx_single.cpp
+    ${CMAKE_SOURCE_DIR}/src/bin/learn/trx_stream.cpp
+    ${CMAKE_SOURCE_DIR}/src/bin/timing.cpp
 )
 
 add_executable(harmony900learnTool ${sources})

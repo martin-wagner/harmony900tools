@@ -6,7 +6,7 @@
 #include <QString>
 #include <mutex>
 
-#include "bin/data.h"
+#include "bin/timing.h"
 #include "context.h"
 #include "ui/logViewer.h"
 
@@ -83,7 +83,7 @@ class Concord: public QWidget
      * true -- remote is ready, false -- remote is done / window closed */
     void learnWindowIsOpen(bool waits);
     /** learn command is done */
-    void learnDone(const lib::TimingStream &t, uint32_t carrier);
+    void learnDone(const binary::TimingStream &t, uint32_t carrier);
     /** reading is done */
     void readUserConfigDone(bool success);
 

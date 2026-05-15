@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace binary
+{
 namespace trx
 {
 
@@ -19,7 +21,7 @@ Single::Status Single::parse(const std::vector<uint8_t> &p)
   //drop 0x02, 0xXX 0xXX big endian
   for (size_t i = 0; (i + 2) < p.size(); i += 3) {
     if (p[i] == 0x02) {
-      payload.push_back(lib::parseHarmony16_network(p[i+1], p[i+2]));
+      payload.push_back(lib::parseHarmony16_network(p[i + 1], p[i + 2]));
     } else {
       return Status::ERR_PAYLOAD_FORMAT;
     }
@@ -30,7 +32,7 @@ Single::Status Single::parse(const std::vector<uint8_t> &p)
 Single::Status Single::addChunk(const std::vector<uint8_t> &data, bool first)
 {
   auto status = Base::check(data);
-  if (status !=  Status::OK) {
+  if (status != Status::OK) {
     return status;
   }
 
@@ -58,4 +60,5 @@ Single::Status Single::addChunk(const std::vector<uint8_t> &data, bool first)
   return Status::OK;
 }
 
+}
 }

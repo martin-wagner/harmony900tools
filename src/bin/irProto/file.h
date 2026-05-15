@@ -3,8 +3,9 @@
 #pragma once
 
 #include "cli/lib/lib.h"
-#include "bin/data.h"
+#include "bin/timing.h"
 
+namespace binary {
 namespace irProto {
 
 /** UR Default Carrier clock. Use this if not available, will work 95% of times.
@@ -243,13 +244,14 @@ class File
     Status serialise(const std::string &filename, uint32_t *crc = nullptr) const;
 
     /** serialise to timing stream */
-    Status serialiseIrStream(lib::TimingStream &out, uint16_t index, const IrProto::Data &data) const;
+    Status serialiseIrStream(binary::TimingStream &out, uint16_t index, const IrProto::Data &data) const;
 
   private:
     Status parseObject(const std::vector<uint8_t> &raw, uint16_t startOffset, uint16_t endOffset);
 
 };
 
+}
 }
 
 

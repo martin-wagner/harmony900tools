@@ -26,6 +26,7 @@
 #include "file.h"
 #include "code.h"
 
+using namespace binary;
 using namespace irProto;
 
 #ifndef REAL_IRPROTO_BIN_PATH
@@ -597,7 +598,7 @@ TEST_F(RealIrProtoTest, LG_FlatCommandProducesTimingStream)
 {
   // LG 82UN85006LA: proto=0, FLAT, 32 bits
   Code code("0x0000F40101010020DF32CD010100");
-  lib::TimingStream out;
+  TimingStream out;
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   // 32 data bits -> 32 mark/pause pairs + SoF(2) + EoF(1) + repeat section SoF/EoF
@@ -613,7 +614,7 @@ TEST_F(RealIrProtoTest, Samsung_SingleSectionCommandProducesTimingStream)
 {
   // Samsung SV-6332X: proto=1, SINGLE_SECTION, tx=3
   Code code("0x0100F401030001005F5F778800");
-  lib::TimingStream out;
+  TimingStream out;
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
@@ -628,7 +629,7 @@ TEST_F(RealIrProtoTest, Philips_MultiSectionCommandProducesTimingStream)
 {
   // Philips BDP-2700: proto=2, MULTI_SECTION(3)
   Code code("0x0200F4010300030070010002B9FF00");
-  lib::TimingStream out;
+  TimingStream out;
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
@@ -643,7 +644,7 @@ TEST_F(RealIrProtoTest, VuPlus_SingleSectionCommandProducesTimingStream)
 {
   // Vu+ DUO 2: proto=4, SINGLE_SECTION, tx=1
   Code code("0x0400C80001000100FEB5BFFC00");
-  lib::TimingStream out;
+  TimingStream out;
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
@@ -658,7 +659,7 @@ TEST_F(RealIrProtoTest, XBox_SingleSectionCommandProducesTimingStream)
 {
   // Microsoft XBox: proto=5, 24 bits, 56kHz
   Code code("0x0500F40103000100530ACF00");
-  lib::TimingStream out;
+  TimingStream out;
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
@@ -673,7 +674,7 @@ TEST_F(RealIrProtoTest, Led_SingleSectionCommandProducesTimingStream)
 {
   // Led RGB-LED-1: proto=6, 16 bits
   Code code("0x0600F401030001009C0000");
-  lib::TimingStream out;
+  TimingStream out;
   auto status = file.serialiseIrStream(out, code.getIndex(), code.getData());
   EXPECT_EQ(status, Status::OK);
   EXPECT_FALSE(out.timings().empty());
@@ -687,7 +688,7 @@ TEST_F(RealIrProtoTest, Led_SingleSectionCommandProducesTimingStream)
 TEST_F(RealIrProtoTest, InvalidProtocolIndexReturnsError)
 {
   Code code("0x0000F40101010020DF32CD010100");
-  lib::TimingStream out;
+  TimingStream out;
   // protocol index 99 doesn't exist
   auto status = file.serialiseIrStream(out, 99, code.getData());
   EXPECT_EQ(status, Status::ERROR_INDEX);

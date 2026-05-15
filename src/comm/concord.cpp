@@ -51,7 +51,7 @@ class Worker: public QObject
     void done(bool success, const QString &msg);
     void time(const QString time);
     void learnWindowIsOpen(bool waits);
-    void learnDone(const lib::TimingStream &t, uint32_t carrier);
+    void learnDone(const binary::TimingStream &t, uint32_t carrier);
     void readUserConfigDone(bool success);
     void pingResponse();
 
@@ -390,7 +390,7 @@ class Worker: public QObject
           tr("libconcord IR Carrier %1kHz").arg((double) carrier / 1000.0),
           ContentType::PlainText);
 
-      auto stream = lib::TimingStream::fromMarkPause(data);
+      auto stream = binary::TimingStream::fromMarkPause(data);
       auto visual = stream.convertAsciiPlot(250);
 
       emit writeLog(LogLevel::Debug,

@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace binary
+{
 namespace trx
 {
 
@@ -59,4 +61,4 @@ Stream::Status Stream::addChunk(const std::vector<uint8_t> &data, bool first)
 }
 
 }
-
+}

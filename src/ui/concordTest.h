@@ -35,7 +35,7 @@ class ConcordTest: public QWidget
     void onDone(bool success, const QString &msg);
     void onTime(const QString time);
     void onLearnWindowIsOpen(bool waits);
-    void onLearnDone(const lib::TimingStream &t, uint32_t carrier);
+    void onLearnDone(const binary::TimingStream &t, uint32_t carrier);
     void onReadUserConfigDone(bool success);
 
   protected:

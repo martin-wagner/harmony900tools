@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include "trx_single.h"
 
+using namespace binary;
 using namespace trx;
 
 // ---------------------------------------------------------------------------

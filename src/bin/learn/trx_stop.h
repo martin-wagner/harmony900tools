@@ -4,12 +4,13 @@
 
 #include "trx_base.h"
 
+namespace binary {
 namespace trx {
 
-class Start : public Base
+class Stop : public Base
 {
   private:
-    const std::vector<uint8_t> frameReq = { 0x20, 0xA1, 0x80, 0x01, 0x01, 0x00 };
+    const std::vector<uint8_t> frameReq = { 0x20, 0xA4, 0x80, 0x00 };
 
     int getHeaderMinSize() { return 4; };
     int getProtoclCmd() { return frameReq[1]; };;
@@ -25,5 +26,5 @@ class Start : public Base
 
 
 }
-
+}
 
