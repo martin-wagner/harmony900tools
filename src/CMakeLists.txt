@@ -42,7 +42,6 @@ set(sources
 qt_add_executable(${programName} ${sources})
 
 add_dependencies(${programName} libconcord_ext)
-add_dependencies(${programName} qtadvanceddocking-qt6)
 add_dependencies(${programName} version_info)
 
 if(ltoEnabled)
@@ -65,6 +64,8 @@ target_link_libraries(${programName} PRIVATE
     Qt6::Svg
     qtadvanceddocking-qt6
     Libconcord::libconcord
+    nlohmann_json::nlohmann_json
+    pugixml::pugixml
 )
 
 # Resources:

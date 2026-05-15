@@ -36,6 +36,8 @@ endif()
 # add libs
 include(concordance.cmake)
 include(ads.cmake)
+include(nlohmann_json.cmake)
+include(pugixml.cmake)
 include(version.cmake)
 
 # add project
