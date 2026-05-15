@@ -66,6 +66,7 @@ target_link_libraries(${programName} PRIVATE
     Libconcord::libconcord
     nlohmann_json::nlohmann_json
     pugixml::pugixml
+    magic_enum::magic_enum
 )
 
 # Resources:

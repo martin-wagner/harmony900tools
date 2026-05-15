@@ -38,6 +38,7 @@ include(concordance.cmake)
 include(ads.cmake)
 include(nlohmann_json.cmake)
 include(pugixml.cmake)
+include(magic_enum.cmake)
 include(version.cmake)
 
 # add project
