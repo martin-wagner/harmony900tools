@@ -1,0 +1,89 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#pragma once
+
+#include <type_traits>
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <map>
+#include <QString>
+#include <QList>
+
+namespace document
+{
+namespace domain
+{
+
+//use enum values exactly as in UserConfiguration.xml!
+//all enums _must_ have "Unknown" as last item!.
+enum class Locale { enu, deu, Unknown };
+enum class TimeFormat { Military, Unknown };
+enum class PvrType { Generic, Unknown };
+enum class TunerInput { Tuner, Unknown };
+enum class DeviceType { Amplifier, AudioVideoSwitch, Cd, ClimateControl, Computer, DvdCd,
+    DvdCdGame, DvdCdRadio, GameConsole, Light, MediaCenterPC, Projector, Pvr, Receiver,
+    SetTopBox, Television, Vcr, Unknown };
+enum class StateMachineType { Power, Input, Screen, TVInput, AntennaOutput, Unknown };
+enum class ActionType { None, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
+enum class Operation { ForceValue, SendCommnad, SendDelay, SetValue, Unknown };
+enum class Modifier { None, Press, Hold, Unknown };
+enum class ActivityType { PowerOff, VirtualCdMulti, VirtualDvd, VirtualGameConsole,
+    VirtualGeneric, VirtualMusicServer, VirtualPvr, VirtualRadioSimple,
+    VirtualSatelliteMusic, VirtualTelevisionN, VirtualVcr, Unknown};
+enum class DeviceRole { DEFAULT, DISPLAY, VOLUME, LIGHTCONTROL, LIGHTCONTROL2, LIGHTCONTROL3, LIGHTCONTROL4,
+    PASSTHROUGH, PASSTHROUGH2, PASSTHROUGH3, PASSTHROUGH4, Unknown};
+enum class ActivityStartPage { Transport, Numbers, GameController, Unknown };
+enum class ChannelButtonBehaviour { BasicChannels, Unknown };
+enum class GuideButtonMode { TunerProgramGuide, Unknown };
+enum class MediaButtonMode { ShowMedia, Unknown };
+
+/**
+ * stores enums as enum value and string.
+ *
+ * string allows to dump original value if not known at software build time.
+ */
+template<typename T>
+class Enum
+{
+  static_assert(std::is_enum_v<T>, "T must be an enum");
+
+  public:
+    Enum(const std::string &s);
+    Enum(T v);
+
+    static bool isEnumValue(std::string s);
+    static std::string getString(T v);
+    static QString getQString(T v);
+
+    std::vector<std::string> getStringList();
+    QStringList getQStringList();
+
+    std::string getString() const;
+    QString getQString() const;
+    T getValue() const;
+
+  protected:
+    T value;
+    std::string src;
+};
+
+//limit magic_enum to cpp file -> must provide template types here.
+template class Enum<Locale>;
+template class Enum<TimeFormat>;
+template class Enum<PvrType>;
+template class Enum<TunerInput>;
+template class Enum<DeviceType>;
+template class Enum<StateMachineType>;
+template class Enum<ActionType>;
+template class Enum<Operation>;
+template class Enum<Modifier>;
+template class Enum<ActivityType>;
+template class Enum<ActivityStartPage>;
+template class Enum<ChannelButtonBehaviour>;
+template class Enum<GuideButtonMode>;
+template class Enum<MediaButtonMode>;
+
+}
+}
+
