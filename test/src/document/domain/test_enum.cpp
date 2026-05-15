@@ -17,12 +17,10 @@ using namespace document::domain;
 
 // ---------------------------------------------------------------------------
 // Constructor: string -> enum value
-// Bug: value = v  instead of  value = v.value()  causes compile/runtime error
 // ---------------------------------------------------------------------------
 
 TEST(EnumStringCtor, KnownValueMapsCorrectly)
 {
-    // Bug: value = v assigns optional<T> to T -> should not compile / crash
     Enum<Locale> e("enu");
     EXPECT_EQ(e.getValue(), Locale::enu);
 }
@@ -97,12 +95,11 @@ TEST(EnumGetStringStatic, KnownValue)
 }
 
 // ---------------------------------------------------------------------------
-// getStringList — bug: lambda captures ret by value, list stays empty
+// getStringList
 // ---------------------------------------------------------------------------
 
 TEST(EnumGetStringList, ContainsKnownValues)
 {
-    // Bug: if lambda captures by value, result is empty
     Enum<Locale> e(Locale::enu);
     auto list = e.getStringList();
     EXPECT_NE(std::find(list.begin(), list.end(), "enu"),  list.end());

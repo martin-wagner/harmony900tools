@@ -32,6 +32,10 @@ set(sources
   mainwindow.cpp
   bin/timing.cpp
   comm/concord.cpp
+  document/domain/data.cpp
+  document/domain/enum.cpp
+  document/domain/items/action.cpp
+  document/domain/items/activity.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp
