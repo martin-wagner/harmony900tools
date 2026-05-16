@@ -28,14 +28,16 @@ qt_standard_project_setup(REQUIRES 6.8
 # sources
 set(sources 
   lib/users.h  #moc for headers
+  lib/undo.cpp
   main.cpp
   mainwindow.cpp
   bin/timing.cpp
   comm/concord.cpp
-  document/domain/data.cpp
-  document/domain/enum.cpp
-  document/domain/items/action.cpp
-  document/domain/items/activity.cpp
+  document/config.cpp
+  document/data/data.cpp
+  document/data/enum.cpp
+  document/data/items/action.cpp
+  document/data/items/activity.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp

@@ -7,8 +7,8 @@
 #include <vector>
 #include <chrono>
 
-#include "document/domain/enum.h"
-#include "document/domain/property.h"
+#include "document/data/enum.h"
+#include "document/data/property.h"
 #include "unknown.h"
 #include "state.h"
 #include "digits.h"
@@ -17,7 +17,7 @@
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {
@@ -81,26 +81,26 @@ class Device
     struct Properties {
       //power related
       Property<bool> manualPower{false, Include::ALWAYS};
-      Property<bool> alwaysOn{false, Include::OPTIONAL};
-      Property<bool> autoPower{false, Include::OPTIONAL};
+      Property<bool> alwaysOn{false, Include::CHECK};
+      Property<bool> autoPower{false, Include::CHECK};
       //other
-      Property<bool> audioSwitch{false, Include::OPTIONAL};
-      Property<bool> dimmer{false, Include::OPTIONAL};
-      Property<bool> hasBands{true, Include::OPTIONAL};
-      Property<bool> hasPresets{true, Include::OPTIONAL};
-      Property<bool> isNewDevice{true, Include::OPTIONAL};
-      Property<bool> isDisplayDevice{true, Include::OPTIONAL};
-      Property<bool> menuOnDevice{false, Include::OPTIONAL};
-      Property<int> numDiscs{1, Include::OPTIONAL};
-      Property<int> numLights{1, Include::OPTIONAL};
-      Property<bool> onScreenGuide{false, Include::OPTIONAL};
-      Property<Enum<PvrType>> pvrType{PvrType::Generic, Include::OPTIONAL};
-      Property<bool> recordMediaFixedDisc{true, Include::OPTIONAL};
-      Property<bool> recordMediaRemovableVideotape{true, Include::OPTIONAL};
-      Property<bool> revertInput{true, Include::OPTIONAL};
-      Property<bool> scart{true, Include::OPTIONAL};
-      Property<Enum<TunerInput>> tunerInput{TunerInput::Tuner, Include::OPTIONAL};
-      Property<bool> videoSwitch{true, Include::OPTIONAL};
+      Property<bool> audioSwitch{false, Include::CHECK};
+      Property<bool> dimmer{false, Include::CHECK};
+      Property<bool> hasBands{true, Include::CHECK};
+      Property<bool> hasPresets{true, Include::CHECK};
+      Property<bool> isNewDevice{true, Include::CHECK};
+      Property<bool> isDisplayDevice{true, Include::CHECK};
+      Property<bool> menuOnDevice{false, Include::CHECK};
+      Property<int> numDiscs{1, Include::CHECK};
+      Property<int> numLights{1, Include::CHECK};
+      Property<bool> onScreenGuide{false, Include::CHECK};
+      Property<Enum<PvrType>> pvrType{PvrType::Generic, Include::CHECK};
+      Property<bool> recordMediaFixedDisc{true, Include::CHECK};
+      Property<bool> recordMediaRemovableVideotape{true, Include::CHECK};
+      Property<bool> revertInput{true, Include::CHECK};
+      Property<bool> scart{true, Include::CHECK};
+      Property<Enum<TunerInput>> tunerInput{TunerInput::Tuner, Include::CHECK};
+      Property<bool> videoSwitch{true, Include::CHECK};
       //other other
       std::vector<UnknownElement> u;
     } p;

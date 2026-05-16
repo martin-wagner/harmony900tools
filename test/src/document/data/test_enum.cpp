@@ -12,7 +12,7 @@
 
 #include "enum.h"
 
-using namespace document::domain;
+using namespace document::data;
 
 
 // ---------------------------------------------------------------------------

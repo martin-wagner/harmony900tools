@@ -12,7 +12,7 @@
 #include <sys/ioctl.h>
 #endif
 
-#include "lib/time.h"
+#include "lib/timestamp.h"
 #include "lib/hex.h"
 
 namespace lib

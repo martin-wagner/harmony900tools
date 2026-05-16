@@ -11,7 +11,7 @@ using namespace magic_enum;
 
 namespace document
 {
-namespace domain
+namespace data
 {
 
 template<typename T>

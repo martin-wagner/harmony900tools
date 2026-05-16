@@ -6,13 +6,13 @@
 #include <string>
 #include <vector>
 
-#include "document/domain/enum.h"
-#include "document/domain/property.h"
+#include "document/data/enum.h"
+#include "document/data/property.h"
 #include "unknown.h"
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {
@@ -55,6 +55,36 @@ class UserInfo
       this->lastName = lastName;
     }
 
+    const std::string& getFileCreationDate() const
+    {
+      return fileCreationDate;
+    }
+
+    void setFileCreationDate(const std::string &fileCreationDate)
+    {
+      this->fileCreationDate = fileCreationDate;
+    }
+
+    const std::string& getFileModificationDate() const
+    {
+      return fileModificationDate;
+    }
+
+    void setFileModificationDate(const std::string &fileModificationDate)
+    {
+      this->fileModificationDate = fileModificationDate;
+    }
+
+    const std::string& getOsUserName() const
+    {
+      return osUserName;
+    }
+
+    void setOsUserName(const std::string &osUserName)
+    {
+      this->osUserName = osUserName;
+    }
+
     PROPERTY_GETTER(Property<bool>, newDeviceFound, getNewDeviceFound)
     PROPERTY_GETTER(Property<bool>, trainingWheels, getTrainingWheels)
     PROPERTY_GETTER(Property<Enum<Locale>>, locale, getLocale)
@@ -82,7 +112,7 @@ class UserInfo
 
   protected:
     struct Properties {
-      Property<bool> newDeviceFound{false, Include::OPTIONAL};
+      Property<bool> newDeviceFound{false, Include::CHECK};
       Property<bool> trainingWheels{false, Include::ALWAYS};
       Property<Enum<Locale>> locale{{Locale::enu}, Include::ALWAYS};
       Property<Enum<TimeFormat>> timeFormat{{TimeFormat::Military}, Include::ALWAYS};
@@ -92,6 +122,9 @@ class UserInfo
     uint32_t id = DEFAULT_USERID;
     std::string firstName = "Michael";
     std::string lastName = "Mustermann";
+    std::string osUserName;
+    std::string fileCreationDate;
+    std::string fileModificationDate;
     std::vector<UnknownElement> u;
 };
 

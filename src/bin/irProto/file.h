@@ -110,7 +110,7 @@ class TimingSection
     /** data type for data frame */
     enum class Ctrl1 :uint8_t {
       NOT_DATA_FRAME = 0,
-      NO_DATA = 0,
+      NO_PAYLOAD = 0,
       DATA_ONE_PAIR = 1, //can only code one binary state. ??
       DATA_TWO_PAIRS = 2 //codes two binary states (true/false)
     };

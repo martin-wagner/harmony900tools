@@ -2,7 +2,7 @@
 
 #include "trx_single.h"
 
-#include "lib/endian.h"
+#include "lib/harmony_endian.h"
 
 using namespace std;
 

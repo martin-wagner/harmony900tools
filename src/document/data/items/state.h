@@ -7,13 +7,13 @@
 #include <map>
 #include <chrono>
 
-#include "document/domain/enum.h"
+#include "document/data/enum.h"
 #include "action.h"
 #include "unknown.h"
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {

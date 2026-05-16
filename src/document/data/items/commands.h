@@ -11,7 +11,7 @@
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {
@@ -79,21 +79,9 @@ class ProtoCommand
       this->protocolIndex = protocolIndex;
     }
 
-    const std::string& getRawCode() const
-    {
-      return rawCode;
-    }
-
-    void setRawCode(const std::string &rawCode)
-    {
-      this->rawCode = rawCode;
-    }
-
   protected:
     std::string name;
     uint32_t protocolIndex;
-    std::string rawCode;
-    //todo code strukturiert ablegen
 };
 
 /** IR command list

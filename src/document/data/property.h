@@ -8,13 +8,13 @@
 
 namespace document
 {
-namespace domain
+namespace data
 {
 
 /** dump to export file */
 enum class Include
 {
-  ALWAYS, OPTIONAL,
+  ALWAYS, CHECK,
 };
 
 /**
@@ -26,7 +26,7 @@ template<typename T>
 class Property
 {
   public:
-    Property(T v, Include defaultIncluded = Include::OPTIONAL) :
+    Property(T v, Include defaultIncluded = Include::CHECK) :
         include(defaultIncluded), value(v)
     {
     }

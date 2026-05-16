@@ -341,7 +341,7 @@ TEST_F(RealIrProtoTest, Proto0Section1IsRepeatFrame)
 {
   const auto &s = file.accessProtocol(0).accessSection(1);
   EXPECT_EQ(s.getCtrl0(), TimingSection::Ctrl0::IS_REPEAT_FRAME);
-  EXPECT_EQ(s.getCtrl1(), TimingSection::Ctrl1::NO_DATA);
+  EXPECT_EQ(s.getCtrl1(), TimingSection::Ctrl1::NO_PAYLOAD);
   EXPECT_EQ(s.getBitCount(), 0u);
 }
 

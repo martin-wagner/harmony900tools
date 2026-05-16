@@ -2,7 +2,7 @@
 
 #include "code.h"
 
-#include "lib/endian.h"
+#include "lib/harmony_endian.h"
 #include "cli/lib/lib.h"
 
 using namespace std;

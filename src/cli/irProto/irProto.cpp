@@ -13,7 +13,7 @@
 #include "cli/lib/lib.h"
 #include "bin/irProto/file.h"
 #include "bin/irProto/code.h"
-#include "lib/endian.h"
+#include "lib/harmony_endian.h"
 
 using namespace std;
 using namespace binary;
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 
       //payload marker (??)
       switch (section.getCtrl1()) {
-        case irProto::TimingSection::Ctrl1::NO_DATA:
+        case irProto::TimingSection::Ctrl1::NO_PAYLOAD:
           if (ctrl0 != irProto::TimingSection::Ctrl0::IS_REPEAT_FRAME) {
             cout << "Payload on repeat ???; ";
           }

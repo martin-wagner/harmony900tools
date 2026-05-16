@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-#include "document/domain/enum.h"
+#include "document/data/enum.h"
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {

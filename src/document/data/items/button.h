@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-#include "document/domain/enum.h"
+#include "document/data/enum.h"
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {
@@ -22,7 +22,7 @@ enum class ButtonType { Soft, Hard };
 class Button
 {
   public:
-    static constexpr std::string ACTION_POSTFIX = "_Hold";
+    static constexpr std::string_view ACTION_POSTFIX = "_Hold";
 
     Button(ButtonType t, const std::string &name, const std::string &action, int position = -1);
     Button(std::string t, const std::string &name, const std::string &action, int position = -1);
@@ -41,7 +41,7 @@ class Button
     /** for export \todo ist das hier richtig? */
     const std::string getActionId(int id) const
     {
-      return std::to_string(id) + "_" + action + ACTION_POSTFIX;
+      return std::to_string(id) + "_" + action + std::string(ACTION_POSTFIX);
     }
 
     /** command that will be sent on press */

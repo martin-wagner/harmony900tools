@@ -4,7 +4,7 @@
 
 #include "file.h"
 
-#include "lib/endian.h"
+#include "lib/harmony_endian.h"
 #include "lib/crc32.h"
 
 using namespace std;
@@ -208,7 +208,7 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
   }
   ctrl1 = static_cast<Ctrl1>(data[9]);
   switch (ctrl1) {
-    case Ctrl1::NO_DATA:
+    case Ctrl1::NO_PAYLOAD:
     case Ctrl1::DATA_ONE_PAIR:
     case Ctrl1::DATA_TWO_PAIRS:
       break;

@@ -10,11 +10,18 @@
 #include <QString>
 #include <QList>
 
+#ifdef _WIN32
+  //we do reflection on the enum items below. we need those _exact_ strings...
+  //fixme check side-effects of just nuking the macros
+  #undef DEFAULT
+  #undef DISPLAY
+  #undef PASSTHROUGH
+#endif
+
 namespace document
 {
-namespace domain
+namespace data
 {
-
 //use enum values exactly as in UserConfiguration.xml!
 //all enums _must_ have "Unknown" as last item!.
 enum class Locale { enu, deu, Unknown };
@@ -87,3 +94,5 @@ template class Enum<MediaButtonMode>;
 }
 }
 
+//#pragma pop_macro("DEFAULT")
+//#pragma pop_macro("DISPLAY")

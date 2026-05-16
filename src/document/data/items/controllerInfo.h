@@ -16,7 +16,7 @@
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {

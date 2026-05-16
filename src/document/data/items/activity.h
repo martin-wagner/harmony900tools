@@ -7,8 +7,8 @@
 #include <vector>
 #include <chrono>
 
-#include "document/domain/enum.h"
-#include "document/domain/property.h"
+#include "document/data/enum.h"
+#include "document/data/property.h"
 #include "unknown.h"
 #include "presentation.h"
 #include "state.h"
@@ -19,7 +19,7 @@
 
 namespace document
 {
-namespace domain
+namespace data
 {
 namespace item
 {
@@ -94,27 +94,27 @@ class Activity
       Property<bool> trainingWheels{true, Include::ALWAYS};
       Property<bool> unusedDevicesHelp{false, Include::ALWAYS};
       //other
-      Property<Enum<ChannelButtonBehaviour>> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Include::OPTIONAL};
-      Property<bool> controlGroup_SoftButtons{true, Include::OPTIONAL};
-      Property<bool> enableSmartMenu{true, Include::OPTIONAL};
-      Property<bool> enableSmartZoom{true, Include::OPTIONAL};
-      Property<Enum<GuideButtonMode>> guideButtonMode{GuideButtonMode::TunerProgramGuide, Include::OPTIONAL};
-      Property<bool> hideModeControl{false, Include::OPTIONAL};
-      Property<bool> hideModeListen{false, Include::OPTIONAL};
-      Property<bool> hideModeNavigate{false, Include::OPTIONAL};
-      Property<bool> hideModePlay{false, Include::OPTIONAL};
-      Property<bool> hideModePlayMode{false, Include::OPTIONAL};
-      Property<bool> hideSurfAllChannels{false, Include::OPTIONAL};
-      Property<bool> hideSurfAllShows{false, Include::OPTIONAL};
-      Property<bool> hideSurfFavoriteChannels{false, Include::OPTIONAL};
-      Property<bool> hideSurfFavoriteShows{false, Include::OPTIONAL};
-      Property<uint32_t> maxTvContentDays{false, Include::OPTIONAL};
-      Property<Enum<MediaButtonMode>> mediaButtonMode{MediaButtonMode::ShowMedia, Include::OPTIONAL};
-      Property<bool> playOnEnter{true, Include::OPTIONAL};
-      Property<bool> retainStop{false, Include::OPTIONAL};
-      Property<bool> scrollChannelsByPage{true, Include::OPTIONAL};
-      Property<bool> scrollShowsByPage{true, Include::OPTIONAL};
-      Property<bool> stopOnExit{false, Include::OPTIONAL};
+      Property<Enum<ChannelButtonBehaviour>> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Include::CHECK};
+      Property<bool> controlGroup_SoftButtons{true, Include::CHECK};
+      Property<bool> enableSmartMenu{true, Include::CHECK};
+      Property<bool> enableSmartZoom{true, Include::CHECK};
+      Property<Enum<GuideButtonMode>> guideButtonMode{GuideButtonMode::TunerProgramGuide, Include::CHECK};
+      Property<bool> hideModeControl{false, Include::CHECK};
+      Property<bool> hideModeListen{false, Include::CHECK};
+      Property<bool> hideModeNavigate{false, Include::CHECK};
+      Property<bool> hideModePlay{false, Include::CHECK};
+      Property<bool> hideModePlayMode{false, Include::CHECK};
+      Property<bool> hideSurfAllChannels{false, Include::CHECK};
+      Property<bool> hideSurfAllShows{false, Include::CHECK};
+      Property<bool> hideSurfFavoriteChannels{false, Include::CHECK};
+      Property<bool> hideSurfFavoriteShows{false, Include::CHECK};
+      Property<uint32_t> maxTvContentDays{false, Include::CHECK};
+      Property<Enum<MediaButtonMode>> mediaButtonMode{MediaButtonMode::ShowMedia, Include::CHECK};
+      Property<bool> playOnEnter{true, Include::CHECK};
+      Property<bool> retainStop{false, Include::CHECK};
+      Property<bool> scrollChannelsByPage{true, Include::CHECK};
+      Property<bool> scrollShowsByPage{true, Include::CHECK};
+      Property<bool> stopOnExit{false, Include::CHECK};
 
       //other other
       std::vector<UnknownElement> u;
