@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
+#include <set>
 #include <chrono>
 
 #include "document/data/enum.h"
@@ -29,10 +30,14 @@ class Device
   public:
     Device(uint32_t id) : id(id) {};
 
+    /** get device uid */
     uint32_t getId() const
     {
       return id;
     }
+
+    /** get device uid + all command uids */
+    std::set<uint32_t> getAllIds() {}; //todo
 
     PROPERTY_GETTER(Property<bool>, manualPower, getManualPower)
     PROPERTY_GETTER(Property<bool>, alwaysOn, getAlwaysOn)
@@ -113,10 +118,10 @@ class Device
     std::vector<StateMachine> stateMachines;
     struct Numpad {
       int fixedDigits = 0;
-      std::unique_ptr<Digits> first;
-      std::unique_ptr<Digits> middle;
-      std::unique_ptr<Digits> last;
-      std::unique_ptr<DeviceAction> finish;
+      std::optional<Digits> first;
+      std::optional<Digits> middle;
+      std::optional<Digits> last;
+      std::optional<DeviceAction> finish;
       std::vector<UnknownElement> u; //todo do we have a start action?
     } numpad;
     Commands irCommands;

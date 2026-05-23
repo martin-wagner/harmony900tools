@@ -2,13 +2,23 @@
 
 #pragma once
 
+#include <memory>
 #include <QObject>
+#include <QTemporaryDir>
 
 #include "lib/undo.h"
+#include "lib/zip.h"
 #include "data/data.h"
+#include "ui/logViewer.h"
 
 namespace document
 {
+
+enum class Type {
+    UNKNOWN,
+    H900 = 900,
+    //todo more?
+};
 
 /** one config file object
  *
@@ -18,12 +28,15 @@ class Config : public QObject
 {
   Q_OBJECT
   public:
+    /** new config. init = true -> create a new, empty config */
+    Config(bool init = false);
+
     /** create new, empty config */
-    static Config create();
+    bool create();
     /** import zipped config from remote / backup */
-    static Config create(const std::vector<uint8_t> &zip);
+    bool read(const std::vector<uint8_t> &zip, Type t);
     /** read config */
-    static Config create(const QString &path);
+    bool read(const QString &path);
 
     ~Config();
 
@@ -38,9 +51,12 @@ class Config : public QObject
     /** write copy to disk */
     bool saveAs(const QString &path);
     /** generate export */
-    bool dumpZip(std::vector<uint8_t> &zip);
+    bool dumpZip(std::vector<uint8_t> &zip, Type t);
 
   signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
     void deviceChanged(int index);
     void deviceAdded(int index);
     void deviceRemoved(int index);
@@ -50,13 +66,20 @@ class Config : public QObject
     void dirtyChanged(bool dirty);
 
   protected:
-    Config();
 
   protected:
     data::Config configData;
     lib::UndoStack stack;
 
     bool dirty = false;
+    Type type = Type::UNKNOWN;
+
+    static constexpr uint32_t UidStartValue = 10000000;
+
+  protected:
+      QString workPath;
+      std::unique_ptr<QTemporaryDir> tempDir;
+
 };
 
 

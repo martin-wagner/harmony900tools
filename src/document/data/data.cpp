@@ -17,12 +17,12 @@ Config::~Config()
 {
 }
 
-const vector<item::Activity>& Config::getActivities() const
+const map<uint32_t, item::Activity>& Config::getActivities() const
 {
   return activities;
 }
 
-vector<item::Activity>& Config::getActivities()
+map<uint32_t, item::Activity>& Config::getActivities()
 {
   return activities;
 }
@@ -57,12 +57,12 @@ item::ControllerInfo& Config::getController()
   return controller;
 }
 
-const vector<item::Device>& Config::getDevices() const
+const map<uint32_t, item::Device>& Config::getDevices() const
 {
   return devices;
 }
 
-vector<item::Device>& Config::getDevices()
+map<uint32_t, item::Device>& Config::getDevices()
 {
   return devices;
 }

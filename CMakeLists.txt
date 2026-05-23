@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(
   harmony900
-  LANGUAGES CXX
+  LANGUAGES CXX C
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -39,6 +39,7 @@ include(ads.cmake)
 include(nlohmann_json.cmake)
 include(pugixml.cmake)
 include(magic_enum.cmake)
+include(zlib.cmake)
 include(version.cmake)
 
 # add project

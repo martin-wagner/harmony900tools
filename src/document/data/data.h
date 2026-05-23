@@ -24,8 +24,8 @@ class Config
     Config();
     ~Config();
 
-    const std::vector<item::Activity>& getActivities() const;
-    std::vector<item::Activity>& getActivities();
+    const std::map<uint32_t, item::Activity>& getActivities() const;
+    std::map<uint32_t, item::Activity>& getActivities();
 
     const std::vector<item::Blob>& getBlobs() const;
     std::vector<item::Blob>& getBlobs();
@@ -36,8 +36,8 @@ class Config
     const item::ControllerInfo& getController() const;
     item::ControllerInfo& getController();
 
-    const std::vector<item::Device>& getDevices() const;
-    std::vector<item::Device>& getDevices();
+    const std::map<uint32_t, item::Device>& getDevices() const;
+    std::map<uint32_t, item::Device>& getDevices();
 
     bool isIgnoreDeviceLimit() const;
     bool& isIgnoreDeviceLimit();
@@ -61,8 +61,8 @@ class Config
     /** user config */
     item::UserInfo user;
     item::ControllerInfo controller;
-    std::vector<item::Device> devices;
-    std::vector<item::Activity> activities;
+    std::map<uint32_t, item::Device> devices; //id/data
+    std::map<uint32_t, item::Activity> activities; //id/data
     std::vector<item::Blob> blobs;
 
     /** ir command data */

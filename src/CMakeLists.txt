@@ -29,11 +29,13 @@ qt_standard_project_setup(REQUIRES 6.8
 set(sources 
   lib/users.h  #moc for headers
   lib/undo.cpp
+  lib/zip.cpp
   main.cpp
   mainwindow.cpp
   bin/timing.cpp
   comm/concord.cpp
   document/config.cpp
+  document/data/catalogue.cpp
   document/data/data.cpp
   document/data/enum.cpp
   document/data/items/action.cpp
@@ -68,6 +70,7 @@ target_link_libraries(${programName} PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Svg
+    minizip
     qtadvanceddocking-qt6
     Libconcord::libconcord
     nlohmann_json::nlohmann_json
