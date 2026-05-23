@@ -109,7 +109,7 @@ void MainWindow::createLog()
 
 void MainWindow::createData()
 {
-  ctx = make_unique<Context>(*settings, *user);
+  ctx = make_unique<Context>(*settings, *user, undo);
 
   concord = new Concord(*ctx, this);
 }
@@ -156,6 +156,23 @@ void MainWindow::createWidgets()
   dockConcordTest->setWidget(concordTest);
   dockManager->addDockWidget(ads::RightDockWidgetArea, dockConcordTest);
   dockMenu->addAction(dockConcordTest->toggleViewAction());
+
+  documentTest = new DocumentTest(*ctx.get(), this);
+  ads::CDockWidget *dockDocumentTest = new ads::CDockWidget(dockManager,
+      tr("Test Document Import/Export"));
+  dockDocumentTest->setWidget(documentTest);
+  dockManager->addDockWidget(ads::RightDockWidgetArea, dockDocumentTest);
+  dockMenu->addAction(dockDocumentTest->toggleViewAction());
+
+  QUndoView *undoView = new QUndoView(undo.getStack());
+  undoView->setCleanIcon(
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-clear.png",
+          "edit-clear"));
+  ads::CDockWidget *dockUndo = new ads::CDockWidget(dockManager,
+      tr("Undo History"));
+  dockUndo->setWidget(undoView);
+  dockManager->addDockWidget(ads::RightDockWidgetArea, dockUndo);
+  dockMenu->addAction(dockUndo->toggleViewAction());
 
   //log viewer already created
   ads::CDockWidget *dockLog = new ads::CDockWidget(dockManager,
@@ -323,6 +340,9 @@ void MainWindow::createActions()
 
   connect(concordTest, &ConcordTest::writeLog, log, &LogViewer::addEntry);
   connect(concordTest, &ConcordTest::writeMsg, log, &LogViewer::addMessage);
+
+  connect(documentTest, &DocumentTest::writeLog, log, &LogViewer::addEntry);
+  connect(documentTest, &DocumentTest::writeMsg, log, &LogViewer::addMessage);
 }
 
 void MainWindow::readSettings()

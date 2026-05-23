@@ -13,25 +13,26 @@ namespace document
 namespace data
 {
 
-class Config;
+class ConfigData;
 
 /** all data modification commands, implementing dependencies and undo */
 class CmdCatalogue : public QObject
 {
   Q_OBJECT
   public:
-    CmdCatalogue(Config &c, lib::UndoStack &undo, QObject *parent = nullptr);
+    CmdCatalogue(ConfigData &c, lib::UndoStack &undo, QObject *parent = nullptr);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
   public:
-    bool addDeviceCommand(uint32_t *id);
+    bool addDeviceCommand(uint32_t id); //existing id
+    bool addDeviceCommand(uint32_t *id); //assign id
     bool removeDeviceCommand(uint32_t id);
 
   protected:
-    Config &c;
+    ConfigData &c;
     lib::UndoStack &undo;
     lib::UidGenerator &uid;
 };

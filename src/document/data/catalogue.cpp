@@ -13,9 +13,24 @@ namespace document
 namespace data
 {
 
-CmdCatalogue::CmdCatalogue(Config &c, lib::UndoStack &undo, QObject *parent) :
+CmdCatalogue::CmdCatalogue(ConfigData &c, lib::UndoStack &undo, QObject *parent) :
     QObject(parent), c(c), undo(undo), uid(lib::UidGenerator::getInstance())
 {
+}
+
+bool CmdCatalogue::addDeviceCommand(uint32_t id)
+{
+  auto *cmd = new AddDeviceCommand(c, id);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device id %1 already exists, dropped").arg(id),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
 }
 
 bool CmdCatalogue::addDeviceCommand(uint32_t *id)
@@ -35,6 +50,9 @@ bool CmdCatalogue::removeDeviceCommand(uint32_t id)
   if (ret == true) {
     undo.push(cmd);
   } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device id %1 already exists, dropped").arg(id),
+        ContentType::PlainText);
     delete cmd;
   }
   return ret;

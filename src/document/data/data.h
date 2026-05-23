@@ -18,11 +18,11 @@ namespace data
 {
 
 /** this contains a full config data elemnent */
-class Config
+class ConfigData
 {
   public:
-    Config();
-    ~Config();
+    ConfigData();
+    ~ConfigData();
 
     const std::map<uint32_t, item::Activity>& getActivities() const;
     std::map<uint32_t, item::Activity>& getActivities();

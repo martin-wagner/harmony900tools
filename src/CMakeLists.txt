@@ -40,9 +40,11 @@ set(sources
   document/data/enum.cpp
   document/data/items/action.cpp
   document/data/items/activity.cpp
+  document/files/h900.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp
+  ui/documentTest.cpp
   wrappers/concordWrapper.cpp
 )
 

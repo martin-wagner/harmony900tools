@@ -9,100 +9,100 @@ namespace document
 namespace data
 {
 
-Config::Config()
+ConfigData::ConfigData()
 {
 }
 
-Config::~Config()
+ConfigData::~ConfigData()
 {
 }
 
-const map<uint32_t, item::Activity>& Config::getActivities() const
-{
-  return activities;
-}
-
-map<uint32_t, item::Activity>& Config::getActivities()
+const map<uint32_t, item::Activity>& ConfigData::getActivities() const
 {
   return activities;
 }
 
-const vector<item::Blob>& Config::getBlobs() const
+map<uint32_t, item::Activity>& ConfigData::getActivities()
+{
+  return activities;
+}
+
+const vector<item::Blob>& ConfigData::getBlobs() const
 {
   return blobs;
 }
 
-vector<item::Blob>& Config::getBlobs()
+vector<item::Blob>& ConfigData::getBlobs()
 {
   return blobs;
 }
 
-const vector<binary::irProto::Code>& Config::getCommands() const
+const vector<binary::irProto::Code>& ConfigData::getCommands() const
 {
   return commands;
 }
 
-vector<binary::irProto::Code>& Config::getCommands()
+vector<binary::irProto::Code>& ConfigData::getCommands()
 {
   return commands;
 }
 
-const item::ControllerInfo& Config::getController() const
+const item::ControllerInfo& ConfigData::getController() const
 {
   return controller;
 }
 
-item::ControllerInfo& Config::getController()
+item::ControllerInfo& ConfigData::getController()
 {
   return controller;
 }
 
-const map<uint32_t, item::Device>& Config::getDevices() const
+const map<uint32_t, item::Device>& ConfigData::getDevices() const
 {
   return devices;
 }
 
-map<uint32_t, item::Device>& Config::getDevices()
+map<uint32_t, item::Device>& ConfigData::getDevices()
 {
   return devices;
 }
 
-bool Config::isIgnoreDeviceLimit() const
+bool ConfigData::isIgnoreDeviceLimit() const
 {
   return ignoreDeviceLimit;
 }
 
-bool& Config::isIgnoreDeviceLimit()
+bool& ConfigData::isIgnoreDeviceLimit()
 {
   return ignoreDeviceLimit;
 }
 
-const vector<binary::irProto::File>& Config::getProtocols() const
+const vector<binary::irProto::File>& ConfigData::getProtocols() const
 {
   return protocols;
 }
 
-vector<binary::irProto::File>& Config::getProtocols()
+vector<binary::irProto::File>& ConfigData::getProtocols()
 {
   return protocols;
 }
 
-const vector<binary::ssIr::File>& Config::getStreams() const
+const vector<binary::ssIr::File>& ConfigData::getStreams() const
 {
   return streams;
 }
 
-vector<binary::ssIr::File>& Config::getStreams()
+vector<binary::ssIr::File>& ConfigData::getStreams()
 {
   return streams;
 }
 
-const item::UserInfo& Config::getUser() const
+const item::UserInfo& ConfigData::getUser() const
 {
   return user;
 }
 
-item::UserInfo& Config::getUser()
+item::UserInfo& ConfigData::getUser()
 {
   return user;
 }

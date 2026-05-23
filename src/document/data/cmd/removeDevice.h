@@ -39,8 +39,10 @@ class RemoveDeviceFromActivityCommand: public QUndoCommand
 class RemoveDeviceCommand: public QUndoCommand
 {
   public:
-    RemoveDeviceCommand(Config &c, uint32_t id, QUndoCommand *parent = nullptr) :
-        QUndoCommand(QObject::tr("Remove device"), parent), c(c), id(id), device(0)
+    RemoveDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent =
+        nullptr) :
+        QUndoCommand(QObject::tr("Remove device (ID: %1)").arg(id), parent), c(
+            c), id(id), device(0)
     {
       auto &d = c.getDevices();
       if (d.contains(id)) {
@@ -83,12 +85,11 @@ class RemoveDeviceCommand: public QUndoCommand
   protected:
     bool isValid = false;
 
-    Config &c;
+    ConfigData &c;
     uint32_t id;
     item::Device device;
 
 };
-
 
 }
 }

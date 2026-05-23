@@ -5,6 +5,7 @@
 #include <QString>
 #include "ui/settings.h"
 #include "lib/users.h"
+#include "lib/undo.h"
 
 /**
  * @brief Central container for application-wide state and services.
@@ -12,15 +13,17 @@
  */
 class Context {
 public:
-    Context(Settings &s, lib::UserLevel &u) :
-      settings(s), userLevel(u)
+    Context(Settings &s, lib::UserLevel &u, lib::UndoStack &undo) :
+      settings(s), userLevel(u), undo(undo)
     {
     }
 
     Settings& getSettings() { return settings; }
     const lib::UserLevel& getUserLevel() { return userLevel; }
+    lib::UndoStack &getUndoStack() { return undo; }
 
 private:
     Settings &settings;
     lib::UserLevel &userLevel;
+    lib::UndoStack &undo;
 };

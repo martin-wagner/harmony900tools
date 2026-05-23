@@ -9,7 +9,9 @@
 #include "ui/logViewer.h"
 #include "ui/settings.h"
 #include "ui/concordTest.h"
+#include "ui/documentTest.h"
 #include "lib/users.h"
+#include "lib/undo.h"
 #include "context.h"
 
 class QAction;
@@ -78,8 +80,11 @@ class MainWindow: public QMainWindow
     lib::UserLevel *user;
     std::unique_ptr<Context> ctx;
 
+    lib::UndoStack undo;
+
     Concord *concord;
     ConcordTest *concordTest;
+    DocumentTest *documentTest;
 
     QPlainTextEdit *textEdit;
     QString curFile;

@@ -7,19 +7,22 @@
 #include "lib/zip.h"
 #include "lib/uid.h"
 #include "config.h"
+#include "files/h900.h"
 
 using namespace std;
 
 namespace document
 {
 
-Config::Config(bool init)
+Config::Config(Context &ctx, bool init) :
+    stack(ctx.getUndoStack()), worker(configData, stack)
 {
   tempDir = std::make_unique<QTemporaryDir>();
   if (!tempDir->isValid()) {
     qWarning() << "Config::create(zip): failed to create temp dir";
     return;
   }
+  tempDir->setAutoRemove(true);
   workPath = tempDir->path();
 
   lib::UidGenerator::initialize(UidStartValue);
@@ -27,6 +30,9 @@ Config::Config(bool init)
   if (init) {
     create();
   }
+
+  connect(&worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
+  connect(&worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
 }
 
 bool document::Config::create()
@@ -35,10 +41,11 @@ bool document::Config::create()
 
 bool Config::read(const std::vector<uint8_t> &zip, Type t)
 {
+  bool ret = false;
   QTemporaryFile zipFile;
 
   if (t != Type::H900) {
-    emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int)t),
+    emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int) t),
         ContentType::PlainText);
     return false;
   }
@@ -55,6 +62,10 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
         ContentType::PlainText);
     return false;
   }
+  emit writeLog(LogLevel::Debug, tr("config: using temp file %1, "
+      "temp dir %2").arg(zipFile.fileName()).arg(workPath),
+      ContentType::PlainText);
+
   zipFile.write(reinterpret_cast<const char*>(zip.data()),
       static_cast<qint64>(zip.size()));
   zipFile.flush();
@@ -85,7 +96,21 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
   //todo deserialise
   //todo setup uids
 
-  return true;
+  switch (t) {
+    case Type::H900: {
+      auto parser = files::ConfigH900(workPath);
+      connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
+      connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
+      ret = parser.read(configData, worker);
+      break;
+    }
+    default:
+      //must not happen, this is checked first
+      return false;
+  }
+
+  dirty = true;
+  return ret;
 }
 
 bool Config::read(const QString &path)
@@ -117,7 +142,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
   QTemporaryFile zipFile;
 
   if (t != Type::H900) {
-    emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int)t),
+    emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int) t),
         ContentType::PlainText);
     return false;
   }

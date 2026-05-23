@@ -6,9 +6,11 @@
 #include <QObject>
 #include <QTemporaryDir>
 
+#include "context.h"
 #include "lib/undo.h"
 #include "lib/zip.h"
 #include "data/data.h"
+#include "data/catalogue.h"
 #include "ui/logViewer.h"
 
 namespace document
@@ -29,7 +31,7 @@ class Config : public QObject
   Q_OBJECT
   public:
     /** new config. init = true -> create a new, empty config */
-    Config(bool init = false);
+    Config(Context &ctx, bool init = false);
 
     /** create new, empty config */
     bool create();
@@ -68,8 +70,9 @@ class Config : public QObject
   protected:
 
   protected:
-    data::Config configData;
-    lib::UndoStack stack;
+    data::ConfigData configData;
+    lib::UndoStack &stack;
+    data::CmdCatalogue worker;
 
     bool dirty = false;
     Type type = Type::UNKNOWN;

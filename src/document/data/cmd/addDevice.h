@@ -17,10 +17,22 @@ namespace data
 class AddDeviceCommand: public QUndoCommand
 {
   public:
-    AddDeviceCommand(Config &c, QUndoCommand *parent = nullptr) :
-        QUndoCommand(QObject::tr("Add device"), parent), c(c)
+    AddDeviceCommand(ConfigData &c, QUndoCommand *parent = nullptr) :
+        QUndoCommand(parent), c(c)
     {
       id = lib::UidGenerator::getInstance().generate();
+      setText(QObject::tr("Add device (ID: %1)").arg(id));
+      isValid = true;
+    }
+
+    AddDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent = nullptr) :
+        QUndoCommand(QObject::tr("Add device (ID: %1)").arg(id), parent), c(c), id(
+            id)
+    {
+      auto &d = c.getDevices();
+      if (!d.contains(id)) {
+        isValid = true;
+      }
     }
 
     void redo() override
@@ -39,8 +51,14 @@ class AddDeviceCommand: public QUndoCommand
       return id;
     }
 
+    bool valid() const
+    {
+      return isValid;
+    }
+
   protected:
-    Config &c;
+    bool isValid = false;
+    ConfigData &c;
     uint32_t id;
 };
 
