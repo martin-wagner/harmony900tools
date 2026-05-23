@@ -15,6 +15,9 @@ namespace lib
  *
  * Defers all beginMacro() calls until the first command is pushed,
  * preserving the full nesting order. Empty macro sequences are discarded.
+ *
+ * When macrosDisabled is true, macros are not used at all. Instead, a no-op
+ * stamp command with the macro name is pushed to the stack for traceability.
  */
 class UndoStack: public QObject
 {
@@ -29,11 +32,21 @@ class UndoStack: public QObject
 
     void beginMacro(const QString &text)
     {
+      if (macrosDisabled) {
+        stack.push(new MacroStampCommand("[begin] " + text));
+        return;
+      }
       pendingMacros.append(text);
     }
 
     void endMacro()
     {
+      if (macrosDisabled) {
+        // The stamp for endMacro is pushed only if a matching begin was not pending.
+        // Since we never add to pendingMacros when disabled, always stamp here.
+        stack.push(new MacroStampCommand("[end]"));
+        return;
+      }
       if (!pendingMacros.isEmpty()) {
         // Paired with a pending beginMacro that was never flushed — discard it.
         pendingMacros.removeLast();
@@ -44,10 +57,12 @@ class UndoStack: public QObject
 
     void push(QUndoCommand *command)
     {
-      for (const QString &macroText : pendingMacros) {
-        stack.beginMacro(macroText);
+      if (!macrosDisabled) {
+        for (const QString &macroText : pendingMacros) {
+          stack.beginMacro(macroText);
+        }
+        pendingMacros.clear();
       }
-      pendingMacros.clear();
       stack.push(command);
     }
 
@@ -85,9 +100,37 @@ class UndoStack: public QObject
       return &stack;
     }
 
+    bool getMacrosDisabled() const
+    {
+      return macrosDisabled;
+    }
+    void setMacrosDisabled(bool disabled)
+    {
+      macrosDisabled = disabled;
+    }
+
   private:
+    /**
+     * @brief No-op command used as a debug stamp when macros are disabled.
+     */
+    class MacroStampCommand: public QUndoCommand
+    {
+      public:
+        explicit MacroStampCommand(const QString &label) :
+            QUndoCommand(label)
+        {
+        }
+        void undo() override
+        {
+        }
+        void redo() override
+        {
+        }
+    };
+
     QUndoStack stack;
     QList<QString> pendingMacros;
+    bool macrosDisabled = false;
 };
 
 }

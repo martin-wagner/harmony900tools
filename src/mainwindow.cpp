@@ -358,60 +358,62 @@ void MainWindow::readSettings()
     settings->setValue(defaults::loglevel().key, logLevel);
   }
 
+  settings->addSetting(defaults::undoMacros());
+
   // @formatter:off
-  settings->addSetting({
-      .key          = "username",
-      .label        = "Username",
-      .helpText     = "Your display name in the application.",
-      .type         = SettingType::String,
-      .defaultValue = "user",
-  });
-
-  settings->addSetting({
-      .key          = "darkMode",
-      .label        = "Dark mode",
-      .helpText     = "Enable dark colour scheme.",
-      .type         = SettingType::Bool,
-      .defaultValue = false,
-  });
-
-  // ── Network tab ───────────────────────────────────────────────────────────
-
-  settings->addSetting({
-      .key          = "port",
-      .label        = "Port",
-      .helpText     = "TCP port to listen on.",
-      .type         = SettingType::Int,
-      .defaultValue = 8080,
-      .tab          = "Network",
-      .minValue     = 1024,
-      .maxValue     = 65535,
-  });
-
-  settings->addSetting({
-      .key          = "timeout",
-      .label        = "Timeout (s)",
-      .helpText     = "Connection timeout in seconds.",
-      .type         = SettingType::Double,
-      .defaultValue = 30.0,
-      .tab          = "Network",
-      .minValue     = 0.1,
-      .maxValue     = 300.0,
-  });
-
-  settings->addSetting({
-      .key      = "protocol",
-      .label    = "Protocol",
-      .helpText = "Transport protocol.",
-      .type     = SettingType::MultiSelection,
-      .defaultValue = 0,   // matches itemData below
-      .tab      = "Network",
-      .options  = {
-          { "TCP",  0 },
-          { "UDP",  1 },
-          { "QUIC", 2 },
-      },
-  });
+//  settings->addSetting({
+//      .key          = "username",
+//      .label        = "Username",
+//      .helpText     = "Your display name in the application.",
+//      .type         = SettingType::String,
+//      .defaultValue = "user",
+//  });
+//
+//  settings->addSetting({
+//      .key          = "darkMode",
+//      .label        = "Dark mode",
+//      .helpText     = "Enable dark colour scheme.",
+//      .type         = SettingType::Bool,
+//      .defaultValue = false,
+//  });
+//
+//  // ── Network tab ───────────────────────────────────────────────────────────
+//
+//  settings->addSetting({
+//      .key          = "port",
+//      .label        = "Port",
+//      .helpText     = "TCP port to listen on.",
+//      .type         = SettingType::Int,
+//      .defaultValue = 8080,
+//      .tab          = "Network",
+//      .minValue     = 1024,
+//      .maxValue     = 65535,
+//  });
+//
+//  settings->addSetting({
+//      .key          = "timeout",
+//      .label        = "Timeout (s)",
+//      .helpText     = "Connection timeout in seconds.",
+//      .type         = SettingType::Double,
+//      .defaultValue = 30.0,
+//      .tab          = "Network",
+//      .minValue     = 0.1,
+//      .maxValue     = 300.0,
+//  });
+//
+//  settings->addSetting({
+//      .key      = "protocol",
+//      .label    = "Protocol",
+//      .helpText = "Transport protocol.",
+//      .type     = SettingType::MultiSelection,
+//      .defaultValue = 0,   // matches itemData below
+//      .tab      = "Network",
+//      .options  = {
+//          { "TCP",  0 },
+//          { "UDP",  1 },
+//          { "QUIC", 2 },
+//      },
+//  }); todo
 // @formatter:on
 
   //todo settings dialog doesn't save settings in qsettings
@@ -588,6 +590,9 @@ void MainWindow::applySettings()
   auto userlevel = settings->value(defaults::userlevel().key).toInt();
   user->setLevel(static_cast<lib::UserLevel::Level>(userlevel));
   log->addMessage("Setting userlevel to " + user->levelToString());
+
+  auto debugMacros = settings->value(defaults::undoMacros().key).toBool();
+  undo.setMacrosDisabled(debugMacros);
 
   //todo weitere
 }

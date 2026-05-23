@@ -50,6 +50,23 @@ inline const SettingDef userlevel()
   return s;
 };
 
+inline const SettingDef undoMacros()
+{
+  QList<QPair<QString, QVariant>> options;
+  SettingDef s;
+
+  s.key = "undoMacro";
+  s.label = QObject::tr("Disable Undo Macro");
+  s.helpText = QObject::tr("Disable undo macros, instead print all commands separately");
+  s.type = SettingType::Bool;
+  s.defaultValue = false;
+  s.tab = "Debug";
+  s.minValue = QVariant { };
+  s.maxValue = QVariant { };
+
+  return s;
+};
+
 
 }
 
