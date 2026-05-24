@@ -21,7 +21,7 @@ bool ConfigH900::dump(const data::ConfigData &c)
 {
 }
 
-bool ConfigH900::read(data::ConfigData &c, data::CmdCatalogue &worker)
+bool ConfigH900::read(data::ConfigData &c, data::CmdCatalogue *worker)
 {
   bool ret = true;
 
@@ -43,7 +43,7 @@ bool ConfigH900::read(data::ConfigData &c, data::CmdCatalogue &worker)
 }
 
 bool ConfigH900::readUserConfigXml(data::ConfigData &c,
-    data::CmdCatalogue &worker)
+    data::CmdCatalogue *worker)
 {
   pugi::xml_parse_result ret;
   pugi::xml_document xml;
@@ -89,7 +89,7 @@ bool ConfigH900::readUserConfigXml(data::ConfigData &c,
   //devices
   for (pugi::xml_node device : root.children("Device")) {
     auto id = device.child("Id").text().as_uint();
-    auto ret = worker.addDeviceCommand(id);
+    auto ret = worker->addDeviceCommand(id);
     if (!ret) {
       continue;
     }

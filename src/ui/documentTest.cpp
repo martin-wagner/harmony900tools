@@ -36,6 +36,9 @@ void DocumentTest::onImport()
     msgBox.exec();
     return;
   }
+
+  ctx.getUndoStack().clear();
+
   QByteArray data = f.readAll();
   std::vector<uint8_t> bytes(data.begin(), data.end());
   auto ret = config.read(bytes, document::Type::H900);

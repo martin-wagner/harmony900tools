@@ -15,34 +15,28 @@ namespace document
 {
 
 Config::Config(Context &ctx, bool init) :
-    stack(ctx.getUndoStack()), worker(configData, stack)
+    stack(ctx.getUndoStack())
 {
-  tempDir = std::make_unique<QTemporaryDir>();
-  if (!tempDir->isValid()) {
-    qWarning() << "Config::create(zip): failed to create temp dir";
-    return;
-  }
-  tempDir->setAutoRemove(true);
-  workPath = tempDir->path();
-
-  lib::UidGenerator::initialize(UidStartValue);
+  reset();
 
   if (init) {
     create();
   }
-
-  connect(&worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
-  connect(&worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
 }
 
 bool document::Config::create()
 {
+  reset();
+
+  //todo
 }
 
 bool Config::read(const std::vector<uint8_t> &zip, Type t)
 {
   bool ret = false;
   QTemporaryFile zipFile;
+
+  reset();
 
   if (t != Type::H900) {
     emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int) t),
@@ -102,7 +96,7 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
       stack.beginMacro(tr("Import Harmony 900 Config"));
-      ret = parser.read(configData, worker);
+      ret = parser.read(*configData, worker);
       stack.endMacro();
       break;
     }
@@ -117,6 +111,36 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
 
 bool Config::read(const QString &path)
 {
+  reset();
+
+  //todo
+
+}
+
+bool Config::reset()
+{
+  disconnect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
+  disconnect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
+
+  configData = make_unique<data::ConfigData>();
+  worker = new data::CmdCatalogue(*configData, stack, this);
+  type = Type::UNKNOWN;
+  lib::UidGenerator::initialize(UidStartValue);
+  workPath.clear();
+  dirty = false;
+
+  tempDir = std::make_unique<QTemporaryDir>();
+  if (!tempDir->isValid()) {
+    qWarning() << "Config::create(zip): failed to create temp dir";
+    return false;
+  }
+  tempDir->setAutoRemove(true);
+  workPath = tempDir->path();
+
+  connect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
+  connect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
+
+  return true;
 }
 
 Config::~Config()

@@ -39,6 +39,8 @@ class Config : public QObject
     bool read(const std::vector<uint8_t> &zip, Type t);
     /** read config */
     bool read(const QString &path);
+    /** unload config */
+    bool reset();
 
     ~Config();
 
@@ -70,9 +72,9 @@ class Config : public QObject
   protected:
 
   protected:
-    data::ConfigData configData;
+    std::unique_ptr<data::ConfigData> configData;
     lib::UndoStack &stack;
-    data::CmdCatalogue worker;
+    data::CmdCatalogue *worker;
 
     bool dirty = false;
     Type type = Type::UNKNOWN;

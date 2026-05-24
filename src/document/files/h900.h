@@ -24,7 +24,7 @@ class ConfigH900 : public QObject
     ConfigH900(const QString &workPath);
 
     bool dump(const data::ConfigData &c);
-    bool read(data::ConfigData &c, data::CmdCatalogue &worker);
+    bool read(data::ConfigData &c, data::CmdCatalogue *worker);
 
   public:
     const QString actionListPath = "userconfig/ActionLists.xml";
@@ -38,7 +38,7 @@ class ConfigH900 : public QObject
 
 
   protected:
-    bool readUserConfigXml(data::ConfigData &c, data::CmdCatalogue &worker);
+    bool readUserConfigXml(data::ConfigData &c, data::CmdCatalogue *worker);
 
   protected:
     const QString wp;
