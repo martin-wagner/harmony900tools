@@ -49,22 +49,25 @@ void DocumentTest::onImport()
 
 void DocumentTest::onDump()
 {
-//  if (!success) {
-//    return;
-//  }
-//
-//  QString filePathXml = QFileDialog::getSaveFileName(this,
-//      tr("Save XML + Zip Config"), QDir::homePath(),
-//      tr("hex Files (*.hex);;All Files (*)"));
-//  if (!filePathXml.isEmpty()) {
-//    //write xml + zip file
-//    auto ret = concord.writeUserConfigFile(filePathXml, true);
-//    if (ret != 0) {
-//      emit writeLog(LogLevel::Error, tr("write file error"),
-//          ContentType::PlainText);
-//      return;
-//    }
-//  }
+  std::vector<uint8_t> bytes;
+
+  QString file = QFileDialog::getSaveFileName(this, tr("Save File"),
+      QDir::homePath(), tr("zip Files (*.zip);;All Files (*)"));
+  auto f = QFile(file);
+  if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    emit writeMsg("File can't be opened");
+    return;
+  }
+
+  //write data
+  auto ret = config.dumpZip(bytes, document::Type::H900);
+  if (!ret) {
+    emit writeLog(LogLevel::Error, tr("write file error"),
+        ContentType::PlainText);
+    return;
+  }
+  QByteArray data(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+  f.write(data);
 }
 
 void DocumentTest::onRead()

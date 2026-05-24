@@ -200,17 +200,26 @@ bool Config::saveAs(const QString &path)
 
 bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
 {
+  bool ret;
   QTemporaryFile zipFile;
 
-  if (t != Type::H900) {
-    emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int) t),
-        ContentType::PlainText);
-    return false;
+  switch (t) {
+    case Type::H900: {
+      auto parser = files::ConfigH900(workPath);
+      connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
+      connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
+      ret = parser.dump(*configData);
+      break;
+    }
+    default:
+      emit writeLog(LogLevel::Error, tr("Type not supported (%1)").arg((int) t),
+          ContentType::PlainText);
+      return false;
+  }
+  if (!ret) {
+    return ret;
   }
   type = t;
-
-  // TODO: save configData to workPath first
-  //todo serialise
 
   zipFile.setAutoRemove(true);
   if (!zipFile.open()) {

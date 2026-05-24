@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include <QDir>
 #include <pugixml.hpp>
 
 #include "document/data/data.h"
@@ -20,6 +21,23 @@ ConfigH900::ConfigH900(const QString &workPath) :
 
 bool ConfigH900::dump(const data::ConfigData &c)
 {
+  bool ret = true;
+
+  try {
+    ret &= dumpUserConfigXml(c);
+
+//  pugi::xml_document actionList;
+//  pugi::xml_document userConfiguration;
+//  std::vector<uint8_t> irProto;
+//  std::vector<uint8_t> ssir;
+
+  } catch (const std::exception &e) {
+    emit writeLog(LogLevel::Error,
+        tr("export: exception: %1").arg(QString(e.what())),
+        ContentType::PlainText);
+  }
+
+  return ret;
 }
 
 bool ConfigH900::read(data::ConfigData &c, data::CmdCatalogue *worker)
@@ -104,6 +122,51 @@ bool ConfigH900::readUserConfigXml(data::ConfigData &c,
   //protocols //todo
 
   return true;
+}
+
+bool ConfigH900::dumpUserConfigXml(const data::ConfigData &c)
+{
+  pugi::xml_document xml;
+  bool ret;
+
+  auto decl = xml.prepend_child(pugi::node_declaration);
+  decl.append_attribute("version").set_value("1.0");
+  decl.append_attribute("encoding").set_value("UTF-8");
+
+  auto root = xml.append_child("Root");
+
+  //general stuff
+  auto properties = root.append_child("Properties");
+  auto property = properties.append_child("Property");
+  property.append_attribute("name").set_value("version");
+  property.text().set("1.0");
+
+  //user //todo
+
+  //controller //todo
+
+  //devices
+  for (const auto &d : c.getDevices()) {
+    auto devices = root.append_child("Device");
+    devices.append_child("Id").text().set(d.first);
+
+    //todo all the other stuff...
+
+  }
+
+  //activities //todo
+
+  //protocols //todo
+
+  QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
+#ifdef _WIN32
+  ret = xml.save_file(QString(wp + "/" + userConfigPath).toStdWString().c_str()),
+      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+#else
+  ret = xml.save_file(QString(wp + "/" + userConfigPath).toUtf8(),
+      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+#endif
+  return ret;
 }
 
 }

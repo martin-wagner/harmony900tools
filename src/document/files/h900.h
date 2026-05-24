@@ -41,6 +41,9 @@ class ConfigH900 : public QObject
     bool readUserConfigXml(data::ConfigData &c, data::CmdCatalogue *worker);
 
   protected:
+    bool dumpUserConfigXml(const data::ConfigData &c);
+
+  protected:
     const QString wp;
 
 };
