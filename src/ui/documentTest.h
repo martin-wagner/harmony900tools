@@ -20,8 +20,12 @@ class DocumentTest: public QWidget
     void writeMsg(const QString &message);
 
   protected slots:
-    void onImport();
-    void onDump();
+  void onImport();
+  void onDump();
+
+  void onRead();
+  void onWrite();
+  void onSave();
 
   protected:
     void createWidgets();
@@ -36,6 +40,9 @@ class DocumentTest: public QWidget
 
     QPushButton *buttonImportConfig;
     QPushButton *buttonDumpConfig;
+    QPushButton *buttonReadConfig;
+    QPushButton *buttonWriteConfig;
+    QPushButton *buttonSaveConfig;
     QLabel *labelFileSize;
 
 };

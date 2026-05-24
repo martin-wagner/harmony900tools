@@ -41,6 +41,7 @@ set(sources
   document/data/items/action.cpp
   document/data/items/activity.cpp
   document/files/h900.cpp
+  document/files/storage.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp

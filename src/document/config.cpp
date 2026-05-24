@@ -8,6 +8,7 @@
 #include "lib/uid.h"
 #include "config.h"
 #include "files/h900.h"
+#include "files/storage.h"
 
 using namespace std;
 
@@ -113,20 +114,35 @@ bool Config::read(const QString &path)
 {
   reset();
 
-  //todo
+  if (path.isEmpty()) {
+    emit writeMsg(tr("No path set"));
+    return false;
+  }
+  savePath = path;
 
+  auto storage = files::ConfigStorage(savePath);
+  connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
+  connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
+  stack.beginMacro(tr("Read Config"));
+  auto ret = storage.read(*configData, worker);
+  stack.endMacro();
+  dirty = true;
+  return ret;
 }
 
 bool Config::reset()
 {
-  disconnect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
-  disconnect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
+  if (worker != nullptr) {
+    disconnect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
+    disconnect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
+  }
 
   configData = make_unique<data::ConfigData>();
   worker = new data::CmdCatalogue(*configData, stack, this);
   type = Type::UNKNOWN;
   lib::UidGenerator::initialize(UidStartValue);
   workPath.clear();
+  savePath.clear();
   dirty = false;
 
   tempDir = std::make_unique<QTemporaryDir>();
@@ -157,10 +173,29 @@ QString Config::getPath()
 
 bool Config::save()
 {
+  if (savePath.isEmpty()) {
+    emit writeMsg(tr("No path set"));
+    return false;
+  }
+  return saveAs(savePath);
 }
 
 bool Config::saveAs(const QString &path)
 {
+  if (path.isEmpty()) {
+    emit writeMsg(tr("Path is empty"));
+    return false;
+  }
+  savePath = path;
+
+  auto storage = files::ConfigStorage(savePath);
+  connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
+  connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
+  auto ret = storage.write(*configData);
+  if (ret == true) {
+    dirty = false;
+  }
+  return ret;
 }
 
 bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)

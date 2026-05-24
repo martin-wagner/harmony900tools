@@ -74,7 +74,7 @@ class Config : public QObject
   protected:
     std::unique_ptr<data::ConfigData> configData;
     lib::UndoStack &stack;
-    data::CmdCatalogue *worker;
+    data::CmdCatalogue *worker = nullptr;
 
     bool dirty = false;
     Type type = Type::UNKNOWN;
@@ -82,6 +82,7 @@ class Config : public QObject
     static constexpr uint32_t UidStartValue = 10000000;
 
   protected:
+      QString savePath;
       QString workPath;
       std::unique_ptr<QTemporaryDir> tempDir;
 

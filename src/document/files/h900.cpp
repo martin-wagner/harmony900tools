@@ -13,7 +13,8 @@ namespace document
 namespace files
 {
 
-ConfigH900::ConfigH900(const QString &workPath) : wp(workPath)
+ConfigH900::ConfigH900(const QString &workPath) :
+    wp(workPath)
 {
 }
 
@@ -33,10 +34,10 @@ bool ConfigH900::read(data::ConfigData &c, data::CmdCatalogue *worker)
 //  std::vector<uint8_t> irProto;
 //  std::vector<uint8_t> ssir;
 
-  } catch (...) {
-    emit writeLog(LogLevel::Error, tr("import: failed with exception"),
+  } catch (const std::exception &e) {
+    emit writeLog(LogLevel::Error,
+        tr("import: exception: %1").arg(QString(e.what())),
         ContentType::PlainText);
-    return false;
   }
 
   return ret;
@@ -100,9 +101,7 @@ bool ConfigH900::readUserConfigXml(data::ConfigData &c,
 
   //activities //todo
 
-
   //protocols //todo
-
 
   return true;
 }
