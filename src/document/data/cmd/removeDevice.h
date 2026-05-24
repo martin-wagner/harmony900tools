@@ -2,85 +2,53 @@
 
 #pragma once
 
-#include <set>
-#include <QUndoCommand>
-
-#include "lib/undo.h"
-#include "lib/uid.h"
-#include "document/data/data.h"
+#include "base.h"
 
 namespace document
 {
 namespace data
 {
 
-class RemoveDeviceFromActivityCommand: public QUndoCommand
+class RemoveDeviceFromActivityCommand: public BaseCommand
 {
+  Q_OBJECT
   public:
-    RemoveDeviceFromActivityCommand(std::set<uint32_t> ids, item::Activity &a,
-        QUndoCommand *parent = nullptr) :
-        QUndoCommand(QObject::tr("Remove device from activity"), parent)
-    {
-      //todo implement this!
-    }
+    RemoveDeviceFromActivityCommand(std::set<uint32_t> ids, item::Activity &a, QUndoCommand *parent = nullptr);
 
-    void redo() override
-    {
-    }
+    void redo() override;
+    void undo() override;
 
-    void undo() override
-    {
-    }
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
 
-  protected:
-
+    void activityAdded(uint32_t id);
+    void activityAboutToBeRemoved(uint32_t id);
+    void activityRemoved(uint32_t id);
 };
 
-class RemoveDeviceCommand: public QUndoCommand
+class RemoveDeviceCommand: public BaseCommand
 {
+  Q_OBJECT
   public:
-    RemoveDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent =
-        nullptr) :
-        QUndoCommand(QObject::tr("Remove device (ID: %1)").arg(id), parent), c(
-            c), id(id), device(0)
-    {
-      auto &d = c.getDevices();
-      if (d.contains(id)) {
-        //copy device for undo
+    RemoveDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent = nullptr);
 
-        //add activites for undo
-        auto ids = d.at(id).getAllIds();
-        for (auto &a : c.getActivities()) {
-          new RemoveDeviceFromActivityCommand(ids, a.second, this);
-        }
+    void redo() override;
+    void undo() override;
 
-        isValid = true;
-      }
-    }
+    bool valid() const;
 
-    void redo() override
-    {
-      if (!isValid) {
-        return;
-      }
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
 
-      QUndoCommand::redo();
-      c.getDevices().erase(id);
-    }
+    void deviceAdded(uint32_t index);
+    void deviceAboutToBeRemoved(uint32_t id);
+    void deviceRemoved(uint32_t index);
 
-    void undo() override
-    {
-      if (!isValid) {
-        return;
-      }
-      c.getDevices().insert(std::make_pair(id, device));
-      QUndoCommand::undo();
-    }
-
-    bool valid() const
-    {
-      return isValid;
-    }
+    void activityAdded(uint32_t id);
+    void activityAboutToBeRemoved(uint32_t id);
+    void activityRemoved(uint32_t id);
 
   protected:
     bool isValid = false;
@@ -88,9 +56,7 @@ class RemoveDeviceCommand: public QUndoCommand
     ConfigData &c;
     uint32_t id;
     item::Device device;
-
 };
 
 }
 }
-

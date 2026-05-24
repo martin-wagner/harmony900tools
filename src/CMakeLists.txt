@@ -38,6 +38,9 @@ set(sources
   document/data/catalogue.cpp
   document/data/data.cpp
   document/data/enum.cpp
+  document/data/cmd/base.cpp
+  document/data/cmd/addDevice.cpp
+  document/data/cmd/removeDevice.cpp
   document/data/items/action.cpp
   document/data/items/activity.cpp
   document/files/h900.cpp

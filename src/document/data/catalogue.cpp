@@ -23,6 +23,7 @@ bool CmdCatalogue::addDeviceCommand(uint32_t id)
   auto *cmd = new AddDeviceCommand(c, id);
   auto ret = cmd->valid();
   if (ret == true) {
+    connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
@@ -39,6 +40,7 @@ bool CmdCatalogue::addDeviceCommand(uint32_t *id)
   if (id != nullptr) {
     *id = cmd->getUid();
   }
+  connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
@@ -48,6 +50,7 @@ bool CmdCatalogue::removeDeviceCommand(uint32_t id)
   auto *cmd = new RemoveDeviceCommand(c, id);
   auto ret = cmd->valid();
   if (ret == true) {
+    connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
@@ -56,6 +59,25 @@ bool CmdCatalogue::removeDeviceCommand(uint32_t id)
     delete cmd;
   }
   return ret;
+}
+
+void CmdCatalogue::connectCommand(BaseCommand *cmd)
+{
+  //connect signals. not all commands actually use all signals!
+
+  // @formatter:off
+  connect(cmd, &BaseCommand::writeLog, this, &CmdCatalogue::writeLog);
+  connect(cmd, &BaseCommand::writeMsg, this, &CmdCatalogue::writeMsg);
+  connect(cmd, &BaseCommand::deviceChanged, this, &CmdCatalogue::deviceChanged);
+  connect(cmd, &BaseCommand::deviceAdded, this, &CmdCatalogue::deviceAdded);
+  connect(cmd, &BaseCommand::deviceAboutToBeRemoved, this, &CmdCatalogue::deviceAboutToBeRemoved);
+  connect(cmd, &BaseCommand::deviceRemoved, this, &CmdCatalogue::deviceRemoved);
+  connect(cmd, &BaseCommand::activityChanged, this, &CmdCatalogue::activityChanged);
+  connect(cmd, &BaseCommand::activityAdded, this, &CmdCatalogue::activityAdded);
+  connect(cmd, &BaseCommand::activityAboutToBeRemoved, this, &CmdCatalogue::activityAboutToBeRemoved);
+  connect(cmd, &BaseCommand::activityRemoved, this, &CmdCatalogue::activityRemoved);
+  connect(cmd, &BaseCommand::dirtyChanged, this, &CmdCatalogue::dirtyChanged);
+// @formatter:on
 }
 
 }

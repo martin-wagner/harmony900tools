@@ -110,7 +110,7 @@ class Device
       std::vector<UnknownElement> u;
     } p;
 
-    const uint32_t id;
+    uint32_t id;
     Enum<DeviceType> type{DeviceType::Computer};
     std::string manufacturer = "Unknown";
     std::string model = "Unknown";

@@ -133,8 +133,7 @@ bool Config::read(const QString &path)
 bool Config::reset()
 {
   if (worker != nullptr) {
-    disconnect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
-    disconnect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
+    worker->deleteLater();
   }
 
   configData = make_unique<data::ConfigData>();
@@ -153,8 +152,22 @@ bool Config::reset()
   tempDir->setAutoRemove(true);
   workPath = tempDir->path();
 
+  // @formatter:off
   connect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
   connect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
+  connect(worker, &data::CmdCatalogue::deviceChanged, this, &Config::deviceChanged);
+  connect(worker, &data::CmdCatalogue::deviceAdded, this, &Config::deviceAdded);
+  connect(worker, &data::CmdCatalogue::deviceAboutToBeRemoved, this, &Config::deviceAboutToBeRemoved);
+  connect(worker, &data::CmdCatalogue::deviceRemoved, this, &Config::deviceRemoved);
+  connect(worker, &data::CmdCatalogue::activityChanged, this, &Config::activityChanged);
+  connect(worker, &data::CmdCatalogue::activityAdded, this, &Config::activityAdded);
+  connect(worker, &data::CmdCatalogue::activityAboutToBeRemoved, this, &Config::activityAboutToBeRemoved);
+  connect(worker, &data::CmdCatalogue::activityRemoved, this, &Config::activityRemoved);
+  connect(worker, &data::CmdCatalogue::dirtyChanged, this, [this](bool dirty) {
+    this->dirty = dirty;
+    emit dirtyChanged(dirty);
+  });
+// @formatter:on
 
   return true;
 }

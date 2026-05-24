@@ -2,59 +2,33 @@
 
 #pragma once
 
-#include <set>
-#include <QUndoCommand>
-
-#include "lib/undo.h"
-#include "lib/uid.h"
-#include "document/data/data.h"
+#include "base.h"
 
 namespace document
 {
 namespace data
 {
 
-class AddDeviceCommand: public QUndoCommand
+class AddDeviceCommand: public BaseCommand
 {
+  Q_OBJECT
   public:
-    AddDeviceCommand(ConfigData &c, QUndoCommand *parent = nullptr) :
-        QUndoCommand(parent), c(c)
-    {
-      id = lib::UidGenerator::getInstance().generate();
-      setText(QObject::tr("Add device (ID: %1)").arg(id));
-      isValid = true;
-    }
+    AddDeviceCommand(ConfigData &c, QUndoCommand *parent = nullptr);
+    AddDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent = nullptr);
 
-    AddDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent = nullptr) :
-        QUndoCommand(QObject::tr("Add device (ID: %1)").arg(id), parent), c(c), id(
-            id)
-    {
-      auto &d = c.getDevices();
-      if (!d.contains(id)) {
-        isValid = true;
-      }
-    }
+    void redo() override;
+    void undo() override;
 
-    void redo() override
-    {
-      item::Device device(id);
-      c.getDevices().insert(std::make_pair(id, device));
-    }
+    uint32_t getUid() const;
+    bool valid() const;
 
-    void undo() override
-    {
-      c.getDevices().erase(id);
-    }
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
 
-    uint32_t getUid() const
-    {
-      return id;
-    }
-
-    bool valid() const
-    {
-      return isValid;
-    }
+    void deviceAdded(uint32_t index);
+    void deviceAboutToBeRemoved(uint32_t id);
+    void deviceRemoved(uint32_t index);
 
   protected:
     bool isValid = false;
@@ -64,4 +38,3 @@ class AddDeviceCommand: public QUndoCommand
 
 }
 }
-

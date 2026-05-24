@@ -36,7 +36,6 @@ class ConfigH900 : public QObject
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-
   protected:
     bool readUserConfigXml(data::ConfigData &c, data::CmdCatalogue *worker);
 

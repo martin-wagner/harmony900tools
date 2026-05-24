@@ -2,26 +2,25 @@
 
 #pragma once
 
-#include <QObject>
+#include <set>
+#include <QUndoCommand>
 
 #include "lib/undo.h"
 #include "lib/uid.h"
+#include "document/data/data.h"
 #include "ui/logViewer.h"
-#include "cmd/base.h"
 
 namespace document
 {
 namespace data
 {
 
-class ConfigData;
-
-/** all data modification commands, implementing dependencies and undo */
-class CmdCatalogue : public QObject
+class BaseCommand: public QObject, public QUndoCommand
 {
   Q_OBJECT
+
   public:
-    CmdCatalogue(ConfigData &c, lib::UndoStack &undo, QObject *parent = nullptr);
+    explicit BaseCommand(const QString &text, QUndoCommand *parent = nullptr);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
@@ -36,22 +35,7 @@ class CmdCatalogue : public QObject
     void activityAboutToBeRemoved(uint32_t id);
     void activityRemoved(uint32_t id);
     void dirtyChanged(bool dirty);
-
-  public:
-    bool addDeviceCommand(uint32_t id); //existing id
-    bool addDeviceCommand(uint32_t *id); //assign id
-    bool removeDeviceCommand(uint32_t id);
-
-  protected:
-    void connectCommand(BaseCommand *cmd);
-
-  protected:
-    ConfigData &c;
-    lib::UndoStack &undo;
-    lib::UidGenerator &uid;
 };
 
 }
 }
-
-

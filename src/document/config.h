@@ -61,15 +61,15 @@ class Config : public QObject
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    void deviceChanged(int index);
-    void deviceAdded(int index);
-    void deviceRemoved(int index);
-    void activityChanged(int index);
-    void activityAdded(int index);
-    void activityRemoved(int index);
+    void deviceChanged(uint32_t id);
+    void deviceAdded(uint32_t id);
+    void deviceAboutToBeRemoved(uint32_t id);
+    void deviceRemoved(uint32_t id);
+    void activityChanged(uint32_t id);
+    void activityAdded(uint32_t id);
+    void activityAboutToBeRemoved(uint32_t id);
+    void activityRemoved(uint32_t id);
     void dirtyChanged(bool dirty);
-
-  protected:
 
   protected:
     std::unique_ptr<data::ConfigData> configData;
