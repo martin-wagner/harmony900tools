@@ -102,15 +102,19 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c,
   //controller //todo
 
   //devices
-  for (const auto &[key, value] : j["Devices"].items()) {
-    auto ret = worker->addDeviceCommand(stoul(key));
+  for (int i = 0; i < j["Devices"].size(); i++) {
+    auto &jd = j["Devices"][i];
+
+    auto id = jd["Id"].get<uint32_t>();
+    auto ret = worker->addDeviceCommand(-1, id);
     if (!ret) {
       continue;
     }
 
     //todo all the other stuff...
-
   }
+
+
 
   //activities //todo
 
@@ -131,8 +135,12 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
   j["User"]["Created"] = c.getUser().getFileCreationDate();
   j["User"]["Modified"] = c.getUser().getFileModificationDate();
 
-  for (const auto &d : c.getDevices()) {
-    j["Devices"][to_string(d.first)]["Test"] = 42;
+  for (int i = 0; i < c.getDevices().size(); i++) {
+    auto &jd = j["Devices"][i];
+    auto &d = c.getDevices()[i];
+    jd["Id"] = d.getId();
+    jd["Test"] = 42;
+
   }
 
 #ifdef _WIN32

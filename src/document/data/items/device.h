@@ -39,6 +39,76 @@ class Device
     /** get device uid + all command uids */
     std::set<uint32_t> getAllIds() {}; //todo
 
+    const Presentation& getButtons() const
+    {
+      return buttons;
+    }
+
+    void setButtons(const Presentation &buttons)
+    {
+      this->buttons = buttons;
+    }
+
+    const Commands& getIrCommands() const
+    {
+      return irCommands;
+    }
+
+    void setIrCommands(const Commands &irCommands)
+    {
+      this->irCommands = irCommands;
+    }
+
+    const std::string& getManufacturer() const
+    {
+      return manufacturer;
+    }
+
+    void setManufacturer(const std::string &manufacturer = "Unknown")
+    {
+      this->manufacturer = manufacturer;
+    }
+
+    const std::string& getModel() const
+    {
+      return model;
+    }
+
+    void setModel(const std::string &model = "Unknown")
+    {
+      this->model = model;
+    }
+
+    const std::vector<StateMachine>& getStateMachines() const
+    {
+      return stateMachines;
+    }
+
+    void setStateMachines(const std::vector<StateMachine> &stateMachines)
+    {
+      this->stateMachines = stateMachines;
+    }
+
+    const Enum<DeviceType>& getType() const
+    {
+      return type;
+    }
+
+    void setType(const Enum<DeviceType>& type)
+    {
+      this->type = type;
+    }
+
+    const std::vector<UnknownElement>& getU() const
+    {
+      return u;
+    }
+
+    void setU(const std::vector<UnknownElement> &u)
+    {
+      this->u = u;
+    }
+
     PROPERTY_GETTER(Property<bool>, manualPower, getManualPower)
     PROPERTY_GETTER(Property<bool>, alwaysOn, getAlwaysOn)
     PROPERTY_GETTER(Property<bool>, autoPower, getAutoPower)

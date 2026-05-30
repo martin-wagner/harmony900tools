@@ -275,4 +275,24 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
   return true;
 }
 
+const data::ConfigData &Config::data() const
+{
+  return *configData;
+}
+
+data::CmdCatalogue &Config::modify()
+{
+  return *worker;
+}
+
+void Config::beginMacro(const QString &text)
+{
+  stack.beginMacro(text);
+}
+
+void Config::endMacro()
+{
+  stack.endMacro();
+}
+
 }

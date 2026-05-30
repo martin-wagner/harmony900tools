@@ -31,7 +31,8 @@ class RemoveDeviceCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    RemoveDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent = nullptr);
+    //pos -1 = end
+    RemoveDeviceCommand(ConfigData &c, int pos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -54,7 +55,7 @@ class RemoveDeviceCommand: public BaseCommand
     bool isValid = false;
 
     ConfigData &c;
-    uint32_t id;
+    uint32_t pos;
     item::Device device;
 };
 

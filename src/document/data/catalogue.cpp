@@ -18,25 +18,25 @@ CmdCatalogue::CmdCatalogue(ConfigData &c, lib::UndoStack &undo, QObject *parent)
 {
 }
 
-bool CmdCatalogue::addDeviceCommand(uint32_t id)
+bool CmdCatalogue::addDeviceCommand(int pos, uint32_t id)
 {
-  auto *cmd = new AddDeviceCommand(c, id);
+  auto *cmd = new AddDeviceCommand(c, id, pos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device id %1 already exists, dropped").arg(id),
+        tr("modify: device pos %1 already exists, dropped").arg(pos),
         ContentType::PlainText);
     delete cmd;
   }
   return true;
 }
 
-bool CmdCatalogue::addDeviceCommand(uint32_t *id)
+bool CmdCatalogue::addDeviceCommand(int pos, uint32_t *id)
 {
-  auto *cmd = new AddDeviceCommand(c);
+  auto *cmd = new AddDeviceCommand(c, pos);
   if (id != nullptr) {
     *id = cmd->getUid();
   }
@@ -45,16 +45,16 @@ bool CmdCatalogue::addDeviceCommand(uint32_t *id)
   return true;
 }
 
-bool CmdCatalogue::removeDeviceCommand(uint32_t id)
+bool CmdCatalogue::removeDeviceCommand(int pos)
 {
-  auto *cmd = new RemoveDeviceCommand(c, id);
+  auto *cmd = new RemoveDeviceCommand(c, pos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device id %1 already exists, dropped").arg(id),
+        tr("modify: device pos %1 doesn't exist, dropped").arg(pos),
         ContentType::PlainText);
     delete cmd;
   }

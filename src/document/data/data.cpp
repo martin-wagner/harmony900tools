@@ -17,14 +17,40 @@ ConfigData::~ConfigData()
 {
 }
 
-const map<uint32_t, item::Activity>& ConfigData::getActivities() const
+const std::vector<item::Activity>& ConfigData::getActivities() const
 {
   return activities;
 }
 
-map<uint32_t, item::Activity>& ConfigData::getActivities()
+std::vector<item::Activity>& ConfigData::getActivities()
 {
   return activities;
+}
+
+const item::Activity* ConfigData::getActivity(uint32_t idx, uint32_t *pos) const
+{
+  for (int i = 0; i < activities.size(); i++) {
+    if (activities[i].getId() == idx) {
+      if (pos != nullptr) {
+        *pos = i;
+      }
+      return &activities[i];
+    }
+  }
+  return nullptr;
+}
+
+item::Activity* ConfigData::getActivity(uint32_t idx, uint32_t *pos)
+{
+  for (int i = 0; i < activities.size(); i++) {
+    if (activities[i].getId() == idx) {
+      if (pos != nullptr) {
+        *pos = i;
+      }
+      return &activities[i];
+    }
+  }
+  return nullptr;
 }
 
 const vector<item::Blob>& ConfigData::getBlobs() const
@@ -57,14 +83,41 @@ item::ControllerInfo& ConfigData::getController()
   return controller;
 }
 
-const map<uint32_t, item::Device>& ConfigData::getDevices() const
+const std::vector<item::Device>& ConfigData::getDevices() const
 {
   return devices;
 }
 
-map<uint32_t, item::Device>& ConfigData::getDevices()
+std::vector<item::Device>& ConfigData::getDevices()
 {
   return devices;
+}
+
+const item::Device* ConfigData::getDevice(uint32_t idx,
+    uint32_t *pos) const
+{
+  for (int i = 0; i < devices.size(); i++) {
+    if (devices[i].getId() == idx) {
+      if (pos != nullptr) {
+        *pos = i;
+      }
+      return &devices[i];
+    }
+  }
+  return nullptr;
+}
+
+item::Device* ConfigData::getDevice(uint32_t idx, uint32_t *pos)
+{
+  for (int i = 0; i < devices.size(); i++) {
+    if (devices[i].getId() == idx) {
+      if (pos != nullptr) {
+        *pos = i;
+      }
+      return &devices[i];
+    }
+  }
+  return nullptr;
 }
 
 bool ConfigData::isIgnoreDeviceLimit() const

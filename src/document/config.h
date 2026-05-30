@@ -57,18 +57,30 @@ class Config : public QObject
     /** generate export */
     bool dumpZip(std::vector<uint8_t> &zip, Type t);
 
+  public:
+    //model access
+    /** read data */
+    const data::ConfigData &data() const;
+    /** modify data */
+    data::CmdCatalogue &modify();
+    /** start undo macro */
+    void beginMacro(const QString &text);
+    /** end undo macro */
+    void endMacro();
+
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    void deviceChanged(uint32_t id);
-    void deviceAdded(uint32_t id);
-    void deviceAboutToBeRemoved(uint32_t id);
-    void deviceRemoved(uint32_t id);
-    void activityChanged(uint32_t id);
-    void activityAdded(uint32_t id);
-    void activityAboutToBeRemoved(uint32_t id);
-    void activityRemoved(uint32_t id);
+    //model observers
+    void deviceChanged(uint32_t pos);
+    void deviceAdded(uint32_t pos);
+    void deviceAboutToBeRemoved(uint32_t pos);
+    void deviceRemoved(uint32_t pos);
+    void activityChanged(uint32_t pos);
+    void activityAdded(uint32_t pos);
+    void activityAboutToBeRemoved(uint32_t pos);
+    void activityRemoved(uint32_t pos);
     void dirtyChanged(bool dirty);
 
   protected:

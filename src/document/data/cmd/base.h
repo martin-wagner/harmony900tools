@@ -26,14 +26,14 @@ class BaseCommand: public QObject, public QUndoCommand
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    void deviceChanged(uint32_t id);
-    void deviceAdded(uint32_t id);
-    void deviceAboutToBeRemoved(uint32_t id);
-    void deviceRemoved(uint32_t id);
-    void activityChanged(uint32_t id);
-    void activityAdded(uint32_t id);
-    void activityAboutToBeRemoved(uint32_t id);
-    void activityRemoved(uint32_t id);
+    void deviceChanged(uint32_t pos);
+    void deviceAdded(uint32_t pos);
+    void deviceAboutToBeRemoved(uint32_t pos);
+    void deviceRemoved(uint32_t pos);
+    void activityChanged(uint32_t pos);
+    void activityAdded(uint32_t pos);
+    void activityAboutToBeRemoved(uint32_t pos);
+    void activityRemoved(uint32_t pos);
     void dirtyChanged(bool dirty);
 };
 

@@ -108,7 +108,7 @@ bool ConfigH900::readUserConfigXml(data::ConfigData &c,
   //devices
   for (pugi::xml_node device : root.children("Device")) {
     auto id = device.child("Id").text().as_uint();
-    auto ret = worker->addDeviceCommand(id);
+    auto ret = worker->addDeviceCommand(-1, id);
     if (!ret) {
       continue;
     }
@@ -148,7 +148,7 @@ bool ConfigH900::dumpUserConfigXml(const data::ConfigData &c)
   //devices
   for (const auto &d : c.getDevices()) {
     auto devices = root.append_child("Device");
-    devices.append_child("Id").text().set(d.first);
+    devices.append_child("Id").text().set(d.getId());
 
     //todo all the other stuff...
 
@@ -160,7 +160,7 @@ bool ConfigH900::dumpUserConfigXml(const data::ConfigData &c)
 
   QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
 #ifdef _WIN32
-  ret = xml.save_file(QString(wp + "/" + userConfigPath).toStdWString().c_str()),
+  ret = xml.save_file(QString(wp + "/" + userConfigPath).toStdWString().c_str(),
       PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
 #else
   ret = xml.save_file(QString(wp + "/" + userConfigPath).toUtf8(),

@@ -13,8 +13,10 @@ class AddDeviceCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    AddDeviceCommand(ConfigData &c, QUndoCommand *parent = nullptr);
-    AddDeviceCommand(ConfigData &c, uint32_t id, QUndoCommand *parent = nullptr);
+    //pos -1 = append
+    AddDeviceCommand(ConfigData &c, int pos = -1, QUndoCommand *parent = nullptr);
+    //pos -1 = append
+    AddDeviceCommand(ConfigData &c, uint32_t id, int pos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -34,6 +36,7 @@ class AddDeviceCommand: public BaseCommand
     bool isValid = false;
     ConfigData &c;
     uint32_t id;
+    int pos;
 };
 
 }
