@@ -45,6 +45,7 @@ set(sources
   document/data/items/activity.cpp
   document/files/h900.cpp
   document/files/storage.cpp
+  models/deviceListModel.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordTest.cpp

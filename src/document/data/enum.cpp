@@ -59,7 +59,7 @@ QString Enum<T>::getQString(T v)
 }
 
 template<typename T>
-vector<string> Enum<T>::getStringList()
+vector<string> Enum<T>::getStringList() const
 {
   vector<string> ret;
 
@@ -78,7 +78,7 @@ vector<string> Enum<T>::getStringList()
 }
 
 template<typename T>
-QStringList Enum<T>::getQStringList()
+QStringList Enum<T>::getQStringList() const
 {
   QStringList ret;
 

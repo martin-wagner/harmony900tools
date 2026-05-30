@@ -63,8 +63,8 @@ class Enum
     static std::string getString(T v);
     static QString getQString(T v);
 
-    std::vector<std::string> getStringList();
-    QStringList getQStringList();
+    std::vector<std::string> getStringList() const;
+    QStringList getQStringList() const;
 
     std::string getString() const;
     QString getQString() const;
