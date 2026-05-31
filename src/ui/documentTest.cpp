@@ -6,8 +6,8 @@
 
 using namespace std;
 
-DocumentTest::DocumentTest(Context &ctx, QWidget *parent) :
-    QWidget(parent), ctx(ctx), config(ctx, false)
+DocumentTest::DocumentTest(Context &ctx, editors::DeviceEditor *editor, QWidget *parent) :
+    QWidget(parent), ctx(ctx), deviceEditor(editor), config(ctx, false)
 {
   createWidgets();
   createActions();
@@ -45,6 +45,8 @@ void DocumentTest::onImport()
   if (!ret) {
     emit writeLog(LogLevel::Debug, tr("import fail"), ContentType::PlainText);
   }
+
+  updateModelViews();
 }
 
 void DocumentTest::onDump()
@@ -85,6 +87,8 @@ void DocumentTest::onRead()
       return;
     }
   }
+
+  updateModelViews();
 }
 
 void DocumentTest::onWrite()
@@ -146,4 +150,13 @@ void DocumentTest::createActions()
 
   connect(&config, &document::Config::writeLog, this, &DocumentTest::writeLog);
   connect(&config, &document::Config::writeMsg, this, &DocumentTest::writeMsg);
+}
+
+void DocumentTest::updateModelViews()
+{
+  if (deviceModel != nullptr) {
+    deviceModel->deleteLater();
+  }
+  deviceModel = new models::DeviceModel(config, this);
+  deviceEditor->setModel(deviceModel);
 }

@@ -37,7 +37,7 @@ class Device
     }
 
     /** get device uid + all command uids */
-    std::set<uint32_t> getAllIds() {}; //todo
+    std::set<uint32_t> getAllIds() { return {}; }; //todo
 
     const Presentation& getButtons() const
     {

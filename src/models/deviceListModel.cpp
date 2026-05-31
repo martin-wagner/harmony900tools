@@ -14,6 +14,7 @@ DeviceModel::DeviceModel(document::Config &config, QObject *parent) :
   for (auto &item : columnSetup) {
     header.push_back(item.second.name);
   }
+  createActions();
 }
 
 DeviceModel::~DeviceModel() = default;
@@ -213,6 +214,17 @@ bool DeviceModel::setHeaderData(int section, Qt::Orientation orientation,
   return false;
 }
 
+void models::DeviceModel::createActions()
+{
+  //connect observers
+  connect(&config, &document::Config::deviceChanged, [this](int pos) {
+    emit dataChanged(index(pos, 0),
+        index(pos, columnCount()), {Qt::DisplayRole, Qt::EditRole});
+  });
+  //don't need device add/remove -- is done in here.
+  //don't need activities -- devices don't have dependendies to those.
+}
+
 QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
 {
   try {
@@ -220,7 +232,7 @@ QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
     switch (index.column()) {
       case Column::ID:
         return device.getId();
-      case Column::DEVICE_TYPE:
+      case Column::DEVTYPE:
         return device.getType().getQString();
       case Column::MANUFACTURER:
         return QString::fromStdString(device.getManufacturer());
@@ -241,7 +253,7 @@ QVariant DeviceModel::getEditData(const QModelIndex &index) const
     switch (index.column()) {
       case Column::ID:
         return device.getId();
-      case Column::DEVICE_TYPE:
+      case Column::DEVTYPE:
         return static_cast<int>(device.getType().getValue());
       case Column::MANUFACTURER:
         return QString::fromStdString(device.getManufacturer());
@@ -279,7 +291,7 @@ QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
   try {
     auto &device = config.data().getDevices().at(index.row());
     switch (index.column()) {
-      case Column::DEVICE_TYPE:
+      case Column::DEVTYPE:
         return device.getType().getQStringList();
       default:
         break;

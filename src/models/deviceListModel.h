@@ -25,7 +25,7 @@ class DeviceModel: public QAbstractItemModel
   public:
     enum Column {
       ID,
-      DEVICE_TYPE,
+      DEVTYPE,
       MANUFACTURER,
       MODEL,
 
@@ -42,7 +42,7 @@ class DeviceModel: public QAbstractItemModel
 
     const std::map<Column, Setup> columnSetup = {
         { Column::ID,            { "ID", "id", "int", true,  {}, } },
-        { Column::DEVICE_TYPE,   { "Type", "What kind of device you have", "Enum", false, {}, } },
+        { Column::DEVTYPE,   { "Type", "What kind of device you have", "Enum", false, {}, } },
         { Column::MANUFACTURER,  { "Manufacturer", "Device manufacturer", "QString", false, {}, } },
         { Column::MODEL,         { "Model", "Device model", "QString", false, {}, } }
     };
@@ -71,6 +71,9 @@ class DeviceModel: public QAbstractItemModel
 
   private:
     document::Config &config;
+    QStringList header;
+
+    void createActions();
 
     QVariant getDisplayData(const QModelIndex &index) const;
     QVariant getEditData(const QModelIndex &index) const;
@@ -79,7 +82,6 @@ class DeviceModel: public QAbstractItemModel
     QVariant getForegroundData(const QModelIndex &index) const;
     QVariant getSelectionItemsData(const QModelIndex &index) const;
 
-    QStringList header;
 };
 
 }

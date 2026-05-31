@@ -157,7 +157,14 @@ void MainWindow::createWidgets()
   dockManager->addDockWidget(ads::RightDockWidgetArea, dockConcordTest);
   dockMenu->addAction(dockConcordTest->toggleViewAction());
 
-  documentTest = new DocumentTest(*ctx.get(), this);
+  deviceEditor = new editors::DeviceEditor(*ctx.get(), nullptr, this);
+  ads::CDockWidget *dockDeviceEditor = new ads::CDockWidget(dockManager,
+      tr("Edit Devices"));
+  dockDeviceEditor->setWidget(deviceEditor);
+  dockManager->addDockWidget(ads::LeftDockWidgetArea, dockDeviceEditor);
+  dockMenu->addAction(dockDeviceEditor->toggleViewAction());
+
+  documentTest = new DocumentTest(*ctx.get(), deviceEditor, this);
   ads::CDockWidget *dockDocumentTest = new ads::CDockWidget(dockManager,
       tr("Test Document Import/Export"));
   dockDocumentTest->setWidget(documentTest);
@@ -343,6 +350,11 @@ void MainWindow::createActions()
 
   connect(documentTest, &DocumentTest::writeLog, log, &LogViewer::addEntry);
   connect(documentTest, &DocumentTest::writeMsg, log, &LogViewer::addMessage);
+
+  connect(deviceEditor, &editors::DeviceEditor::writeLog, log,
+      &LogViewer::addEntry);
+  connect(deviceEditor, &editors::DeviceEditor::writeMsg, log,
+      &LogViewer::addMessage);
 }
 
 void MainWindow::readSettings()
@@ -587,8 +599,6 @@ void MainWindow::applySettings()
   log->setLoglevel(static_cast<LogLevel>(logLevel));
   log->addMessage("Setting loglevel to " + QString(logLevelName(logLevel)));
 
-  auto userlevel = settings->value(defaults::userlevel().key).toInt();
-  user->setLevel(static_cast<lib::UserLevel::Level>(userlevel));
   log->addMessage("Setting userlevel to " + user->levelToString());
 
   auto debugMacros = settings->value(defaults::undoMacros().key).toBool();

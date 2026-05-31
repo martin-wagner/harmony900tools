@@ -50,6 +50,7 @@ set(sources
   ui/settings.cpp
   ui/concordTest.cpp
   ui/documentTest.cpp
+  ui/deviceEditor.cpp
   wrappers/concordWrapper.cpp
 )
 

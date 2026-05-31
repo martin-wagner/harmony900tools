@@ -10,6 +10,7 @@
 #include "ui/settings.h"
 #include "ui/concordTest.h"
 #include "ui/documentTest.h"
+#include "ui/deviceEditor.h"
 #include "lib/users.h"
 #include "lib/undo.h"
 #include "context.h"
@@ -85,6 +86,7 @@ class MainWindow: public QMainWindow
     Concord *concord;
     ConcordTest *concordTest;
     DocumentTest *documentTest;
+    editors::DeviceEditor *deviceEditor;
 
     QPlainTextEdit *textEdit;
     QString curFile;
