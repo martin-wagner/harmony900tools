@@ -6,7 +6,8 @@
 #include "ui/settings.h"
 #include "defaults.h"
 
-namespace lib {
+namespace lib
+{
 
 class UserLevel: public QObject
 {
@@ -22,6 +23,9 @@ class UserLevel: public QObject
         QObject(parent), settings(settings)
     {
       settings.addSetting(defaults::userlevel());
+      currentLevel = getLevel();
+      connect(&settings, &Settings::settingsAccepted, this,
+          &UserLevel::updateLevel);
     }
 
     Level getLevel() const
@@ -39,17 +43,21 @@ class UserLevel: public QObject
 
     void setLevel(Level level)
     {
-      if (getLevel() == level) {
+      if (currentLevel == level) {
         return;
       }
       QVariant val = static_cast<int>(level);
       settings.setValue("userLevel", val);
-      emit levelChanged(level);
+      updateLevel();
     }
 
     bool validate(Level required) const
     {
-      Level current = getLevel();
+      return validate(getLevel(), required);
+    }
+
+    static bool validate(Level current, Level required)
+    {
       switch (required) {
         case Level::Simple:
           return current == Level::Simple || current == Level::Expert
@@ -61,6 +69,7 @@ class UserLevel: public QObject
       }
       return false;
     }
+
 
     QString levelToString() const
     {
@@ -78,8 +87,20 @@ class UserLevel: public QObject
   signals:
     void levelChanged(Level level);
 
+  protected slots:
+    void updateLevel()
+    {
+      auto newLevel = getLevel();
+      if (newLevel == currentLevel) {
+        return;
+      }
+      currentLevel = newLevel;
+      emit levelChanged (newLevel);
+    }
+
   private:
     Settings &settings;
+    Level currentLevel;
 };
 
 }
