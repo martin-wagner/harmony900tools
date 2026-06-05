@@ -368,7 +368,7 @@ class Worker: public QObject
     void finaliseLearnedCommand(uint32_t carrier, uint32_t *data_ret,
         uint32_t data_len)
     {
-      std::vector<uint16_t> data;
+      vector<uint16_t> data;
 
       if (data_ret == nullptr) {
         emit writeLog(LogLevel::Error, tr("libconcord nullptr"),
@@ -481,13 +481,52 @@ QString Concord::hwVersion()
       + QString::number(concord->getHwVerMic());
 }
 
+bool Concord::stripHeader(const QString &file, vector<uint8_t> &data)
+{
+  //no function available in libconcord header. just serach for the zip start magic...
+  int32_t zipOffset = -1;
+  const uint8_t *bytes;
+  int32_t size;
+
+  QFile f(file);
+  if (!f.open(QIODevice::ReadOnly)) {
+    return false;
+  }
+  if (f.size() == 0) {
+    return false;
+  }
+
+  QByteArray raw = f.readAll();
+  f.close();
+
+  bytes = reinterpret_cast<const uint8_t*>(raw.constData());
+  size = static_cast<int32_t>(raw.size());
+
+  // Scan for the ZIP local file header magic (PK\x03\x04).
+  // The XML header always precedes the appended binary, so the
+  // first occurrence marks the start of the ZIP payload.
+  for (int32_t i = 0; i < size - 3; i++) {
+    if (bytes[i] == 0x50 && bytes[i + 1] == 0x4B && bytes[i + 2] == 0x03
+        && bytes[i + 3] == 0x04) {
+      zipOffset = i;
+      break;
+    }
+  }
+  if (zipOffset < 0) {
+    return false;
+  }
+
+  data = vector<uint8_t>(bytes + zipOffset, bytes + size);
+  return true;
+}
+
 bool Concord::connectRemote()
 {
   if (isInitialised()) {
     disconnectRemote();
   }
 
-  concord = make_unique<LibConcord::ConcordWrapper>(this);
+  concord = make_shared<LibConcord::ConcordWrapper>(this);
   auto ret = concord->initConcord();
   if (ret != 0) {
     auto err = concord->errorToString(ret);
@@ -592,17 +631,17 @@ int Concord::writeUserConfigFile(const QString &file, bool includeHeader)
   return 0;
 }
 
-std::vector<uint8_t> Concord::getUserConfig()
+vector<uint8_t> Concord::getUserConfig()
 {
   if (!isInitialised()) {
-    return std::vector<uint8_t>();
+    return vector<uint8_t>();
   }
 
   lock_guard<mutex> m(lock);
 
   auto data = worker->getReadConfig();
   if (data == nullptr) {
-    return std::vector<uint8_t>();
+    return vector<uint8_t>();
   }
   return (*data);
 }
@@ -636,7 +675,7 @@ int Concord::updateUserConfig(const QString &file)
   return 0;
 }
 
-int Concord::updateUserConfigData(const std::vector<uint8_t> &data,
+int Concord::updateUserConfigData(const vector<uint8_t> &data,
     bool containsHeader)
 {
   int type;

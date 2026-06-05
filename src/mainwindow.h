@@ -43,6 +43,7 @@ class MainWindow: public QMainWindow
     void open();
     bool save();
     bool saveAs();
+    void import();
     void about();
     void documentWasModified();
     void commitData(QSessionManager&);
@@ -72,6 +73,7 @@ class MainWindow: public QMainWindow
     QString infoText();
     QString strippedName(const QString &fullFileName);
     void updateModelView();
+    void setTitle(const QString &append = "");
 
   private:
     ads::CDockManager* dockManager;

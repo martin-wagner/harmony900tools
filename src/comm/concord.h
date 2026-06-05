@@ -37,6 +37,9 @@ class Concord: public QWidget
     /** get hw string */
     QString hwVersion();
 
+    /** take hex file, remove xml header, return data */
+    bool stripHeader(const QString &file, std::vector<uint8_t> &data);
+
     /** all following methods emit "done()" when finished. some provide additional signals */
 
     /** open connection */

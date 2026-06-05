@@ -94,6 +94,41 @@ bool MainWindow::saveAs()
   return ret;
 }
 
+void MainWindow::import()
+{
+  vector<uint8_t> data;
+
+  auto ret = maybeSave();
+  if (ret) {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Import Config"),
+        QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"));
+
+    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+
+    ret = concord->stripHeader(fileName, data);
+    if (!ret) {
+      QMessageBox::warning(this, tr("Application"),
+          tr("Error importing config %1 (reading)").arg(
+              QDir::toNativeSeparators(fileName)));
+      QGuiApplication::restoreOverrideCursor();
+      return;
+    }
+
+    undo.clear();
+    auto ret = config->read(data, document::Type::H900);
+    if (!ret) {
+      QMessageBox::warning(this, tr("Application"),
+          tr("Error importing config %1 (parsing)").arg(
+              QDir::toNativeSeparators(fileName)));
+      QGuiApplication::restoreOverrideCursor();
+      return;
+    }
+    updateModelView();
+    QGuiApplication::restoreOverrideCursor();
+    log->addMessage(tr("Project loaded"));
+  }
+}
+
 void MainWindow::about()
 {
   QMessageBox::about(this, tr("About %1").arg(QString(PROGRAM_NAME)),
@@ -156,8 +191,7 @@ void MainWindow::createAds()
 void MainWindow::createWidgets()
 {
   //mainwindow
-  setWindowTitle(
-      QString(PROGRAM_NAME) + " " + QString::fromUtf8(BuildInfo::versionFull));
+  setTitle();
 
   //create widgets
   concordTest = new ConcordTest(*ctx.get(), *concord, this);
@@ -250,6 +284,16 @@ void MainWindow::createActions()
       &MainWindow::saveAs);
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the document under a new name"));
+
+  fileMenu->addSeparator();
+
+  const QIcon importIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/document-import.png",
+      "document-import");
+  QAction *importAct = new QAction(importIcon, tr("&Import..."), this);
+  importAct->setStatusTip(tr("Import config/backup created with concordance"));
+  connect(importAct, &QAction::triggered, this, &MainWindow::import);
+  fileMenu->addAction(importAct);
 
   fileMenu->addSeparator();
 
@@ -465,8 +509,6 @@ void MainWindow::loadFile(const QString &fileName)
 
 bool MainWindow::saveFile(const QString &fileName)
 {
-  QString errorMessage;
-
   if (fileName.isEmpty()) {
     return false;
   }
@@ -496,6 +538,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
     shownName = "untitled." + document::Config::defaultFilePostfix;
   }
   setWindowFilePath(shownName);
+  setTitle(shownName);
 }
 
 QString MainWindow::infoText()
@@ -650,4 +693,11 @@ void MainWindow::onCopyViewToClipboard()
 {
   QString view = dockManager->saveState();
   QApplication::clipboard()->setText(view);
+}
+
+void MainWindow::setTitle(const QString &append)
+{
+  setWindowTitle(
+      QString(PROGRAM_NAME) + " " + QString::fromUtf8(BuildInfo::versionFull)
+          + " -- " + append);
 }
