@@ -59,7 +59,7 @@ void DeviceEditor::setModel(models::DeviceModel *model)
 
   updateActions();
   onSettingsChanged();
-  onUserLevelChanged(ctx.getUserLevel().getLevel());
+  onUserLevelChanged(ctx.userLevel().getLevel());
   emit selectionChanged(-1, 0);
 }
 
@@ -221,9 +221,9 @@ void DeviceEditor::createActions()
   connect(actionMoveUp, &QAction::triggered, this, &DeviceEditor::onMoveUp);
   connect(actionMoveDown, &QAction::triggered, this, &DeviceEditor::onMoveDown);
 
-  connect(&ctx.getUserLevel(), &lib::UserLevel::levelChanged, this,
+  connect(&ctx.userLevel(), &lib::UserLevel::levelChanged, this,
       &DeviceEditor::onUserLevelChanged);
-  connect(&ctx.getSettings(), &Settings::settingsAccepted, this,
+  connect(&ctx.settings(), &Settings::settingsAccepted, this,
       &DeviceEditor::onSettingsChanged);
 }
 

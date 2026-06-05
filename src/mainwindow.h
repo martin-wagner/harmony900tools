@@ -14,6 +14,8 @@
 #include "lib/users.h"
 #include "lib/undo.h"
 #include "context.h"
+#include "document/config.h"
+#include "models/deviceListModel.h"
 
 class QAction;
 class QMenu;
@@ -69,6 +71,7 @@ class MainWindow: public QMainWindow
     void setCurrentFile(const QString &fileName);
     QString infoText();
     QString strippedName(const QString &fullFileName);
+    void updateModelView();
 
   private:
     ads::CDockManager* dockManager;
@@ -84,12 +87,14 @@ class MainWindow: public QMainWindow
     lib::UndoStack undo;
 
     Concord *concord;
+    document::Config *config;
+    QString curFile;
+
+    editors::DeviceEditor *deviceEditor;
+    models::DeviceModel *deviceModel;
+
     ConcordTest *concordTest;
     DocumentTest *documentTest;
-    editors::DeviceEditor *deviceEditor;
-
-    QPlainTextEdit *textEdit;
-    QString curFile;
 
 };
 

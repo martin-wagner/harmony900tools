@@ -42,7 +42,7 @@ class DeviceModel: public QAbstractItemModel
 
     const std::map<Column, Setup> columnSetup = {
         { Column::ID,            { "ID", "id", "int", true,  {}, } },
-        { Column::DEVTYPE,   { "Type", "What kind of device you have", "Enum", false, {}, } },
+        { Column::DEVTYPE,       { "Type", "What kind of device you have", "Enum", false, {}, } },
         { Column::MANUFACTURER,  { "Manufacturer", "Device manufacturer", "QString", false, {}, } },
         { Column::MODEL,         { "Model", "Device model", "QString", false, {}, } }
     };

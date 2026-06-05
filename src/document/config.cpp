@@ -15,8 +15,8 @@ using namespace std;
 namespace document
 {
 
-Config::Config(Context &ctx, bool init) :
-    stack(ctx.getUndoStack())
+Config::Config(Context &ctx, bool init, QObject *parent) :
+    QObject(parent), stack(ctx.undoStack())
 {
   reset();
 
@@ -30,6 +30,8 @@ bool document::Config::create()
   reset();
 
   //todo
+
+  return true;
 }
 
 bool Config::read(const std::vector<uint8_t> &zip, Type t)
@@ -46,7 +48,7 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
   }
   type = t;
 
-  if (workPath.isEmpty()) {
+  if (importPath.isEmpty()) {
     return false;
   }
 
@@ -58,7 +60,7 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
     return false;
   }
   emit writeLog(LogLevel::Debug, tr("config: using temp file %1, "
-      "temp dir %2").arg(zipFile.fileName()).arg(workPath),
+      "temp dir %2").arg(zipFile.fileName()).arg(importPath),
       ContentType::PlainText);
 
   zipFile.write(reinterpret_cast<const char*>(zip.data()),
@@ -78,22 +80,22 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
     return false;
   }
 
-  auto ok = lib::unzipToDirectory(uf, workPath);
+  auto ok = lib::unzipToDirectory(uf, importPath);
   unzClose(uf);
-
   if (!ok) {
     emit writeLog(LogLevel::Error, tr("config: extraction failed"),
         ContentType::PlainText);
     return false;
   }
 
-  // TODO: config.configData.load(config.workPath);
+  // TODO: config.configData.load(config.importPath);
   //todo deserialise
   //todo setup uids
+  //todo backup zip to project file
 
   switch (t) {
     case Type::H900: {
-      auto parser = files::ConfigH900(workPath);
+      auto parser = files::ConfigH900(importPath);
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
       stack.beginMacro(tr("Import Harmony 900 Config"));
@@ -110,21 +112,41 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
   return ret;
 }
 
-bool Config::read(const QString &path)
+bool Config::read(const QString &file)
 {
+  bool ret;
+
   reset();
 
-  if (path.isEmpty()) {
+  if (file.isEmpty()) {
     emit writeMsg(tr("No path set"));
     return false;
   }
-  savePath = path;
 
-  auto storage = files::ConfigStorage(savePath);
+#ifdef _WIN32
+  auto uf = unzOpen64(file.toStdWString().c_str());
+#else
+  auto uf = unzOpen64(QFile::encodeName(file).constData());
+#endif
+  if (uf == nullptr) {
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to open compressed config"), ContentType::PlainText);
+    return false;
+  }
+
+  auto ok = lib::unzipToDirectory(uf, workPath);
+  unzClose(uf);
+  if (!ok) {
+    emit writeLog(LogLevel::Error, tr("config: extraction failed"),
+        ContentType::PlainText);
+    return false;
+  }
+
+  auto storage = files::ConfigStorage(workPath);
   connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
   connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
   stack.beginMacro(tr("Read Config"));
-  auto ret = storage.read(*configData, worker);
+  ret = storage.read(*configData, worker);
   stack.endMacro();
   dirty = true;
   return ret;
@@ -132,6 +154,8 @@ bool Config::read(const QString &path)
 
 bool Config::reset()
 {
+  QDir dir;
+
   if (worker != nullptr) {
     worker->deleteLater();
   }
@@ -141,7 +165,7 @@ bool Config::reset()
   type = Type::UNKNOWN;
   lib::UidGenerator::initialize(UidStartValue);
   workPath.clear();
-  savePath.clear();
+  importPath.clear();
   dirty = false;
 
   tempDir = std::make_unique<QTemporaryDir>();
@@ -150,7 +174,10 @@ bool Config::reset()
     return false;
   }
   tempDir->setAutoRemove(true);
-  workPath = tempDir->path();
+  importPath = tempDir->path() + "/import";
+  workPath = tempDir->path() + "/project";
+  dir.mkpath(importPath);
+  dir.mkpath(workPath);
 
   // @formatter:off
   connect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
@@ -178,37 +205,45 @@ Config::~Config()
 
 bool Config::isDirty()
 {
+  return dirty;
 }
 
-QString Config::getPath()
+bool Config::saveAs(const QString &file)
 {
-}
-
-bool Config::save()
-{
-  if (savePath.isEmpty()) {
-    emit writeMsg(tr("No path set"));
-    return false;
-  }
-  return saveAs(savePath);
-}
-
-bool Config::saveAs(const QString &path)
-{
-  if (path.isEmpty()) {
+  if (file.isEmpty()) {
     emit writeMsg(tr("Path is empty"));
     return false;
   }
-  savePath = path;
 
-  auto storage = files::ConfigStorage(savePath);
+  auto storage = files::ConfigStorage(workPath);
   connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
   connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
   auto ret = storage.write(*configData);
   if (ret == true) {
     dirty = false;
+  } else {
+    return false;
   }
-  return ret;
+
+#ifdef _WIN32
+  auto zf = zipOpen64(file.toStdWString().c_str(), APPEND_STATUS_CREATE);
+#else
+  auto zf = zipOpen64(QFile::encodeName(file).constData(),
+  APPEND_STATUS_CREATE);
+#endif
+  if (zf == nullptr) {
+    emit writeLog(LogLevel::Error, tr("config: failed to create project file"),
+        ContentType::PlainText);
+    return false;
+  }
+
+  auto ok = lib::zipDirectory(zf, workPath);
+  if (!ok) {
+    zipClose(zf, nullptr);
+    return false;
+  }
+  zipClose(zf, nullptr);
+  return true;
 }
 
 bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
@@ -218,7 +253,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
 
   switch (t) {
     case Type::H900: {
-      auto parser = files::ConfigH900(workPath);
+      auto parser = files::ConfigH900(importPath);
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
       ret = parser.dump(*configData);
@@ -256,7 +291,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
     return false;
   }
 
-  auto ok = lib::zipDirectory(zf, workPath);
+  auto ok = lib::zipDirectory(zf, importPath);
   if (!ok) {
     zipClose(zf, nullptr);
     return false;
@@ -275,12 +310,12 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
   return true;
 }
 
-const data::ConfigData &Config::data() const
+const data::ConfigData& Config::data() const
 {
   return *configData;
 }
 
-data::CmdCatalogue &Config::modify()
+data::CmdCatalogue& Config::modify()
 {
   return *worker;
 }

@@ -37,7 +37,7 @@ void DocumentTest::onImport()
     return;
   }
 
-  ctx.getUndoStack().clear();
+  ctx.undoStack().clear();
 
   QByteArray data = f.readAll();
   std::vector<uint8_t> bytes(data.begin(), data.end());
@@ -79,7 +79,7 @@ void DocumentTest::onRead()
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if (!projectPath.isEmpty()) {
     //read project
-    ctx.getUndoStack().clear();
+    ctx.undoStack().clear();
     auto ret = config.read(projectPath);
     if (!ret) {
       emit writeLog(LogLevel::Error, tr("read project error"),
@@ -109,11 +109,11 @@ void DocumentTest::onWrite()
 
 void DocumentTest::onSave()
 {
-  auto ret = config.save();
-  if (!ret) {
-    emit writeLog(LogLevel::Error, tr("write file error"),
-        ContentType::PlainText);
-  }
+//  auto ret = config.save();
+//  if (!ret) {
+//    emit writeLog(LogLevel::Error, tr("write file error"),
+//        ContentType::PlainText);
+//  }
 }
 
 void DocumentTest::createWidgets()

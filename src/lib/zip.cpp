@@ -14,7 +14,7 @@ namespace lib
 
 static const uLong UTF8_FLAG = 0x0800;
 
-bool zipDirectory(zipFile zf, const QString &baseDir)
+bool zipDirectory(zipFile &zf, const QString &baseDir)
 {
   QDirIterator it(baseDir, QDir::Files | QDir::NoDotAndDotDot,
       QDirIterator::Subdirectories);
@@ -61,7 +61,7 @@ bool zipDirectory(zipFile zf, const QString &baseDir)
   return true;
 }
 
-bool unzipToDirectory(unzFile uf, const QString &destDir)
+bool unzipToDirectory(unzFile &uf, const QString &destDir)
 {
   unz_global_info64 gi;
   if (unzGetGlobalInfo64(uf, &gi) != UNZ_OK) {

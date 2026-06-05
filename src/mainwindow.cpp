@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include <QtWidgets>
+#include <QFileInfo>
 
 #include "mainwindow.h"
 #include "comm/concord.h"
@@ -11,8 +12,7 @@
 
 using namespace std;
 
-MainWindow::MainWindow(bool haveLogLevel, int logLevel) :
-    textEdit(new QPlainTextEdit)
+MainWindow::MainWindow(bool haveLogLevel, int logLevel)
 {
   if (haveLogLevel) {
     this->logLevel = logLevel;
@@ -28,8 +28,13 @@ MainWindow::MainWindow(bool haveLogLevel, int logLevel) :
   createActions();
   applySettings();
 
-  setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
+
+  if (curFile.isEmpty()) {
+    newFile();
+  } else {
+    loadFile(curFile); //can be overwritten by main.cpp -- loadFile (cli)
+  }
 
   log->addMessage("Ready!");
 }
@@ -47,17 +52,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::newFile()
 {
   if (maybeSave()) {
-    textEdit->clear();
+    undo.clear();
+    config->create();
+    updateModelView();
     setCurrentFile(QString());
   }
 }
 
 void MainWindow::open()
 {
-  if (maybeSave()) {
-    QString fileName = QFileDialog::getOpenFileName(this);
-    if (!fileName.isEmpty())
-      loadFile(fileName);
+  auto ret = maybeSave();
+  if (ret) {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"),
+        QDir::homePath(),
+        tr("%1 Files (*.%1);;All Files (*)").arg(
+            document::Config::defaultFilePostfix), nullptr);
+    loadFile(fileName);
   }
 }
 
@@ -72,12 +82,16 @@ bool MainWindow::save()
 
 bool MainWindow::saveAs()
 {
-  QFileDialog dialog(this);
-  dialog.setWindowModality(Qt::WindowModal);
-  dialog.setAcceptMode(QFileDialog::AcceptSave);
-  if (dialog.exec() != QDialog::Accepted)
-    return false;
-  return saveFile(dialog.selectedFiles().first());
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"),
+      QDir::homePath() + tr("/myRemote."
+          "%1").arg(document::Config::defaultFilePostfix),
+      tr("%1 Files (*.%1);;All Files (*)").arg(
+          document::Config::defaultFilePostfix));
+  auto ret = saveFile(fileName);
+  if (ret == true) {
+    lib::getQSettings().setValue("file", fileName);
+  }
+  return ret;
 }
 
 void MainWindow::about()
@@ -91,7 +105,7 @@ void MainWindow::about()
 
 void MainWindow::documentWasModified()
 {
-  setWindowModified(textEdit->document()->isModified());
+  // todo setWindowModified(textEdit->document()->isModified());
 }
 
 void MainWindow::createStatusBar()
@@ -112,6 +126,9 @@ void MainWindow::createData()
   ctx = make_unique<Context>(*settings, *user, undo);
 
   concord = new Concord(*ctx, this);
+  ctx->setConcord(concord);
+  config = new document::Config(*ctx, false, this);
+  ctx->setConfig(config);
 }
 
 void MainWindow::createAds()
@@ -143,13 +160,6 @@ void MainWindow::createWidgets()
       QString(PROGRAM_NAME) + " " + QString::fromUtf8(BuildInfo::versionFull));
 
   //create widgets
-  textEdit = new QPlainTextEdit;
-  ads::CDockWidget *dockLeft = new ads::CDockWidget(dockManager,
-      tr("Left Panel"));
-  dockLeft->setWidget(textEdit);
-  dockManager->addDockWidget(ads::LeftDockWidgetArea, dockLeft);
-  dockMenu->addAction(dockLeft->toggleViewAction());
-
   concordTest = new ConcordTest(*ctx.get(), *concord, this);
   ads::CDockWidget *dockConcordTest = new ads::CDockWidget(dockManager,
       tr("Test LibConcord"));
@@ -251,39 +261,39 @@ void MainWindow::createActions()
   exitAct->setShortcuts(QKeySequence::Quit);
   exitAct->setStatusTip(tr("Exit the application"));
 
-  //edit
-  QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
-  QToolBar *editToolBar = addToolBar(tr("Edit"));
-
-  const QIcon cutIcon = lib::getIcon(
-      ":/res/icons/BreezeConverted/64x64/actions/edit-cut.png", "edit-cut");
-  QAction *cutAct = new QAction(cutIcon, tr("Cu&t"), this);
-  cutAct->setShortcuts(QKeySequence::Cut);
-  cutAct->setStatusTip(tr("Cut the current selection's contents to the "
-      "clipboard"));
-  connect(cutAct, &QAction::triggered, textEdit, &QPlainTextEdit::cut);
-  editMenu->addAction(cutAct);
-  editToolBar->addAction(cutAct);
-
-  const QIcon copyIcon = lib::getIcon(
-      "/res/icons/BreezeConverted/64x64/actions/edit-copy.png", "edit-copy");
-  QAction *copyAct = new QAction(copyIcon, tr("&Copy"), this);
-  copyAct->setShortcuts(QKeySequence::Copy);
-  copyAct->setStatusTip(tr("Copy the current selection's contents to the "
-      "clipboard"));
-  connect(copyAct, &QAction::triggered, textEdit, &QPlainTextEdit::copy);
-  editMenu->addAction(copyAct);
-  editToolBar->addAction(copyAct);
-
-  const QIcon pasteIcon = lib::getIcon(
-      ":/res/icons/BreezeConverted/64x64/actions/edit-paste.png", "edit-paste");
-  QAction *pasteAct = new QAction(pasteIcon, tr("&Paste"), this);
-  pasteAct->setShortcuts(QKeySequence::Paste);
-  pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
-      "selection"));
-  connect(pasteAct, &QAction::triggered, textEdit, &QPlainTextEdit::paste);
-  editMenu->addAction(pasteAct);
-  editToolBar->addAction(pasteAct);
+//  //edit
+//  QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
+//  QToolBar *editToolBar = addToolBar(tr("Edit"));
+//
+//  const QIcon cutIcon = lib::getIcon(
+//      ":/res/icons/BreezeConverted/64x64/actions/edit-cut.png", "edit-cut");
+//  QAction *cutAct = new QAction(cutIcon, tr("Cu&t"), this);
+//  cutAct->setShortcuts(QKeySequence::Cut);
+//  cutAct->setStatusTip(tr("Cut the current selection's contents to the "
+//      "clipboard"));
+//  connect(cutAct, &QAction::triggered, textEdit, &QPlainTextEdit::cut);
+//  editMenu->addAction(cutAct);
+//  editToolBar->addAction(cutAct);
+//
+//  const QIcon copyIcon = lib::getIcon(
+//      "/res/icons/BreezeConverted/64x64/actions/edit-copy.png", "edit-copy");
+//  QAction *copyAct = new QAction(copyIcon, tr("&Copy"), this);
+//  copyAct->setShortcuts(QKeySequence::Copy);
+//  copyAct->setStatusTip(tr("Copy the current selection's contents to the "
+//      "clipboard"));
+//  connect(copyAct, &QAction::triggered, textEdit, &QPlainTextEdit::copy);
+//  editMenu->addAction(copyAct);
+//  editToolBar->addAction(copyAct);
+//
+//  const QIcon pasteIcon = lib::getIcon(
+//      ":/res/icons/BreezeConverted/64x64/actions/edit-paste.png", "edit-paste");
+//  QAction *pasteAct = new QAction(pasteIcon, tr("&Paste"), this);
+//  pasteAct->setShortcuts(QKeySequence::Paste);
+//  pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
+//      "selection"));
+//  connect(pasteAct, &QAction::triggered, textEdit, &QPlainTextEdit::paste);
+//  editMenu->addAction(pasteAct);
+//  editToolBar->addAction(pasteAct); todo
 
   //view
   lockAction = dockMenu->addAction(tr("Lock UI"));
@@ -326,15 +336,17 @@ void MainWindow::createActions()
 
   //signal / slot
 
-  cutAct->setEnabled(false);
-  copyAct->setEnabled(false);
-  connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct,
-      &QAction::setEnabled);
-  connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct,
-      &QAction::setEnabled);
+//  cutAct->setEnabled(false);
+//  copyAct->setEnabled(false);
+//  connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct,
+//      &QAction::setEnabled);
+//  connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct,
+//      &QAction::setEnabled); todo
 
-  connect(textEdit->document(), &QTextDocument::contentsChanged, this,
+  connect(config, &document::Config::dirtyChanged, this,
       &MainWindow::documentWasModified);
+  connect(config, &document::Config::writeLog, log, &LogViewer::addEntry);
+  connect(config, &document::Config::writeMsg, log, &LogViewer::addMessage);
 
   connect(qApp, &QGuiApplication::commitDataRequest, this,
       &MainWindow::commitData);
@@ -359,6 +371,7 @@ void MainWindow::createActions()
 
 void MainWindow::readSettings()
 {
+  auto qsettings = lib::getQSettings();
   settings = new Settings(this);
   user = new lib::UserLevel(*settings, this);
 
@@ -372,67 +385,14 @@ void MainWindow::readSettings()
 
   settings->addSetting(defaults::undoMacros());
 
-  // @formatter:off
-//  settings->addSetting({
-//      .key          = "username",
-//      .label        = "Username",
-//      .helpText     = "Your display name in the application.",
-//      .type         = SettingType::String,
-//      .defaultValue = "user",
-//  });
-//
-//  settings->addSetting({
-//      .key          = "darkMode",
-//      .label        = "Dark mode",
-//      .helpText     = "Enable dark colour scheme.",
-//      .type         = SettingType::Bool,
-//      .defaultValue = false,
-//  });
-//
-//  // ── Network tab ───────────────────────────────────────────────────────────
-//
-//  settings->addSetting({
-//      .key          = "port",
-//      .label        = "Port",
-//      .helpText     = "TCP port to listen on.",
-//      .type         = SettingType::Int,
-//      .defaultValue = 8080,
-//      .tab          = "Network",
-//      .minValue     = 1024,
-//      .maxValue     = 65535,
-//  });
-//
-//  settings->addSetting({
-//      .key          = "timeout",
-//      .label        = "Timeout (s)",
-//      .helpText     = "Connection timeout in seconds.",
-//      .type         = SettingType::Double,
-//      .defaultValue = 30.0,
-//      .tab          = "Network",
-//      .minValue     = 0.1,
-//      .maxValue     = 300.0,
-//  });
-//
-//  settings->addSetting({
-//      .key      = "protocol",
-//      .label    = "Protocol",
-//      .helpText = "Transport protocol.",
-//      .type     = SettingType::MultiSelection,
-//      .defaultValue = 0,   // matches itemData below
-//      .tab      = "Network",
-//      .options  = {
-//          { "TCP",  0 },
-//          { "UDP",  1 },
-//          { "QUIC", 2 },
-//      },
-//  }); todo
-// @formatter:on
+  settings->addSetting(defaults::loadLastUsed());
+  auto load = settings->value(defaults::loadLastUsed().key).toBool();
+  if (load) {
+    curFile = qsettings.value("file").toString();
+  }
 
-  //todo settings dialog doesn't save settings in qsettings
-
-  auto settings = lib::getQSettings();
   const QByteArray geometry =
-      settings.value("geometry", QByteArray()).toByteArray();
+      qsettings.value("geometry", QByteArray()).toByteArray();
   if (geometry.isEmpty()) {
     const QRect availableGeometry = screen()->availableGeometry();
     resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
@@ -440,7 +400,7 @@ void MainWindow::readSettings()
         (availableGeometry.height() - height()) / 2);
   } else {
     restoreGeometry(geometry);
-    restoreState(settings.value("window").toByteArray());
+    restoreState(qsettings.value("window").toByteArray());
   }
 }
 
@@ -455,10 +415,11 @@ void MainWindow::writeSettings()
 
 bool MainWindow::maybeSave()
 {
-  if (!textEdit->document()->isModified())
+  if (!config->isDirty()) {
     return true;
+  }
   const QMessageBox::StandardButton ret = QMessageBox::warning(this,
-      tr("Application"), tr("The document has been modified.\n"
+      tr("Application"), tr("The project has been modified.\n"
           "Do you want to save your changes?"),
       QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
@@ -474,61 +435,66 @@ bool MainWindow::maybeSave()
 
 void MainWindow::loadFile(const QString &fileName)
 {
-  QFile file(fileName);
-  if (!file.open(QFile::ReadOnly | QFile::Text)) {
-    QMessageBox::warning(this, tr("Application"),
-        tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName),
-            file.errorString()));
+  if (fileName.isEmpty()) {
     return;
   }
 
-  QTextStream in(&file);
+  if (!QFileInfo::exists(fileName) || !QFileInfo(fileName).isFile()) {
+    QMessageBox::warning(this, tr("Application"),
+        tr("Cannot read project %1.").arg(QDir::toNativeSeparators(fileName)));
+    QGuiApplication::restoreOverrideCursor();
+    return;
+  }
+
   QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-  textEdit->setPlainText(in.readAll());
+  undo.clear();
+  auto res = config->read(fileName);
+  if (!res) {
+    QMessageBox::warning(this, tr("Application"),
+        tr("Error reading project %1.").arg(
+            QDir::toNativeSeparators(fileName)));
+    QGuiApplication::restoreOverrideCursor();
+    return;
+  }
+  updateModelView();
   QGuiApplication::restoreOverrideCursor();
 
   setCurrentFile(fileName);
-  statusBar()->showMessage(tr("File loaded"), 2000);
+  log->addMessage(tr("Project loaded"));
 }
 
 bool MainWindow::saveFile(const QString &fileName)
 {
   QString errorMessage;
 
-  QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-  QSaveFile file(fileName);
-  if (file.open(QFile::WriteOnly | QFile::Text)) {
-    QTextStream out(&file);
-    out << textEdit->toPlainText();
-    if (!file.commit()) {
-      errorMessage = tr("Cannot write file %1:\n%2.").arg(
-          QDir::toNativeSeparators(fileName), file.errorString());
-    }
-  } else {
-    errorMessage = tr("Cannot open file %1 for writing:\n%2.").arg(
-        QDir::toNativeSeparators(fileName), file.errorString());
-  }
-  QGuiApplication::restoreOverrideCursor();
-
-  if (!errorMessage.isEmpty()) {
-    QMessageBox::warning(this, tr("Application"), errorMessage);
+  if (fileName.isEmpty()) {
     return false;
   }
 
+  QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+  bool res = config->saveAs(fileName);
+  if (!res) {
+    QMessageBox::warning(this, tr("Application"),
+        tr("Cannot write project %1.").arg(QDir::toNativeSeparators(fileName)));
+    QGuiApplication::restoreOverrideCursor();
+    return false;
+  }
+  QGuiApplication::restoreOverrideCursor();
+
   setCurrentFile(fileName);
-  statusBar()->showMessage(tr("File saved"), 2000);
+  log->addMessage(tr("Project saved"));
   return true;
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)
 {
   curFile = fileName;
-  textEdit->document()->setModified(false);
   setWindowModified(false);
 
   QString shownName = curFile;
-  if (curFile.isEmpty())
-    shownName = "untitled.txt";
+  if (curFile.isEmpty()) {
+    shownName = "untitled." + document::Config::defaultFilePostfix;
+  }
   setWindowFilePath(shownName);
 }
 
@@ -565,13 +531,24 @@ QString MainWindow::strippedName(const QString &fullFileName)
 void MainWindow::commitData(QSessionManager &manager)
 {
   if (manager.allowsInteraction()) {
-    if (!maybeSave())
+    if (!maybeSave()) {
       manager.cancel();
+    }
   } else {
     // Non-interactive: save without asking
-    if (textEdit->document()->isModified())
-      save();
+    if (!curFile.isEmpty() && (config != nullptr) && (config->isDirty())) {
+      config->saveAs(curFile);
+    }
   }
+}
+
+void MainWindow::updateModelView()
+{
+  if (deviceModel != nullptr) {
+    deviceModel->deleteLater();
+  }
+  deviceModel = new models::DeviceModel(*config, this);
+  deviceEditor->setModel(deviceModel);
 }
 
 void MainWindow::showSettings()

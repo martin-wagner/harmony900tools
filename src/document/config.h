@@ -30,15 +30,18 @@ class Config : public QObject
 {
   Q_OBJECT
   public:
+    inline static const QString defaultFilePostfix = "hzip";
+
+  public:
     /** new config. init = true -> create a new, empty config */
-    Config(Context &ctx, bool init = false);
+    Config(Context &ctx, bool init = false, QObject *parent = nullptr);
 
     /** create new, empty config */
     bool create();
     /** import zipped config from remote / backup */
     bool read(const std::vector<uint8_t> &zip, Type t);
     /** read config */
-    bool read(const QString &path);
+    bool read(const QString &file);
     /** unload config */
     bool reset();
 
@@ -47,13 +50,8 @@ class Config : public QObject
     /** check modified */
     bool isDirty();
 
-    /** get current project file path */
-    QString getPath();
-
-    /** write project to disk */
-    bool save();
     /** write copy to disk */
-    bool saveAs(const QString &path);
+    bool saveAs(const QString &file);
     /** generate export */
     bool dumpZip(std::vector<uint8_t> &zip, Type t);
 
@@ -94,8 +92,8 @@ class Config : public QObject
     static constexpr uint32_t UidStartValue = 10000000;
 
   protected:
-      QString savePath;
       QString workPath;
+      QString importPath;
       std::unique_ptr<QTemporaryDir> tempDir;
 
 };

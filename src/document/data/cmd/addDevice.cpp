@@ -43,6 +43,7 @@ void AddDeviceCommand::redo()
     c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
   }
   emit deviceAdded(id);
+  emit dirtyChanged(true);
 }
 
 void AddDeviceCommand::undo()
@@ -58,6 +59,7 @@ void AddDeviceCommand::undo()
     c.getDevices().erase(c.getDevices().begin() + pos);
   }
   emit deviceRemoved(id);
+  emit dirtyChanged(true);
 }
 
 uint32_t AddDeviceCommand::getUid() const

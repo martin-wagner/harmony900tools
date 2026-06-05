@@ -9,8 +9,8 @@
 
 namespace lib {
 
-bool zipDirectory(zipFile zf, const QString &baseDir);
-bool unzipToDirectory(unzFile uf, const QString &destDir);
+bool zipDirectory(zipFile &zf, const QString &baseDir);
+bool unzipToDirectory(unzFile &uf, const QString &destDir);
 
 }
 
