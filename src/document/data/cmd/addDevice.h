@@ -24,13 +24,7 @@ class AddDeviceCommand: public BaseCommand
     uint32_t getUid() const;
     bool valid() const;
 
-  signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
-
-    void deviceAdded(uint32_t index);
-    void deviceAboutToBeRemoved(uint32_t id);
-    void deviceRemoved(uint32_t index);
+    void setPos();
 
   protected:
     bool isValid = false;

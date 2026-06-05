@@ -69,10 +69,12 @@ void CmdCatalogue::connectCommand(BaseCommand *cmd)
   connect(cmd, &BaseCommand::writeLog, this, &CmdCatalogue::writeLog);
   connect(cmd, &BaseCommand::writeMsg, this, &CmdCatalogue::writeMsg);
   connect(cmd, &BaseCommand::deviceChanged, this, &CmdCatalogue::deviceChanged);
+  connect(cmd, &BaseCommand::deviceAboutToBeAdded, this, &CmdCatalogue::deviceAboutToBeAdded);
   connect(cmd, &BaseCommand::deviceAdded, this, &CmdCatalogue::deviceAdded);
   connect(cmd, &BaseCommand::deviceAboutToBeRemoved, this, &CmdCatalogue::deviceAboutToBeRemoved);
   connect(cmd, &BaseCommand::deviceRemoved, this, &CmdCatalogue::deviceRemoved);
   connect(cmd, &BaseCommand::activityChanged, this, &CmdCatalogue::activityChanged);
+  connect(cmd, &BaseCommand::activityAboutToBeAdded, this, &CmdCatalogue::activityAboutToBeAdded);
   connect(cmd, &BaseCommand::activityAdded, this, &CmdCatalogue::activityAdded);
   connect(cmd, &BaseCommand::activityAboutToBeRemoved, this, &CmdCatalogue::activityAboutToBeRemoved);
   connect(cmd, &BaseCommand::activityRemoved, this, &CmdCatalogue::activityRemoved);

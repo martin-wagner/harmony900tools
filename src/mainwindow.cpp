@@ -306,10 +306,28 @@ void MainWindow::createActions()
   exitAct->setShortcuts(QKeySequence::Quit);
   exitAct->setStatusTip(tr("Exit the application"));
 
-//  //edit
-//  QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
-//  QToolBar *editToolBar = addToolBar(tr("Edit"));
-//
+  //edit
+  QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
+  QToolBar *editToolBar = addToolBar(tr("Edit"));
+
+  QAction *undoAct = undo.createUndoAction(this, tr("&Undo"));
+  undoAct->setShortcuts(QKeySequence::Undo);
+  const QIcon undoIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/edit-undo.png",
+      "edit-undo");
+  undoAct->setIcon(undoIcon);
+  editMenu->addAction(undoAct);
+  editToolBar->addAction(undoAct);
+
+  QAction *redoAct = undo.createRedoAction(this, tr("&Redo"));
+  redoAct->setShortcuts(QKeySequence::Redo);
+  const QIcon redoIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/edit-redo.png",
+      "edit-redo");
+  redoAct->setIcon(redoIcon);
+  editMenu->addAction(redoAct);
+  editToolBar->addAction(redoAct);
+
 //  const QIcon cutIcon = lib::getIcon(
 //      ":/res/icons/BreezeConverted/64x64/actions/edit-cut.png", "edit-cut");
 //  QAction *cutAct = new QAction(cutIcon, tr("Cu&t"), this);

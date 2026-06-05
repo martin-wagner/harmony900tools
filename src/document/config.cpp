@@ -183,10 +183,12 @@ bool Config::reset()
   connect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
   connect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
   connect(worker, &data::CmdCatalogue::deviceChanged, this, &Config::deviceChanged);
+  connect(worker, &data::CmdCatalogue::deviceAboutToBeAdded, this, &Config::deviceAboutToBeAdded);
   connect(worker, &data::CmdCatalogue::deviceAdded, this, &Config::deviceAdded);
   connect(worker, &data::CmdCatalogue::deviceAboutToBeRemoved, this, &Config::deviceAboutToBeRemoved);
   connect(worker, &data::CmdCatalogue::deviceRemoved, this, &Config::deviceRemoved);
   connect(worker, &data::CmdCatalogue::activityChanged, this, &Config::activityChanged);
+  connect(worker, &data::CmdCatalogue::activityAboutToBeAdded, this, &Config::activityAboutToBeAdded);
   connect(worker, &data::CmdCatalogue::activityAdded, this, &Config::activityAdded);
   connect(worker, &data::CmdCatalogue::activityAboutToBeRemoved, this, &Config::activityAboutToBeRemoved);
   connect(worker, &data::CmdCatalogue::activityRemoved, this, &Config::activityRemoved);

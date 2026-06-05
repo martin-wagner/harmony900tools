@@ -109,7 +109,8 @@ bool DeviceModel::insertRows(int position, int rows, const QModelIndex &parent)
   }
   auto &worker = config.modify();
 
-  beginInsertRows(parent, position, position + rows - 1);
+  //no begin/end insert rows, is done inside observers
+
   config.beginMacro(QObject::tr("Add %1 device(s)").arg(rows));
 
   for (int i = position; i < position + rows; i++) {
@@ -121,7 +122,6 @@ bool DeviceModel::insertRows(int position, int rows, const QModelIndex &parent)
   }
 
   config.endMacro();
-  endInsertRows();
 
   return success;
 }
@@ -150,7 +150,8 @@ bool DeviceModel::removeRows(int position, int rows, const QModelIndex &parent)
   }
   auto &worker = config.modify();
 
-  beginRemoveRows(parent, position, position + rows - 1);
+  //no begin/end remove rows, is done inside observers
+
   config.beginMacro(QObject::tr("Remove %1 device(s)").arg(rows));
 
   for (int i = 0; i < rows; i++) {
@@ -164,7 +165,6 @@ bool DeviceModel::removeRows(int position, int rows, const QModelIndex &parent)
   }
 
   config.endMacro();
-  endRemoveRows();
 
   return success;
 }
@@ -221,7 +221,19 @@ void models::DeviceModel::createActions()
     emit dataChanged(index(pos, 0),
         index(pos, columnCount()), {Qt::DisplayRole, Qt::EditRole});
   });
-  //don't need device add/remove -- is done in here.
+  connect(&config, &document::Config::deviceAboutToBeAdded, [this](int pos) {
+    emit beginInsertRows(QModelIndex(), pos, pos);
+  });
+  connect(&config, &document::Config::deviceAdded, [this](int pos) {
+    emit endInsertRows();
+  });
+  connect(&config, &document::Config::deviceAboutToBeRemoved, [this](int pos) {
+    emit beginRemoveRows(QModelIndex(), pos, pos);
+  });
+  connect(&config, &document::Config::deviceRemoved, [this](int pos) {
+    emit endRemoveRows();
+  });
+
   //don't need activities -- devices don't have dependendies to those.
 }
 

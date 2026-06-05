@@ -17,14 +17,6 @@ class RemoveDeviceFromActivityCommand: public BaseCommand
 
     void redo() override;
     void undo() override;
-
-  signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
-
-    void activityAdded(uint32_t id);
-    void activityAboutToBeRemoved(uint32_t id);
-    void activityRemoved(uint32_t id);
 };
 
 class RemoveDeviceCommand: public BaseCommand
@@ -38,18 +30,6 @@ class RemoveDeviceCommand: public BaseCommand
     void undo() override;
 
     bool valid() const;
-
-  signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
-
-    void deviceAdded(uint32_t index);
-    void deviceAboutToBeRemoved(uint32_t id);
-    void deviceRemoved(uint32_t index);
-
-    void activityAdded(uint32_t id);
-    void activityAboutToBeRemoved(uint32_t id);
-    void activityRemoved(uint32_t id);
 
   protected:
     bool isValid = false;

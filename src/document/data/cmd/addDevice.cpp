@@ -14,6 +14,7 @@ AddDeviceCommand::AddDeviceCommand(ConfigData &c, int pos, QUndoCommand *parent)
 {
   id = lib::UidGenerator::getInstance().generate();
   setText(QObject::tr("Add device (Id: %1, Pos: %2)").arg(id).arg(pos));
+  setPos();
   isValid = true;
 }
 
@@ -29,6 +30,7 @@ AddDeviceCommand::AddDeviceCommand(ConfigData &c, uint32_t id, int pos,
     //append
     pos = -1;
   }
+  setPos();
 }
 
 void AddDeviceCommand::redo()
@@ -37,12 +39,9 @@ void AddDeviceCommand::redo()
     return;
   }
 
-  if (pos < 0) {
-    c.getDevices().push_back(item::Device(id));
-  } else {
-    c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
-  }
-  emit deviceAdded(id);
+  emit deviceAboutToBeAdded(pos);
+  c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
+  emit deviceAdded(pos);
   emit dirtyChanged(true);
 }
 
@@ -52,13 +51,9 @@ void AddDeviceCommand::undo()
     return;
   }
 
-  emit deviceAboutToBeRemoved(id);
-  if (pos < 0) {
-    c.getDevices().pop_back();
-  } else {
-    c.getDevices().erase(c.getDevices().begin() + pos);
-  }
-  emit deviceRemoved(id);
+  emit deviceAboutToBeRemoved(pos);
+  c.getDevices().erase(c.getDevices().begin() + pos);
+  emit deviceRemoved(pos);
   emit dirtyChanged(true);
 }
 
@@ -70,6 +65,13 @@ uint32_t AddDeviceCommand::getUid() const
 bool AddDeviceCommand::valid() const
 {
   return isValid;
+}
+
+void AddDeviceCommand::setPos()
+{
+  if (pos < 0) {
+    pos = c.getDevices().size();
+  }
 }
 
 }

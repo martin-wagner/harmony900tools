@@ -70,9 +70,17 @@ class UndoStack: public QObject
     {
       stack.undo();
     }
+    QAction *createUndoAction(QObject *parent, const QString &prefix = QString()) const
+    {
+      return stack.createUndoAction(parent, prefix);
+    }
     void redo()
     {
       stack.redo();
+    }
+    QAction *createRedoAction(QObject *parent, const QString &prefix = QString()) const
+    {
+      return stack.createRedoAction(parent, prefix);
     }
     bool canUndo() const
     {

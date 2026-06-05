@@ -46,6 +46,8 @@ RemoveDeviceCommand::RemoveDeviceCommand(ConfigData &c, int pos,
         &RemoveDeviceCommand::writeLog);
     connect(cmd, &RemoveDeviceFromActivityCommand::writeMsg, this,
         &RemoveDeviceCommand::writeMsg);
+    connect(cmd, &RemoveDeviceFromActivityCommand::activityAboutToBeAdded, this,
+        &RemoveDeviceCommand::activityAboutToBeAdded);
     connect(cmd, &RemoveDeviceFromActivityCommand::activityAdded, this,
         &RemoveDeviceCommand::activityAdded);
     connect(cmd, &RemoveDeviceFromActivityCommand::activityAboutToBeRemoved,

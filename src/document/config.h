@@ -72,10 +72,12 @@ class Config : public QObject
 
     //model observers
     void deviceChanged(uint32_t pos);
+    void deviceAboutToBeAdded(uint32_t pos);
     void deviceAdded(uint32_t pos);
     void deviceAboutToBeRemoved(uint32_t pos);
     void deviceRemoved(uint32_t pos);
     void activityChanged(uint32_t pos);
+    void activityAboutToBeAdded(uint32_t pos);
     void activityAdded(uint32_t pos);
     void activityAboutToBeRemoved(uint32_t pos);
     void activityRemoved(uint32_t pos);
