@@ -56,6 +56,7 @@ class MainWindow: public QMainWindow
     void onLoadDefaultView();
     void onDeleteView();
     void onCopyViewToClipboard();
+    void onDoImport(const std::vector<uint8_t> &data);
 
   private:
     void createStatusBar();
@@ -73,6 +74,7 @@ class MainWindow: public QMainWindow
     QString strippedName(const QString &fullFileName);
     void updateModelView();
     void setTitle(const QString &append = "");
+    bool importData(const std::vector<uint8_t> &data);
 
   private:
     ads::CDockManager* dockManager;
@@ -95,6 +97,5 @@ class MainWindow: public QMainWindow
     models::DeviceModel *deviceModel = nullptr;
 
     ConcordConnection *concordConnection;
-
 };
 

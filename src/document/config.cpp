@@ -46,7 +46,6 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
         ContentType::PlainText);
     return false;
   }
-  type = t;
 
   if (importPath.isEmpty()) {
     return false;
@@ -162,7 +161,6 @@ bool Config::reset()
 
   configData = make_unique<data::ConfigData>();
   worker = new data::CmdCatalogue(*configData, stack, this);
-  type = Type::UNKNOWN;
   lib::UidGenerator::initialize(UidStartValue);
   workPath.clear();
   importPath.clear();
@@ -248,7 +246,7 @@ bool Config::saveAs(const QString &file)
   return true;
 }
 
-bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
+bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
 {
   bool ret;
   QTemporaryFile zipFile;
@@ -269,7 +267,6 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t)
   if (!ret) {
     return ret;
   }
-  type = t;
 
   zipFile.setAutoRemove(true);
   if (!zipFile.open()) {

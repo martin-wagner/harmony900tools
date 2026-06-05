@@ -88,7 +88,7 @@ bool MainWindow::saveAs()
       tr("%1 Files (*.%1);;All Files (*)").arg(
           document::Config::defaultFilePostfix));
   auto ret = saveFile(fileName);
-  if (ret == true) {
+  if (ret) {
     lib::getQSettings().setValue("file", fileName);
   }
   return ret;
@@ -104,7 +104,6 @@ void MainWindow::import()
         QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"));
 
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-
     ret = concord->stripHeader(fileName, data);
     if (!ret) {
       QMessageBox::warning(this, tr("Application"),
@@ -113,18 +112,7 @@ void MainWindow::import()
       QGuiApplication::restoreOverrideCursor();
       return;
     }
-
-    undo.clear();
-    auto ret = config->read(data, document::Type::H900);
-    if (!ret) {
-      QMessageBox::warning(this, tr("Application"),
-          tr("Error importing config %1 (parsing)").arg(
-              QDir::toNativeSeparators(fileName)));
-      QGuiApplication::restoreOverrideCursor();
-      return;
-    }
-    updateModelView();
-    setCurrentFile(QString());
+    importData(data);
     QGuiApplication::restoreOverrideCursor();
     log->addMessage(tr("Project loaded"));
   }
@@ -183,8 +171,8 @@ void MainWindow::createAds()
 // @formatter:on
   dockManager = new ads::CDockManager(this);
 
-  auto settings = lib::getQSettings();
-  dockManager->loadPerspectives(settings);
+  auto qsettings = lib::getQSettings();
+  dockManager->loadPerspectives(qsettings);
 
   dockMenu = new QMenu(tr("&View"), this);
 }
@@ -227,8 +215,8 @@ void MainWindow::createWidgets()
   dockMenu->addAction(dockLog->toggleViewAction());
 
   //widgets need to be available to restore docks
-  auto settings = lib::getQSettings();
-  auto docks = settings.value("dock");
+  auto qsettings = lib::getQSettings();
+  auto docks = qsettings.value("dock");
   if (docks.isValid() && (docks.toString() != "")) {
     dockManager->restoreState(docks.toByteArray());
   }
@@ -306,8 +294,7 @@ void MainWindow::createActions()
   QAction *undoAct = undo.createUndoAction(this, tr("&Undo"));
   undoAct->setShortcuts(QKeySequence::Undo);
   const QIcon undoIcon = lib::getIcon(
-      ":/res/icons/BreezeConverted/64x64/actions/edit-undo.png",
-      "edit-undo");
+      ":/res/icons/BreezeConverted/64x64/actions/edit-undo.png", "edit-undo");
   undoAct->setIcon(undoIcon);
   editMenu->addAction(undoAct);
   editToolBar->addAction(undoAct);
@@ -315,8 +302,7 @@ void MainWindow::createActions()
   QAction *redoAct = undo.createRedoAction(this, tr("&Redo"));
   redoAct->setShortcuts(QKeySequence::Redo);
   const QIcon redoIcon = lib::getIcon(
-      ":/res/icons/BreezeConverted/64x64/actions/edit-redo.png",
-      "edit-redo");
+      ":/res/icons/BreezeConverted/64x64/actions/edit-redo.png", "edit-redo");
   redoAct->setIcon(redoIcon);
   editMenu->addAction(redoAct);
   editToolBar->addAction(redoAct);
@@ -419,8 +405,12 @@ void MainWindow::createActions()
   connect(concord, &Concord::writeLog, log, &LogViewer::addEntry);
   connect(concord, &Concord::writeMsg, log, &LogViewer::addMessage);
 
-  connect(concordConnection, &ConcordConnection::writeLog, log, &LogViewer::addEntry);
-  connect(concordConnection, &ConcordConnection::writeMsg, log, &LogViewer::addMessage);
+  connect(concordConnection, &ConcordConnection::writeLog, log,
+      &LogViewer::addEntry);
+  connect(concordConnection, &ConcordConnection::writeMsg, log,
+      &LogViewer::addMessage);
+  connect(concordConnection, &ConcordConnection::doImport, this,
+      &MainWindow::onDoImport);
 
   connect(deviceEditor, &editors::DeviceEditor::writeLog, log,
       &LogViewer::addEntry);
@@ -710,9 +700,28 @@ void MainWindow::onCopyViewToClipboard()
   QApplication::clipboard()->setText(view);
 }
 
+void MainWindow::onDoImport(const vector<uint8_t> &data)
+{
+  importData(data);
+}
+
 void MainWindow::setTitle(const QString &append)
 {
   setWindowTitle(
       QString(PROGRAM_NAME) + " " + QString::fromUtf8(BuildInfo::versionFull)
           + " -- " + append);
+}
+
+bool MainWindow::importData(const std::vector<uint8_t> &data)
+{
+  undo.clear();
+  auto ret = config->read(data, document::Type::H900);
+  if (!ret) {
+    QMessageBox::warning(this, tr("Application"), tr("Error parsing config"));
+    return false;
+  }
+  updateModelView();
+  setCurrentFile(QString());
+  log->addMessage(tr("Project loaded"));
+  return true;
 }

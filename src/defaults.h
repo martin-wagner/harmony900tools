@@ -84,6 +84,24 @@ inline const SettingDef loadLastUsed()
   return s;
 };
 
+inline const SettingDef learnStreamTimeout()
+{
+  QList<QPair<QString, QVariant>> options;
+  SettingDef s;
+
+  s.key = "streamTimeout";
+  s.label = QObject::tr("Stream / macro timeout (ms)");
+  s.helpText = QObject::tr("Max. recording time for stream / macros. H900 software maxed out a 1000ms, try more at your own risk!");
+  s.type = SettingType::Int;
+  s.defaultValue = 1000;
+  s.tab = "Learning";
+  s.minValue = QVariant { 250 };
+  s.maxValue = QVariant { 10000 };
+
+  return s;
+};
+
+
 // @formatter:off
 //  settings->addSetting({
 //      .key          = "username",

@@ -22,6 +22,8 @@ class ConcordConnection: public QWidget
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
+    void doImport(const std::vector<uint8_t> &data);
+
   protected slots:
     void onOpenConnection();
     void onCloseConnection();
@@ -30,6 +32,8 @@ class ConcordConnection: public QWidget
     void onSetTime();
     void onReadConfig();
     void onWriteConfig();
+    void onBackupConfig();
+    void onBackupConfigRestore();
     void onLearnIrSingle();
     void onLearnIrStream();
 
@@ -39,9 +43,10 @@ class ConcordConnection: public QWidget
     void onTime(const QString time);
     void onLearnWindowIsOpen(bool waits);
     void onLearnDone(const binary::TimingStream &t, uint32_t carrier);
-    void onReadUserConfigDone(bool success);
+    void onBackupConfigDone(bool success);
 
   protected:
+    void createSettings();
     void createWidgets();
     void createActions();
 
@@ -49,13 +54,14 @@ class ConcordConnection: public QWidget
     Context &ctx;
     Concord &concord;
 
+    bool dataMode = false;
+
   private:
-    void updateActionStates();
+    void updateActionStates(bool setToBusy = false);
     void cleanup();
 
   private:
     QGridLayout *layout;
-
 
     QPushButton *buttonOpenConnection;
     QPushButton *buttonCloseConnection;
@@ -78,6 +84,8 @@ class ConcordConnection: public QWidget
     QAction *actionGetInfo;
     QAction *actionSetTime;
     QAction *actionReadConfig;
+    QAction *actionBackupConfig;
+    QAction *actionBackupConfigRestore;
     QAction *actionWriteConfig;
     QAction *actionLearnIrSingle;
     QAction *actionLearnIrStream;

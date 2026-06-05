@@ -53,7 +53,7 @@ class Config : public QObject
     /** write copy to disk */
     bool saveAs(const QString &file);
     /** generate export */
-    bool dumpZip(std::vector<uint8_t> &zip, Type t);
+    bool dumpZip(std::vector<uint8_t> &zip, Type t) const;
 
   public:
     //model access
@@ -67,8 +67,8 @@ class Config : public QObject
     void endMacro();
 
   signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
+    void writeLog(LogLevel level, const QString &message, ContentType contentType) const;
+    void writeMsg(const QString &message) const;
 
     //model observers
     void deviceChanged(uint32_t pos);
@@ -89,7 +89,6 @@ class Config : public QObject
     data::CmdCatalogue *worker = nullptr;
 
     bool dirty = false;
-    Type type = Type::UNKNOWN;
 
     static constexpr uint32_t UidStartValue = 10000000;
 

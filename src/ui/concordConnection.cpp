@@ -4,6 +4,7 @@
 
 #include "concordConnection.h"
 #include "lib/icon.h"
+#include "document/config.h"
 
 //plain c functions -- never use outside cpp file (->global namespace)
 #include "wrappers/concordWrapper.h"
@@ -15,6 +16,7 @@ ConcordConnection::ConcordConnection(Context &ctx, Concord &concord,
     QWidget *parent) :
     QWidget(parent), ctx(ctx), concord(concord)
 {
+  createSettings();
   createWidgets();
   createActions();
   updateActionStates();
@@ -55,6 +57,9 @@ void ConcordConnection::addToMenu(QMenu *menu)
   menu->addAction(actionReadConfig);
   menu->addAction(actionWriteConfig);
   menu->addSeparator();
+  menu->addAction(actionBackupConfig);
+  menu->addAction(actionBackupConfigRestore);
+  menu->addSeparator();
   menu->addAction(actionLearnIrSingle);
   menu->addAction(actionLearnIrStream);
 }
@@ -64,6 +69,7 @@ void ConcordConnection::onOpenConnection()
   if (concord.isInitialised()) {
     return;
   }
+  cleanup();
 
   onUpdateProgress("Connecting...", 0, 0);
 
@@ -79,15 +85,11 @@ void ConcordConnection::onCloseConnection()
   concord.disconnectRemote();
   cleanup();
   updateActionStates();
-  labelConnection->setText(tr("dsconnected"));
+  labelConnection->setText(tr("disconnected"));
 }
 
 void ConcordConnection::onGetInfo()
 {
-  if (!concord.isInitialised()) {
-    return;
-  }
-
   auto mnf = concord.mnf();
   auto model = concord.model();
   auto fwVersion = concord.fwVersion();
@@ -101,30 +103,61 @@ void ConcordConnection::onGetInfo()
 
 void ConcordConnection::onGetTime()
 {
+  updateActionStates(true);
   concord.readTime();
 }
 
 void ConcordConnection::onSetTime()
 {
+  updateActionStates(true);
   concord.setTime();
 }
 
 void ConcordConnection::onReadConfig()
 {
-  onUpdateProgress("Read Config...", 0, 0);
+  emit writeLog(LogLevel::Debug, tr("load config from remote"),
+      ContentType::PlainText);
 
+  dataMode = true;
+  updateActionStates(true);
   concord.readUserConfig();
 }
 
 void ConcordConnection::onWriteConfig()
 {
-  if (!concord.isInitialised()) {
+  vector<uint8_t> data;
+
+  emit writeLog(LogLevel::Debug, tr("write config to remote"),
+      ContentType::PlainText);
+
+  auto ret = ctx.config()->dumpZip(data, document::Type::H900);
+  if (!ret) {
+    emit writeLog(LogLevel::Error, tr("serialising failed"),
+        ContentType::PlainText);
     return;
   }
 
-  QString file = QFileDialog::getOpenFileName(this, tr("Open File"),
-      QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"), nullptr,
-      QFileDialog::DontUseNativeDialog);
+  emit writeLog(LogLevel::Critical,
+      tr("not ready for this yet -- rejecting write"), ContentType::PlainText);
+  return; //todo
+
+  updateActionStates(true);
+  concord.updateUserConfigData(data, false);
+}
+
+void ConcordConnection::onBackupConfig()
+{
+  onUpdateProgress("Backup Config...", 0, 0);
+
+  updateActionStates(true);
+  dataMode = false;
+  concord.readUserConfig();
+}
+
+void ConcordConnection::onBackupConfigRestore()
+{
+  auto file = QFileDialog::getOpenFileName(this, tr("Open File"),
+      QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"));
   if (file.isEmpty()) {
     return;
   }
@@ -139,6 +172,7 @@ void ConcordConnection::onWriteConfig()
 
   onUpdateProgress("Write Config...", 0, 0);
 
+  updateActionStates(true);
   concord.updateUserConfig(file);
 }
 
@@ -146,6 +180,7 @@ void ConcordConnection::onLearnIrSingle()
 {
   onUpdateProgress("Learn command...", 0, 0);
 
+  updateActionStates(true);
   concord.learnCommand();
 }
 
@@ -153,7 +188,10 @@ void ConcordConnection::onLearnIrStream()
 {
   onUpdateProgress("Learn command...", 0, 0);
 
-  concord.learnStream(2500);
+  auto timeout =
+      ctx.settings().value(defaults::learnStreamTimeout().key).toInt();
+  updateActionStates(true);
+  concord.learnStream(timeout);
 }
 
 void ConcordConnection::onUpdateProgress(const QString text, int step, int of)
@@ -208,7 +246,11 @@ void ConcordConnection::onDone(bool success, const QString &msg)
     progressBar->setFormat(tr("%1: OK").arg(progressBar->text()));
   } else {
     progressBar->setFormat(tr("Error in %1").arg(progressBar->text()));
+    emit writeLog(LogLevel::Error,
+        tr("libconcord error in: %1").arg(progressBar->text()),
+        ContentType::PlainText);
   }
+  updateActionStates();
 }
 
 void ConcordConnection::onTime(const QString time)
@@ -249,24 +291,36 @@ void ConcordConnection::onLearnDone(const binary::TimingStream &t,
   }
 }
 
-void ConcordConnection::onReadUserConfigDone(bool success)
+void ConcordConnection::onBackupConfigDone(bool success)
 {
   if (!success) {
+    dataMode = false;
     return;
   }
 
-  QString filePathXml = QFileDialog::getSaveFileName(this,
-      tr("Save XML + Zip Config"), QDir::homePath(),
-      tr("hex Files (*.hex);;All Files (*)"));
-  if (!filePathXml.isEmpty()) {
+  if (dataMode) {
+    dataMode = false;
+    auto data = concord.getUserConfig();
+    emit doImport(data);
+    return;
+  }
+
+  auto file = QFileDialog::getSaveFileName(this, tr("Save XML + Zip Config"),
+      QDir::homePath() + "/Backup.hex", tr("hex Files (*.hex);;All Files (*)"));
+  if (!file.isEmpty()) {
     //write xml + zip file
-    auto ret = concord.writeUserConfigFile(filePathXml, true);
+    auto ret = concord.writeUserConfigFile(file, true);
     if (ret != 0) {
       emit writeLog(LogLevel::Error, tr("write file error"),
           ContentType::PlainText);
       return;
     }
   }
+}
+
+void ConcordConnection::createSettings()
+{
+  ctx.settings().addSetting(defaults::learnStreamTimeout());
 }
 
 void ConcordConnection::createWidgets()
@@ -350,7 +404,7 @@ void ConcordConnection::createActions()
   connect(actionSetTime, &QAction::triggered, this,
       &ConcordConnection::onSetTime);
 
-  actionReadConfig = new QAction(tr("Read Config"), this);
+  actionReadConfig = new QAction(tr("Read Config from remote"), this);
   actionReadConfig->setStatusTip(tr("Read configuration from remote"));
   actionReadConfig->setIcon(
       lib::getIcon(
@@ -358,7 +412,7 @@ void ConcordConnection::createActions()
   connect(actionReadConfig, &QAction::triggered, this,
       &ConcordConnection::onReadConfig);
 
-  actionWriteConfig = new QAction(tr("Write Config"), this);
+  actionWriteConfig = new QAction(tr("Write Config to remote"), this);
   actionWriteConfig->setStatusTip(tr("Write configuration to remote"));
   actionWriteConfig->setIcon(
       lib::getIcon(
@@ -382,6 +436,20 @@ void ConcordConnection::createActions()
   connect(actionLearnIrStream, &QAction::triggered, this,
       &ConcordConnection::onLearnIrStream);
 
+  actionBackupConfig = new QAction(tr("Create remote backup"), this);
+  actionBackupConfig->setStatusTip(
+      tr("Backup configuration from remote to a file"));
+  actionBackupConfig->setIcon(
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/backup.png"));
+  connect(actionBackupConfig, &QAction::triggered, this,
+      &ConcordConnection::onBackupConfig);
+
+  actionBackupConfigRestore = new QAction(tr("Restore Backup"), this);
+  actionBackupConfigRestore->setStatusTip(
+      tr("Restore remote from previous backup"));
+  connect(actionBackupConfigRestore, &QAction::triggered, this,
+      &ConcordConnection::onBackupConfigRestore);
+
   actionProgress = new QWidgetAction(this);
   actionProgress->setDefaultWidget(progressBar);
 
@@ -396,9 +464,9 @@ void ConcordConnection::createActions()
   connect(buttonSetTime, &QPushButton::clicked, this,
       &ConcordConnection::onSetTime);
   connect(buttonReadConfigFromRemote, &QPushButton::clicked, this,
-      &ConcordConnection::onReadConfig);
+      &ConcordConnection::onBackupConfig);
   connect(buttonWriteConfigToRemote, &QPushButton::clicked, this,
-      &ConcordConnection::onWriteConfig);
+      &ConcordConnection::onBackupConfigRestore);
   connect(buttonLearnIrSingle, &QPushButton::clicked, this,
       &ConcordConnection::onLearnIrSingle);
   connect(buttonLearnIrStream, &QPushButton::clicked, this,
@@ -414,24 +482,44 @@ void ConcordConnection::createActions()
       &ConcordConnection::onLearnWindowIsOpen);
   connect(&concord, &Concord::learnDone, this, &ConcordConnection::onLearnDone);
   connect(&concord, &Concord::readUserConfigDone, this,
-      &ConcordConnection::onReadUserConfigDone);
+      &ConcordConnection::onBackupConfigDone);
 }
 
-void ConcordConnection::updateActionStates()
+void ConcordConnection::updateActionStates(bool setToBusy)
 {
-  bool connected = concord.isInitialised();
+  bool state;
+
+  auto connected = concord.isInitialised();
+  if (setToBusy) {
+    state = false;
+  } else {
+    state = connected;
+  }
 
   actionConnect->setEnabled(!connected);
-  actionDisconnect->setEnabled(connected);
-  actionGetInfo->setEnabled(connected);
-  actionSetTime->setEnabled(connected);
-  actionReadConfig->setEnabled(connected);
-  actionWriteConfig->setEnabled(connected);
-  actionLearnIrSingle->setEnabled(connected);
-  actionLearnIrStream->setEnabled(connected);
-  progressBar->setEnabled(connected);
+  actionDisconnect->setEnabled(state);
+  actionGetInfo->setEnabled(state);
+  actionSetTime->setEnabled(state);
+  actionReadConfig->setEnabled(state);
+  actionWriteConfig->setEnabled(state);
+  actionBackupConfig->setEnabled(state);
+  actionBackupConfigRestore->setEnabled(state);
+  actionLearnIrSingle->setEnabled(state);
+  actionLearnIrStream->setEnabled(state);
+  if (!setToBusy) {
+    progressBar->setEnabled(state);
+  }
 }
 
 void ConcordConnection::cleanup()
 {
+  dataMode = false;
+  if (disconnectMsg != nullptr) {
+    disconnectMsg->deleteLater();
+    disconnectMsg = nullptr;
+  }
+  if (waitMsg != nullptr) {
+    waitMsg->deleteLater();
+    waitMsg = nullptr;
+  }
 }

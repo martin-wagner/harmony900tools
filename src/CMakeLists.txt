@@ -109,6 +109,7 @@ set(${programName}_resource_files
     ${iconPath}/status/dialog-information.png
     ${iconPath}/misc/org.kde.plasma.analogclock.png
     ${iconPath}/actions/kt-set-max-upload-speed.png
+    ${iconPath}/actions/backup.png
     ${iconPath}/actions/edit-download.png
     ${iconPath}/actions/media-record.png
     ${iconPath}/actions/keyframe-record.png
