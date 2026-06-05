@@ -48,7 +48,7 @@ set(sources
   models/deviceListModel.cpp
   ui/logViewer.cpp
   ui/settings.cpp
-  ui/concordTest.cpp
+  ui/concordConnection.cpp
   ui/deviceEditor.cpp
   wrappers/concordWrapper.cpp
 )
@@ -98,9 +98,20 @@ set(${programName}_resource_files
     ${iconPath}/actions/gnumeric-object-scrollbar.png
     ${iconPath}/actions/document-new.png
     ${iconPath}/actions/document-open.png
+    ${iconPath}/actions/document-import.png
     ${iconPath}/actions/document-save.png
     ${iconPath}/actions/document-save-as.png
     ${iconPath}/actions/application-exit.png
+    ${iconPath}/actions/edit-undo.png
+    ${iconPath}/actions/edit-redo.png
+    ${iconPath}/actions/network-connect.png
+    ${iconPath}/actions/network-disconnect.png
+    ${iconPath}/status/dialog-information.png
+    ${iconPath}/misc/org.kde.plasma.analogclock.png
+    ${iconPath}/actions/kt-set-max-upload-speed.png
+    ${iconPath}/actions/edit-download.png
+    ${iconPath}/actions/media-record.png
+    ${iconPath}/actions/keyframe-record.png
 )
 
 qt_add_resources(${programName} "application"

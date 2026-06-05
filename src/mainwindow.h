@@ -8,7 +8,7 @@
 
 #include "ui/logViewer.h"
 #include "ui/settings.h"
-#include "ui/concordTest.h"
+#include "ui/concordConnection.h"
 #include "ui/deviceEditor.h"
 #include "lib/users.h"
 #include "lib/undo.h"
@@ -94,7 +94,7 @@ class MainWindow: public QMainWindow
     editors::DeviceEditor *deviceEditor = nullptr;
     models::DeviceModel *deviceModel = nullptr;
 
-    ConcordTest *concordTest;
+    ConcordConnection *concordConnection;
 
 };
 

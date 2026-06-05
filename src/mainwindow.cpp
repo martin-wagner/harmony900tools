@@ -195,10 +195,10 @@ void MainWindow::createWidgets()
   setTitle();
 
   //create widgets
-  concordTest = new ConcordTest(*ctx.get(), *concord, this);
+  concordConnection = new ConcordConnection(*ctx.get(), *concord, this);
   ads::CDockWidget *dockConcordTest = new ads::CDockWidget(dockManager,
       tr("Test LibConcord"));
-  dockConcordTest->setWidget(concordTest);
+  dockConcordTest->setWidget(concordConnection);
   dockManager->addDockWidget(ads::RightDockWidgetArea, dockConcordTest);
   dockMenu->addAction(dockConcordTest->toggleViewAction());
 
@@ -351,6 +351,12 @@ void MainWindow::createActions()
 //  editMenu->addAction(pasteAct);
 //  editToolBar->addAction(pasteAct); todo
 
+  //connection
+  QMenu *connectMenu = menuBar()->addMenu(tr("&Connection"));
+  concordConnection->addToMenu(connectMenu);
+  QToolBar *connectToolBar = addToolBar(tr("Connection"));
+  concordConnection->addToToolbar(connectToolBar);
+
   //view
   lockAction = dockMenu->addAction(tr("Lock UI"));
   lockAction->setCheckable(true);
@@ -413,8 +419,8 @@ void MainWindow::createActions()
   connect(concord, &Concord::writeLog, log, &LogViewer::addEntry);
   connect(concord, &Concord::writeMsg, log, &LogViewer::addMessage);
 
-  connect(concordTest, &ConcordTest::writeLog, log, &LogViewer::addEntry);
-  connect(concordTest, &ConcordTest::writeMsg, log, &LogViewer::addMessage);
+  connect(concordConnection, &ConcordConnection::writeLog, log, &LogViewer::addEntry);
+  connect(concordConnection, &ConcordConnection::writeMsg, log, &LogViewer::addMessage);
 
   connect(deviceEditor, &editors::DeviceEditor::writeLog, log,
       &LogViewer::addEntry);

@@ -7,13 +7,16 @@
 #include "comm/concord.h"
 #include "logViewer.h"
 
-class ConcordTest: public QWidget
+class ConcordConnection: public QWidget
 {
   Q_OBJECT
 
   public:
-    explicit ConcordTest(Context &ctx, Concord &concord, QWidget *parent = nullptr);
-    ~ConcordTest();
+    explicit ConcordConnection(Context &ctx, Concord &concord, QWidget *parent = nullptr);
+    ~ConcordConnection();
+
+    void addToToolbar(QToolBar *bar);
+    void addToMenu(QMenu *menu);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
@@ -47,6 +50,7 @@ class ConcordTest: public QWidget
     Concord &concord;
 
   private:
+    void updateActionStates();
     void cleanup();
 
   private:
@@ -68,6 +72,16 @@ class ConcordTest: public QWidget
     QPushButton *buttonLearnIrSingle;
     QPushButton *buttonLearnIrStream;
     QLabel *labelIrData;
+
+    QAction *actionConnect = nullptr;
+    QAction *actionDisconnect;
+    QAction *actionGetInfo;
+    QAction *actionSetTime;
+    QAction *actionReadConfig;
+    QAction *actionWriteConfig;
+    QAction *actionLearnIrSingle;
+    QAction *actionLearnIrStream;
+    QWidgetAction *actionProgress;
 
     QProgressBar *progressBar;
 
