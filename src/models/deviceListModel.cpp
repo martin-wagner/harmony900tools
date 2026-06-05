@@ -217,20 +217,23 @@ bool DeviceModel::setHeaderData(int section, Qt::Orientation orientation,
 void models::DeviceModel::createActions()
 {
   //connect observers
-  connect(&config, &document::Config::deviceChanged, [this](int pos) {
-    emit dataChanged(index(pos, 0),
-        index(pos, columnCount()), {Qt::DisplayRole, Qt::EditRole});
-  });
-  connect(&config, &document::Config::deviceAboutToBeAdded, [this](int pos) {
-    emit beginInsertRows(QModelIndex(), pos, pos);
-  });
-  connect(&config, &document::Config::deviceAdded, [this](int pos) {
+  connect(&config, &document::Config::deviceChanged, this,
+      [this](
+          int pos) {
+            emit dataChanged(index(pos, 0), index(pos, columnCount()), {Qt::DisplayRole, Qt::EditRole});
+          });
+  connect(&config, &document::Config::deviceAboutToBeAdded, this,
+      [this](int pos) {
+        emit beginInsertRows(QModelIndex(), pos, pos);
+      });
+  connect(&config, &document::Config::deviceAdded, this, [this](int pos) {
     emit endInsertRows();
   });
-  connect(&config, &document::Config::deviceAboutToBeRemoved, [this](int pos) {
-    emit beginRemoveRows(QModelIndex(), pos, pos);
-  });
-  connect(&config, &document::Config::deviceRemoved, [this](int pos) {
+  connect(&config, &document::Config::deviceAboutToBeRemoved, this,
+      [this](int pos) {
+        emit beginRemoveRows(QModelIndex(), pos, pos);
+      });
+  connect(&config, &document::Config::deviceRemoved, this, [this](int pos) {
     emit endRemoveRows();
   });
 

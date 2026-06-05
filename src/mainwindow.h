@@ -92,8 +92,8 @@ class MainWindow: public QMainWindow
     document::Config *config;
     QString curFile;
 
-    editors::DeviceEditor *deviceEditor;
-    models::DeviceModel *deviceModel;
+    editors::DeviceEditor *deviceEditor = nullptr;
+    models::DeviceModel *deviceModel = nullptr;
 
     ConcordTest *concordTest;
     DocumentTest *documentTest;
