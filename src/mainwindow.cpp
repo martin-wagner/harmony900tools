@@ -124,6 +124,7 @@ void MainWindow::import()
       return;
     }
     updateModelView();
+    setCurrentFile(QString());
     QGuiApplication::restoreOverrideCursor();
     log->addMessage(tr("Project loaded"));
   }
