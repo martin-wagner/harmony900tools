@@ -209,13 +209,6 @@ void MainWindow::createWidgets()
   dockManager->addDockWidget(ads::LeftDockWidgetArea, dockDeviceEditor);
   dockMenu->addAction(dockDeviceEditor->toggleViewAction());
 
-  documentTest = new DocumentTest(*ctx.get(), deviceEditor, this);
-  ads::CDockWidget *dockDocumentTest = new ads::CDockWidget(dockManager,
-      tr("Test Document Import/Export"));
-  dockDocumentTest->setWidget(documentTest);
-  dockManager->addDockWidget(ads::RightDockWidgetArea, dockDocumentTest);
-  dockMenu->addAction(dockDocumentTest->toggleViewAction());
-
   QUndoView *undoView = new QUndoView(undo.getStack());
   undoView->setCleanIcon(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-clear.png",
@@ -422,9 +415,6 @@ void MainWindow::createActions()
 
   connect(concordTest, &ConcordTest::writeLog, log, &LogViewer::addEntry);
   connect(concordTest, &ConcordTest::writeMsg, log, &LogViewer::addMessage);
-
-  connect(documentTest, &DocumentTest::writeLog, log, &LogViewer::addEntry);
-  connect(documentTest, &DocumentTest::writeMsg, log, &LogViewer::addMessage);
 
   connect(deviceEditor, &editors::DeviceEditor::writeLog, log,
       &LogViewer::addEntry);

@@ -9,7 +9,6 @@
 #include "ui/logViewer.h"
 #include "ui/settings.h"
 #include "ui/concordTest.h"
-#include "ui/documentTest.h"
 #include "ui/deviceEditor.h"
 #include "lib/users.h"
 #include "lib/undo.h"
@@ -96,7 +95,6 @@ class MainWindow: public QMainWindow
     models::DeviceModel *deviceModel = nullptr;
 
     ConcordTest *concordTest;
-    DocumentTest *documentTest;
 
 };
 
