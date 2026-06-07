@@ -149,14 +149,6 @@ bool ConfigH900::readProperties(pugi::xml_node &root)
 
 bool ConfigH900::readUser(pugi::xml_node &root)
 {
-  unordered_set<string> properties;
-
-  Property<bool> newDeviceFound { false, Include::CHECK };
-  Property<bool> trainingWheels { false, Include::ALWAYS };
-  Property<Enum<Locale>> locale { { Locale::enu }, Include::ALWAYS };
-  Property<Enum<TimeFormat>> timeFormat { { TimeFormat::Military },
-      Include::ALWAYS };
-
   auto user = root.child("User");
 
   auto id = user.child("Id").text().as_uint();
@@ -209,6 +201,26 @@ bool ConfigH900::readUser(pugi::xml_node &root)
 
 bool ConfigH900::readController(pugi::xml_node &root)
 {
+  auto controller = root.child("Controller");
+
+  auto id = controller.child("Id").text().as_uint();
+  addId(id);
+  worker->setControllerId(id);
+
+  auto type = controller.child("Type").child_value();
+  auto mnf = controller.child("Manufacturer").child_value();
+  auto model = controller.child("Model").child_value();
+  auto label = controller.child("Presentation").child("Label").child_value();
+  worker->setControllerMetadata(type, mnf, model, label);
+
+  for (pugi::xml_node prop : controller.child("Properties").children("Property")) {
+    //no properties by default
+    auto unknown = toUnknownElement(prop);
+    emit writeLog(LogLevel::Debug,
+        tr("import user: unknown property (value = %1)").arg(
+            QString::fromStdString(unknown.text)), ContentType::PlainText);
+    worker->setControllerUnknownProperty(unknown);
+  }
   return true;
 }
 
@@ -365,6 +377,22 @@ bool ConfigH900::writeUser(pugi::xml_node &root)
 
 bool ConfigH900::writeController(pugi::xml_node &root)
 {
+  auto controller = root.append_child("Controller");
+  auto id = controller.append_child("Id");
+  id.text().set(c->getController().getId());
+  auto type = controller.append_child("Type");
+  type.text().set(c->getController().type.get());
+  auto mnf = controller.append_child("Manufacturer");
+  mnf.text().set(c->getController().mnf.get());
+  auto model = controller.append_child("Model");
+  model.text().set(c->getController().model.get());
+  auto properties = controller.append_child("Properties");
+  for (const auto &prop : c->getUser().getUnknownProperties()) {
+    writeUnknownElement(properties, prop);
+  }
+  auto presentation = controller.append_child("Presentation");
+  auto label = presentation.append_child("Label");
+  label.text().set(c->getController().label.get());
   return true;
 }
 

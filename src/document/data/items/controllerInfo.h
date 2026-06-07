@@ -38,77 +38,24 @@ class ControllerInfo
       this->id = id;
     }
 
-    const std::string& getLabel() const
-    {
-      return label;
-    }
-
-    void setLabel(const std::string &label)
-    {
-      this->label = label;
-    }
-
-    const std::string& getMnf() const
-    {
-      return mnf;
-    }
-
-    void setMnf(const std::string &mnf)
-    {
-      this->mnf = mnf;
-    }
-
-    const std::string& getModel() const
-    {
-      return model;
-    }
-
-    void setModel(const std::string &model)
-    {
-      this->model = model;
-    }
-
-    const std::string& getType() const
-    {
-      return type;
-    }
-
-    void setType(const std::string &type)
-    {
-      this->type = type;
-    }
-
-    const std::vector<UnknownElement> &getUnknownItems() const
-    {
-      return u;
-    }
-
-    void setUnknownItems(const std::vector<UnknownElement> &u)
-    {
-      this->u = u;
-    }
+    PropertyString type{"Protocol Code"};
+    PropertyString mnf{"Logitech"};
+    PropertyString model{"Harmony 1000-ish"};
+    PropertyString label{"Harmony 1000-ish"};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {
-      return p.u;
+      return unknownProperties;
     }
 
-    void setUnknownProperties(const std::vector<UnknownElement> &u)
+    std::vector<UnknownElement> &getUnknownProperties()
     {
-      p.u = u;
+      return unknownProperties;
     }
 
   protected:
-    struct Properties {
-      std::vector<UnknownElement> u;
-    } p;
-
     uint32_t id = DEFAULT_ID;
-    std::string type = "Protocol Code";
-    std::string mnf = "Logitech";
-    std::string model = "Harmony 1000-ish";
-    std::string label = "Harmony 1000-ish";
-    std::vector<UnknownElement> u;
+    std::vector<UnknownElement> unknownProperties;
 };
 
 }

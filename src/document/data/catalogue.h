@@ -52,7 +52,9 @@ class CmdCatalogue : public QObject
     bool setUserLocale(const Enum<Locale> &l);
     bool setUserTimeFormat(const Enum<TimeFormat> &f);
     bool setUserUnknownProperty(const data::item::UnknownElement& value);
-
+    bool setControllerId(uint32_t id);
+    bool setControllerMetadata(const QString &type, const QString &mnf, const QString &model, const QString &label);
+    bool setControllerUnknownProperty(const data::item::UnknownElement& value);
 
   protected:
     void connectCommand(BaseCommand *cmd);

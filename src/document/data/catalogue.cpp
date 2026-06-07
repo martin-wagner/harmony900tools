@@ -7,6 +7,7 @@
 #include "cmd/removeDevice.h"
 #include "cmd/setId.h"
 #include "cmd/setUserMetadata.h"
+#include "cmd/setControllerMetadata.h"
 #include "cmd/setUserName.h"
 #include "cmd/setUnknownProperty.h"
 
@@ -73,7 +74,8 @@ bool CmdCatalogue::setUserId(uint32_t id)
   return true;
 }
 
-bool CmdCatalogue::setUserName(const QString &firstName, const QString &lastName)
+bool CmdCatalogue::setUserName(const QString &firstName,
+    const QString &lastName)
 {
   auto *cmd = new SetUserNameCommand(c, firstName, lastName);
   connectCommand(cmd);
@@ -132,6 +134,32 @@ bool CmdCatalogue::setUserTimeFormat(const Enum<TimeFormat> &f)
 }
 
 bool CmdCatalogue::setUserUnknownProperty(
+    const data::item::UnknownElement &value)
+{
+  auto *cmd = new SetUserUnknownPropertyCommand(c, value);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setControllerId(uint32_t id)
+{
+  auto *cmd = new SetControllerIdCommand(c, id);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setControllerMetadata(const QString &type,
+    const QString &mnf, const QString &model, const QString &label)
+{
+  auto *cmd = new SetControllerMetadataCommand(c, type, mnf, model, label);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setControllerUnknownProperty(
     const data::item::UnknownElement &value)
 {
   auto *cmd = new SetUserUnknownPropertyCommand(c, value);

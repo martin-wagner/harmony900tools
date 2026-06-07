@@ -20,5 +20,15 @@ SetUserIdCommand::SetUserIdCommand(ConfigData &c, uint32_t id,
 {
 }
 
+SetControllerIdCommand::SetControllerIdCommand(ConfigData &c, uint32_t id,
+    QUndoCommand *parent) :
+    SetIdCommand([&c]() -> uint32_t {
+      return c.getController().getId();
+    }, [&c](uint32_t id) {
+      c.getController().setId(id);
+    }, id, parent)
+{
+}
+
 }
 }

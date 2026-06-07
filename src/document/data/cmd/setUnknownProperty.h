@@ -58,5 +58,13 @@ class SetUserUnknownPropertyCommand: public SetUnknownPropertyCommand
         QUndoCommand* parent = nullptr);
 };
 
+class SetControllerUnknownPropertyCommand: public SetUnknownPropertyCommand
+{
+  public:
+    SetControllerUnknownPropertyCommand(ConfigData& c,
+        const UnknownElement& value,
+        QUndoCommand* parent = nullptr);
+};
+
 }
 }

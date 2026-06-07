@@ -20,5 +20,15 @@ SetUserUnknownPropertyCommand::SetUserUnknownPropertyCommand(ConfigData &c,
 {
 }
 
+SetControllerUnknownPropertyCommand::SetControllerUnknownPropertyCommand(ConfigData &c,
+    const UnknownElement &value, QUndoCommand *parent) :
+    SetUnknownPropertyCommand([&c]() -> std::vector<UnknownElement>& {
+      return c.getController().getUnknownProperties();
+    }, [&c](const UnknownElement &e) {
+      c.getController().getUnknownProperties().push_back(e);
+    }, value, parent)
+{
+}
+
 }
 }

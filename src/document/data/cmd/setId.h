@@ -21,7 +21,7 @@ class SetIdCommand: public BaseCommand
 
     SetIdCommand(Getter getter, Setter setter, uint32_t id,
         QUndoCommand *parent = nullptr) :
-        BaseCommand(QObject::tr("Set ID %1").arg(getter()), parent), id(
+        BaseCommand(QObject::tr("Set ID %1").arg(id), parent), id(
             id), prevId(getter()), get(getter), set(setter)
     {
     }
@@ -49,6 +49,13 @@ class SetUserIdCommand: public SetIdCommand
 {
   public:
     SetUserIdCommand(ConfigData &c, uint32_t id,
+        QUndoCommand *parent = nullptr);
+};
+
+class SetControllerIdCommand: public SetIdCommand
+{
+  public:
+    SetControllerIdCommand(ConfigData &c, uint32_t id,
         QUndoCommand *parent = nullptr);
 };
 
