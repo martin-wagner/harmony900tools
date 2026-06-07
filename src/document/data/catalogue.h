@@ -51,6 +51,7 @@ class CmdCatalogue : public QObject
     bool setUserTrainingWheels(bool w);
     bool setUserLocale(const Enum<Locale> &l);
     bool setUserTimeFormat(const Enum<TimeFormat> &f);
+    bool setUserUnknownProperty(const data::item::UnknownElement& value);
 
 
   protected:

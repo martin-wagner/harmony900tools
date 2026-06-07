@@ -63,6 +63,17 @@ class ConfigH900 : public QObject
 
   protected:
     bool dumpUserConfigXml();
+    bool writeProperties(pugi::xml_node &root);
+    bool writeUser(pugi::xml_node &root);
+    bool writeController(pugi::xml_node &root);
+    bool writeDevices(pugi::xml_node &root);
+    bool writeDevice(pugi::xml_node &devices);
+    bool writeActivities(pugi::xml_node &root);
+    bool writeActivitiy(pugi::xml_node &activities);
+    bool writeProtocols(pugi::xml_node &root);
+    bool writeProtocol(pugi::xml_node &protocols);
+
+    void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
 
   protected:
     const QString wp;

@@ -8,6 +8,7 @@
 #include "cmd/setId.h"
 #include "cmd/setUserMetadata.h"
 #include "cmd/setUserName.h"
+#include "cmd/setUnknownProperty.h"
 
 using namespace std;
 
@@ -125,6 +126,15 @@ bool CmdCatalogue::setUserLocale(const Enum<Locale> &l)
 bool CmdCatalogue::setUserTimeFormat(const Enum<TimeFormat> &f)
 {
   auto *cmd = new SetUserTimeFormatCommand(c, f);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserUnknownProperty(
+    const data::item::UnknownElement &value)
+{
+  auto *cmd = new SetUserUnknownPropertyCommand(c, value);
   connectCommand(cmd);
   undo.push(cmd);
   return true;

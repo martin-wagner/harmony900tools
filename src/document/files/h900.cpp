@@ -5,6 +5,7 @@
 
 #include "lib/consthash.h"
 #include "lib/uid.h"
+#include "lib/timestamp.h"
 #include "document/data/data.h"
 #include "document/data/catalogue.h"
 #include "document/data/items/unknown.h"
@@ -162,9 +163,9 @@ bool ConfigH900::readUser(pugi::xml_node &root)
   addId(id);
   worker->setUserId(id);
   auto firstName = user.child("Presentation").child("FirstName").child_value();
+  auto lastName = user.child("Presentation").child("LastName").child_value();
   worker->setUserName(QString::fromStdString(firstName),
       QString::fromStdString(lastName));
-  auto lastName = user.child("Presentation").child("LastName").child_value();
   worker->setUserMetadata();
 
   for (pugi::xml_node prop : user.child("Properties").children("Property")) {
@@ -195,7 +196,11 @@ bool ConfigH900::readUser(pugi::xml_node &root)
       }
       default: {
         auto unknown = toUnknownElement(prop);
-
+        emit writeLog(LogLevel::Debug,
+            tr("import user: unknown property (value = %1)").arg(
+                QString::fromStdString(unknown.text)), ContentType::PlainText);
+        worker->setUserUnknownProperty(unknown);
+        break;
       }
     }
   }
@@ -253,8 +258,9 @@ bool ConfigH900::readProtocol(pugi::xml_node &protocols)
 data::item::UnknownElement ConfigH900::toUnknownElement(
     const pugi::xml_node &node)
 {
-  std::map<std::string, std::string> attrs;
-  std::vector<data::item::UnknownElement> children;
+  string text;
+  map<string, string> attrs;
+  vector<data::item::UnknownElement> children;
 
   for (pugi::xml_attribute attr : node.attributes()) {
     attrs.emplace(attr.name(), attr.as_string());
@@ -267,8 +273,6 @@ data::item::UnknownElement ConfigH900::toUnknownElement(
 
     children.emplace_back(toUnknownElement(child));
   }
-
-  std::string text;
 
   // only take meaningful text (trim-ish behavior optional)
   if (node.first_child() && node.first_child().type() == pugi::node_pcdata) {
@@ -287,36 +291,21 @@ void ConfigH900::addId(uint32_t id)
 bool ConfigH900::dumpUserConfigXml()
 {
   pugi::xml_document xml;
-  bool ret;
 
   auto decl = xml.prepend_child(pugi::node_declaration);
   decl.append_attribute("version").set_value("1.0");
   decl.append_attribute("encoding").set_value("UTF-8");
 
   auto root = xml.append_child("Root");
-
-  //general stuff
-  auto properties = root.append_child("Properties");
-  auto property = properties.append_child("Property");
-  property.append_attribute("name").set_value("version");
-  property.text().set("1.0");
-
-  //user //todo
-
-  //controller //todo
-
-  //devices
-  for (const auto &d : c->getDevices()) {
-    auto devices = root.append_child("Device");
-    devices.append_child("Id").text().set(d.getId());
-
-    //todo all the other stuff...
-
+  auto ret = writeProperties(root);
+  ret &= writeUser(root);
+  ret &= writeController(root);
+  ret &= writeDevices(root);
+  ret &= writeActivities(root);
+  ret &= writeProtocols(root);
+  if (!ret) {
+    return ret;
   }
-
-  //activities //todo
-
-  //protocols //todo
 
   QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
 #ifdef _WIN32
@@ -326,7 +315,114 @@ bool ConfigH900::dumpUserConfigXml()
   ret = xml.save_file(QString(wp + "/" + userConfigPath).toUtf8(),
       PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
 #endif
-  return ret;
+  return true;
+}
+
+bool ConfigH900::writeProperties(pugi::xml_node &root)
+{
+  auto properties = root.append_child("Properties");
+  auto property = properties.append_child("Property");
+  property.append_attribute("name").set_value("version");
+  property.text().set("1.0");
+  property = properties.append_child("Property");
+  property.append_attribute("name").set_value("ProtocolCacheHash");
+  property.text().set("0xdeadbeef"); //todo get the crc32
+  property = properties.append_child("Property");
+  property.append_attribute("name").set_value("LastUpdated");
+  auto time = lib::writeTimeH900Xml();
+  property.text().set(time);
+  return true;
+}
+
+bool ConfigH900::writeUser(pugi::xml_node &root)
+{
+  auto user = root.append_child("User");
+  auto id = user.append_child("Id");
+  id.text().set(c->getUser().getId());
+  auto properties = user.append_child("Properties");
+  auto property = properties.append_child("Property");
+  property.append_attribute("name").set_value("TrainingWheels");
+  property.text().set(c->getUser().trainingWheels.get());
+  property = properties.append_child("Property");
+  property.append_attribute("name").set_value("NewDeviceFound");
+  property.text().set(c->getUser().newDeviceFound.get());
+  property = properties.append_child("Property");
+  property.append_attribute("name").set_value("LocaleId");
+  property.text().set(c->getUser().locale.get().getString());
+  property = properties.append_child("Property");
+  property.append_attribute("name").set_value("TimeDisplayFormat");
+  property.text().set(c->getUser().timeFormat.get().getString());
+  for (const auto &prop : c->getUser().getUnknownProperties()) {
+    writeUnknownElement(properties, prop);
+  }
+  auto presentation = user.append_child("Presentation");
+  auto firstName = presentation.append_child("FirstName");
+  firstName.text().set(c->getUser().firstName.get());
+  auto lastName = presentation.append_child("LastName");
+  lastName.text().set(c->getUser().lastName.get());
+  return true;
+}
+
+bool ConfigH900::writeController(pugi::xml_node &root)
+{
+  return true;
+}
+
+bool ConfigH900::writeDevices(pugi::xml_node &root)
+{
+  //devices
+  for (const auto &d : c->getDevices()) {
+    auto devices = root.append_child("Device");
+    devices.append_child("Id").text().set(d.getId());
+
+    //todo all the other stuff...
+
+  }
+
+  return true;
+}
+
+bool ConfigH900::writeDevice(pugi::xml_node &devices)
+{
+  return true;
+}
+
+bool ConfigH900::writeActivities(pugi::xml_node &root)
+{
+  return true;
+}
+
+bool ConfigH900::writeActivitiy(pugi::xml_node &activities)
+{
+  return true;
+}
+
+bool ConfigH900::writeProtocols(pugi::xml_node &root)
+{
+  return true;
+}
+
+bool ConfigH900::writeProtocol(pugi::xml_node &protocols)
+{
+  return true;
+}
+
+void ConfigH900::writeUnknownElement(pugi::xml_node &parent,
+    const data::item::UnknownElement &element)
+{
+  auto node = parent.append_child(element.tag.c_str());
+
+  for (const auto& [name, value] : element.attributes) {
+    node.append_attribute(name.c_str()) = value.c_str();
+  }
+
+  if (!element.text.empty()) {
+    node.text().set(element.text.c_str());
+  }
+
+  for (const auto &child : element.children) {
+    writeUnknownElement(node, child);
+  }
 }
 
 }

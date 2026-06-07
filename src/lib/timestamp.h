@@ -10,7 +10,6 @@
 namespace lib
 {
 
-
 inline std::string writeTime()
 {
   using namespace std::chrono;
@@ -40,6 +39,29 @@ inline void printTime(bool endl = false)
   if (endl) {
     std::cout << std::endl;
   }
+}
+
+inline std::string writeTimeH900Xml()
+{
+  using namespace std::chrono;
+
+  std::stringstream str;
+
+  // get current time
+  auto now = system_clock::now();
+  auto secs = time_point_cast<seconds>(now);
+
+  // convert to calendar time
+  time_t tt = system_clock::to_time_t(secs);
+  tm local = *localtime(&tt);
+
+  // print timestamp yyyymmdd hhmmss
+  str << std::setfill('0') << std::setw(4) << local.tm_year + 1900
+      << std::setw(2) << local.tm_mon + 1 << std::setw(2) << local.tm_mday
+      << " " << std::setw(2) << local.tm_hour << std::setw(2) << local.tm_min
+      << std::setw(2) << local.tm_sec;
+
+  return str.str();
 }
 
 }
