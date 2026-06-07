@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#include "lib/timestamp.h"
+#include "setUnknownProperty.h"
+
+using namespace std;
+
+namespace document
+{
+namespace data
+{
+
+SetUserUnknownPropertyCommand::SetUserUnknownPropertyCommand(ConfigData &c,
+    const UnknownElement &value, QUndoCommand *parent) :
+    SetUnknownPropertyCommand([&c]() -> std::vector<UnknownElement>& {
+      return c.getUser().getUnknownProperties();
+    }, [&c](const UnknownElement &e) {
+      c.getUser().getUnknownProperties().push_back(e);
+    }, value, parent)
+{
+}
+
+}
+}

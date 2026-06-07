@@ -39,6 +39,8 @@ void AddDeviceCommand::redo()
     return;
   }
 
+  //todo newdevicefound property
+
   emit deviceAboutToBeAdded(pos);
   c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
   emit deviceAdded(pos);

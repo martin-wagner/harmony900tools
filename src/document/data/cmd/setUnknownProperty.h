@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#pragma once
+
+#include "base.h"
+#include "document/data/items/unknown.h"
+
+namespace document
+{
+namespace data
+{
+
+class SetUnknownPropertyCommand: public BaseCommand
+{
+  protected:
+    using UnknownElement = document::data::item::UnknownElement;
+
+  public:
+    using Getter = std::function<std::vector<UnknownElement>&()>;
+    using Setter = std::function<void(const UnknownElement&)>;
+
+    SetUnknownPropertyCommand(Getter getter, Setter setter,
+        const UnknownElement &value, QUndoCommand *parent = nullptr) :
+        BaseCommand(
+            QObject::tr("Unknown property (%1)").arg(
+                QString::fromStdString(value.tag)), parent), value(value), get(
+            getter), set(setter)
+    {
+    }
+
+    void redo() override
+    {
+      set(value);
+      emit dirtyChanged(true);
+    }
+
+    void undo() override
+    {
+      auto &vec = get();
+      if (!vec.empty()) {
+        vec.pop_back();
+      }
+
+      emit dirtyChanged(true);
+    }
+
+  private:
+    UnknownElement value;
+    Getter get;
+    Setter set;
+};
+
+class SetUserUnknownPropertyCommand: public SetUnknownPropertyCommand
+{
+  public:
+    SetUserUnknownPropertyCommand(ConfigData& c,
+        const UnknownElement& value,
+        QUndoCommand* parent = nullptr);
+};
+
+}
+}

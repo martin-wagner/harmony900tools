@@ -3,8 +3,18 @@
 #pragma once
 
 #include <QObject>
+#include <unordered_set>
 
 #include "ui/logViewer.h"
+#include "document/data/items/unknown.h"
+
+namespace pugi
+{
+  class xml_document;
+  class xml_node;
+  class xml_attribute;
+  class xml_text;
+}
 
 namespace document
 {
@@ -23,8 +33,8 @@ class ConfigH900 : public QObject
   public:
     ConfigH900(const QString &workPath);
 
-    bool dump(const data::ConfigData &c);
-    bool read(data::ConfigData &c, data::CmdCatalogue *worker);
+    bool dump(const data::ConfigData *c);
+    bool read(const data::ConfigData *c, data::CmdCatalogue *worker);
 
   public:
     const QString actionListPath = "userconfig/ActionLists.xml";
@@ -37,13 +47,29 @@ class ConfigH900 : public QObject
     void writeMsg(const QString &message);
 
   protected:
-    bool readUserConfigXml(data::ConfigData &c, data::CmdCatalogue *worker);
+    bool readUserConfigXml();
+    bool readProperties(pugi::xml_node &root);
+    bool readUser(pugi::xml_node &root);
+    bool readController(pugi::xml_node &root);
+    bool readDevices(pugi::xml_node &root);
+    bool readDevice(pugi::xml_node &devices);
+    bool readActivities(pugi::xml_node &root);
+    bool readActivitiy(pugi::xml_node &activities);
+    bool readProtocols(pugi::xml_node &root);
+    bool readProtocol(pugi::xml_node &protocols);
+
+    data::item::UnknownElement toUnknownElement(const pugi::xml_node& node);
+    void addId(uint32_t id);
 
   protected:
-    bool dumpUserConfigXml(const data::ConfigData &c);
+    bool dumpUserConfigXml();
 
   protected:
     const QString wp;
+
+  private:
+    const data::ConfigData *c = nullptr;
+    data::CmdCatalogue *worker = nullptr;
 
 };
 

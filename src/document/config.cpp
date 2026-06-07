@@ -98,7 +98,7 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
       stack.beginMacro(tr("Import Harmony 900 Config"));
-      ret = parser.read(*configData, worker);
+      ret = parser.read(configData.get(), worker);
       stack.endMacro();
       break;
     }
@@ -256,7 +256,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
       auto parser = files::ConfigH900(importPath);
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
-      ret = parser.dump(*configData);
+      ret = parser.dump(configData.get());
       break;
     }
     default:

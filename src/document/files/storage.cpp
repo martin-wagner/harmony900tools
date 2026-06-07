@@ -129,11 +129,11 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
   json j;
 
   j["Version"] = jsonVersion;
-  j["User"]["FirstName"] = c.getUser().getFirstName();
-  j["User"]["LastName"] = c.getUser().getLastName();
-  j["User"]["Login"] = c.getUser().getOsUserName();
-  j["User"]["Created"] = c.getUser().getFileCreationDate();
-  j["User"]["Modified"] = c.getUser().getFileModificationDate();
+  j["User"]["FirstName"] = c.getUser().firstName.get();
+  j["User"]["LastName"] = c.getUser().lastName.get();
+  j["User"]["Login"] = c.getUser().osUserName.get();
+  j["User"]["Created"] = c.getUser().fileCreationDate.get();
+  j["User"]["Modified"] = c.getUser().fileModificationDate.get();
 
   for (int i = 0; i < c.getDevices().size(); i++) {
     auto &jd = j["Devices"][i];

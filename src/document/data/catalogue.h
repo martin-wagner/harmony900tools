@@ -43,6 +43,15 @@ class CmdCatalogue : public QObject
     bool addDeviceCommand(int pos, uint32_t id); //existing id
     bool addDeviceCommand(int pos, uint32_t *id = nullptr); //assign id
     bool removeDeviceCommand(int pos);
+    bool setUserId(uint32_t id);
+    bool setUserName(const QString &firstName, const QString &lastName);
+    bool setUserMetadata();
+    bool setUserMetadata(const QString &user, const QString &creationDate, const QString &modificationDate);
+    bool setUserNewDeviceFound(bool f);
+    bool setUserTrainingWheels(bool w);
+    bool setUserLocale(const Enum<Locale> &l);
+    bool setUserTimeFormat(const Enum<TimeFormat> &f);
+
 
   protected:
     void connectCommand(BaseCommand *cmd);

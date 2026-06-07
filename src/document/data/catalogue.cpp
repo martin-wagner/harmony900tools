@@ -5,6 +5,9 @@
 #include "document/config.h"
 #include "cmd/addDevice.h"
 #include "cmd/removeDevice.h"
+#include "cmd/setId.h"
+#include "cmd/setUserMetadata.h"
+#include "cmd/setUserName.h"
 
 using namespace std;
 
@@ -59,6 +62,72 @@ bool CmdCatalogue::removeDeviceCommand(int pos)
     delete cmd;
   }
   return ret;
+}
+
+bool CmdCatalogue::setUserId(uint32_t id)
+{
+  auto *cmd = new SetUserIdCommand(c, id);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserName(const QString &firstName, const QString &lastName)
+{
+  auto *cmd = new SetUserNameCommand(c, firstName, lastName);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserMetadata()
+{
+  auto *cmd = new SetUserMetadataCommand(c);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserMetadata(const QString &user,
+    const QString &creationDate, const QString &modificationDate)
+{
+  auto *cmd = new SetUserMetadataCommand(c, user, creationDate,
+      modificationDate);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserNewDeviceFound(bool f)
+{
+  auto *cmd = new SetUserNewDeviceFoundCommand(c, f);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserTrainingWheels(bool w)
+{
+  auto *cmd = new SetUserTrainingWheelsCommand(c, w);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserLocale(const Enum<Locale> &l)
+{
+  auto *cmd = new SetUserLocaleCommand(c, l);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setUserTimeFormat(const Enum<TimeFormat> &f)
+{
+  auto *cmd = new SetUserTimeFormatCommand(c, f);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
 }
 
 void CmdCatalogue::connectCommand(BaseCommand *cmd)

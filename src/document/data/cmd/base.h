@@ -40,5 +40,39 @@ class BaseCommand: public QObject, public QUndoCommand
     void dirtyChanged(bool dirty);
 };
 
+template<typename T>
+class SetPropertyBaseCommand: public BaseCommand
+{
+  public:
+    using Getter = std::function<T()>;
+    using Setter = std::function<void(const T&)>;
+
+    SetPropertyBaseCommand(const QString &text, Getter getter, Setter setter,
+        const T &value, QUndoCommand *parent = nullptr) :
+        BaseCommand(text, parent), value(value), prevValue(getter()), get(
+            getter), set(setter)
+    {
+    }
+
+    void redo() override
+    {
+      set(value);
+      emit dirtyChanged(true);
+    }
+
+    void undo() override
+    {
+      set(prevValue);
+      emit dirtyChanged(true);
+    }
+
+  protected:
+    T value;
+    T prevValue;
+    Getter get;
+    Setter set;
+};
+
+
 }
 }

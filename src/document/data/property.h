@@ -14,7 +14,7 @@ namespace data
 /** dump to export file */
 enum class Include
 {
-  ALWAYS, CHECK,
+  ALWAYS, CHECK
 };
 
 /**
@@ -26,7 +26,7 @@ template<typename T>
 class Property
 {
   public:
-    Property(T v, Include defaultIncluded = Include::CHECK) :
+    Property(T v, Include defaultIncluded = Include::ALWAYS) :
         include(defaultIncluded), value(v)
     {
     }
@@ -41,14 +41,15 @@ class Property
       return include;
     }
 
-    T getValue() const
+    T get() const
     {
       return value;
     }
 
-    void setValue(T v)
+    Property& set(T v)
     {
       value = v;
+      return *this;
     }
 
   protected:
@@ -56,10 +57,20 @@ class Property
     T value;
 };
 
+//some common use cases...
+using PropertyString = Property<std::string>;
+using PropertyBool = Property<bool>;
+using PropertyU8 = Property<uint8_t>;
+using PropertyU16 = Property<uint16_t>;
+using PropertyI32 = Property<int32_t>;
+using PropertyU32 = Property<uint32_t>;
+template<typename T>
+using PropertyEnum = Property<Enum<T>>;
+
 }
 }
 
-//fixme -- don't use a preprocessor macro...
+// todo alle properties using ... verwenden, das hier wegmachen
 #define PROPERTY_GETTER(type, varname, methodname) \
   type& methodname()                       \
   {                                        \
@@ -70,3 +81,4 @@ class Property
   {                                        \
     return p.varname;                      \
   }
+

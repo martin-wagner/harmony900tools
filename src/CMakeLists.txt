@@ -40,7 +40,11 @@ set(sources
   document/data/enum.cpp
   document/data/cmd/base.cpp
   document/data/cmd/addDevice.cpp
+  document/data/cmd/setId.cpp
   document/data/cmd/removeDevice.cpp
+  document/data/cmd/setUnknownProperty.cpp
+  document/data/cmd/setUserMetadata.cpp
+  document/data/cmd/setUserName.cpp
   document/data/items/action.cpp
   document/data/items/activity.cpp
   document/files/h900.cpp

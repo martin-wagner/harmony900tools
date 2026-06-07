@@ -35,97 +35,30 @@ class UserInfo
       this->id = id;
     }
 
-    const std::string& getFirstName() const
-    {
-      return firstName;
-    }
+    PropertyString firstName{"Michael"};
+    PropertyString lastName{"Mustermann"};
+    PropertyString osUserName{""};
+    PropertyString fileCreationDate{""};
+    PropertyString fileModificationDate{""};
 
-    void setFirstName(const std::string &firstName)
-    {
-      this->firstName = firstName;
-    }
-
-    const std::string& getLastName() const
-    {
-      return lastName;
-    }
-
-    void setLastName(const std::string &lastName)
-    {
-      this->lastName = lastName;
-    }
-
-    const std::string& getFileCreationDate() const
-    {
-      return fileCreationDate;
-    }
-
-    void setFileCreationDate(const std::string &fileCreationDate)
-    {
-      this->fileCreationDate = fileCreationDate;
-    }
-
-    const std::string& getFileModificationDate() const
-    {
-      return fileModificationDate;
-    }
-
-    void setFileModificationDate(const std::string &fileModificationDate)
-    {
-      this->fileModificationDate = fileModificationDate;
-    }
-
-    const std::string& getOsUserName() const
-    {
-      return osUserName;
-    }
-
-    void setOsUserName(const std::string &osUserName)
-    {
-      this->osUserName = osUserName;
-    }
-
-    PROPERTY_GETTER(Property<bool>, newDeviceFound, getNewDeviceFound)
-    PROPERTY_GETTER(Property<bool>, trainingWheels, getTrainingWheels)
-    PROPERTY_GETTER(Property<Enum<Locale>>, locale, getLocale)
-    PROPERTY_GETTER(Property<Enum<TimeFormat>>, timeFormat, getTimeFormat)
-
-    const std::vector<UnknownElement> &getUnknownItems() const
-    {
-      return u;
-    }
-
-    void setUnknownItems(const std::vector<UnknownElement> &u)
-    {
-      this->u = u;
-    }
+    PropertyBool newDeviceFound{false, Include::CHECK};
+    PropertyBool trainingWheels{false, Include::ALWAYS};
+    PropertyEnum<Locale> locale{{Locale::enu}, Include::ALWAYS};
+    PropertyEnum<TimeFormat> timeFormat{{TimeFormat::Military}, Include::ALWAYS};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {
-      return u;
+      return unknownProperties;
     }
 
-    void setUnknownProperties(const std::vector<UnknownElement> &u)
+    std::vector<UnknownElement> &getUnknownProperties()
     {
-      p.u = u;
+      return unknownProperties;
     }
 
   protected:
-    struct Properties {
-      Property<bool> newDeviceFound{false, Include::CHECK};
-      Property<bool> trainingWheels{false, Include::ALWAYS};
-      Property<Enum<Locale>> locale{{Locale::enu}, Include::ALWAYS};
-      Property<Enum<TimeFormat>> timeFormat{{TimeFormat::Military}, Include::ALWAYS};
-      std::vector<UnknownElement> u;
-    } p;
-
     uint32_t id = DEFAULT_USERID;
-    std::string firstName = "Michael";
-    std::string lastName = "Mustermann";
-    std::string osUserName;
-    std::string fileCreationDate;
-    std::string fileModificationDate;
-    std::vector<UnknownElement> u;
+    std::vector<UnknownElement> unknownProperties;
 };
 
 }
