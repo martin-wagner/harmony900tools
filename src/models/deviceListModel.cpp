@@ -248,11 +248,11 @@ QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
       case Column::ID:
         return device.getId();
       case Column::DEVTYPE:
-        return device.getType().getQString();
+        return device.type.get().getQString();
       case Column::MANUFACTURER:
-        return QString::fromStdString(device.getManufacturer());
+        return QString::fromStdString(device.mnf.get());
       case Column::MODEL:
-        return QString::fromStdString(device.getModel());
+        return QString::fromStdString(device.model.get());
       default:
         break;
     }
@@ -269,11 +269,11 @@ QVariant DeviceModel::getEditData(const QModelIndex &index) const
       case Column::ID:
         return device.getId();
       case Column::DEVTYPE:
-        return static_cast<int>(device.getType().getValue());
+        return static_cast<int>(device.type.get().getValue());
       case Column::MANUFACTURER:
-        return QString::fromStdString(device.getManufacturer());
+        return QString::fromStdString(device.mnf.get());
       case Column::MODEL:
-        return QString::fromStdString(device.getModel());
+        return QString::fromStdString(device.model.get());
       default:
         break;
     }
@@ -307,7 +307,7 @@ QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
     auto &device = config.data().getDevices().at(index.row());
     switch (index.column()) {
       case Column::DEVTYPE:
-        return device.getType().getQStringList();
+        return device.type.get().getQStringList();
       default:
         break;
     }

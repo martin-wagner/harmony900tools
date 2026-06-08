@@ -43,6 +43,7 @@ set(sources
   document/data/cmd/setId.cpp
   document/data/cmd/removeDevice.cpp
   document/data/cmd/setControllerMetadata.cpp
+  document/data/cmd/setDeviceMetadata.cpp
   document/data/cmd/setUnknownProperty.cpp
   document/data/cmd/setUserMetadata.cpp
   document/data/cmd/setUserName.cpp

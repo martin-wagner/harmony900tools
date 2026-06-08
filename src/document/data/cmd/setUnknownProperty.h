@@ -66,5 +66,13 @@ class SetControllerUnknownPropertyCommand: public SetUnknownPropertyCommand
         QUndoCommand* parent = nullptr);
 };
 
+class SetDeviceUnknownPropertyCommand: public SetUnknownPropertyCommand
+{
+  public:
+    SetDeviceUnknownPropertyCommand(ConfigData& c,
+        const UnknownElement& value, uint32_t pos,
+        QUndoCommand* parent = nullptr);
+};
+
 }
 }

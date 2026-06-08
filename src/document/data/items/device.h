@@ -44,12 +44,27 @@ class Device
       return buttons;
     }
 
-    void setButtons(const Presentation &buttons)
+    Presentation& getButtons()
     {
-      this->buttons = buttons;
+      return buttons;
+    }
+
+    const std::vector<StateMachine>& getStateMachines() const
+    {
+      return stateMachines;
+    }
+
+    std::vector<StateMachine>& getStateMachines()
+    {
+      return stateMachines;
     }
 
     const Commands& getIrCommands() const
+    {
+      return irCommands;
+    }
+
+    Commands& getIrCommands()
     {
       return irCommands;
     }
@@ -59,131 +74,46 @@ class Device
       this->irCommands = irCommands;
     }
 
-    const std::string& getManufacturer() const
-    {
-      return manufacturer;
-    }
+    PropertyEnum<DeviceType> type{DeviceType::Computer};
+    PropertyString mnf{"Commodore"};
+    PropertyString model{"C64"};
+    PropertyString label{"My C64"};
 
-    void setManufacturer(const std::string &manufacturer = "Unknown")
-    {
-      this->manufacturer = manufacturer;
-    }
-
-    const std::string& getModel() const
-    {
-      return model;
-    }
-
-    void setModel(const std::string &model = "Unknown")
-    {
-      this->model = model;
-    }
-
-    const std::vector<StateMachine>& getStateMachines() const
-    {
-      return stateMachines;
-    }
-
-    void setStateMachines(const std::vector<StateMachine> &stateMachines)
-    {
-      this->stateMachines = stateMachines;
-    }
-
-    const Enum<DeviceType>& getType() const
-    {
-      return type;
-    }
-
-    void setType(const Enum<DeviceType>& type)
-    {
-      this->type = type;
-    }
-
-    const std::vector<UnknownElement>& getU() const
-    {
-      return u;
-    }
-
-    void setU(const std::vector<UnknownElement> &u)
-    {
-      this->u = u;
-    }
-
-    PROPERTY_GETTER(Property<bool>, manualPower, getManualPower)
-    PROPERTY_GETTER(Property<bool>, alwaysOn, getAlwaysOn)
-    PROPERTY_GETTER(Property<bool>, autoPower, getAutoPower)
-    PROPERTY_GETTER(Property<bool>, audioSwitch, getAudioSwitch)
-    PROPERTY_GETTER(Property<bool>, dimmer, getDimmer)
-    PROPERTY_GETTER(Property<bool>, hasBands, getHasBands)
-    PROPERTY_GETTER(Property<bool>, hasPresets, getHasPresets)
-    PROPERTY_GETTER(Property<bool>, isNewDevice, getIsNewDevice)
-    PROPERTY_GETTER(Property<bool>, isDisplayDevice, getIsDisplayDevice)
-    PROPERTY_GETTER(Property<bool>, menuOnDevice, getMenuOnDevice)
-    PROPERTY_GETTER(Property<int>, numDiscs, getNumDiscs)
-    PROPERTY_GETTER(Property<int>, numLights, getNumLights)
-    PROPERTY_GETTER(Property<bool>, onScreenGuide, getOnScreenGuide)
-    PROPERTY_GETTER(Property<Enum<PvrType>>, pvrType, getPvrType)
-    PROPERTY_GETTER(Property<bool>, recordMediaFixedDisc, getRecordMediaFixedDisc)
-    PROPERTY_GETTER(Property<bool>, recordMediaRemovableVideotape, getRecordMediaRemovableVideotape)
-    PROPERTY_GETTER(Property<bool>, revertInput, getRevertInput)
-    PROPERTY_GETTER(Property<bool>, scart, getScart)
-    PROPERTY_GETTER(Property<Enum<TunerInput>>, tunerInput, getTunerInput)
-    PROPERTY_GETTER(Property<bool>, videoSwitch, getVideoSwitch)
-
-    //todo getter/setter
-
-    const std::vector<UnknownElement> &getUnknownItems() const
-    {
-      return u;
-    }
-
-    void setUnknownItems(const std::vector<UnknownElement> &u)
-    {
-      this->u = u;
-    }
+    //power related
+    PropertyBool manualPower{false, Include::ALWAYS};
+    PropertyBool alwaysOn{false, Include::CHECK};
+    PropertyBool autoPower{false, Include::CHECK};
+    //other
+    PropertyBool audioSwitch{false, Include::CHECK};
+    PropertyBool dimmer{false, Include::CHECK};
+    PropertyBool hasBands{true, Include::CHECK};
+    PropertyBool hasPresets{true, Include::CHECK};
+    PropertyBool isNewDevice{true, Include::CHECK};
+    PropertyBool isDisplayDevice{true, Include::CHECK};
+    PropertyBool menuOnDevice{false, Include::CHECK};
+    PropertyI32 numDiscs{1, Include::CHECK};
+    PropertyI32 numLights{1, Include::CHECK};
+    PropertyBool onScreenGuide{false, Include::CHECK};
+    PropertyEnum<PvrType> pvrType{PvrType::Generic, Include::CHECK};
+    PropertyBool recordMediaFixedDisc{true, Include::CHECK};
+    PropertyBool recordMediaRemovableVideotape{true, Include::CHECK};
+    PropertyBool revertInput{true, Include::CHECK};
+    PropertyBool scart{true, Include::CHECK};
+    PropertyEnum<TunerInput> tunerInput{TunerInput::Tuner, Include::CHECK};
+    PropertyBool videoSwitch{true, Include::CHECK};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {
-      return u;
+      return unknownProperties;
     }
 
-    void setUnknownProperties(const std::vector<UnknownElement> &u)
+    std::vector<UnknownElement> &getUnknownProperties()
     {
-      p.u = u;
+      return unknownProperties;
     }
 
   protected:
-    struct Properties {
-      //power related
-      Property<bool> manualPower{false, Include::ALWAYS};
-      Property<bool> alwaysOn{false, Include::CHECK};
-      Property<bool> autoPower{false, Include::CHECK};
-      //other
-      Property<bool> audioSwitch{false, Include::CHECK};
-      Property<bool> dimmer{false, Include::CHECK};
-      Property<bool> hasBands{true, Include::CHECK};
-      Property<bool> hasPresets{true, Include::CHECK};
-      Property<bool> isNewDevice{true, Include::CHECK};
-      Property<bool> isDisplayDevice{true, Include::CHECK};
-      Property<bool> menuOnDevice{false, Include::CHECK};
-      Property<int> numDiscs{1, Include::CHECK};
-      Property<int> numLights{1, Include::CHECK};
-      Property<bool> onScreenGuide{false, Include::CHECK};
-      Property<Enum<PvrType>> pvrType{PvrType::Generic, Include::CHECK};
-      Property<bool> recordMediaFixedDisc{true, Include::CHECK};
-      Property<bool> recordMediaRemovableVideotape{true, Include::CHECK};
-      Property<bool> revertInput{true, Include::CHECK};
-      Property<bool> scart{true, Include::CHECK};
-      Property<Enum<TunerInput>> tunerInput{TunerInput::Tuner, Include::CHECK};
-      Property<bool> videoSwitch{true, Include::CHECK};
-      //other other
-      std::vector<UnknownElement> u;
-    } p;
 
-    uint32_t id;
-    Enum<DeviceType> type{DeviceType::Computer};
-    std::string manufacturer = "Unknown";
-    std::string model = "Unknown";
     Presentation buttons;
     std::vector<StateMachine> stateMachines;
     struct Numpad {
@@ -196,7 +126,8 @@ class Device
     } numpad;
     Commands irCommands;
 
-    std::vector<UnknownElement> u;
+    uint32_t id;
+    std::vector<UnknownElement> unknownProperties;
 };
 
 }

@@ -19,6 +19,32 @@ namespace document
 namespace files
 {
 
+//not a class member!. for generic types
+template<typename T>
+void writeProperty(pugi::xml_node &parent, const char *name,
+    const Property<T> &prop)
+{
+  if (prop.isIncluded() != Include::ALWAYS) {
+    return;
+  }
+  auto property = parent.append_child("Property");
+  property.append_attribute("name").set_value(name);
+  property.text().set(prop.get());
+}
+
+//not a class member!. for enum types
+template<typename T>
+void writeProperty(pugi::xml_node &parent, const char *name,
+    const Property<Enum<T>> &prop)
+{
+  if (prop.isIncluded() != Include::ALWAYS) {
+    return;
+  }
+  auto property = parent.append_child("Property");
+  property.append_attribute("name").set_value(name);
+  property.text().set(prop.get().getString().c_str());
+}
+
 ConfigH900::ConfigH900(const QString &workPath) :
     wp(workPath)
 {
@@ -226,24 +252,150 @@ bool ConfigH900::readController(pugi::xml_node &root)
 
 bool ConfigH900::readDevices(pugi::xml_node &root)
 {
+  bool ret = true;
 
-  //devices
   for (pugi::xml_node device : root.children("Device")) {
-    auto id = device.child("Id").text().as_uint();
-    auto ret = worker->addDeviceCommand(-1, id);
-    if (!ret) {
-      continue;
-    }
-
-    //todo all the other stuff...
-
+    ret &= readDevice(device);
   }
-
-  return true;
+  return ret;
 }
 
-bool ConfigH900::readDevice(pugi::xml_node &devices)
+bool ConfigH900::readDevice(pugi::xml_node &device)
 {
+  auto id = device.child("Id").text().as_uint();
+  addId(id);
+  auto ret = worker->addDeviceCommand(-1, id); //append
+  if (!ret) {
+    return false;
+  }
+  auto pos = c->getDevices().size() - 1;
+
+  auto typeStr = device.child("Type").child_value();
+  Enum<DeviceType> type(typeStr);
+  auto mnf = device.child("Manufacturer").child_value();
+  auto model = device.child("Model").child_value();
+  auto label = device.child("Presentation").child("Label").child_value();
+  worker->setDeviceMetadata(type, mnf, model, label, pos);
+
+  for (pugi::xml_node prop : device.child("Properties").children("Property")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+    switch (h) {
+      case "AlwaysOn"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceAlwaysOn(val, pos);
+        break;
+      }
+      case "AudioSwitch"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceAudioSwitch(val, pos);
+        break;
+      }
+      case "AutoPower"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceAutoPower(val, pos);
+        break;
+      }
+      case "Dimmer"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceDimmer(val, pos);
+        break;
+      }
+      case "HasBands"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceHasBands(val, pos);
+        break;
+      }
+      case "HasPresets"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceHasPresets(val, pos);
+        break;
+      }
+      case "IsDisplayDevice"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceIsDisplayDevice(val, pos);
+        break;
+      }
+      case "IsNewDevice"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceIsNewDevice(val, pos);
+        break;
+      }
+      case "ManualPower"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceManualPower(val, pos);
+        break;
+      }
+      case "MenuOnDevice"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceMenuOnDevice(val, pos);
+        break;
+      }
+      case "NumDiscs"_hash: {
+        auto val = prop.text().as_int(1);
+        worker->setDeviceNumDiscs(val, pos);
+        break;
+      }
+      case "NumLights"_hash: {
+        auto val = prop.text().as_int(1);
+        worker->setDeviceNumLights(val, pos);
+        break;
+      }
+      case "OnScreenGuide"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceOnScreenGuide(val, pos);
+        break;
+      }
+      case "PvrType"_hash: {
+        auto valStr = prop.text().as_string("Generic");
+        auto val = Enum<PvrType>(valStr);
+        worker->setDevicePvrType(val, pos);
+        break;
+      }
+      case "RecordMedia Fixed Disc"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceRecordMediaFixedDisc(val, pos);
+        break;
+      }
+      case "RecordMedia Removable Videotape"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceRecordMediaRemovableVideotape(val, pos);
+        break;
+      }
+      case "RevertInput"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceRevertInput(val, pos);
+        break;
+      }
+      case "Scart"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceScart(val, pos);
+        break;
+      }
+      case "TunerInput"_hash: {
+        auto valStr = prop.text().as_string("Tuner");
+        auto val = Enum<TunerInput>(valStr);
+        worker->setDeviceTunerInput(val, pos);
+        break;
+      }
+      case "VideoSwitch"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setDeviceVideoSwitch(val, pos);
+        break;
+      }
+      default: {
+        auto unknown = toUnknownElement(prop);
+        emit writeLog(LogLevel::Debug,
+            tr("import device: unknown property (value = %1)").arg(
+                QString::fromStdString(unknown.text)), ContentType::PlainText);
+        worker->setDeviceUnknownProperty(unknown, pos);
+        break;
+      }
+    }
+  }
+
+  //todo weitere...
+
   return true;
 }
 
@@ -252,7 +404,7 @@ bool ConfigH900::readActivities(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::readActivitiy(pugi::xml_node &activities)
+bool ConfigH900::readActivitiy(pugi::xml_node &activitie)
 {
   return true;
 }
@@ -262,7 +414,7 @@ bool ConfigH900::readProtocols(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::readProtocol(pugi::xml_node &protocols)
+bool ConfigH900::readProtocol(pugi::xml_node &protocol)
 {
   return true;
 }
@@ -351,67 +503,88 @@ bool ConfigH900::writeUser(pugi::xml_node &root)
   auto user = root.append_child("User");
   auto id = user.append_child("Id");
   id.text().set(c->getUser().getId());
+  // @formatter:off
   auto properties = user.append_child("Properties");
-  auto property = properties.append_child("Property");
-  property.append_attribute("name").set_value("TrainingWheels");
-  property.text().set(c->getUser().trainingWheels.get());
-  property = properties.append_child("Property");
-  property.append_attribute("name").set_value("NewDeviceFound");
-  property.text().set(c->getUser().newDeviceFound.get());
-  property = properties.append_child("Property");
-  property.append_attribute("name").set_value("LocaleId");
-  property.text().set(c->getUser().locale.get().getString());
-  property = properties.append_child("Property");
-  property.append_attribute("name").set_value("TimeDisplayFormat");
-  property.text().set(c->getUser().timeFormat.get().getString());
+  writeProperty(properties, "TrainingWheels", c->getUser().trainingWheels);
+  writeProperty(properties, "NewDeviceFound", c->getUser().newDeviceFound);
+  writeProperty(properties, "LocaleId", c->getUser().locale);
+  writeProperty(properties, "TimeDisplayFormat", c->getUser().timeFormat);
   for (const auto &prop : c->getUser().getUnknownProperties()) {
     writeUnknownElement(properties, prop);
   }
   auto presentation = user.append_child("Presentation");
-  auto firstName = presentation.append_child("FirstName");
-  firstName.text().set(c->getUser().firstName.get());
-  auto lastName = presentation.append_child("LastName");
-  lastName.text().set(c->getUser().lastName.get());
+  presentation.append_child("FirstName").text().set(c->getUser().firstName.get());
+  presentation.append_child("LastName").text().set(c->getUser().lastName.get());
+// @formatter:on
   return true;
 }
 
 bool ConfigH900::writeController(pugi::xml_node &root)
 {
+  // @formatter:off
   auto controller = root.append_child("Controller");
-  auto id = controller.append_child("Id");
-  id.text().set(c->getController().getId());
-  auto type = controller.append_child("Type");
-  type.text().set(c->getController().type.get());
-  auto mnf = controller.append_child("Manufacturer");
-  mnf.text().set(c->getController().mnf.get());
-  auto model = controller.append_child("Model");
-  model.text().set(c->getController().model.get());
+  controller.append_child("Id").text().set(c->getController().getId());
+  controller.append_child("Type").text().set(c->getController().type.get());
+  controller.append_child("Manufacturer").text().set(c->getController().mnf.get());
+  controller.append_child("Model").text().set(c->getController().model.get());
   auto properties = controller.append_child("Properties");
   for (const auto &prop : c->getUser().getUnknownProperties()) {
     writeUnknownElement(properties, prop);
   }
   auto presentation = controller.append_child("Presentation");
-  auto label = presentation.append_child("Label");
-  label.text().set(c->getController().label.get());
+  presentation.append_child("Label").text().set(c->getController().label.get());
+// @formatter:on
   return true;
 }
 
 bool ConfigH900::writeDevices(pugi::xml_node &root)
 {
-  //devices
-  for (const auto &d : c->getDevices()) {
-    auto devices = root.append_child("Device");
-    devices.append_child("Id").text().set(d.getId());
+  bool ret = true;
 
-    //todo all the other stuff...
-
+  const auto &devices = c->getDevices();
+  for (uint32_t i = 0; i < devices.size(); i++) {
+    auto device = root.append_child("Device");
+    ret &= writeDevice(device, devices[i], i);
   }
-
-  return true;
+  return ret;
 }
 
-bool ConfigH900::writeDevice(pugi::xml_node &devices)
+bool ConfigH900::writeDevice(pugi::xml_node &device,
+    const data::item::Device &data, uint32_t pos)
 {
+  // @formatter:off
+  device.append_child("Id").text().set(data.getId());
+  device.append_child("Type").text().set(data.type.get().getString());
+  device.append_child("Manufacturer").text().set(data.mnf.get());
+  device.append_child("Model").text().set(data.model.get());
+
+  auto properties = device.append_child("Properties");
+  writeProperty(properties, "AlwaysOn", c->getDevices()[pos].alwaysOn);
+  writeProperty(properties, "AudioSwitch", c->getDevices()[pos].audioSwitch);
+  writeProperty(properties, "AutoPower", c->getDevices()[pos].autoPower);
+  writeProperty(properties, "Dimmer", c->getDevices()[pos].dimmer);
+  writeProperty(properties, "HasBands", c->getDevices()[pos].hasBands);
+  writeProperty(properties, "HasPresets", c->getDevices()[pos].hasPresets);
+  writeProperty(properties, "IsNewDevice", c->getDevices()[pos].isNewDevice);
+  writeProperty(properties, "IsDisplayDevice", c->getDevices()[pos].isDisplayDevice);
+  writeProperty(properties, "ManualPower", c->getDevices()[pos].manualPower);
+  writeProperty(properties, "MenuOnDevice", c->getDevices()[pos].menuOnDevice);
+  writeProperty(properties, "OnScreenGuide", c->getDevices()[pos].onScreenGuide);
+  writeProperty(properties, "NumDiscs", c->getDevices()[pos].numDiscs);
+  writeProperty(properties, "NumLights", c->getDevices()[pos].numLights);
+  writeProperty(properties, "PvrType", c->getDevices()[pos].pvrType);
+  writeProperty(properties, "RecordMedia Fixed Disc", c->getDevices()[pos].recordMediaFixedDisc);
+  writeProperty(properties, "RecordMedia Removable Videotape", c->getDevices()[pos].recordMediaRemovableVideotape);
+  writeProperty(properties, "RevertInput", c->getDevices()[pos].revertInput);
+  writeProperty(properties, "Scart", c->getDevices()[pos].scart);
+  writeProperty(properties, "TunerInput", c->getDevices()[pos].tunerInput);
+  writeProperty(properties, "VideoSwitch", c->getDevices()[pos].videoSwitch);
+  for (const auto &prop : c->getDevices()[pos].getUnknownProperties()) {
+    writeUnknownElement(properties, prop);
+  }
+  //todo weitere...
+
+// @formatter:on
   return true;
 }
 
@@ -420,7 +593,7 @@ bool ConfigH900::writeActivities(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::writeActivitiy(pugi::xml_node &activities)
+bool ConfigH900::writeActivitiy(pugi::xml_node &activitie)
 {
   return true;
 }
@@ -430,7 +603,7 @@ bool ConfigH900::writeProtocols(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::writeProtocol(pugi::xml_node &protocols)
+bool ConfigH900::writeProtocol(pugi::xml_node &protocol)
 {
   return true;
 }
