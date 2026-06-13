@@ -5,10 +5,13 @@
 #include "document/config.h"
 #include "cmd/addDevice.h"
 #include "cmd/removeDevice.h"
+#include "cmd/addButton.h"
+#include "cmd/removeButton.h"
 #include "cmd/setId.h"
-#include "cmd/setUserMetadata.h"
+#include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
-#include "cmd/setDeviceMetadata.h"
+#include "cmd/setDeviceData.h"
+#include "cmd/setButtonData.h"
 #include "cmd/setUserName.h"
 #include "cmd/setUnknownProperty.h"
 
@@ -375,6 +378,76 @@ bool CmdCatalogue::setDeviceUnknownProperty(
     const data::item::UnknownElement &value, uint32_t pos)
 {
   auto *cmd = new SetDeviceUnknownPropertyCommand(c, value, pos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::addButtonCommand(item::ButtonType t, uint32_t devicePos,
+    int buttonPos)
+{
+  auto *cmd = new AddButtonCommand(c, t, devicePos, buttonPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: button pos %1/%2 already exists, dropped").arg(devicePos).arg(
+            buttonPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeButtonCommand(item::ButtonType t, uint32_t devicePos,
+    int buttonPos)
+{
+  auto *cmd = new RemoveButtonCommand(c, t, devicePos, buttonPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: button pos %1/%2 doesn't exist, dropped").arg(devicePos).arg(
+            buttonPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setButtonAction(const std::string &v, item::ButtonType t,
+    uint32_t devicePos, int buttonPos)
+{
+  auto *cmd = new SetActionCommand(c, v, t, devicePos, buttonPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setButtonName(const std::string &v, item::ButtonType t,
+    uint32_t devicePos, int buttonPos)
+{
+  auto *cmd = new SetNameCommand(c, v, t, devicePos, buttonPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setButtonFile(const std::string &v, item::ButtonType t,
+    uint32_t devicePos, int buttonPos)
+{
+  auto *cmd = new SetFileCommand(c, v, t, devicePos, buttonPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setButtonPosition(const int32_t &v, item::ButtonType t,
+    uint32_t devicePos, int buttonPos)
+{
+  auto *cmd = new SetPositionCommand(c, v, t, devicePos, buttonPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;

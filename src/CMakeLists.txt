@@ -39,16 +39,20 @@ set(sources
   document/data/data.cpp
   document/data/enum.cpp
   document/data/cmd/base.cpp
+  document/data/cmd/addButton.cpp
   document/data/cmd/addDevice.cpp
   document/data/cmd/setId.cpp
+  document/data/cmd/removeButton.cpp
   document/data/cmd/removeDevice.cpp
+  document/data/cmd/setButtonData.cpp
   document/data/cmd/setControllerMetadata.cpp
-  document/data/cmd/setDeviceMetadata.cpp
+  document/data/cmd/setDeviceData.cpp
   document/data/cmd/setUnknownProperty.cpp
-  document/data/cmd/setUserMetadata.cpp
+  document/data/cmd/setUserData.cpp
   document/data/cmd/setUserName.cpp
   document/data/items/action.cpp
   document/data/items/activity.cpp
+  document/data/items/button.cpp
   document/files/h900.cpp
   document/files/storage.cpp
   models/deviceListModel.cpp

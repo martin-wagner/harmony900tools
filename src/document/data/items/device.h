@@ -14,7 +14,7 @@
 #include "state.h"
 #include "digits.h"
 #include "commands.h"
-#include "presentation.h"
+#include "button.h"
 
 namespace document
 {
@@ -39,14 +39,24 @@ class Device
     /** get device uid + all command uids */
     std::set<uint32_t> getAllIds() { return {}; }; //todo
 
-    const Presentation& getButtons() const
+    const std::vector<Button>& getSoftButtons() const
     {
-      return buttons;
+      return softButtons;
     }
 
-    Presentation& getButtons()
+    std::vector<Button>& getSoftButtons()
     {
-      return buttons;
+      return softButtons;
+    }
+
+    const std::vector<Button>& getHardButtons() const
+    {
+      return hardButtons;
+    }
+
+    std::vector<Button>& getHardButtons()
+    {
+      return hardButtons;
     }
 
     const std::vector<StateMachine>& getStateMachines() const
@@ -113,8 +123,8 @@ class Device
     }
 
   protected:
-
-    Presentation buttons;
+    std::vector<Button> softButtons;
+    std::vector<Button> hardButtons;
     std::vector<StateMachine> stateMachines;
     struct Numpad {
       int fixedDigits = 0;

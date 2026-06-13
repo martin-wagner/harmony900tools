@@ -53,6 +53,8 @@ class ConfigH900 : public QObject
     bool readController(pugi::xml_node &root);
     bool readDevices(pugi::xml_node &root);
     bool readDevice(pugi::xml_node &device);
+    bool readButtons(pugi::xml_node &buttons, enum data::item::ButtonType t);
+    bool readButton(pugi::xml_node &button, enum data::item::ButtonType t);
     bool readActivities(pugi::xml_node &root);
     bool readActivitiy(pugi::xml_node &activitie);
     bool readProtocols(pugi::xml_node &root);
@@ -67,11 +69,13 @@ class ConfigH900 : public QObject
     bool writeUser(pugi::xml_node &root);
     bool writeController(pugi::xml_node &root);
     bool writeDevices(pugi::xml_node &root);
-    bool writeDevice(pugi::xml_node &device, const data::item::Device &data, uint32_t pos);
+    bool writeDevice(pugi::xml_node &device, const data::item::Device &data);
     bool writeActivities(pugi::xml_node &root);
     bool writeActivitiy(pugi::xml_node &activitie);
     bool writeProtocols(pugi::xml_node &root);
     bool writeProtocol(pugi::xml_node &protocol);
+    bool writeButtons(pugi::xml_node &buttons, uint32_t deviceId, const std::vector<data::item::Button> &data);
+    bool writeButton(pugi::xml_node &button, uint32_t deviceId, const data::item::Button &data);
 
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
 

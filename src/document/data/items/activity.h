@@ -10,7 +10,7 @@
 #include "document/data/enum.h"
 #include "document/data/property.h"
 #include "unknown.h"
-#include "presentation.h"
+#include "button.h"
 #include "state.h"
 #include "digits.h"
 #include "commands.h"
@@ -123,7 +123,8 @@ class Activity
     bool powerOff; //has no id, no properties
     const uint32_t id;
     Enum<ActivityType> type{ActivityType::VirtualGeneric};
-    Presentation buttons;
+    std::vector<Button> softButtons;
+    std::vector<Button> hardButtons;
     std::vector<StateAction> enterActions;
     std::vector<StateAction> leaveActions;
     std::vector<uint32_t> powerOnDeviceIds;

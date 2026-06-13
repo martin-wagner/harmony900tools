@@ -274,7 +274,8 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
   Enum<DeviceType> type(typeStr);
   auto mnf = device.child("Manufacturer").child_value();
   auto model = device.child("Model").child_value();
-  auto label = device.child("Presentation").child("Label").child_value();
+  auto presentation = device.child("Presentation");
+  auto label = presentation.child("Label").child_value();
   worker->setDeviceMetadata(type, mnf, model, label, pos);
 
   for (pugi::xml_node prop : device.child("Properties").children("Property")) {
@@ -394,8 +395,83 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
     }
   }
 
-  //todo weitere...
+  ret = true;
+  for (pugi::xml_node prop : presentation.children("ControlGroup")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+    switch (h) {
+      case "Misc"_hash: {
+        ret &= readButtons(prop, data::item::ButtonType::Soft);
+        break;
+      }
+      case "HardButtons"_hash: {
+        ret &= readButtons(prop, data::item::ButtonType::Hard);
+        break;
+      }
+    }
+  }
+  if (!ret) {
+    return ret;
+  }
 
+  //todo weitere
+
+  return true;
+}
+
+bool ConfigH900::readButtons(pugi::xml_node &buttons,
+    enum data::item::ButtonType t)
+{
+  auto ret = true;
+  for (pugi::xml_node prop : buttons.children("Button")) {
+    ret &= readButton(prop, t);
+  }
+  return ret;
+}
+
+bool ConfigH900::readButton(pugi::xml_node &button,
+    enum data::item::ButtonType t)
+{
+  int buttonPos;
+
+  auto devicePos = c->getDevices().size() - 1;
+
+  auto ret = worker->addButtonCommand(t, devicePos, -1); //append
+  if (!ret) {
+    return false;
+  }
+  if (t == data::item::ButtonType::Hard) {
+    buttonPos = c->getDevices()[devicePos].getHardButtons().size() - 1;
+  } else {
+    buttonPos = c->getDevices()[devicePos].getSoftButtons().size() - 1;
+  }
+
+  auto actionId = string(
+      button.child("ActionId").text().as_string("1_unknown_Hold"));
+  auto action = data::item::Button::getAction(actionId);
+  worker->setButtonAction(action, t, devicePos, buttonPos);
+
+  //hard/soft are different
+  auto name = button.attribute("name");
+  if (name) {
+    auto c = name.value();
+    worker->setButtonName(string(c), t, devicePos, buttonPos);
+  } else {
+    auto c = button.child("Label").child_value();
+    worker->setButtonName(string(c), t, devicePos, buttonPos);
+  }
+
+  //only soft buttons
+  auto pos = button.child("Position");
+  if (pos) {
+    auto p = pos.text().as_uint(0);
+    worker->setButtonPosition(p, t, devicePos, buttonPos);
+  }
+  auto file = button.child("Icon");
+  if (file) {
+    auto c = name.value();
+    worker->setButtonFile(string(c), t, devicePos, buttonPos);
+  }
   return true;
 }
 
@@ -542,50 +618,63 @@ bool ConfigH900::writeDevices(pugi::xml_node &root)
   bool ret = true;
 
   const auto &devices = c->getDevices();
-  for (uint32_t i = 0; i < devices.size(); i++) {
+  for (const auto &data : devices) {
     auto device = root.append_child("Device");
-    ret &= writeDevice(device, devices[i], i);
+    ret &= writeDevice(device, data);
   }
   return ret;
 }
 
 bool ConfigH900::writeDevice(pugi::xml_node &device,
-    const data::item::Device &data, uint32_t pos)
+    const data::item::Device &data)
 {
+  bool ret = true;
+
   // @formatter:off
   device.append_child("Id").text().set(data.getId());
   device.append_child("Type").text().set(data.type.get().getString());
   device.append_child("Manufacturer").text().set(data.mnf.get());
   device.append_child("Model").text().set(data.model.get());
 
+  auto presentation = device.append_child("Presentation");
+  presentation.append_child("Label").text().set(data.label.get());
+  auto softButtons = presentation.append_child("ControlGroup");
+  softButtons.append_attribute("name").set_value("Misc");
+  ret &= writeButtons(softButtons, data.getId(), data.getSoftButtons());
+  auto hardButtons = presentation.append_child("ControlGroup");
+  hardButtons.append_attribute("name").set_value("HardButtons");
+  ret &= writeButtons(hardButtons, data.getId(), data.getHardButtons());
+
   auto properties = device.append_child("Properties");
-  writeProperty(properties, "AlwaysOn", c->getDevices()[pos].alwaysOn);
-  writeProperty(properties, "AudioSwitch", c->getDevices()[pos].audioSwitch);
-  writeProperty(properties, "AutoPower", c->getDevices()[pos].autoPower);
-  writeProperty(properties, "Dimmer", c->getDevices()[pos].dimmer);
-  writeProperty(properties, "HasBands", c->getDevices()[pos].hasBands);
-  writeProperty(properties, "HasPresets", c->getDevices()[pos].hasPresets);
-  writeProperty(properties, "IsNewDevice", c->getDevices()[pos].isNewDevice);
-  writeProperty(properties, "IsDisplayDevice", c->getDevices()[pos].isDisplayDevice);
-  writeProperty(properties, "ManualPower", c->getDevices()[pos].manualPower);
-  writeProperty(properties, "MenuOnDevice", c->getDevices()[pos].menuOnDevice);
-  writeProperty(properties, "OnScreenGuide", c->getDevices()[pos].onScreenGuide);
-  writeProperty(properties, "NumDiscs", c->getDevices()[pos].numDiscs);
-  writeProperty(properties, "NumLights", c->getDevices()[pos].numLights);
-  writeProperty(properties, "PvrType", c->getDevices()[pos].pvrType);
-  writeProperty(properties, "RecordMedia Fixed Disc", c->getDevices()[pos].recordMediaFixedDisc);
-  writeProperty(properties, "RecordMedia Removable Videotape", c->getDevices()[pos].recordMediaRemovableVideotape);
-  writeProperty(properties, "RevertInput", c->getDevices()[pos].revertInput);
-  writeProperty(properties, "Scart", c->getDevices()[pos].scart);
-  writeProperty(properties, "TunerInput", c->getDevices()[pos].tunerInput);
-  writeProperty(properties, "VideoSwitch", c->getDevices()[pos].videoSwitch);
-  for (const auto &prop : c->getDevices()[pos].getUnknownProperties()) {
+  writeProperty(properties, "AlwaysOn", data.alwaysOn);
+  writeProperty(properties, "AudioSwitch", data.audioSwitch);
+  writeProperty(properties, "AutoPower", data.autoPower);
+  writeProperty(properties, "Dimmer", data.dimmer);
+  writeProperty(properties, "HasBands", data.hasBands);
+  writeProperty(properties, "HasPresets", data.hasPresets);
+  writeProperty(properties, "IsNewDevice", data.isNewDevice);
+  writeProperty(properties, "IsDisplayDevice", data.isDisplayDevice);
+  writeProperty(properties, "ManualPower", data.manualPower);
+  writeProperty(properties, "MenuOnDevice", data.menuOnDevice);
+  writeProperty(properties, "OnScreenGuide", data.onScreenGuide);
+  writeProperty(properties, "NumDiscs", data.numDiscs);
+  writeProperty(properties, "NumLights", data.numLights);
+  writeProperty(properties, "PvrType", data.pvrType);
+  writeProperty(properties, "RecordMedia Fixed Disc", data.recordMediaFixedDisc);
+  writeProperty(properties, "RecordMedia Removable Videotape", data.recordMediaRemovableVideotape);
+  writeProperty(properties, "RevertInput", data.revertInput);
+  writeProperty(properties, "Scart", data.scart);
+  writeProperty(properties, "TunerInput", data.tunerInput);
+  writeProperty(properties, "VideoSwitch", data.videoSwitch);
+  for (const auto &prop : data.getUnknownProperties()) {
     writeUnknownElement(properties, prop);
   }
+
+
   //todo weitere...
 
 // @formatter:on
-  return true;
+  return ret;
 }
 
 bool ConfigH900::writeActivities(pugi::xml_node &root)
@@ -605,6 +694,34 @@ bool ConfigH900::writeProtocols(pugi::xml_node &root)
 
 bool ConfigH900::writeProtocol(pugi::xml_node &protocol)
 {
+  return true;
+}
+
+bool ConfigH900::writeButtons(pugi::xml_node &buttons, uint32_t deviceId,
+    const vector<data::item::Button> &data)
+{
+  bool ret = true;
+
+  for (const auto &d : data) {
+    auto button = buttons.append_child("Button");
+    ret &= writeButton(button, deviceId, d);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeButton(pugi::xml_node &button, uint32_t deviceId,
+    const data::item::Button &data)
+{
+  if (data.getButtonType() == data::item::ButtonType::Hard) {
+    button.append_attribute("name").set_value(data.name.get());
+    button.append_child("Label"); //empty
+  } else {
+    button.append_child("Label").text().set(data.name.get());
+  }
+  if (data.position.isIncluded() == data::Include::ALWAYS) {
+    button.append_child("Position").text().set(data.position.get());
+  }
+  button.append_child("ActionId").text().set(data.getActionId(deviceId));
   return true;
 }
 

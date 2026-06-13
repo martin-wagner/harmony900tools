@@ -84,7 +84,13 @@ class CmdCatalogue : public QObject
     bool setDevicePvrType(const Enum<PvrType> &v, uint32_t pos);
     bool setDeviceTunerInput(const Enum<TunerInput> &v, uint32_t pos);
     bool setDeviceUnknownProperty(const data::item::UnknownElement& value, uint32_t pos);
-
+    //buttons
+    bool addButtonCommand(item::ButtonType t, uint32_t devicePos, int buttonPos);
+    bool removeButtonCommand(item::ButtonType t, uint32_t devicePos, int buttonPos);
+    bool setButtonAction(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
+    bool setButtonName(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
+    bool setButtonFile(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
+    bool setButtonPosition(const int32_t &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
 
   protected:
     void connectCommand(BaseCommand *cmd);
