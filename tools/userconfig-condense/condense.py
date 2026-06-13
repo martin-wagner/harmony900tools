@@ -64,6 +64,11 @@ Output files (in <folder>/accumulated/):
     activity_power_missing_devices.txt
         Activities where the Power section does not cover all devices in the file.
         Empty file if all Power sections are complete.
+
+    device_states_both_action_types.txt
+        States that contain both <DiscreteActions> and <RelativeActions>.
+        Each entry shows source, state id, values, and the child action tags
+        of each block (no action detail). Empty file if no such states exist.
 """
 
 import sys
@@ -166,6 +171,12 @@ class Accumulator:
         self.activity_role_presentation_nonempty: list = []
         self.activity_power_missing_devices: list = []
 
+        # States that contain both DiscreteActions and RelativeActions
+        self.device_states_both_action_types: list = []
+
+        # All Parameter name= values found inside any Action/Operation
+        self.action_parameter_names: set = set()
+
     # -----------------------------------------------------------------------
     # Device processing
     # -----------------------------------------------------------------------
@@ -251,6 +262,17 @@ class Accumulator:
                     action = item.find("Action")
                     op_str = self._format_action(action)
                     lines.append(f"    {item.tag}: {op_str}")
+
+            # Record states that carry both action types
+            if da is not None and ra is not None:
+                entry = (
+                    f"[{src}]\n"
+                    f"  State:             {st_id}\n"
+                    f"  Values:            {values}\n"
+                    f"  DiscreteActions:   {[c.tag for c in da]}\n"
+                    f"  RelativeActions:   {[c.tag for c in ra]}\n"
+                )
+                self.device_states_both_action_types.append(entry)
 
         lines.append("")
         self.device_states.append("\n".join(lines))
@@ -538,6 +560,10 @@ class Accumulator:
         if op_name:
             self.operation_names.add(op_name)
         params = [p.text for p in op.findall("Parameter") if p.text]
+        for p in op.findall("Parameter"):
+            name_attr = p.get("name")
+            if name_attr:
+                self.action_parameter_names.add(name_attr)
         return f"target={target!r}  op={op_name}  params={params}"
 
 
@@ -577,9 +603,10 @@ def write_outputs(out_dir: Path, acc: Accumulator):
     write_enum(out_dir / "role_names.txt",            acc.role_names)
     write_enum(out_dir / "state_ids.txt",             acc.state_ids)
     write_enum(out_dir / "state_values.txt",          acc.state_values)
-    write_enum(out_dir / "operation_names.txt",       acc.operation_names)
-    write_enum(out_dir / "action_targets.txt",        acc.action_targets)
-    write_enum(out_dir / "discrete_action_tags.txt",  acc.discrete_action_tags)
+    write_enum(out_dir / "operation_names.txt",          acc.operation_names)
+    write_enum(out_dir / "action_targets.txt",           acc.action_targets)
+    write_enum(out_dir / "discrete_action_tags.txt",     acc.discrete_action_tags)
+    write_enum(out_dir / "action_parameter_names.txt",   acc.action_parameter_names)
     write_enum(out_dir / "relative_action_tags.txt",  acc.relative_action_tags)
     write_enum(out_dir / "controlgroup_names.txt",    acc.controlgroup_names)
 
@@ -605,6 +632,7 @@ def write_outputs(out_dir: Path, acc: Accumulator):
     write_complex(out_dir / "activity_role_presentation_nonempty.txt", acc.activity_role_presentation_nonempty)
     write_complex(out_dir / "activity_power_missing_devices.txt",     acc.activity_power_missing_devices)
     write_enum(out_dir / "button_names.txt",          acc.button_names)
+    write_complex(out_dir / "device_states_both_action_types.txt",    acc.device_states_both_action_types)
 
 
 def main():

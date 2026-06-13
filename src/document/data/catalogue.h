@@ -91,6 +91,25 @@ class CmdCatalogue : public QObject
     bool setButtonName(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
     bool setButtonFile(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
     bool setButtonPosition(const int32_t &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
+    //state machines
+    bool addStatemachineCommand(uint32_t devicePos, int smPos);
+    bool removeStatemachineCommand(uint32_t devicePos, int smPos);
+    bool setStatemachineType(const Enum<StateMachineType> &type,  uint32_t devicePos, int smPos);
+    bool setStatemachineDelay(uint32_t delayMs, uint32_t devicePos, int smPos);
+    bool setStatemachineActionClass(const Enum<ActionClass> &v, uint32_t devicePos, int smPos);
+    //state machine actions
+    bool addDeviceActionCommand(uint32_t devicePos, int smPos, uint32_t actPos);
+    bool removeDeviceActionCommand(uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionType(const Enum<ActionType> &v, uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionName(const std::string &v, uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionRepeatWillNotHarm(const bool &v, uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionOp(const Enum<Operation> &v, uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionCmd(const std::string &v, uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionDelayMs(const uint32_t &v, uint32_t devicePos, int buttonPos, uint32_t actPos);
+    bool setDeviceActionStateName(const Enum<StateMachineType> &v, uint32_t devicePos, int buttonPos, uint32_t actPos);
+    bool setDeviceActionStateValue(const std::string &v, uint32_t devicePos, int buttonPos, uint32_t actPos);
+    bool setDeviceActionMod(const Enum<Modifier> &v, uint32_t devicePos, int smPos, uint32_t actPos);
+    bool setDeviceActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, int smPos, uint32_t actPos);
 
   protected:
     void connectCommand(BaseCommand *cmd);

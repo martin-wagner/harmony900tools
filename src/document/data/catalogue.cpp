@@ -5,13 +5,19 @@
 #include "document/config.h"
 #include "cmd/addDevice.h"
 #include "cmd/removeDevice.h"
+#include "cmd/removeDeviceAction.h"
 #include "cmd/addButton.h"
 #include "cmd/removeButton.h"
+#include "cmd/addDeviceAction.h"
+#include "cmd/addStatemachine.h"
+#include "cmd/removeStatemachine.h"
 #include "cmd/setId.h"
 #include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
 #include "cmd/setDeviceData.h"
+#include "cmd/setDeviceActionData.h"
 #include "cmd/setButtonData.h"
+#include "cmd/setStatemachineData.h"
 #include "cmd/setUserName.h"
 #include "cmd/setUnknownProperty.h"
 
@@ -417,28 +423,28 @@ bool CmdCatalogue::removeButtonCommand(item::ButtonType t, uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setButtonAction(const std::string &v, item::ButtonType t,
+bool CmdCatalogue::setButtonAction(const string &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetActionCommand(c, v, t, devicePos, buttonPos);
+  auto *cmd = new SetButtonActionCommand(c, v, t, devicePos, buttonPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setButtonName(const std::string &v, item::ButtonType t,
+bool CmdCatalogue::setButtonName(const string &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetNameCommand(c, v, t, devicePos, buttonPos);
+  auto *cmd = new SetButtonNameCommand(c, v, t, devicePos, buttonPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setButtonFile(const std::string &v, item::ButtonType t,
+bool CmdCatalogue::setButtonFile(const string &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetFileCommand(c, v, t, devicePos, buttonPos);
+  auto *cmd = new SetButtonFileCommand(c, v, t, devicePos, buttonPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
@@ -447,7 +453,197 @@ bool CmdCatalogue::setButtonFile(const std::string &v, item::ButtonType t,
 bool CmdCatalogue::setButtonPosition(const int32_t &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetPositionCommand(c, v, t, devicePos, buttonPos);
+  auto *cmd = new SetButtonPositionCommand(c, v, t, devicePos, buttonPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::addStatemachineCommand(uint32_t devicePos, int smPos)
+{
+  auto *cmd = new AddStatemachineCommand(c, devicePos, smPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: statemachine pos %1/%2 already exists, dropped").arg(
+            devicePos).arg(smPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeStatemachineCommand(uint32_t devicePos, int smPos)
+{
+  auto *cmd = new RemoveStatemachineCommand(c, devicePos, smPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: statemachine pos %1/%2 doesn't exist, dropped").arg(
+            devicePos).arg(smPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setStatemachineType(const Enum<StateMachineType> &type,
+    uint32_t devicePos, int smPos)
+{
+  auto *cmd = new SetStatemachineTypeCommand(c, type, devicePos, smPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setStatemachineDelay(uint32_t delayMs, uint32_t devicePos,
+    int smPos)
+{
+  auto *cmd = new SetStatemachineDelayCommand(c, delayMs, devicePos, smPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+
+bool CmdCatalogue::setStatemachineActionClass(const Enum<ActionClass> &v,
+    uint32_t devicePos, int smPos)
+{
+  auto *cmd = new SetStatemachineActionClassCommand(c, v, devicePos, smPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::addDeviceActionCommand(uint32_t devicePos, int smPos,
+    uint32_t actPos)
+{
+  auto *cmd = new AddDeviceActionCommand(c, devicePos, smPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device action pos %1/%2/%2 already exists, dropped").arg(
+            devicePos).arg(smPos).arg(actPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeDeviceActionCommand(uint32_t devicePos, int smPos,
+    uint32_t actPos)
+{
+  auto *cmd = new RemoveDeviceActionCommand(c, devicePos, smPos, actPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device action pos %1/%2/%2 doesn't exist, dropped").arg(
+            devicePos).arg(smPos).arg(actPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setDeviceActionType(const Enum<ActionType> &v,
+    uint32_t devicePos, int smPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionTypeCommand(c, v, devicePos, smPos, actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionName(const string &v, uint32_t devicePos,
+    int smPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionNameCommand(c, v, devicePos, smPos, actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionRepeatWillNotHarm(const bool &v,
+    uint32_t devicePos, int smPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionRepeatWillNotHarmCommand(c, v, devicePos,
+      smPos, actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionOp(const Enum<Operation> &v,
+    uint32_t devicePos, int smPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionOpCommand(c, v, devicePos, smPos, actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionCmd(const std::string &v, uint32_t devicePos,
+    int smPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionCmdCommand(c, v, devicePos, smPos, actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionDelayMs(const uint32_t &v, uint32_t devicePos,
+    int buttonPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionDelayMsCommand(c, v, devicePos, buttonPos,
+      actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionStateName(const Enum<StateMachineType> &v,
+    uint32_t devicePos, int buttonPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionStateNameCommand(c, v, devicePos, buttonPos,
+      actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionStateValue(const std::string &v,
+    uint32_t devicePos, int buttonPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionStateValueCommand(c, v, devicePos, buttonPos,
+      actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionMod(const Enum<Modifier> &v,
+    uint32_t devicePos, int smPos, uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionModCommand(c, v, devicePos, smPos, actPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setDeviceActionUnknownParam(
+    const data::item::UnknownElement &value, uint32_t devicePos, int smPos,
+    uint32_t actPos)
+{
+  auto *cmd = new SetDeviceActionUnknownParamCommand(c, value, devicePos,
+      smPos, actPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;

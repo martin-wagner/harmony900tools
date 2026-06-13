@@ -10,7 +10,7 @@ namespace document
 namespace data
 {
 
-SetActionCommand::SetActionCommand(ConfigData &c, const string &value, item::ButtonType t,
+SetButtonActionCommand::SetButtonActionCommand(ConfigData &c, const string &value, item::ButtonType t,
     uint32_t devicePos, int buttonPos, QUndoCommand *parent) :
     SetPropertyBaseCommand<string>(QObject::tr("set button action"),
         [&c, t, devicePos, buttonPos]() {
@@ -30,7 +30,7 @@ SetActionCommand::SetActionCommand(ConfigData &c, const string &value, item::But
 {
 }
 
-SetNameCommand::SetNameCommand(ConfigData &c, const string &value,
+SetButtonNameCommand::SetButtonNameCommand(ConfigData &c, const string &value,
     item::ButtonType t, uint32_t devicePos, int buttonPos, QUndoCommand *parent) :
     SetPropertyBaseCommand<string>(QObject::tr("set button name"),
         [&c, t, devicePos, buttonPos]() {
@@ -50,7 +50,7 @@ SetNameCommand::SetNameCommand(ConfigData &c, const string &value,
 {
 }
 
-SetFileCommand::SetFileCommand(ConfigData &c, const string &value,
+SetButtonFileCommand::SetButtonFileCommand(ConfigData &c, const string &value,
     item::ButtonType t, uint32_t devicePos, int buttonPos, QUndoCommand *parent) :
     SetPropertyBaseCommand<string>(QObject::tr("set button file"),
         [&c, t, devicePos, buttonPos]() {
@@ -70,7 +70,7 @@ SetFileCommand::SetFileCommand(ConfigData &c, const string &value,
 {
 }
 
-SetPositionCommand::SetPositionCommand(ConfigData &c, const int32_t &value,
+SetButtonPositionCommand::SetButtonPositionCommand(ConfigData &c, const int32_t &value,
     item::ButtonType t, uint32_t devicePos, int buttonPos, QUndoCommand *parent) :
     SetPropertyBaseCommand<int32_t>(QObject::tr("set button position"),
         [&c, t, devicePos, buttonPos]() {

@@ -6,6 +6,7 @@
 #include <string>
 
 #include "document/data/enum.h"
+#include "document/data/property.h"
 
 namespace document
 {
@@ -20,117 +21,36 @@ namespace item
 class DeviceAction
 {
   public:
-    DeviceAction(uint32_t id = 0, const std::string &cmd = "", bool canRepeat =
-        false);
+    PropertyEnum<ActionType> actionType{ActionType::None, Include::ALWAYS};
+    PropertyString name{"", Include::ALWAYS};
+    PropertyBool repeatWillNotHarm{false, Include::ALWAYS};
+    PropertyEnum<Operation> op{Operation::SendCommnad, Include::ALWAYS};
+    PropertyString cmd{"", Include::CHECK};
+    PropertyU32 delayMs{1000, Include::CHECK};
+    PropertyEnum<StateMachineType> stateName{StateMachineType::Unknown, Include::CHECK};
+    PropertyString stateValue{"", Include::CHECK};
+    PropertyEnum<Modifier> mod{Modifier::Press, Include::CHECK};
 
-    const Enum<ActionType>& getAction() const
+    const std::vector<UnknownElement> &getUnknownParams() const
     {
-      return action;
+      return unknownParams;
     }
 
-    void setAction(const Enum<ActionType> &action)
+    std::vector<UnknownElement> &getUnknownParams()
     {
-      this->action = action;
-    }
-
-    const Enum<Operation>& getOpCode() const
-    {
-      return op;
-    }
-
-    void setOpCode(const Enum<Operation> &op)
-    {
-      this->op = op;
-    }
-
-    const std::string& getCmd() const
-    {
-      return cmd;
-    }
-
-    void setCmd(const std::string &cmd)
-    {
-      this->cmd = cmd;
-    }
-
-    uint32_t getId() const
-    {
-      return id;
-    }
-
-    void setId(uint32_t id)
-    {
-      this->id = id;
-    }
-
-    const Enum<Modifier>& getMod() const
-    {
-      return mod;
-    }
-
-    void setMod(const Enum<Modifier> &mod)
-    {
-      this->mod = mod;
-    }
-
-    bool canRepeat() const
-    {
-      return repeatWillNotHarm;
-    }
-
-    void setRepeatWillNotHarm(bool repeatWillNotHarm)
-    {
-      this->repeatWillNotHarm = repeatWillNotHarm;
+      return unknownParams;
     }
 
   protected:
-    Enum<ActionType> action { ActionType::None };
-    Enum<Operation> op { Operation::SendCommnad };
-    uint32_t id;
-    std::string cmd;
-    Enum<Modifier> mod { Modifier::Press };
-
-    bool repeatWillNotHarm;
+    std::vector<UnknownElement> unknownParams;
 };
 
 /** one state switch action */
 class StateAction
 {
   public:
-    const std::string& getDeviceAction() const
-    {
-      return deviceAction;
-    }
-
-    void setDeviceAction(const std::string &deviceAction)
-    {
-      this->deviceAction = deviceAction;
-    }
-
-    uint32_t getDeviceId() const
-    {
-      return deviceId;
-    }
-
-    void setDeviceId(uint32_t deviceId)
-    {
-      this->deviceId = deviceId;
-    }
-
-    const Enum<StateMachineType>& getWhichStateMachine() const
-    {
-      return which;
-    }
-
-    void setStateMachine(const Enum<StateMachineType> &which)
-    {
-      this->which = which;
-    }
-
-  protected:
-    uint32_t deviceId;
-    Enum<StateMachineType> which { StateMachineType::Power };
-    std::string deviceAction;
+    PropertyEnum<StateMachineType> action{StateMachineType::Power, Include::ALWAYS};
+    PropertyString deviceAction{"", Include::ALWAYS};
 };
 
 }

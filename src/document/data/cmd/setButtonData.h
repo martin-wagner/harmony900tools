@@ -9,34 +9,34 @@ namespace document
 namespace data
 {
 
-class SetActionCommand: public SetPropertyBaseCommand<std::string>
+class SetButtonActionCommand: public SetPropertyBaseCommand<std::string>
 {
   public:
-    SetActionCommand(ConfigData &c, const std::string &value,
+    SetButtonActionCommand(ConfigData &c, const std::string &value,
         item::ButtonType t, uint32_t devicePos, int buttonPos,
         QUndoCommand *parent = nullptr);
 };
 
-class SetNameCommand: public SetPropertyBaseCommand<std::string>
+class SetButtonNameCommand: public SetPropertyBaseCommand<std::string>
 {
   public:
-    SetNameCommand(ConfigData &c, const std::string &value,
+    SetButtonNameCommand(ConfigData &c, const std::string &value,
         item::ButtonType t, uint32_t devicePos, int buttonPos,
         QUndoCommand *parent = nullptr);
 };
 
-class SetFileCommand: public SetPropertyBaseCommand<std::string>
+class SetButtonFileCommand: public SetPropertyBaseCommand<std::string>
 {
   public:
-    SetFileCommand(ConfigData &c, const std::string &value,
+    SetButtonFileCommand(ConfigData &c, const std::string &value,
         item::ButtonType t, uint32_t devicePos, int buttonPos,
         QUndoCommand *parent = nullptr);
 };
 
-class SetPositionCommand: public SetPropertyBaseCommand<int32_t>
+class SetButtonPositionCommand: public SetPropertyBaseCommand<int32_t>
 {
   public:
-    SetPositionCommand(ConfigData &c, const int32_t &value,
+    SetButtonPositionCommand(ConfigData &c, const int32_t &value,
         item::ButtonType t, uint32_t devicePos, int buttonPos,
         QUndoCommand *parent = nullptr);
 };

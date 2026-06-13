@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 #include <string>
-#include <map>
+#include <vector>
 #include <chrono>
 
 #include "document/data/enum.h"
@@ -26,65 +26,23 @@ namespace item
 class StateMachine
 {
   public:
-    const std::chrono::milliseconds& getDelay() const
+    const std::vector<DeviceAction>& getActions() const
     {
-      return delay;
+      return actions;
     }
 
-    void setDelay(const std::chrono::milliseconds &delay)
+    std::vector<DeviceAction>& getActions()
     {
-      this->delay = delay;
+      return actions;
     }
 
-    const std::map<std::string, DeviceAction>& getDiscreteActions() const
-    {
-      return discreteActions;
-    }
-
-    void setDiscreteActions(
-        const std::map<std::string, DeviceAction> &discreteActions)
-    {
-      this->discreteActions = discreteActions;
-    }
-
-    const Enum<StateMachineType>& getId() const
-    {
-      return id;
-    }
-
-    void setId(const Enum<StateMachineType> &id)
-    {
-      this->id = id;
-    }
-
-    const std::map<std::string, DeviceAction>& getRelativeActions() const
-    {
-      return relativeActions;
-    }
-
-    void setRelativeActions(
-        const std::map<std::string, DeviceAction> &relativeActions)
-    {
-      this->relativeActions = relativeActions;
-    }
-
-    const std::vector<UnknownElement>& getUnknownItems() const
-    {
-      return u;
-    }
-
-    void setUnknownItems(const std::vector<UnknownElement> &u)
-    {
-      this->u = u;
-    }
+    PropertyEnum<StateMachineType> smType{StateMachineType::Power, Include::ALWAYS};
+    PropertyU32 delayMs{100, Include::CHECK};
+    PropertyEnum<ActionClass> actionClass{ActionClass::DiscreteActions, Include::ALWAYS};
 
   protected:
-    Enum<StateMachineType> id { StateMachineType::Power };
-    std::chrono::milliseconds delay;
-    std::map<std::string, DeviceAction> discreteActions;
-    std::map<std::string, DeviceAction> relativeActions;
-
-    std::vector<UnknownElement> u;
+    //actual type defined by actionclass
+    std::vector<DeviceAction> actions;
 };
 
 }

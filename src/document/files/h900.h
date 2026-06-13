@@ -7,6 +7,7 @@
 
 #include "ui/logViewer.h"
 #include "document/data/items/unknown.h"
+#include "document/data/enum.h"
 
 namespace pugi
 {
@@ -55,6 +56,10 @@ class ConfigH900 : public QObject
     bool readDevice(pugi::xml_node &device);
     bool readButtons(pugi::xml_node &buttons, enum data::item::ButtonType t);
     bool readButton(pugi::xml_node &button, enum data::item::ButtonType t);
+    bool readStatemachines(pugi::xml_node &states);
+    bool readStatemachine(pugi::xml_node &state);
+    bool readDeviceActions(pugi::xml_node &state, data::ActionClass &ac);
+    bool readDeviceAction(pugi::xml_node &actionType);
     bool readActivities(pugi::xml_node &root);
     bool readActivitiy(pugi::xml_node &activitie);
     bool readProtocols(pugi::xml_node &root);
@@ -76,6 +81,11 @@ class ConfigH900 : public QObject
     bool writeProtocol(pugi::xml_node &protocol);
     bool writeButtons(pugi::xml_node &buttons, uint32_t deviceId, const std::vector<data::item::Button> &data);
     bool writeButton(pugi::xml_node &button, uint32_t deviceId, const data::item::Button &data);
+    bool writeStatemachines(pugi::xml_node &states, uint32_t deviceId, const std::vector<data::item::StateMachine> &data);
+    bool writeStatemachine(pugi::xml_node &state, uint32_t deviceId, const data::item::StateMachine &data);
+    bool writeDeviceActions(pugi::xml_node &actionClass, uint32_t deviceId, const std::vector<data::item::DeviceAction> &data);
+    bool writeDeviceAction(pugi::xml_node &action, uint32_t deviceId, const data::item::DeviceAction &data);
+
 
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
 
