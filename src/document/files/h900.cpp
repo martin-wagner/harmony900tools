@@ -412,10 +412,14 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
     }
   }
   auto states = device.child("States");
-  ret = readStatemachines(states);
+  ret &= readStatemachines(states);
+  auto numeric = device.child("Numeric");
+  if (numeric) {
+    ret &= readNumeric(numeric);
+  }
 
   if (!ret) {
-    return ret;
+    return false;
   }
 
   //todo weitere
@@ -702,7 +706,7 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
   }
   auto operation = sequence.child("Operation");
   auto opcode = operation.child("Name").text().as_string();
-  worker->setActionSequenceOpCommand(Enum<Operation>(opcode), devicePos, smPos,
+  worker->setActionSequenceOp(Enum<Operation>(opcode), devicePos, smPos,
       t, actPos, seqPos);
   for (pugi::xml_node prop : operation.children("Parameter")) {
     auto name = string(prop.attribute("name").as_string());
@@ -713,32 +717,32 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
         break;
       case "Command"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceCmdCommand(val, devicePos, smPos, t, actPos,
+        worker->setActionSequenceCmd(val, devicePos, smPos, t, actPos,
             seqPos);
         break;
       }
       case "Modifier"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceModCommand(Enum<Modifier>(val), devicePos,
+        worker->setActionSequenceMod(Enum<Modifier>(val), devicePos,
             smPos, t, actPos, seqPos);
         break;
       }
       case "DelayValue"_hash: {
         auto val = prop.text().as_uint();
-        worker->setActionSequenceDelayMsCommand(val, devicePos, smPos, t,
+        worker->setActionSequenceDelayMs(val, devicePos, smPos, t,
             actPos, seqPos);
         break;
       }
       case "State"_hash:
       case "StateName"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceStateNameCommand(Enum<StateMachineType>(val),
+        worker->setActionSequenceStateName(Enum<StateMachineType>(val),
             devicePos, smPos, t, actPos, seqPos);
         break;
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceStateValueCommand(val, devicePos, smPos, t,
+        worker->setActionSequenceStateValue(val, devicePos, smPos, t,
             actPos, seqPos);
         break;
       }
@@ -754,6 +758,43 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
     }
   }
   return true;
+}
+
+bool ConfigH900::readNumeric(pugi::xml_node &numeric)
+{
+  auto devicePos = c->getDevices().size() - 1;
+
+  auto ret = worker->addNumpadCommand(devicePos);
+  if (!ret) {
+    return false;
+  }
+  auto digits = numeric.child("FixedDigits");
+  if (digits) {
+    worker->setNumpadFixedDigits(digits.text().as_uint(), devicePos);
+  }
+
+  ret = true;
+  auto firstDigit = numeric.child("FirstDigit");
+  if (firstDigit) {
+    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::First);
+    //todo read data
+  }
+  auto middleDigit = numeric.child("MiddleDigit");
+  if (middleDigit) {
+    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::Middle);
+    //todo read data
+  }
+  auto lastDigit = numeric.child("LastDigit");
+  if (lastDigit) {
+    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::Last);
+    //todo read data
+  }
+  auto finish = numeric.child("Finish");
+  if (finish) {
+    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::Finish);
+    //todo read data
+  }
+  return ret;
 }
 
 bool ConfigH900::readActivities(pugi::xml_node &root)
@@ -952,6 +993,10 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
 
   auto states = device.append_child("States");
   ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
+  if (data.getNumpad() != nullopt) {
+    auto numeric = device.append_child("Numeric");
+    ret &= writeNumeric(numeric, data.getNumpad().value());
+  }
 
   //todo weitere...
 
@@ -1118,6 +1163,30 @@ bool ConfigH900::writeDeviceAction(pugi::xml_node &actionType,
     for (const auto &prop : s.getUnknownParams()) {
       writeUnknownElement(operation, prop);
     }
+  }
+  return true;
+}
+
+bool ConfigH900::writeNumeric(pugi::xml_node &numeric, const item::Numpad &data)
+{
+  if (data.fixedDigits.isIncluded() == Include::ALWAYS) {
+    numeric.append_child("FixedDigits").text().set(data.fixedDigits.get());
+  }
+  if (data.finish != nullopt) {
+    numeric.append_child("Finish");
+    //todo content
+  }
+  if (data.first != nullopt) {
+    numeric.append_child("FirstDigit");
+    //todo content
+  }
+  if (data.middle != nullopt) {
+    numeric.append_child("MiddleDigit");
+    //todo content
+  }
+  if (data.last != nullopt) {
+    numeric.append_child("LastDigit");
+    //todo content
   }
   return true;
 }

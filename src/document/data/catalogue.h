@@ -106,15 +106,19 @@ class CmdCatalogue : public QObject
     //state machine action list items
     bool addActionSequenceCommand(uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos); //only discrete actions can add/remove
     bool removeActionSequenceCommand(uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, uint32_t seqPos); //only discrete actions can add/remove
-    bool setActionSequenceOpCommand(const Enum<Operation> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setActionSequenceCmdCommand(const std::string &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setActionSequenceDelayMsCommand(uint32_t value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setActionSequenceStateNameCommand(const Enum<StateMachineType> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setActionSequenceStateValueCommand(const std::string &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setActionSequenceModCommand(const Enum<Modifier> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setActionSequenceOp(const Enum<Operation> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setActionSequenceCmd(const std::string &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setActionSequenceDelayMs(uint32_t value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setActionSequenceStateName(const Enum<StateMachineType> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setActionSequenceStateValue(const std::string &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setActionSequenceMod(const Enum<Modifier> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
     bool setActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, int smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-
-
+    //numpad
+    bool addNumpadCommand(uint32_t devicePos);
+    bool removeNumpadCommand(uint32_t devicePos);
+    bool addNumpadDigitsCommand(uint32_t devicePos, item::DigitSection s);
+    bool removeNumpadDigitsCommand(uint32_t devicePos, item::DigitSection s);
+    bool setNumpadFixedDigits(uint32_t value, uint32_t devicePos);
 
   protected:
     void connectCommand(BaseCommand *cmd);

@@ -22,6 +22,9 @@
 #include "cmd/setButtonData.h"
 #include "cmd/setStatemachineData.h"
 #include "cmd/setUserName.h"
+#include "cmd/addNumpad.h"
+#include "cmd/removeNumpad.h"
+#include "cmd/setNumpadData.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -471,8 +474,8 @@ bool CmdCatalogue::addStatemachineCommand(uint32_t devicePos, int smPos)
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: statemachine pos %1/%2 already exists, dropped").arg(
-            devicePos).arg(smPos), ContentType::PlainText);
+        tr("modify: statemachine pos %1/%2 failed, dropped").arg(devicePos).arg(
+            smPos), ContentType::PlainText);
     delete cmd;
   }
   return true;
@@ -522,8 +525,8 @@ bool CmdCatalogue::addStateCommand(uint32_t devicePos, uint32_t smPos,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device state pos %1/%2/%3 already exists, dropped").arg(
-            devicePos).arg(smPos).arg(actPos), ContentType::PlainText);
+        tr("modify: device state pos %1/%2/%3 failed, dropped").arg(devicePos).arg(
+            smPos).arg(actPos), ContentType::PlainText);
     delete cmd;
   }
   return true;
@@ -539,8 +542,8 @@ bool document::data::CmdCatalogue::addActionCommand(uint32_t devicePos,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device action pos %1/%2/%3 already exists, dropped").arg(
-            devicePos).arg(smPos).arg((int) t), ContentType::PlainText);
+        tr("modify: device action pos %1/%2/%3 failed, dropped").arg(devicePos).arg(
+            smPos).arg((int) t), ContentType::PlainText);
     delete cmd;
   }
   return true;
@@ -610,7 +613,7 @@ bool CmdCatalogue::addActionSequenceCommand(uint32_t devicePos, uint32_t smPos,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device act-seq pos %1/%2/%3/%4 already exists, "
+        tr("modify: device act-seq pos %1/%2/%3/%4 failed, "
             "dropped").arg(devicePos).arg(smPos).arg(actPos).arg(seqPos),
         ContentType::PlainText);
     delete cmd;
@@ -638,7 +641,7 @@ bool CmdCatalogue::removeActionSequenceCommand(uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setActionSequenceOpCommand(const Enum<Operation> &value,
+bool CmdCatalogue::setActionSequenceOp(const Enum<Operation> &value,
     uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
     uint32_t actPos, uint32_t seqPos)
 {
@@ -649,9 +652,9 @@ bool CmdCatalogue::setActionSequenceOpCommand(const Enum<Operation> &value,
   return true;
 }
 
-bool CmdCatalogue::setActionSequenceCmdCommand(const string &value,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
-    uint32_t actPos, uint32_t seqPos)
+bool CmdCatalogue::setActionSequenceCmd(const string &value, uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos,
+    uint32_t seqPos)
 {
   auto *cmd = new SetActionCmdCommand(c, value, devicePos, smPos, t, actPos,
       seqPos);
@@ -660,9 +663,9 @@ bool CmdCatalogue::setActionSequenceCmdCommand(const string &value,
   return true;
 }
 
-bool CmdCatalogue::setActionSequenceDelayMsCommand(uint32_t value,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
-    uint32_t actPos, uint32_t seqPos)
+bool CmdCatalogue::setActionSequenceDelayMs(uint32_t value, uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos,
+    uint32_t seqPos)
 {
   auto *cmd = new SetActionDelayMsCommand(c, value, devicePos, smPos, t, actPos,
       seqPos);
@@ -671,7 +674,7 @@ bool CmdCatalogue::setActionSequenceDelayMsCommand(uint32_t value,
   return true;
 }
 
-bool CmdCatalogue::setActionSequenceStateNameCommand(
+bool CmdCatalogue::setActionSequenceStateName(
     const Enum<StateMachineType> &value, uint32_t devicePos, uint32_t smPos,
     item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
 {
@@ -682,7 +685,7 @@ bool CmdCatalogue::setActionSequenceStateNameCommand(
   return true;
 }
 
-bool CmdCatalogue::setActionSequenceStateValueCommand(const string &value,
+bool CmdCatalogue::setActionSequenceStateValue(const string &value,
     uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
     uint32_t actPos, uint32_t seqPos)
 {
@@ -693,7 +696,7 @@ bool CmdCatalogue::setActionSequenceStateValueCommand(const string &value,
   return true;
 }
 
-bool CmdCatalogue::setActionSequenceModCommand(const Enum<Modifier> &value,
+bool CmdCatalogue::setActionSequenceMod(const Enum<Modifier> &value,
     uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
     uint32_t actPos, uint32_t seqPos)
 {
@@ -710,6 +713,79 @@ bool CmdCatalogue::setActionUnknownParam(
 {
   auto *cmd = new SetDeviceActionUnknownParamCommand(c, value, devicePos, smPos,
       actPos, t, seqPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::addNumpadCommand(uint32_t devicePos)
+{
+  auto *cmd = new AddNumpadCommand(c, devicePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning, tr("modify: device add numpad pos %1 "
+        "failed").arg(devicePos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeNumpadCommand(uint32_t devicePos)
+{
+  auto *cmd = new RemoveNumpadCommand(c, devicePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: removing numpad pos %1 failed, "
+            "dropped").arg(devicePos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::addNumpadDigitsCommand(uint32_t devicePos,
+    item::DigitSection s)
+{
+  auto *cmd = new AddDigitsCommand(c, devicePos, s);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device add numpad digits pos %1 failed").arg(devicePos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeNumpadDigitsCommand(uint32_t devicePos,
+    item::DigitSection s)
+{
+  auto *cmd = new RemoveDigitsCommand(c, devicePos, s);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: removing numpad digits pos %1 failed, dropped").arg(
+            devicePos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setNumpadFixedDigits(uint32_t value, uint32_t devicePos)
+{
+  auto *cmd = new SetNumpadFixedDigitsCommand(c, value, devicePos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;

@@ -67,7 +67,7 @@ class ConfigH900 : public QObject
     bool readRelativeActionSequences(pugi::xml_node &action, data::item::StateTransitionAction t);
     bool readRelativeActionSequence(pugi::xml_node &sequence, data::item::StateTransitionAction t);
     bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, uint32_t smPos, uint32_t actPos, data::item::StateTransitionAction t, uint32_t seqPos);
-
+    bool readNumeric(pugi::xml_node &numeric);
 
 
 
@@ -97,7 +97,7 @@ class ConfigH900 : public QObject
     bool writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId, const data::item::DiscreteActions &data);
     bool writeRelativeActions(pugi::xml_node &action, uint32_t deviceId, const data::item::RelativeActions &data);
     bool writeDeviceAction(pugi::xml_node &actionType, uint32_t deviceId, const data::item::DeviceAction &data, data::item::StateTransitionType t);
-
+    bool writeNumeric(pugi::xml_node &numeric, const data::item::Numpad &data);
 
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
 

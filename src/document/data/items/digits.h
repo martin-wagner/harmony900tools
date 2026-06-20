@@ -7,6 +7,7 @@
 #include <array>
 
 #include "action.h"
+#include "document/data/property.h"
 
 namespace document
 {
@@ -19,36 +20,25 @@ namespace item
  *
  * index 0 ... 9 matches to numpad number 0 ... 9
  */
-class Digits
-{
+using Digits = std::array<DeviceAction, 10>;
+
+enum class DigitSection {
+  First,
+  Middle,
+  Last,
+  Finish
+};
+
+/** class for storing how a number is sent by the remote. for more see the docs */
+class Numpad {
   public:
-    Digits()
-    {
-    }
-    Digits(const std::array<DeviceAction, 10> &digits)
-    {
-      this->digits = digits;
-    }
+    PropertyU32 fixedDigits{0, Include::CHECK};
 
-    const std::array<DeviceAction, 10>& getDigits() const
-    {
-      return digits;
-    }
-
-    void setDigits(const std::array<DeviceAction, 10> &digits)
-    {
-      this->digits = digits;
-    }
-
-    void setDigit(const DeviceAction &action, int index)
-    {
-      if (index < digits.size()) {
-        this->digits = digits;
-      }
-    }
-
-  protected:
-    std::array<DeviceAction, 10> digits;
+    std::optional<Digits> first;
+    std::optional<Digits> middle;
+    std::optional<Digits> last;
+    std::optional<DeviceAction> finish;
+    //todo do we have a start action?
 };
 
 }

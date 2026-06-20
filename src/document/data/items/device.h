@@ -69,6 +69,16 @@ class Device
       return stateMachines;
     }
 
+    const std::optional<Numpad>& getNumpad() const
+    {
+      return numpad;
+    }
+
+    std::optional<Numpad>& getNumpad()
+    {
+      return numpad;
+    }
+
     const Commands& getIrCommands() const
     {
       return irCommands;
@@ -126,14 +136,7 @@ class Device
     std::vector<Button> softButtons;
     std::vector<Button> hardButtons;
     std::vector<StateMachine> stateMachines;
-    struct Numpad {
-      int fixedDigits = 0;
-      std::optional<Digits> first;
-      std::optional<Digits> middle;
-      std::optional<Digits> last;
-      std::optional<DeviceAction> finish;
-      std::vector<UnknownElement> u; //todo do we have a start action?
-    } numpad;
+    std::optional<Numpad> numpad;
     Commands irCommands;
 
     uint32_t id;
