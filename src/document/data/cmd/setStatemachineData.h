@@ -24,15 +24,5 @@ class SetStatemachineDelayCommand: public SetPropertyBaseCommand<uint32_t>
         uint32_t devicePos, int smPos, QUndoCommand *parent = nullptr);
 };
 
-
-class SetStatemachineActionClassCommand: public SetPropertyBaseCommand<Enum<ActionClass>>
-{
-  public:
-    SetStatemachineActionClassCommand(ConfigData &c, const Enum<ActionClass> &value,
-        uint32_t devicePos, uint32_t smPos,
-        QUndoCommand *parent = nullptr);
-};
-
-
 }
 }

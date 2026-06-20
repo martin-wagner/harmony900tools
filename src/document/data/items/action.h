@@ -15,16 +15,10 @@ namespace data
 namespace item
 {
 
-/** one device action (state machine, activity change, number buttons)
- *
- * todo -- geht immer nur eine operation?? */
-class DeviceAction
-{
+/** a action can require multiple "steps" to complete */
+class SequenceItem {
   public:
-    PropertyEnum<ActionType> actionType{ActionType::None, Include::ALWAYS};
-    PropertyString name{"", Include::ALWAYS};
-    PropertyBool repeatWillNotHarm{false, Include::ALWAYS};
-    PropertyEnum<Operation> op{Operation::SendCommnad, Include::ALWAYS};
+    PropertyEnum<Operation> opcode{Operation::SendCommand, Include::ALWAYS};
     PropertyString cmd{"", Include::CHECK};
     PropertyU32 delayMs{1000, Include::CHECK};
     PropertyEnum<StateMachineType> stateName{StateMachineType::Unknown, Include::CHECK};
@@ -45,12 +39,14 @@ class DeviceAction
     std::vector<UnknownElement> unknownParams;
 };
 
-/** one state switch action */
-class StateAction
+/** one device action (state machine, activity change, number buttons) */
+class DeviceAction
 {
   public:
-    PropertyEnum<StateMachineType> action{StateMachineType::Power, Include::ALWAYS};
-    PropertyString deviceAction{"", Include::ALWAYS};
+    PropertyEnum<ActionType> actionType{ActionType::None, Include::ALWAYS};
+    PropertyBool repeatWillNotHarm{false, Include::ALWAYS};
+
+    std::vector<SequenceItem> sequence;
 };
 
 }

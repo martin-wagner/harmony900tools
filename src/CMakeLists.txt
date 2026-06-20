@@ -39,18 +39,21 @@ set(sources
   document/data/data.cpp
   document/data/enum.cpp
   document/data/cmd/base.cpp
+  document/data/cmd/addActionSequence.cpp
   document/data/cmd/addButton.cpp
   document/data/cmd/addDevice.cpp
-  document/data/cmd/addDeviceAction.cpp
+  document/data/cmd/addState.cpp
   document/data/cmd/addStatemachine.cpp
   document/data/cmd/setId.cpp
+  document/data/cmd/removeActionSequence.cpp
   document/data/cmd/removeButton.cpp
   document/data/cmd/removeDevice.cpp
-  document/data/cmd/removeDeviceAction.cpp
+  document/data/cmd/removeState.cpp
   document/data/cmd/removeStatemachine.cpp
   document/data/cmd/setButtonData.cpp
+  document/data/cmd/setActionData.cpp
+  document/data/cmd/setActionSequenceData.cpp
   document/data/cmd/setControllerMetadata.cpp
-  document/data/cmd/setDeviceActionData.cpp
   document/data/cmd/setDeviceData.cpp
   document/data/cmd/setStatemachineData.cpp
   document/data/cmd/setUnknownProperty.cpp

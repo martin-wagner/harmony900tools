@@ -2,6 +2,7 @@
 
 #include "lib/timestamp.h"
 #include "setUnknownProperty.h"
+#include "setActionData.h"
 
 using namespace std;
 
@@ -41,12 +42,13 @@ SetDeviceUnknownPropertyCommand::SetDeviceUnknownPropertyCommand(ConfigData &c,
 }
 
 SetDeviceActionUnknownParamCommand::SetDeviceActionUnknownParamCommand(
-    ConfigData &c, const UnknownElement &value, uint32_t devicePos, uint32_t smPos,
-    uint32_t actPos, QUndoCommand *parent) :
-    SetUnknownPropertyCommand([&c, devicePos, smPos, actPos]() -> std::vector<UnknownElement>& {
-      return c.getDevices()[devicePos].getStateMachines()[smPos].getActions()[actPos].getUnknownParams();
-    }, [&c, devicePos, smPos, actPos](const UnknownElement &e) {
-      c.getDevices()[devicePos].getStateMachines()[smPos].getActions()[actPos].getUnknownParams().push_back(e);
+    ConfigData &c, const UnknownElement &value, uint32_t devicePos,
+    uint32_t smPos, uint32_t actPos, item::StateTransitionAction t,
+    uint32_t seqPos, QUndoCommand *parent) :
+    SetUnknownPropertyCommand([&c, devicePos, smPos, actPos, t, seqPos]() -> std::vector<UnknownElement>& {
+      return getActionRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].getUnknownParams();
+    }, [&c, devicePos, smPos, actPos, t, seqPos](const UnknownElement &e) {
+      getActionRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].getUnknownParams().push_back(e);
     }, value, parent)
 {
 }

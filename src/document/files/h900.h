@@ -58,8 +58,19 @@ class ConfigH900 : public QObject
     bool readButton(pugi::xml_node &button, enum data::item::ButtonType t);
     bool readStatemachines(pugi::xml_node &states);
     bool readStatemachine(pugi::xml_node &state);
-    bool readDeviceActions(pugi::xml_node &state, data::ActionClass &ac);
-    bool readDeviceAction(pugi::xml_node &actionType);
+    bool readDiscreteActions(pugi::xml_node &actions);
+    bool readDiscreteAction(pugi::xml_node &action);
+    bool readDiscreteActionSequences(pugi::xml_node &action);
+    bool readDiscreteActionSequence(pugi::xml_node &sequence);
+    bool readRelativeActions(pugi::xml_node &state);
+    bool readRelativeAction(pugi::xml_node &action);
+    bool readRelativeActionSequences(pugi::xml_node &action, data::item::StateTransitionAction t);
+    bool readRelativeActionSequence(pugi::xml_node &sequence, data::item::StateTransitionAction t);
+    bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, uint32_t smPos, uint32_t actPos, data::item::StateTransitionAction t, uint32_t seqPos);
+
+
+
+
     bool readActivities(pugi::xml_node &root);
     bool readActivitiy(pugi::xml_node &activitie);
     bool readProtocols(pugi::xml_node &root);
@@ -83,8 +94,9 @@ class ConfigH900 : public QObject
     bool writeButton(pugi::xml_node &button, uint32_t deviceId, const data::item::Button &data);
     bool writeStatemachines(pugi::xml_node &states, uint32_t deviceId, const std::vector<data::item::StateMachine> &data);
     bool writeStatemachine(pugi::xml_node &state, uint32_t deviceId, const data::item::StateMachine &data);
-    bool writeDeviceActions(pugi::xml_node &actionClass, uint32_t deviceId, const std::vector<data::item::DeviceAction> &data);
-    bool writeDeviceAction(pugi::xml_node &action, uint32_t deviceId, const data::item::DeviceAction &data);
+    bool writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId, const data::item::DiscreteActions &data);
+    bool writeRelativeActions(pugi::xml_node &action, uint32_t deviceId, const data::item::RelativeActions &data);
+    bool writeDeviceAction(pugi::xml_node &actionType, uint32_t deviceId, const data::item::DeviceAction &data, data::item::StateTransitionType t);
 
 
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);

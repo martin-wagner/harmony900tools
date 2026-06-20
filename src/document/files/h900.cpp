@@ -402,11 +402,11 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
     auto h = lib::hash_fnv1a(name.data(), name.size());
     switch (h) {
       case "Misc"_hash: {
-        ret &= readButtons(prop, data::item::ButtonType::Soft);
+        ret &= readButtons(prop, item::ButtonType::Soft);
         break;
       }
       case "HardButtons"_hash: {
-        ret &= readButtons(prop, data::item::ButtonType::Hard);
+        ret &= readButtons(prop, item::ButtonType::Hard);
         break;
       }
     }
@@ -423,8 +423,7 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
   return true;
 }
 
-bool ConfigH900::readButtons(pugi::xml_node &buttons,
-    enum data::item::ButtonType t)
+bool ConfigH900::readButtons(pugi::xml_node &buttons, enum item::ButtonType t)
 {
   auto ret = true;
   for (pugi::xml_node prop : buttons.children("Button")) {
@@ -433,8 +432,7 @@ bool ConfigH900::readButtons(pugi::xml_node &buttons,
   return ret;
 }
 
-bool ConfigH900::readButton(pugi::xml_node &button,
-    enum data::item::ButtonType t)
+bool ConfigH900::readButton(pugi::xml_node &button, enum item::ButtonType t)
 {
   int buttonPos;
 
@@ -444,7 +442,7 @@ bool ConfigH900::readButton(pugi::xml_node &button,
   if (!ret) {
     return false;
   }
-  if (t == data::item::ButtonType::Hard) {
+  if (t == item::ButtonType::Hard) {
     buttonPos = c->getDevices()[devicePos].getHardButtons().size() - 1;
   } else {
     buttonPos = c->getDevices()[devicePos].getSoftButtons().size() - 1;
@@ -452,7 +450,7 @@ bool ConfigH900::readButton(pugi::xml_node &button,
 
   auto actionId = string(
       button.child("ActionId").text().as_string("1_unknown_Hold"));
-  auto action = data::item::Button::getAction(actionId);
+  auto action = item::Button::getAction(actionId);
   worker->setButtonAction(action, t, devicePos, buttonPos);
 
   //hard/soft are different
@@ -490,8 +488,6 @@ bool ConfigH900::readStatemachines(pugi::xml_node &states)
 
 bool ConfigH900::readStatemachine(pugi::xml_node &state)
 {
-  data::ActionClass ac = data::ActionClass::Unknown;
-
   auto devicePos = c->getDevices().size() - 1;
 
   auto ret = worker->addStatemachineCommand(devicePos, -1); //append
@@ -502,21 +498,11 @@ bool ConfigH900::readStatemachine(pugi::xml_node &state)
 
   auto id = state.child("Id").text().as_string();
   worker->setStatemachineType(Enum<StateMachineType>(id), devicePos, smPos);
-  //value -- don't store redundant data, is name of each action. we could check consistency...
   auto delay = state.child("Delay");
   if (delay) {
     worker->setStatemachineDelay(delay.text().as_uint(0), devicePos, smPos);
   }
 
-  ret = readDeviceActions(state, ac);
-  worker->setStatemachineActionClass(data::Enum<data::ActionClass>(ac),
-      devicePos, smPos);
-  return ret;
-}
-
-bool ConfigH900::readDeviceActions(pugi::xml_node &state, data::ActionClass &ac)
-{
-  auto ret = true;
   auto discreteActions = state.child("DiscreteActions");
   auto relativeActions = state.child("RelativeActions");
   if (!discreteActions.empty() && !relativeActions.empty()) {
@@ -527,49 +513,197 @@ bool ConfigH900::readDeviceActions(pugi::xml_node &state, data::ActionClass &ac)
         ContentType::PlainText);
     return false;
   }
+  ret = readDiscreteActions(discreteActions);
+  ret &= readRelativeActions(state);
+  return ret;
+}
 
-  //only one contains data
-  for (pugi::xml_node prop : discreteActions.children()) {
-    ac = data::ActionClass::DiscreteActions;
-    ret &= readDeviceAction(prop);
+bool ConfigH900::readDiscreteActions(pugi::xml_node &actions)
+{
+  auto ret = true;
+
+  if (actions.children().empty()) {
+    return true;
   }
-  for (pugi::xml_node prop : relativeActions.children()) {
-    ac = data::ActionClass::RelativeActions;
-    ret &= readDeviceAction(prop);
+
+  for (pugi::xml_node prop : actions.children()) {
+    ret &= readDiscreteAction(prop);
   }
   return ret;
 }
 
-bool ConfigH900::readDeviceAction(pugi::xml_node &actionType)
+bool ConfigH900::readDiscreteAction(pugi::xml_node &action)
 {
   auto devicePos = c->getDevices().size() - 1;
   auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
 
-  auto ret = worker->addDeviceActionCommand(devicePos, smPos, -1); //append
+  auto name = QString(action.child("Name").text().as_string());
+  if (name.isEmpty()) {
+    emit writeLog(LogLevel::Error,
+        tr("xml: state name is empty in %1").arg(
+            QString::fromStdString(c->getDevices().back().label.get())),
+        ContentType::PlainText);
+    return false;
+  }
+
+  auto ret = worker->addStateCommand(devicePos, smPos,
+      item::StateTransitionType::Discrete, name, -1); //append
   if (!ret) {
     return false;
   }
   auto actPos =
-      c->getDevices()[devicePos].getStateMachines()[smPos].getActions().size()
+      c->getDevices()[devicePos].getStateMachines()[smPos].discrete.states.size()
           - 1;
-  auto at = actionType.name();
-  worker->setDeviceActionType(data::Enum<data::ActionType>(at), devicePos,
-      smPos, actPos);
-  auto name = actionType.child("Name").text().as_string();
-  worker->setDeviceActionName(name, devicePos, smPos, actPos);
-  auto action = actionType.child("Action");
-  auto target = action.child("Target").text().as_string();
+  auto type = Enum<ActionType>(action.name());
+  worker->setActionType(type, devicePos, smPos,
+      item::StateTransitionAction::Discrete_Enter, actPos);
+  return readDiscreteActionSequences(action);
+}
+
+bool ConfigH900::readDiscreteActionSequences(pugi::xml_node &action)
+{
+  auto ret = true;
+
+  for (pugi::xml_node prop : action.children("Action")) {
+    ret &= readDiscreteActionSequence(prop);
+  }
+  return ret;
+}
+
+bool ConfigH900::readDiscreteActionSequence(pugi::xml_node &sequence)
+{
+  auto devicePos = c->getDevices().size() - 1;
+  auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
+  auto actPos =
+      c->getDevices()[devicePos].getStateMachines()[smPos].discrete.states.size()
+          - 1;
+  worker->addActionSequenceCommand(devicePos, smPos, actPos,
+      item::StateTransitionAction::Discrete_Enter, -1); //append
+  auto seqPos =
+      c->getDevices()[devicePos].getStateMachines()[smPos].discrete.enterStateAction[actPos].sequence.size()
+          - 1;
+  return readActionSequenceData(sequence, devicePos, smPos, actPos,
+      item::StateTransitionAction::Discrete_Enter, seqPos);
+}
+
+bool ConfigH900::readRelativeActions(pugi::xml_node &state)
+{
+  auto ret = true;
+
+  if (state.child("RelativeActions").children().empty()) {
+    return true;
+  }
+
+  auto devicePos = c->getDevices().size() - 1;
+  auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
+
+  //relative actions consists of state names and transition actions as separate items.
+  //state names
+  for (pugi::xml_node prop : state.children("Value")) {
+    auto name = prop.text().as_string();
+    ret &= worker->addStateCommand(devicePos, smPos,
+        item::StateTransitionType::Relative, name, -1); //append
+  }
+  if (!ret) {
+    return false;
+  }
+
+  //transition actions
+  for (pugi::xml_node prop : state.child("RelativeActions").children()) {
+    ret &= readRelativeAction(prop);
+  }
+  return ret;
+}
+
+bool ConfigH900::readRelativeAction(pugi::xml_node &action)
+{
+  item::StateTransitionAction add;
+  auto devicePos = c->getDevices().size() - 1;
+  auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
+
+  auto type = Enum<ActionType>(action.name());
+  switch (type.getValue()) {
+    case ActionType::NextAction:
+      add = item::StateTransitionAction::Relative_Next;
+      break;
+    case ActionType::PrevAction:
+      add = item::StateTransitionAction::Relative_Prev;
+      break;
+    case ActionType::ResetAction:
+      add = item::StateTransitionAction::Relative_Reset;
+      break;
+    default:
+      emit writeLog(LogLevel::Error,
+          tr("xml: action type %1 unknown").arg(type.getQString()),
+          ContentType::PlainText);
+      return false;
+  }
+  auto ret = worker->addActionCommand(devicePos, smPos, add);
+  if (!ret) {
+    return false;
+  }
+  worker->setActionType(type, devicePos, smPos, add, 0);
+  return readRelativeActionSequences(action, add);
+}
+
+bool ConfigH900::readRelativeActionSequences(pugi::xml_node &action,
+    item::StateTransitionAction t)
+{
+  auto ret = true;
+
+  for (pugi::xml_node prop : action.children("Action")) {
+    ret &= readRelativeActionSequence(prop, t);
+  }
+  return ret;
+}
+
+bool ConfigH900::readRelativeActionSequence(pugi::xml_node &sequence,
+    item::StateTransitionAction t)
+{
+  uint32_t seqPos;
+
+  auto devicePos = c->getDevices().size() - 1;
+  auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
+
+  worker->addActionSequenceCommand(devicePos, smPos, 0, t, -1); //append
+  switch (t) {
+    case item::StateTransitionAction::Relative_Reset:
+      seqPos =
+          c->getDevices()[devicePos].getStateMachines()[smPos].relative.resetAction->sequence.size()
+              - 1;
+      break;
+    case item::StateTransitionAction::Relative_Next:
+      seqPos =
+          c->getDevices()[devicePos].getStateMachines()[smPos].relative.nextStateAction->sequence.size()
+              - 1;
+      break;
+    case item::StateTransitionAction::Relative_Prev:
+      seqPos =
+          c->getDevices()[devicePos].getStateMachines()[smPos].relative.prevStateAction->sequence.size()
+              - 1;
+      break;
+    default:
+      return false;
+  }
+  return readActionSequenceData(sequence, devicePos, smPos, 0, t, seqPos);
+}
+
+bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
+    uint32_t devicePos, uint32_t smPos, uint32_t actPos,
+    item::StateTransitionAction t, uint32_t seqPos)
+{
+  auto target = sequence.child("Target").text().as_string();
   if (string(target) != "Device") {
     emit writeLog(LogLevel::Warning,
         tr("xml: Action Target != Device in %1. This is not supported").arg(
             QString::fromStdString(c->getDevices().back().label.get())),
         ContentType::PlainText);
-    //ignore
+    return false;
   }
-  auto operation = action.child("Operation");
+  auto operation = sequence.child("Operation");
   auto opcode = operation.child("Name").text().as_string();
-  worker->setDeviceActionOp(data::Enum<data::Operation>(opcode), devicePos,
-      smPos, actPos);
+  worker->setActionSequenceOpCommand(Enum<Operation>(opcode), devicePos, smPos,
+      t, actPos, seqPos);
   for (pugi::xml_node prop : operation.children("Parameter")) {
     auto name = string(prop.attribute("name").as_string());
     auto h = lib::hash_fnv1a(name.data(), name.size());
@@ -579,31 +713,33 @@ bool ConfigH900::readDeviceAction(pugi::xml_node &actionType)
         break;
       case "Command"_hash: {
         auto val = prop.text().as_string();
-        worker->setDeviceActionCmd(val, devicePos, smPos, actPos);
+        worker->setActionSequenceCmdCommand(val, devicePos, smPos, t, actPos,
+            seqPos);
         break;
       }
       case "Modifier"_hash: {
         auto val = prop.text().as_string();
-        worker->setDeviceActionMod(data::Enum<data::Modifier>(val), devicePos,
-            smPos, actPos);
+        worker->setActionSequenceModCommand(Enum<Modifier>(val), devicePos,
+            smPos, t, actPos, seqPos);
         break;
       }
       case "DelayValue"_hash: {
         auto val = prop.text().as_uint();
-        worker->setDeviceActionDelayMs(val, devicePos, smPos, actPos);
+        worker->setActionSequenceDelayMsCommand(val, devicePos, smPos, t,
+            actPos, seqPos);
         break;
       }
       case "State"_hash:
       case "StateName"_hash: {
-        //state without value -> StateName. wtf???
         auto val = prop.text().as_string();
-        worker->setDeviceActionStateName(
-            data::Enum<data::StateMachineType>(val), devicePos, smPos, actPos);
+        worker->setActionSequenceStateNameCommand(Enum<StateMachineType>(val),
+            devicePos, smPos, t, actPos, seqPos);
         break;
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setDeviceActionStateValue(val, devicePos, smPos, actPos);
+        worker->setActionSequenceStateValueCommand(val, devicePos, smPos, t,
+            actPos, seqPos);
         break;
       }
       default: {
@@ -611,7 +747,8 @@ bool ConfigH900::readDeviceAction(pugi::xml_node &actionType)
         emit writeLog(LogLevel::Debug,
             tr("import device action: unknown property (value = %1)").arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
-        worker->setDeviceActionUnknownParam(unknown, devicePos, smPos, actPos);
+        worker->setActionUnknownParam(unknown, devicePos, smPos, t, actPos,
+            seqPos);
         break;
       }
     }
@@ -639,12 +776,11 @@ bool ConfigH900::readProtocol(pugi::xml_node &protocol)
   return true;
 }
 
-data::item::UnknownElement ConfigH900::toUnknownElement(
-    const pugi::xml_node &node)
+item::UnknownElement ConfigH900::toUnknownElement(const pugi::xml_node &node)
 {
   string text;
   map<string, string> attrs;
-  vector<data::item::UnknownElement> children;
+  vector<item::UnknownElement> children;
 
   for (pugi::xml_attribute attr : node.attributes()) {
     attrs.emplace(attr.name(), attr.as_string());
@@ -663,7 +799,7 @@ data::item::UnknownElement ConfigH900::toUnknownElement(
     text = node.child_value();
   }
 
-  return data::item::UnknownElement(node.name() ? node.name() : "", attrs, text,
+  return item::UnknownElement(node.name() ? node.name() : "", attrs, text,
       children);
 }
 
@@ -770,8 +906,7 @@ bool ConfigH900::writeDevices(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::writeDevice(pugi::xml_node &device,
-    const data::item::Device &data)
+bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
 {
   bool ret = true;
 
@@ -845,7 +980,7 @@ bool ConfigH900::writeProtocol(pugi::xml_node &protocol)
 }
 
 bool ConfigH900::writeButtons(pugi::xml_node &buttons, uint32_t deviceId,
-    const vector<data::item::Button> &data)
+    const vector<item::Button> &data)
 {
   bool ret = true;
 
@@ -857,15 +992,15 @@ bool ConfigH900::writeButtons(pugi::xml_node &buttons, uint32_t deviceId,
 }
 
 bool ConfigH900::writeButton(pugi::xml_node &button, uint32_t deviceId,
-    const data::item::Button &data)
+    const item::Button &data)
 {
-  if (data.getButtonType() == data::item::ButtonType::Hard) {
+  if (data.getButtonType() == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
     button.append_child("Label"); //empty
   } else {
     button.append_child("Label").text().set(data.name.get());
   }
-  if (data.position.isIncluded() == data::Include::ALWAYS) {
+  if (data.position.isIncluded() == Include::ALWAYS) {
     button.append_child("Position").text().set(data.position.get());
   }
   button.append_child("ActionId").text().set(data.getActionId(deviceId));
@@ -873,7 +1008,7 @@ bool ConfigH900::writeButton(pugi::xml_node &button, uint32_t deviceId,
 }
 
 bool ConfigH900::writeStatemachines(pugi::xml_node &states, uint32_t deviceId,
-    const vector<data::item::StateMachine> &data)
+    const vector<item::StateMachine> &data)
 {
   bool ret = true;
 
@@ -885,60 +1020,110 @@ bool ConfigH900::writeStatemachines(pugi::xml_node &states, uint32_t deviceId,
 }
 
 bool ConfigH900::writeStatemachine(pugi::xml_node &state, uint32_t deviceId,
-    const data::item::StateMachine &data)
-{
-  state.append_child("Id").text().set(data.smType.get().getString());
-  for (const auto &d : data.getActions()) {
-    state.append_child("Value").text().set(d.name.get());
-  }
-  if (data.delayMs.isIncluded() == data::Include::ALWAYS) {
-    state.append_child("Delay").text().set(data.delayMs.get());
-  }
-  auto actionClass = state.append_child(data.actionClass.get().getString());
-  return writeDeviceActions(actionClass, deviceId, data.getActions());
-}
-
-bool ConfigH900::writeDeviceActions(pugi::xml_node &actionClass,
-    uint32_t deviceId, const vector<data::item::DeviceAction> &data)
+    const item::StateMachine &data)
 {
   bool ret = true;
 
-  for (const auto &d : data) {
-    auto actionType = actionClass.append_child(d.actionType.get().getString());
-    auto action = actionType.append_child("Action");
-    ret &= writeDeviceAction(action, deviceId, d);
-    actionType.append_child("Name").text().set(d.name.get());
+  state.append_child("Id").text().set(data.smType.get().getString());
+  if (!data.discrete.empty()) {
+    for (const auto &d : data.discrete.states) {
+      state.append_child("Value").text().set(d);
+    }
+  }
+  if (!data.relative.empty()) {
+    for (const auto &d : data.relative.states) {
+      state.append_child("Value").text().set(d);
+    }
+  }
+  if (data.delayMs.isIncluded() == Include::ALWAYS) {
+    state.append_child("Delay").text().set(data.delayMs.get());
+  }
+
+  if (!data.discrete.empty()) {
+    auto discreteAction = state.append_child("DiscreteActions");
+    ret &= writeDiscreteActions(discreteAction, deviceId, data.discrete);
+  }
+  if (!data.relative.empty()) {
+    auto relativeAction = state.append_child("RelativeActions");
+    ret &= writeRelativeActions(relativeAction, deviceId, data.relative);
   }
   return ret;
 }
 
-bool ConfigH900::writeDeviceAction(pugi::xml_node &action, uint32_t deviceId,
-    const data::item::DeviceAction &data)
+bool ConfigH900::writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId,
+    const item::DiscreteActions &data)
 {
-  action.append_child("Target").text().set("Device"); //static value
-  auto operation = action.append_child("Operation");
-  operation.append_child("Name").text().set(data.op.get().getString());
-  auto id = operation.append_child("Parameter");
-  id.append_attribute("name").set_value("DeviceId");
-  id.text().set(deviceId);
-  writeProperty(operation, "Command", data.cmd, "Parameter");
-  writeProperty(operation, "Modifier", data.mod, "Parameter");
-  writeProperty(operation, "DelayValue", data.delayMs, "Parameter");
-  if (data.stateValue.isIncluded() == data::Include::ALWAYS) {
-    writeProperty(operation, "State", data.stateName, "Parameter");
-    writeProperty(operation, "Value", data.stateValue, "Parameter");
-  } else {
-    //state without value -> StateName. wtf???
-    writeProperty(operation, "StateName", data.stateName, "Parameter");
+  bool ret = true;
+
+  for (int i = 0; i < data.states.size(); i++) {
+    auto actionType = action.append_child(
+        data.enterStateAction[i].actionType.get().getString());
+    ret &= writeDeviceAction(actionType, deviceId, data.enterStateAction[i],
+        item::StateTransitionType::Discrete);
+    actionType.append_child("Name").text().set(data.states[i]);
   }
-  for (const auto &prop : data.getUnknownParams()) {
-    writeUnknownElement(operation, prop);
+  return ret;
+}
+
+bool ConfigH900::writeRelativeActions(pugi::xml_node &action, uint32_t deviceId,
+    const item::RelativeActions &data)
+{
+  bool ret = true;
+
+  if (data.resetAction != nullopt) {
+    auto actionType = action.append_child(
+        data.resetAction->actionType.get().getString());
+    ret &= writeDeviceAction(actionType, deviceId, *data.resetAction,
+        item::StateTransitionType::Relative);
+  }
+  if (data.nextStateAction != nullopt) {
+    auto actionType = action.append_child(
+        data.nextStateAction->actionType.get().getString());
+    ret &= writeDeviceAction(actionType, deviceId, *data.nextStateAction,
+        item::StateTransitionType::Relative);
+  }
+  if (data.prevStateAction != nullopt) {
+    auto actionType = action.append_child(
+        data.prevStateAction->actionType.get().getString());
+    ret &= writeDeviceAction(actionType, deviceId, *data.prevStateAction,
+        item::StateTransitionType::Relative);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeDeviceAction(pugi::xml_node &actionType,
+    uint32_t deviceId, const item::DeviceAction &data,
+    item::StateTransitionType t)
+{
+  for (const auto &s : data.sequence) {
+    auto sequence = actionType.append_child("Action");
+    sequence.append_child("Target").text().set("Device"); //static value
+    auto operation = sequence.append_child("Operation");
+    operation.append_child("Name").text().set(s.opcode.get().getString());
+    auto id = operation.append_child("Parameter");
+    id.append_attribute("name").set_value("DeviceId");
+    id.text().set(deviceId);
+    writeProperty(operation, "Command", s.cmd, "Parameter");
+    writeProperty(operation, "Modifier", s.mod, "Parameter");
+    writeProperty(operation, "DelayValue", s.delayMs, "Parameter");
+    if (t != item::StateTransitionType::Relative)
+      writeProperty(operation, "State", s.stateName, "Parameter");
+    else {
+      //fixme we have exactly one sample for this. no idea if this is correct.
+      writeProperty(operation, "StateName", s.stateName, "Parameter");
+    }
+    if (s.stateValue.isIncluded() == Include::ALWAYS) {
+      writeProperty(operation, "Value", s.stateValue, "Parameter");
+    }
+    for (const auto &prop : s.getUnknownParams()) {
+      writeUnknownElement(operation, prop);
+    }
   }
   return true;
 }
 
 void ConfigH900::writeUnknownElement(pugi::xml_node &parent,
-    const data::item::UnknownElement &element)
+    const item::UnknownElement &element)
 {
   auto node = parent.append_child(element.tag.c_str());
 

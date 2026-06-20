@@ -5,17 +5,20 @@
 #include "document/config.h"
 #include "cmd/addDevice.h"
 #include "cmd/removeDevice.h"
-#include "cmd/removeDeviceAction.h"
+#include "cmd/removeState.h"
+#include "cmd/removeActionSequence.h"
 #include "cmd/addButton.h"
 #include "cmd/removeButton.h"
-#include "cmd/addDeviceAction.h"
+#include "cmd/addState.h"
+#include "cmd/addActionSequence.h"
 #include "cmd/addStatemachine.h"
 #include "cmd/removeStatemachine.h"
 #include "cmd/setId.h"
 #include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
 #include "cmd/setDeviceData.h"
-#include "cmd/setDeviceActionData.h"
+#include "cmd/setActionData.h"
+#include "cmd/setActionSequenceData.h"
 #include "cmd/setButtonData.h"
 #include "cmd/setStatemachineData.h"
 #include "cmd/setUserName.h"
@@ -509,141 +512,204 @@ bool CmdCatalogue::setStatemachineDelay(uint32_t delayMs, uint32_t devicePos,
   return true;
 }
 
-
-bool CmdCatalogue::setStatemachineActionClass(const Enum<ActionClass> &v,
-    uint32_t devicePos, int smPos)
+bool CmdCatalogue::addStateCommand(uint32_t devicePos, uint32_t smPos,
+    item::StateTransitionType t, const QString &name, int actPos)
 {
-  auto *cmd = new SetStatemachineActionClassCommand(c, v, devicePos, smPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::addDeviceActionCommand(uint32_t devicePos, int smPos,
-    uint32_t actPos)
-{
-  auto *cmd = new AddDeviceActionCommand(c, devicePos, smPos);
+  auto *cmd = new AddStateCommand(c, devicePos, smPos, name, t, actPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device action pos %1/%2/%2 already exists, dropped").arg(
+        tr("modify: device state pos %1/%2/%3 already exists, dropped").arg(
             devicePos).arg(smPos).arg(actPos), ContentType::PlainText);
     delete cmd;
   }
   return true;
 }
 
-bool CmdCatalogue::removeDeviceActionCommand(uint32_t devicePos, int smPos,
-    uint32_t actPos)
+bool document::data::CmdCatalogue::addActionCommand(uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionAction t)
 {
-  auto *cmd = new RemoveDeviceActionCommand(c, devicePos, smPos, actPos);
+  auto *cmd = new AddActionCommand(c, devicePos, smPos, t);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device action pos %1/%2/%2 doesn't exist, dropped").arg(
+        tr("modify: device action pos %1/%2/%3 already exists, dropped").arg(
+            devicePos).arg(smPos).arg((int) t), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeStateCommand(uint32_t devicePos, uint32_t smPos,
+    item::StateTransitionType t, int actPos)
+{
+  auto *cmd = new RemoveStateCommand(c, devicePos, smPos, t, actPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device action pos %1/%2/%3 doesn't exist, dropped").arg(
             devicePos).arg(smPos).arg(actPos), ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::setDeviceActionType(const Enum<ActionType> &v,
-    uint32_t devicePos, int smPos, uint32_t actPos)
+bool document::data::CmdCatalogue::removeActionCommand(uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionAction t)
 {
-  auto *cmd = new SetDeviceActionTypeCommand(c, v, devicePos, smPos, actPos);
+  auto *cmd = new RemoveActionCommand(c, devicePos, smPos, t);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device action pos %1/%2/%3 doesn't exist, dropped").arg(
+            devicePos).arg(smPos).arg((int) t), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setActionType(const Enum<ActionType> &v, uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
+{
+  auto *cmd = new SetActionTypeCommand(c, v, devicePos, smPos, t, actPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setDeviceActionName(const string &v, uint32_t devicePos,
-    int smPos, uint32_t actPos)
+bool CmdCatalogue::setActionRepeatWillNotHarm(bool v, uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
 {
-  auto *cmd = new SetDeviceActionNameCommand(c, v, devicePos, smPos, actPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::setDeviceActionRepeatWillNotHarm(const bool &v,
-    uint32_t devicePos, int smPos, uint32_t actPos)
-{
-  auto *cmd = new SetDeviceActionRepeatWillNotHarmCommand(c, v, devicePos,
-      smPos, actPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::setDeviceActionOp(const Enum<Operation> &v,
-    uint32_t devicePos, int smPos, uint32_t actPos)
-{
-  auto *cmd = new SetDeviceActionOpCommand(c, v, devicePos, smPos, actPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::setDeviceActionCmd(const std::string &v, uint32_t devicePos,
-    int smPos, uint32_t actPos)
-{
-  auto *cmd = new SetDeviceActionCmdCommand(c, v, devicePos, smPos, actPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::setDeviceActionDelayMs(const uint32_t &v, uint32_t devicePos,
-    int buttonPos, uint32_t actPos)
-{
-  auto *cmd = new SetDeviceActionDelayMsCommand(c, v, devicePos, buttonPos,
+  auto *cmd = new SetActionRepeatWillNotHarmCommand(c, v, devicePos, smPos, t,
       actPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setDeviceActionStateName(const Enum<StateMachineType> &v,
-    uint32_t devicePos, int buttonPos, uint32_t actPos)
+bool CmdCatalogue::addActionSequenceCommand(uint32_t devicePos, uint32_t smPos,
+    uint32_t actPos, item::StateTransitionAction t, int seqPos)
 {
-  auto *cmd = new SetDeviceActionStateNameCommand(c, v, devicePos, buttonPos,
-      actPos);
+  auto *cmd = new AddActionSequenceCommand(c, devicePos, smPos, actPos, t,
+      seqPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device act-seq pos %1/%2/%3/%4 already exists, "
+            "dropped").arg(devicePos).arg(smPos).arg(actPos).arg(seqPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeActionSequenceCommand(uint32_t devicePos,
+    uint32_t smPos, uint32_t actPos, item::StateTransitionAction t,
+    uint32_t seqPos)
+{
+  auto *cmd = new RemoveActionSequenceCommand(c, devicePos, smPos, actPos, t,
+      seqPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device act-seq pos %1/%2/%3/%4 doesn't exist, "
+            "dropped").arg(devicePos).arg(smPos).arg(actPos).arg(seqPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setActionSequenceOpCommand(const Enum<Operation> &value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
+{
+  auto *cmd = new SetActionOpCommand(c, value, devicePos, smPos, t, actPos,
+      seqPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setDeviceActionStateValue(const std::string &v,
-    uint32_t devicePos, int buttonPos, uint32_t actPos)
+bool CmdCatalogue::setActionSequenceCmdCommand(const string &value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetDeviceActionStateValueCommand(c, v, devicePos, buttonPos,
-      actPos);
+  auto *cmd = new SetActionCmdCommand(c, value, devicePos, smPos, t, actPos,
+      seqPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setDeviceActionMod(const Enum<Modifier> &v,
-    uint32_t devicePos, int smPos, uint32_t actPos)
+bool CmdCatalogue::setActionSequenceDelayMsCommand(uint32_t value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetDeviceActionModCommand(c, v, devicePos, smPos, actPos);
+  auto *cmd = new SetActionDelayMsCommand(c, value, devicePos, smPos, t, actPos,
+      seqPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::setDeviceActionUnknownParam(
+bool CmdCatalogue::setActionSequenceStateNameCommand(
+    const Enum<StateMachineType> &value, uint32_t devicePos, uint32_t smPos,
+    item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
+{
+  auto *cmd = new SetActionStateNameCommand(c, value, devicePos, smPos, t,
+      actPos, seqPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setActionSequenceStateValueCommand(const string &value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
+{
+  auto *cmd = new SetActionStateValueCommand(c, value, devicePos, smPos, t,
+      actPos, seqPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setActionSequenceModCommand(const Enum<Modifier> &value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
+{
+  auto *cmd = new SetActionModCommand(c, value, devicePos, smPos, t, actPos,
+      seqPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::setActionUnknownParam(
     const data::item::UnknownElement &value, uint32_t devicePos, int smPos,
-    uint32_t actPos)
+    item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetDeviceActionUnknownParamCommand(c, value, devicePos,
-      smPos, actPos);
+  auto *cmd = new SetDeviceActionUnknownParamCommand(c, value, devicePos, smPos,
+      actPos, t, seqPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;

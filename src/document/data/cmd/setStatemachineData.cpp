@@ -35,18 +35,5 @@ SetStatemachineDelayCommand::SetStatemachineDelayCommand(ConfigData &c,
 {
 }
 
-SetStatemachineActionClassCommand::SetStatemachineActionClassCommand(ConfigData &c,
-    const Enum<ActionClass> &value, uint32_t devicePos, uint32_t smPos,
-    QUndoCommand *parent):
-    SetPropertyBaseCommand<Enum<ActionClass>>(QObject::tr("set device action class"),
-        [&c, devicePos, smPos]() {
-          return c.getDevices()[devicePos].getStateMachines()[smPos].actionClass.get();
-        },
-        [&c, devicePos, smPos](const Enum<ActionClass> &v) {
-          c.getDevices()[devicePos].getStateMachines()[smPos].actionClass.set(v).setIncluded(Include::ALWAYS);
-        }, value, parent)
-{
-}
-
 }
 }

@@ -125,8 +125,8 @@ class Activity
     Enum<ActivityType> type{ActivityType::VirtualGeneric};
     std::vector<Button> softButtons;
     std::vector<Button> hardButtons;
-    std::vector<StateAction> enterActions;
-    std::vector<StateAction> leaveActions;
+//    std::vector<StateAction> enterActions; todo
+//    std::vector<StateAction> leaveActions;
     std::vector<uint32_t> powerOnDeviceIds;
     std::vector<uint32_t> powerOffDeviceIds;
     std::vector<Role> roles;

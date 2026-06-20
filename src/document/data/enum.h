@@ -32,9 +32,8 @@ enum class DeviceType { Amplifier, AudioVideoSwitch, Cd, ClimateControl, Compute
     DvdCdGame, DvdCdRadio, GameConsole, Light, MediaCenterPC, Projector, Pvr, Receiver,
     SetTopBox, Television, Vcr, Unknown };
 enum class StateMachineType { Power, Input, Screen, TVInput, AntennaOutput, Unknown };
-enum class ActionClass { DiscreteActions, RelativeActions, Unknown };
 enum class ActionType { None, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
-enum class Operation { ForceValue, SendCommnad, SendDelay, SetValue, Unknown };
+enum class Operation { ForceValue, SendCommand, SendDelay, SetValue, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };
 enum class ActivityType { PowerOff, VirtualCdMulti, VirtualDvd, VirtualGameConsole,
     VirtualGeneric, VirtualMusicServer, VirtualPvr, VirtualRadioSimple,
@@ -83,7 +82,6 @@ template class Enum<PvrType>;
 template class Enum<TunerInput>;
 template class Enum<DeviceType>;
 template class Enum<StateMachineType>;
-template class Enum<ActionClass>;
 template class Enum<ActionType>;
 template class Enum<Operation>;
 template class Enum<Modifier>;
