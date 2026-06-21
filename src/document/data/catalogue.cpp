@@ -16,15 +16,10 @@
 #include "cmd/setId.h"
 #include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
-#include "cmd/setDeviceData.h"
 #include "cmd/setActionData.h"
-#include "cmd/setActionSequenceData.h"
 #include "cmd/setButtonData.h"
-#include "cmd/setStatemachineData.h"
-#include "cmd/setUserName.h"
 #include "cmd/addNumpad.h"
 #include "cmd/removeNumpad.h"
-#include "cmd/setNumpadData.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -47,13 +42,28 @@ bool CmdCatalogue::setUserId(uint32_t id)
   return true;
 }
 
-bool CmdCatalogue::setUserName(const QString &firstName,
-    const QString &lastName)
+bool CmdCatalogue::setUserFirstName(const QString &v)
 {
-  auto *cmd = new SetUserNameCommand(c, firstName, lastName);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set user first name"),
+        [this]() {return c.getUser().firstName.get();},
+        [this](
+            const string &v) {c.getUser().firstName.set(v).setIncluded(Include::ALWAYS);},
+        v.toStdString() };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setUserLastName(const QString &v)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set user last name"),
+        [this]() {return c.getUser().lastName.get();},
+        [this](
+            const string &v) {c.getUser().lastName.set(v).setIncluded(Include::ALWAYS);},
+        v.toStdString() };
+  return setProperty<string>(access);
 }
 
 bool CmdCatalogue::setUserMetadata()
@@ -76,34 +86,50 @@ bool CmdCatalogue::setUserMetadata(const QString &user,
 
 bool CmdCatalogue::setUserNewDeviceFound(bool f)
 {
-  auto *cmd = new SetUserNewDeviceFoundCommand(c, f);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set new device found"),
+        [this]() {return c.getUser().newDeviceFound.get();},
+        [this](
+            const bool &v) {c.getUser().newDeviceFound.set(v).setIncluded(Include::ALWAYS);},
+        f };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setUserTrainingWheels(bool w)
 {
-  auto *cmd = new SetUserTrainingWheelsCommand(c, w);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set training wheels"),
+        [this]() {return c.getUser().trainingWheels.get();},
+        [this](
+            const bool &v) {c.getUser().trainingWheels.set(v).setIncluded(Include::ALWAYS);},
+        w };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setUserLocale(const Enum<Locale> &l)
 {
-  auto *cmd = new SetUserLocaleCommand(c, l);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<Locale>> access =
+      {
+        tr("set locale"),
+        [this]() {return c.getUser().locale.get();},
+        [this](
+            const Enum<Locale> &v) {c.getUser().locale.set(v).setIncluded(Include::ALWAYS);},
+        l };
+  return setProperty<Enum<Locale>>(access);
 }
 
 bool CmdCatalogue::setUserTimeFormat(const Enum<TimeFormat> &f)
 {
-  auto *cmd = new SetUserTimeFormatCommand(c, f);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<TimeFormat>> access =
+      {
+        tr("set time format"),
+        [this]() {return c.getUser().timeFormat.get();},
+        [this](
+            const Enum<TimeFormat> &v) {c.getUser().timeFormat.set(v).setIncluded(Include::ALWAYS);},
+        f };
+  return setProperty<Enum<TimeFormat>>(access);
 }
 
 bool CmdCatalogue::setUserUnknownProperty(
@@ -135,7 +161,7 @@ bool CmdCatalogue::setControllerMetadata(const QString &type,
 bool CmdCatalogue::setControllerUnknownProperty(
     const data::item::UnknownElement &value)
 {
-  auto *cmd = new SetUserUnknownPropertyCommand(c, value);
+  auto *cmd = new SetControllerUnknownPropertyCommand(c, value);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
@@ -184,206 +210,292 @@ bool CmdCatalogue::removeDeviceCommand(int pos)
   return ret;
 }
 
-bool CmdCatalogue::setDeviceMetadata(const Enum<DeviceType> &type,
-    const QString &mnf, const QString &model, const QString &label,
-    uint32_t pos)
+bool CmdCatalogue::setDeviceType(const Enum<DeviceType> &v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceMetadataCommand(c, type, mnf, model, label, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<DeviceType>> access =
+      {
+        tr("set device type"),
+        [this, pos]() {return c.getDevices()[pos].type.get();},
+        [this, pos](
+            const Enum<DeviceType> &v) {c.getDevices()[pos].type.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<DeviceType>>(access);
 }
 
 bool CmdCatalogue::setDeviceMnf(const QString &v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceMnfCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set manufacturer"),
+        [this, pos]() {return c.getDevices()[pos].mnf.get();},
+        [this, pos](
+            const string &v) {c.getDevices()[pos].mnf.set(v).setIncluded(Include::ALWAYS);},
+        v.toStdString() };
+  return setProperty<string>(access);
 }
 
 bool CmdCatalogue::setDeviceModel(const QString &v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceModelCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set model"),
+        [this, pos]() {return c.getDevices()[pos].model.get();},
+        [this, pos](
+            const string &v) {c.getDevices()[pos].model.set(v).setIncluded(Include::ALWAYS);},
+        v.toStdString() };
+  return setProperty<string>(access);
 }
 
 bool CmdCatalogue::setDeviceLabel(const QString &v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceLabelCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set label"),
+        [this, pos]() {return c.getDevices()[pos].label.get();},
+        [this, pos](
+            const string &v) {c.getDevices()[pos].label.set(v).setIncluded(Include::ALWAYS);},
+        v.toStdString() };
+  return setProperty<string>(access);
 }
 
 bool CmdCatalogue::setDeviceManualPower(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceManualPowerCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set manual power"),
+        [this, pos]() {return c.getDevices()[pos].manualPower.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].manualPower.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceAlwaysOn(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceAlwaysOnCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set always on"),
+        [this, pos]() {return c.getDevices()[pos].alwaysOn.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].alwaysOn.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceAutoPower(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceAutoPowerCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set auto power"),
+        [this, pos]() {return c.getDevices()[pos].autoPower.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].autoPower.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceAudioSwitch(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceAudioSwitchCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set audio switch"),
+        [this, pos]() {return c.getDevices()[pos].audioSwitch.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].audioSwitch.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceDimmer(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceDimmerCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set dimmer"),
+        [this, pos]() {return c.getDevices()[pos].dimmer.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].dimmer.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceHasBands(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceHasBandsCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set has bands"),
+        [this, pos]() {return c.getDevices()[pos].hasBands.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].hasBands.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceHasPresets(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceHasPresetsCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set has presets"),
+        [this, pos]() {return c.getDevices()[pos].hasPresets.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].hasPresets.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceIsNewDevice(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceIsNewDeviceCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set is new device"),
+        [this, pos]() {return c.getDevices()[pos].isNewDevice.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].isNewDevice.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceIsDisplayDevice(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceIsDisplayDeviceCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set is display device"),
+        [this, pos]() {return c.getDevices()[pos].isDisplayDevice.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].isDisplayDevice.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceMenuOnDevice(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceMenuOnDeviceCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set menu on device"),
+        [this, pos]() {return c.getDevices()[pos].menuOnDevice.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].menuOnDevice.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceOnScreenGuide(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceOnScreenGuideCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set on screen guide"),
+        [this, pos]() {return c.getDevices()[pos].onScreenGuide.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].onScreenGuide.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceRecordMediaFixedDisc(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceRecordMediaFixedDiscCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set record media fixed disc"),
+        [this, pos]() {return c.getDevices()[pos].recordMediaFixedDisc.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].recordMediaFixedDisc.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceRecordMediaRemovableVideotape(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceRecordMediaRemovableVideotapeCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set record media removable videotape"),
+        [this, pos]() {return c.getDevices()[pos].recordMediaRemovableVideotape.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].recordMediaRemovableVideotape.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceRevertInput(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceRevertInputCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set revert input"),
+        [this, pos]() {return c.getDevices()[pos].revertInput.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].revertInput.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceScart(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceScartCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set scart"),
+        [this, pos]() {return c.getDevices()[pos].scart.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].scart.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceVideoSwitch(bool v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceVideoSwitchCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set video switch"),
+        [this, pos]() {return c.getDevices()[pos].videoSwitch.get();},
+        [this, pos](
+            const bool &v) {c.getDevices()[pos].videoSwitch.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
 bool CmdCatalogue::setDeviceNumDiscs(int32_t v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceNumDiscsCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<int32_t> access =
+      {
+        tr("set number of discs"),
+        [this, pos]() {return c.getDevices()[pos].numDiscs.get();},
+        [this, pos](
+            const int32_t &v) {c.getDevices()[pos].numDiscs.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<int32_t>(access);
 }
 
 bool CmdCatalogue::setDeviceNumLights(int32_t v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceNumLightsCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::setDeviceType(const Enum<DeviceType> &v, uint32_t pos)
-{
-  auto *cmd = new SetDeviceTypeCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<int32_t> access =
+      {
+        tr("set number of lights"),
+        [this, pos]() {return c.getDevices()[pos].numLights.get();},
+        [this, pos](
+            const int32_t &v) {c.getDevices()[pos].numLights.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<int32_t>(access);
 }
 
 bool CmdCatalogue::setDevicePvrType(const Enum<PvrType> &v, uint32_t pos)
 {
-  auto *cmd = new SetDevicePvrTypeCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<PvrType>> access =
+      {
+        tr("set pvr type"),
+        [this, pos]() {return c.getDevices()[pos].pvrType.get();},
+        [this, pos](
+            const Enum<PvrType> &v) {c.getDevices()[pos].pvrType.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<PvrType>>(access);
 }
 
 bool CmdCatalogue::setDeviceTunerInput(const Enum<TunerInput> &v, uint32_t pos)
 {
-  auto *cmd = new SetDeviceTunerInputCommand(c, v, pos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<TunerInput>> access =
+      {
+        tr("set tuner input"),
+        [this, pos]() {return c.getDevices()[pos].tunerInput.get();},
+        [this, pos](
+            const Enum<TunerInput> &v) {c.getDevices()[pos].tunerInput.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<TunerInput>>(access);
 }
 
 bool CmdCatalogue::setDeviceUnknownProperty(
@@ -395,8 +507,8 @@ bool CmdCatalogue::setDeviceUnknownProperty(
   return true;
 }
 
-bool CmdCatalogue::addButtonCommand(item::ButtonType t, uint32_t devicePos,
-    int buttonPos)
+bool CmdCatalogue::addDeviceButtonCommand(item::ButtonType t,
+    uint32_t devicePos, int buttonPos)
 {
   auto *cmd = new AddButtonCommand(c, t, devicePos, buttonPos);
   auto ret = cmd->valid();
@@ -412,8 +524,8 @@ bool CmdCatalogue::addButtonCommand(item::ButtonType t, uint32_t devicePos,
   return true;
 }
 
-bool CmdCatalogue::removeButtonCommand(item::ButtonType t, uint32_t devicePos,
-    int buttonPos)
+bool CmdCatalogue::removeDeviceButtonCommand(item::ButtonType t,
+    uint32_t devicePos, int buttonPos)
 {
   auto *cmd = new RemoveButtonCommand(c, t, devicePos, buttonPos);
   auto ret = cmd->valid();
@@ -429,43 +541,59 @@ bool CmdCatalogue::removeButtonCommand(item::ButtonType t, uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setButtonAction(const string &v, item::ButtonType t,
+bool CmdCatalogue::setDeviceButtonAction(const string &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetButtonActionCommand(c, v, t, devicePos, buttonPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set button action"),
+        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).action.get();},
+        [this, t, devicePos, buttonPos](
+            const string &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).action.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setButtonName(const string &v, item::ButtonType t,
+bool CmdCatalogue::setDeviceButtonName(const string &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetButtonNameCommand(c, v, t, devicePos, buttonPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set button name"),
+        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).name.get();},
+        [this, t, devicePos, buttonPos](
+            const string &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).name.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setButtonFile(const string &v, item::ButtonType t,
+bool CmdCatalogue::setDeviceButtonFile(const string &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetButtonFileCommand(c, v, t, devicePos, buttonPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set button file"),
+        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).file.get();},
+        [this, t, devicePos, buttonPos](
+            const string &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).file.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setButtonPosition(const int32_t &v, item::ButtonType t,
+bool CmdCatalogue::setDeviceButtonPosition(const int32_t &v, item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new SetButtonPositionCommand(c, v, t, devicePos, buttonPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<int32_t> access =
+      {
+        tr("set button position"),
+        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).position.get();},
+        [this, t, devicePos, buttonPos](
+            const int32_t &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).position.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<int32_t>(access);
 }
 
-bool CmdCatalogue::addStatemachineCommand(uint32_t devicePos, int smPos)
+bool CmdCatalogue::addDeviceStatemachineCommand(uint32_t devicePos, int smPos)
 {
   auto *cmd = new AddStatemachineCommand(c, devicePos, smPos);
   auto ret = cmd->valid();
@@ -481,7 +609,8 @@ bool CmdCatalogue::addStatemachineCommand(uint32_t devicePos, int smPos)
   return true;
 }
 
-bool CmdCatalogue::removeStatemachineCommand(uint32_t devicePos, int smPos)
+bool CmdCatalogue::removeDeviceStatemachineCommand(uint32_t devicePos,
+    int smPos)
 {
   auto *cmd = new RemoveStatemachineCommand(c, devicePos, smPos);
   auto ret = cmd->valid();
@@ -497,25 +626,33 @@ bool CmdCatalogue::removeStatemachineCommand(uint32_t devicePos, int smPos)
   return ret;
 }
 
-bool CmdCatalogue::setStatemachineType(const Enum<StateMachineType> &type,
+bool CmdCatalogue::setDeviceStatemachineType(const Enum<StateMachineType> &type,
     uint32_t devicePos, int smPos)
 {
-  auto *cmd = new SetStatemachineTypeCommand(c, type, devicePos, smPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<StateMachineType>> access =
+      {
+        tr("set state machine type"),
+        [this, devicePos, smPos]() {return c.getDevices()[devicePos].getStateMachines()[smPos].smType.get();},
+        [this, devicePos, smPos](
+            const Enum<StateMachineType> &v) {c.getDevices()[devicePos].getStateMachines()[smPos].smType.set(v).setIncluded(Include::ALWAYS);},
+        type };
+  return setProperty<Enum<StateMachineType>>(access);
 }
 
-bool CmdCatalogue::setStatemachineDelay(uint32_t delayMs, uint32_t devicePos,
-    int smPos)
+bool CmdCatalogue::setDeviceStatemachineDelay(uint32_t delayMs,
+    uint32_t devicePos, int smPos)
 {
-  auto *cmd = new SetStatemachineDelayCommand(c, delayMs, devicePos, smPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set state machine delay"),
+        [this, devicePos, smPos]() {return c.getDevices()[devicePos].getStateMachines()[smPos].delayMs.get();},
+        [this, devicePos, smPos](
+            const uint32_t &v) {c.getDevices()[devicePos].getStateMachines()[smPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+        delayMs };
+  return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::addStateCommand(uint32_t devicePos, uint32_t smPos,
+bool CmdCatalogue::addDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos,
     item::StateTransitionType t, const QString &name, int actPos)
 {
   auto *cmd = new AddStateCommand(c, devicePos, smPos, name, t, actPos);
@@ -532,8 +669,8 @@ bool CmdCatalogue::addStateCommand(uint32_t devicePos, uint32_t smPos,
   return true;
 }
 
-bool document::data::CmdCatalogue::addActionCommand(uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t)
+bool CmdCatalogue::addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos,
+    item::StateTransitionAction t)
 {
   auto *cmd = new AddActionCommand(c, devicePos, smPos, t);
   auto ret = cmd->valid();
@@ -549,8 +686,8 @@ bool document::data::CmdCatalogue::addActionCommand(uint32_t devicePos,
   return true;
 }
 
-bool CmdCatalogue::removeStateCommand(uint32_t devicePos, uint32_t smPos,
-    item::StateTransitionType t, int actPos)
+bool CmdCatalogue::removeDeviceSmStateCommand(uint32_t devicePos,
+    uint32_t smPos, item::StateTransitionType t, int actPos)
 {
   auto *cmd = new RemoveStateCommand(c, devicePos, smPos, t, actPos);
   auto ret = cmd->valid();
@@ -566,7 +703,7 @@ bool CmdCatalogue::removeStateCommand(uint32_t devicePos, uint32_t smPos,
   return ret;
 }
 
-bool document::data::CmdCatalogue::removeActionCommand(uint32_t devicePos,
+bool CmdCatalogue::removeDeviceSmActionCommand(uint32_t devicePos,
     uint32_t smPos, item::StateTransitionAction t)
 {
   auto *cmd = new RemoveActionCommand(c, devicePos, smPos, t);
@@ -583,142 +720,169 @@ bool document::data::CmdCatalogue::removeActionCommand(uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setActionType(const Enum<ActionType> &v, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
+bool CmdCatalogue::setDeviceSmActionType(const Enum<ActionType> &v,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos)
 {
-  auto *cmd = new SetActionTypeCommand(c, v, devicePos, smPos, t, actPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<ActionType>> access =
+      {
+        tr("set device action type"),
+        [this, devicePos, smPos, t, actPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->actionType.get();},
+        [this, devicePos, smPos, t, actPos](
+            const Enum<ActionType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->actionType.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<ActionType>>(access);
 }
 
-bool CmdCatalogue::setActionRepeatWillNotHarm(bool v, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
+bool CmdCatalogue::setDeviceSmActionRepeatWillNotHarm(bool v,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos)
 {
-  auto *cmd = new SetActionRepeatWillNotHarmCommand(c, v, devicePos, smPos, t,
-      actPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<bool> access =
+      {
+        tr("set device action repeat will not harm"),
+        [this, devicePos, smPos, t, actPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->repeatWillNotHarm.get();},
+        [this, devicePos, smPos, t, actPos](
+            const bool &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->repeatWillNotHarm.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
 }
 
-bool CmdCatalogue::addActionSequenceCommand(uint32_t devicePos, uint32_t smPos,
-    uint32_t actPos, item::StateTransitionAction t, int seqPos)
+bool CmdCatalogue::addDeviceStateActionSequenceCommand(uint32_t devicePos,
+    uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos)
 {
-  auto *cmd = new AddActionSequenceCommand(c, devicePos, smPos, actPos, t,
-      seqPos);
+  auto *cmd = new AddDeviceSmActionSequenceCommand(c, devicePos, smPos, actPos,
+      t, seqPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device act-seq pos %1/%2/%3/%4 failed, "
-            "dropped").arg(devicePos).arg(smPos).arg(actPos).arg(seqPos),
+        tr("modify: device act-seq pos %1/%2/%3/%4 failed, dropped").arg(
+            devicePos).arg(smPos).arg(actPos).arg(seqPos),
         ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::removeActionSequenceCommand(uint32_t devicePos,
+bool CmdCatalogue::removeDeviceStateActionSequenceCommand(uint32_t devicePos,
     uint32_t smPos, uint32_t actPos, item::StateTransitionAction t,
     uint32_t seqPos)
 {
-  auto *cmd = new RemoveActionSequenceCommand(c, devicePos, smPos, actPos, t,
-      seqPos);
+  auto *cmd = new RemoveDeviceSmActionSequenceCommand(c, devicePos, smPos,
+      actPos, t, seqPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device act-seq pos %1/%2/%3/%4 doesn't exist, "
-            "dropped").arg(devicePos).arg(smPos).arg(actPos).arg(seqPos),
+        tr("modify: device act-seq pos %1/%2/%3/%4 doesn't exist, dropped").arg(
+            devicePos).arg(smPos).arg(actPos).arg(seqPos),
         ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::setActionSequenceOp(const Enum<Operation> &value,
+bool CmdCatalogue::setDeviceStateActionSequenceOp(const Enum<Operation> &value,
     uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
     uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetActionOpCommand(c, value, devicePos, smPos, t, actPos,
-      seqPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<Operation>> access =
+      {
+        tr("set device action sequence opcode"),
+        [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].opcode.get();},
+        [this, devicePos, smPos, t, actPos, seqPos](
+            const Enum<Operation> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].opcode.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<Enum<Operation>>(access);
 }
 
-bool CmdCatalogue::setActionSequenceCmd(const string &value, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos,
-    uint32_t seqPos)
+bool CmdCatalogue::setDeviceStateActionSequenceCmd(const string &value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetActionCmdCommand(c, value, devicePos, smPos, t, actPos,
-      seqPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set device action sequence cmd"),
+        [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].cmd.get();},
+        [this, devicePos, smPos, t, actPos, seqPos](
+            const string &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].cmd.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setActionSequenceDelayMs(uint32_t value, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos,
-    uint32_t seqPos)
+bool CmdCatalogue::setDeviceStateActionSequenceDelayMs(uint32_t value,
+    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetActionDelayMsCommand(c, value, devicePos, smPos, t, actPos,
-      seqPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set device action sequence delay ms"),
+        [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].delayMs.get();},
+        [this, devicePos, smPos, t, actPos, seqPos](
+            const uint32_t &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::setActionSequenceStateName(
+bool CmdCatalogue::setDeviceStateActionSequenceStateName(
     const Enum<StateMachineType> &value, uint32_t devicePos, uint32_t smPos,
     item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetActionStateNameCommand(c, value, devicePos, smPos, t,
-      actPos, seqPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<StateMachineType>> access =
+      {
+        tr("set device action sequence state name"),
+        [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.get();},
+        [this, devicePos, smPos, t, actPos, seqPos](
+            const Enum<StateMachineType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<Enum<StateMachineType>>(access);
 }
 
-bool CmdCatalogue::setActionSequenceStateValue(const string &value,
+bool CmdCatalogue::setDeviceStateActionSequenceStateValue(const string &value,
     uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
     uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetActionStateValueCommand(c, value, devicePos, smPos, t,
-      actPos, seqPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<string> access =
+      {
+        tr("set device action sequence state value"),
+        [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateValue.get();},
+        [this, devicePos, smPos, t, actPos, seqPos](
+            const string &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateValue.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setActionSequenceMod(const Enum<Modifier> &value,
+bool CmdCatalogue::setDeviceStateActionSequenceMod(const Enum<Modifier> &value,
     uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
     uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetActionModCommand(c, value, devicePos, smPos, t, actPos,
-      seqPos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<Enum<Modifier>> access =
+      {
+        tr("set device action sequence modifier"),
+        [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].mod.get();},
+        [this, devicePos, smPos, t, actPos, seqPos](
+            const Enum<Modifier> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].mod.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<Enum<Modifier>>(access);
 }
 
-bool CmdCatalogue::setActionUnknownParam(
+bool CmdCatalogue::setDeviceStateActionUnknownParam(
     const data::item::UnknownElement &value, uint32_t devicePos, int smPos,
     item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
 {
-  auto *cmd = new SetDeviceActionUnknownParamCommand(c, value, devicePos, smPos,
-      actPos, t, seqPos);
+  auto *cmd = new SetDeviceStateActionUnknownParamCommand(c, value, devicePos,
+      smPos, actPos, t, seqPos);
   connectCommand(cmd);
   undo.push(cmd);
   return true;
 }
 
-bool CmdCatalogue::addNumpadCommand(uint32_t devicePos)
+bool CmdCatalogue::addDeviceNumpadCommand(uint32_t devicePos)
 {
   auto *cmd = new AddNumpadCommand(c, devicePos);
   auto ret = cmd->valid();
@@ -726,14 +890,15 @@ bool CmdCatalogue::addNumpadCommand(uint32_t devicePos)
     connectCommand(cmd);
     undo.push(cmd);
   } else {
-    emit writeLog(LogLevel::Warning, tr("modify: device add numpad pos %1 "
-        "failed").arg(devicePos), ContentType::PlainText);
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device add numpad pos %1 failed").arg(devicePos),
+        ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::removeNumpadCommand(uint32_t devicePos)
+bool CmdCatalogue::removeDeviceNumpadCommand(uint32_t devicePos)
 {
   auto *cmd = new RemoveNumpadCommand(c, devicePos);
   auto ret = cmd->valid();
@@ -742,14 +907,14 @@ bool CmdCatalogue::removeNumpadCommand(uint32_t devicePos)
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: removing numpad pos %1 failed, "
-            "dropped").arg(devicePos), ContentType::PlainText);
+        tr("modify: removing numpad pos %1 failed, dropped").arg(devicePos),
+        ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::addNumpadDigitsCommand(uint32_t devicePos,
+bool CmdCatalogue::addDeviceNumpadDigitsCommand(uint32_t devicePos,
     item::DigitSection s)
 {
   auto *cmd = new AddDigitsCommand(c, devicePos, s);
@@ -766,7 +931,7 @@ bool CmdCatalogue::addNumpadDigitsCommand(uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::removeNumpadDigitsCommand(uint32_t devicePos,
+bool CmdCatalogue::removeDeviceNumpadDigitsCommand(uint32_t devicePos,
     item::DigitSection s)
 {
   auto *cmd = new RemoveDigitsCommand(c, devicePos, s);
@@ -783,12 +948,17 @@ bool CmdCatalogue::removeNumpadDigitsCommand(uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setNumpadFixedDigits(uint32_t value, uint32_t devicePos)
+bool CmdCatalogue::setDeviceNumpadFixedDigits(uint32_t value,
+    uint32_t devicePos)
 {
-  auto *cmd = new SetNumpadFixedDigitsCommand(c, value, devicePos);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set numpad fixed digits"),
+        [this, devicePos]() {return c.getDevices()[devicePos].getNumpad()->fixedDigits.get();},
+        [this, devicePos](
+            const uint32_t &v) {c.getDevices()[devicePos].getNumpad()->fixedDigits.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<uint32_t>(access);
 }
 
 void CmdCatalogue::connectCommand(BaseCommand *cmd)
@@ -814,4 +984,3 @@ void CmdCatalogue::connectCommand(BaseCommand *cmd)
 
 }
 }
-

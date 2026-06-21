@@ -31,33 +31,5 @@ class SetUserMetadataCommand: public BaseCommand
     std::string prevModification;
 };
 
-class SetUserNewDeviceFoundCommand: public SetPropertyBaseCommand<bool>
-{
-  public:
-    SetUserNewDeviceFoundCommand(ConfigData &c, bool value, QUndoCommand *parent = nullptr);
-};
-
-
-class SetUserTrainingWheelsCommand: public SetPropertyBaseCommand<bool>
-{
-  public:
-    SetUserTrainingWheelsCommand(ConfigData &c, bool value, QUndoCommand *parent = nullptr);
-};
-
-
-class SetUserLocaleCommand: public SetPropertyBaseCommand<Enum<Locale>>
-{
-  public:
-    SetUserLocaleCommand(ConfigData &c, const Enum<Locale> &value, QUndoCommand *parent = nullptr);
-};
-
-class SetUserTimeFormatCommand: public SetPropertyBaseCommand<Enum<TimeFormat>>
-{
-  public:
-    SetUserTimeFormatCommand(ConfigData &c, const Enum<TimeFormat> &value, QUndoCommand *parent = nullptr);
-};
-
-
-
 }
 }

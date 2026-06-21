@@ -12,13 +12,13 @@ namespace document
 namespace data
 {
 
-class AddActionSequenceCommand: public BaseCommand
+class AddDeviceSmActionSequenceCommand: public BaseCommand
 {
   Q_OBJECT
   public:
     //pos -1 = append
     //device -- discrete action
-    AddActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos = -1, QUndoCommand *parent = nullptr);
+    AddDeviceSmActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;

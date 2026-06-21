@@ -41,14 +41,14 @@ SetDeviceUnknownPropertyCommand::SetDeviceUnknownPropertyCommand(ConfigData &c,
 {
 }
 
-SetDeviceActionUnknownParamCommand::SetDeviceActionUnknownParamCommand(
+SetDeviceStateActionUnknownParamCommand::SetDeviceStateActionUnknownParamCommand(
     ConfigData &c, const UnknownElement &value, uint32_t devicePos,
     uint32_t smPos, uint32_t actPos, item::StateTransitionAction t,
     uint32_t seqPos, QUndoCommand *parent) :
     SetUnknownPropertyCommand([&c, devicePos, smPos, actPos, t, seqPos]() -> std::vector<UnknownElement>& {
-      return getActionRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].getUnknownParams();
+      return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].getUnknownParams();
     }, [&c, devicePos, smPos, actPos, t, seqPos](const UnknownElement &e) {
-      getActionRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].getUnknownParams().push_back(e);
+      getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].getUnknownParams().push_back(e);
     }, value, parent)
 {
 }

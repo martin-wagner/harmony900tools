@@ -53,42 +53,5 @@ void SetUserMetadataCommand::undo()
   emit dirtyChanged(true);
 }
 
-SetUserNewDeviceFoundCommand::SetUserNewDeviceFoundCommand(ConfigData &c,
-    bool value, QUndoCommand *parent) :
-    SetPropertyBaseCommand<bool>(QObject::tr("set new device found"),
-        [&c]() {return c.getUser().newDeviceFound.get();}, [&c](const bool &v) {
-          c.getUser().newDeviceFound.set(v).setIncluded(Include::ALWAYS);
-        }, value, parent)
-{
-}
-
-SetUserTrainingWheelsCommand::SetUserTrainingWheelsCommand(ConfigData &c,
-    bool value, QUndoCommand *parent) :
-    SetPropertyBaseCommand<bool>(QObject::tr("set training wheels"),
-        [&c]() {return c.getUser().trainingWheels.get();}, [&c](const bool &v) {
-          c.getUser().trainingWheels.set(v).setIncluded(Include::ALWAYS);
-        }, value, parent)
-{
-}
-
-SetUserLocaleCommand::SetUserLocaleCommand(ConfigData &c,
-    const Enum<Locale> &value, QUndoCommand *parent) :
-    SetPropertyBaseCommand<Enum<Locale>>(QObject::tr("set locale"),
-        [&c]() {return c.getUser().locale.get();}, [&c](const Enum<Locale> &v) {
-          c.getUser().locale.set(v).setIncluded(Include::ALWAYS);}, value,
-        parent)
-{
-}
-
-SetUserTimeFormatCommand::SetUserTimeFormatCommand(ConfigData &c,
-    const Enum<TimeFormat> &value, QUndoCommand *parent) :
-    SetPropertyBaseCommand<Enum<TimeFormat>>(QObject::tr("set time format"),
-        [&c]() {return c.getUser().timeFormat.get();},
-        [&c](const Enum<TimeFormat> &v) {
-          c.getUser().timeFormat.set(v).setIncluded(Include::ALWAYS);}, value,
-        parent)
-{
-}
-
 }
 }

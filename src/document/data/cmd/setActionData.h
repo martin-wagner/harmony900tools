@@ -9,7 +9,7 @@ namespace document
 namespace data
 {
 
-inline item::DeviceAction* getActionRef(ConfigData &c, uint32_t devicePos,
+inline item::DeviceAction* getActionFromSmRef(ConfigData &c, uint32_t devicePos,
     uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
 {
   try {
@@ -40,22 +40,6 @@ inline item::DeviceAction* getActionRef(ConfigData &c, uint32_t devicePos,
   }
   return nullptr;
 }
-
-class SetActionTypeCommand: public SetPropertyBaseCommand<Enum<ActionType>>
-{
-  public:
-    SetActionTypeCommand(ConfigData &c, const Enum<ActionType> &value,
-        uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
-        uint32_t actPos, QUndoCommand *parent = nullptr);
-};
-
-class SetActionRepeatWillNotHarmCommand: public SetPropertyBaseCommand<bool>
-{
-  public:
-    SetActionRepeatWillNotHarmCommand(ConfigData &c, bool value,
-        uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
-        uint32_t actPos, QUndoCommand *parent = nullptr);
-};
 
 }
 }

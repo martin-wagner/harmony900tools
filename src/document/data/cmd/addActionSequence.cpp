@@ -10,7 +10,7 @@ namespace document
 namespace data
 {
 
-AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
+AddDeviceSmActionSequenceCommand::AddDeviceSmActionSequenceCommand(ConfigData &c,
     uint32_t devicePos, uint32_t smPos, uint32_t actPos,
     item::StateTransitionAction t, int seqPos, QUndoCommand *parent) :
     BaseCommand(
@@ -19,7 +19,7 @@ AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
 {
   uint32_t seqCount;
 
-  auto *act = getActionRef(c, devicePos, smPos, t, actPos);
+  auto *act = getActionFromSmRef(c, devicePos, smPos, t, actPos);
   if (act == nullptr) {
     return;
   }
@@ -33,13 +33,13 @@ AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
 
   getSeq =
       [&c, devicePos, smPos, t, actPos]() -> vector<item::SequenceItem>& {
-        return getActionRef(c, devicePos, smPos, t, actPos)->sequence;
+        return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence;
       };
   this->seqPos = seqPos;
   isValid = true;
 }
 
-void AddActionSequenceCommand::redo()
+void AddDeviceSmActionSequenceCommand::redo()
 {
   if (!isValid) {
     return;
@@ -50,7 +50,7 @@ void AddActionSequenceCommand::redo()
   emit dirtyChanged(true);
 }
 
-void AddActionSequenceCommand::undo()
+void AddDeviceSmActionSequenceCommand::undo()
 {
   if (!isValid) {
     return;
@@ -61,7 +61,7 @@ void AddActionSequenceCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool AddActionSequenceCommand::valid() const
+bool AddDeviceSmActionSequenceCommand::valid() const
 {
   return isValid;
 }

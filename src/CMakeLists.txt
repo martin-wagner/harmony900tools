@@ -52,16 +52,9 @@ set(sources
   document/data/cmd/removeNumpad.cpp
   document/data/cmd/removeState.cpp
   document/data/cmd/removeStatemachine.cpp
-  document/data/cmd/setButtonData.cpp
-  document/data/cmd/setActionData.cpp
-  document/data/cmd/setActionSequenceData.cpp
   document/data/cmd/setControllerMetadata.cpp
-  document/data/cmd/setDeviceData.cpp
-  document/data/cmd/setNumpadData.cpp
-  document/data/cmd/setStatemachineData.cpp
   document/data/cmd/setUnknownProperty.cpp
   document/data/cmd/setUserData.cpp
-  document/data/cmd/setUserName.cpp
   document/data/items/activity.cpp
   document/data/items/button.cpp
   document/files/h900.cpp

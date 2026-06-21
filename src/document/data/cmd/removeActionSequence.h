@@ -11,12 +11,12 @@ namespace document
 namespace data
 {
 
-class RemoveActionSequenceCommand: public BaseCommand
+class RemoveDeviceSmActionSequenceCommand: public BaseCommand
 {
   Q_OBJECT
   public:
     //discrete action
-    RemoveActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, uint32_t seqPos, QUndoCommand *parent = nullptr);
+    RemoveDeviceSmActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, uint32_t seqPos, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;

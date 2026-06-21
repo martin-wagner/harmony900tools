@@ -182,9 +182,9 @@ bool ConfigH900::readUser(pugi::xml_node &root)
   addId(id);
   worker->setUserId(id);
   auto firstName = user.child("Presentation").child("FirstName").child_value();
+  worker->setUserFirstName(QString::fromStdString(firstName));
   auto lastName = user.child("Presentation").child("LastName").child_value();
-  worker->setUserName(QString::fromStdString(firstName),
-      QString::fromStdString(lastName));
+  worker->setUserLastName(QString::fromStdString(lastName));
   worker->setUserMetadata();
 
   for (pugi::xml_node prop : user.child("Properties").children("Property")) {
@@ -273,11 +273,14 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
 
   auto typeStr = device.child("Type").child_value();
   Enum<DeviceType> type(typeStr);
+  worker->setDeviceType(type, pos);
   auto mnf = device.child("Manufacturer").child_value();
+  worker->setDeviceMnf(mnf, pos);
   auto model = device.child("Model").child_value();
+  worker->setDeviceModel(model, pos);
   auto presentation = device.child("Presentation");
   auto label = presentation.child("Label").child_value();
-  worker->setDeviceMetadata(type, mnf, model, label, pos);
+  worker->setDeviceLabel(label, pos);
 
   for (pugi::xml_node prop : device.child("Properties").children("Property")) {
     auto name = string(prop.attribute("name").as_string());
@@ -442,7 +445,7 @@ bool ConfigH900::readButton(pugi::xml_node &button, enum item::ButtonType t)
 
   auto devicePos = c->getDevices().size() - 1;
 
-  auto ret = worker->addButtonCommand(t, devicePos, -1); //append
+  auto ret = worker->addDeviceButtonCommand(t, devicePos, -1); //append
   if (!ret) {
     return false;
   }
@@ -455,28 +458,28 @@ bool ConfigH900::readButton(pugi::xml_node &button, enum item::ButtonType t)
   auto actionId = string(
       button.child("ActionId").text().as_string("1_unknown_Hold"));
   auto action = item::Button::getAction(actionId);
-  worker->setButtonAction(action, t, devicePos, buttonPos);
+  worker->setDeviceButtonAction(action, t, devicePos, buttonPos);
 
   //hard/soft are different
   auto name = button.attribute("name");
   if (name) {
     auto c = name.value();
-    worker->setButtonName(string(c), t, devicePos, buttonPos);
+    worker->setDeviceButtonName(string(c), t, devicePos, buttonPos);
   } else {
     auto c = button.child("Label").child_value();
-    worker->setButtonName(string(c), t, devicePos, buttonPos);
+    worker->setDeviceButtonName(string(c), t, devicePos, buttonPos);
   }
 
   //only soft buttons
   auto pos = button.child("Position");
   if (pos) {
     auto p = pos.text().as_uint(0);
-    worker->setButtonPosition(p, t, devicePos, buttonPos);
+    worker->setDeviceButtonPosition(p, t, devicePos, buttonPos);
   }
   auto file = button.child("Icon");
   if (file) {
     auto c = name.value();
-    worker->setButtonFile(string(c), t, devicePos, buttonPos);
+    worker->setDeviceButtonFile(string(c), t, devicePos, buttonPos);
   }
   return true;
 }
@@ -494,17 +497,19 @@ bool ConfigH900::readStatemachine(pugi::xml_node &state)
 {
   auto devicePos = c->getDevices().size() - 1;
 
-  auto ret = worker->addStatemachineCommand(devicePos, -1); //append
+  auto ret = worker->addDeviceStatemachineCommand(devicePos, -1); //append
   if (!ret) {
     return false;
   }
   auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
 
   auto id = state.child("Id").text().as_string();
-  worker->setStatemachineType(Enum<StateMachineType>(id), devicePos, smPos);
+  worker->setDeviceStatemachineType(Enum<StateMachineType>(id), devicePos,
+      smPos);
   auto delay = state.child("Delay");
   if (delay) {
-    worker->setStatemachineDelay(delay.text().as_uint(0), devicePos, smPos);
+    worker->setDeviceStatemachineDelay(delay.text().as_uint(0), devicePos,
+        smPos);
   }
 
   auto discreteActions = state.child("DiscreteActions");
@@ -550,7 +555,7 @@ bool ConfigH900::readDiscreteAction(pugi::xml_node &action)
     return false;
   }
 
-  auto ret = worker->addStateCommand(devicePos, smPos,
+  auto ret = worker->addDeviceSmStateCommand(devicePos, smPos,
       item::StateTransitionType::Discrete, name, -1); //append
   if (!ret) {
     return false;
@@ -559,7 +564,7 @@ bool ConfigH900::readDiscreteAction(pugi::xml_node &action)
       c->getDevices()[devicePos].getStateMachines()[smPos].discrete.states.size()
           - 1;
   auto type = Enum<ActionType>(action.name());
-  worker->setActionType(type, devicePos, smPos,
+  worker->setDeviceSmActionType(type, devicePos, smPos,
       item::StateTransitionAction::Discrete_Enter, actPos);
   return readDiscreteActionSequences(action);
 }
@@ -581,7 +586,7 @@ bool ConfigH900::readDiscreteActionSequence(pugi::xml_node &sequence)
   auto actPos =
       c->getDevices()[devicePos].getStateMachines()[smPos].discrete.states.size()
           - 1;
-  worker->addActionSequenceCommand(devicePos, smPos, actPos,
+  worker->addDeviceStateActionSequenceCommand(devicePos, smPos, actPos,
       item::StateTransitionAction::Discrete_Enter, -1); //append
   auto seqPos =
       c->getDevices()[devicePos].getStateMachines()[smPos].discrete.enterStateAction[actPos].sequence.size()
@@ -605,7 +610,7 @@ bool ConfigH900::readRelativeActions(pugi::xml_node &state)
   //state names
   for (pugi::xml_node prop : state.children("Value")) {
     auto name = prop.text().as_string();
-    ret &= worker->addStateCommand(devicePos, smPos,
+    ret &= worker->addDeviceSmStateCommand(devicePos, smPos,
         item::StateTransitionType::Relative, name, -1); //append
   }
   if (!ret) {
@@ -642,11 +647,11 @@ bool ConfigH900::readRelativeAction(pugi::xml_node &action)
           ContentType::PlainText);
       return false;
   }
-  auto ret = worker->addActionCommand(devicePos, smPos, add);
+  auto ret = worker->addDeviceSmActionCommand(devicePos, smPos, add);
   if (!ret) {
     return false;
   }
-  worker->setActionType(type, devicePos, smPos, add, 0);
+  worker->setDeviceSmActionType(type, devicePos, smPos, add, 0);
   return readRelativeActionSequences(action, add);
 }
 
@@ -669,7 +674,7 @@ bool ConfigH900::readRelativeActionSequence(pugi::xml_node &sequence,
   auto devicePos = c->getDevices().size() - 1;
   auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
 
-  worker->addActionSequenceCommand(devicePos, smPos, 0, t, -1); //append
+  worker->addDeviceStateActionSequenceCommand(devicePos, smPos, 0, t, -1); //append
   switch (t) {
     case item::StateTransitionAction::Relative_Reset:
       seqPos =
@@ -706,8 +711,8 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
   }
   auto operation = sequence.child("Operation");
   auto opcode = operation.child("Name").text().as_string();
-  worker->setActionSequenceOp(Enum<Operation>(opcode), devicePos, smPos,
-      t, actPos, seqPos);
+  worker->setDeviceStateActionSequenceOp(Enum<Operation>(opcode), devicePos,
+      smPos, t, actPos, seqPos);
   for (pugi::xml_node prop : operation.children("Parameter")) {
     auto name = string(prop.attribute("name").as_string());
     auto h = lib::hash_fnv1a(name.data(), name.size());
@@ -717,32 +722,32 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
         break;
       case "Command"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceCmd(val, devicePos, smPos, t, actPos,
-            seqPos);
+        worker->setDeviceStateActionSequenceCmd(val, devicePos, smPos, t,
+            actPos, seqPos);
         break;
       }
       case "Modifier"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceMod(Enum<Modifier>(val), devicePos,
+        worker->setDeviceStateActionSequenceMod(Enum<Modifier>(val), devicePos,
             smPos, t, actPos, seqPos);
         break;
       }
       case "DelayValue"_hash: {
         auto val = prop.text().as_uint();
-        worker->setActionSequenceDelayMs(val, devicePos, smPos, t,
+        worker->setDeviceStateActionSequenceDelayMs(val, devicePos, smPos, t,
             actPos, seqPos);
         break;
       }
       case "State"_hash:
       case "StateName"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceStateName(Enum<StateMachineType>(val),
-            devicePos, smPos, t, actPos, seqPos);
+        worker->setDeviceStateActionSequenceStateName(
+            Enum<StateMachineType>(val), devicePos, smPos, t, actPos, seqPos);
         break;
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setActionSequenceStateValue(val, devicePos, smPos, t,
+        worker->setDeviceStateActionSequenceStateValue(val, devicePos, smPos, t,
             actPos, seqPos);
         break;
       }
@@ -751,8 +756,8 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
         emit writeLog(LogLevel::Debug,
             tr("import device action: unknown property (value = %1)").arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
-        worker->setActionUnknownParam(unknown, devicePos, smPos, t, actPos,
-            seqPos);
+        worker->setDeviceStateActionUnknownParam(unknown, devicePos, smPos, t,
+            actPos, seqPos);
         break;
       }
     }
@@ -764,34 +769,38 @@ bool ConfigH900::readNumeric(pugi::xml_node &numeric)
 {
   auto devicePos = c->getDevices().size() - 1;
 
-  auto ret = worker->addNumpadCommand(devicePos);
+  auto ret = worker->addDeviceNumpadCommand(devicePos);
   if (!ret) {
     return false;
   }
   auto digits = numeric.child("FixedDigits");
   if (digits) {
-    worker->setNumpadFixedDigits(digits.text().as_uint(), devicePos);
+    worker->setDeviceNumpadFixedDigits(digits.text().as_uint(), devicePos);
   }
 
   ret = true;
   auto firstDigit = numeric.child("FirstDigit");
   if (firstDigit) {
-    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::First);
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::First);
     //todo read data
   }
   auto middleDigit = numeric.child("MiddleDigit");
   if (middleDigit) {
-    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::Middle);
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::Middle);
     //todo read data
   }
   auto lastDigit = numeric.child("LastDigit");
   if (lastDigit) {
-    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::Last);
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::Last);
     //todo read data
   }
   auto finish = numeric.child("Finish");
   if (finish) {
-    ret &= worker->addNumpadDigitsCommand(devicePos, item::DigitSection::Finish);
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::Finish);
     //todo read data
   }
   return ret;
