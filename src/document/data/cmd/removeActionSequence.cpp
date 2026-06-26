@@ -10,11 +10,11 @@ namespace document
 namespace data
 {
 
-RemoveDeviceSmActionSequenceCommand::RemoveDeviceSmActionSequenceCommand(ConfigData &c,
-    uint32_t devicePos, uint32_t smPos, uint32_t actPos,
+RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
+    ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos,
     item::StateTransitionAction t, uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
-        QObject::tr("Remove Sequence from Action (Pos: %1)").arg(devicePos),
+        QObject::tr("Remove Sequence from Action/SM (Pos: %1)").arg(devicePos),
         parent)
 {
   auto *act = getActionFromSmRef(c, devicePos, smPos, t, actPos);
@@ -25,16 +25,38 @@ RemoveDeviceSmActionSequenceCommand::RemoveDeviceSmActionSequenceCommand(ConfigD
     return;
   }
 
-  getSeq =
-      [&c, devicePos, smPos, t, actPos]() -> vector<item::SequenceItem>& {
-        return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence;
-      };
+  getSeq = [&c, devicePos, smPos, t, actPos]() -> vector<item::SequenceItem>& {
+    return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence;
+  };
   this->seqPos = seqPos;
   sequenceItem = getSeq()[seqPos];
   isValid = true;
 }
 
-void RemoveDeviceSmActionSequenceCommand::redo()
+RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
+    ConfigData &c, uint32_t devicePos, item::DigitSection s, uint32_t digit,
+    int seqPos, QUndoCommand *parent) :
+    BaseCommand(
+        QObject::tr("Remove Sequence from Action/NUM (Pos: %1)").arg(devicePos),
+        parent)
+{
+  auto *act = getActionFromNumpadRef(c, devicePos, s, digit);
+  if (act == nullptr) {
+    return;
+  }
+  if (seqPos >= act->sequence.size()) {
+    return;
+  }
+
+  getSeq = [&c, devicePos, s, digit]() -> vector<item::SequenceItem>& {
+    return getActionFromNumpadRef(c, devicePos, s, digit)->sequence;
+  };
+  this->seqPos = seqPos;
+  sequenceItem = getSeq()[seqPos];
+  isValid = true;
+}
+
+void RemoveDeviceActionSequenceCommand::redo()
 {
   if (!isValid) {
     return;
@@ -45,7 +67,7 @@ void RemoveDeviceSmActionSequenceCommand::redo()
   emit dirtyChanged(true);
 }
 
-void RemoveDeviceSmActionSequenceCommand::undo()
+void RemoveDeviceActionSequenceCommand::undo()
 {
   if (!isValid) {
     return;
@@ -56,7 +78,7 @@ void RemoveDeviceSmActionSequenceCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool RemoveDeviceSmActionSequenceCommand::valid() const
+bool RemoveDeviceActionSequenceCommand::valid() const
 {
   return isValid;
 }

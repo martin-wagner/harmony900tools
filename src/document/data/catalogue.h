@@ -112,13 +112,28 @@ class CmdCatalogue : public QObject
     bool setDeviceStateActionSequenceStateName(const Enum<StateMachineType> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
     bool setDeviceStateActionSequenceStateValue(const std::string &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
     bool setDeviceStateActionSequenceMod(const Enum<Modifier> &value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, int smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
     //numpad
     bool addDeviceNumpadCommand(uint32_t devicePos);
     bool removeDeviceNumpadCommand(uint32_t devicePos);
     bool addDeviceNumpadDigitsCommand(uint32_t devicePos, item::DigitSection s);
     bool removeDeviceNumpadDigitsCommand(uint32_t devicePos, item::DigitSection s);
     bool setDeviceNumpadFixedDigits(uint32_t value, uint32_t devicePos);
+    //numpad actions
+    bool setDeviceNumpadActionRepeatWillNotHarm(bool v, uint32_t devicePos, item::DigitSection s, uint32_t digit = 0);
+    //numpad action list items
+    bool addDeviceNumpadActionSequenceCommand(uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos);
+    bool removeDeviceNumpadActionSequenceCommand(uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceOp(const Enum<Operation> &value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceCmd(const std::string &value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceDelayMs(uint32_t value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceStateName(const Enum<StateMachineType> &value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceStateValue(const std::string &value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceMod(const Enum<Modifier> &value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+
+
+
 
 
   protected:

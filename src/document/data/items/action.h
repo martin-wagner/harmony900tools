@@ -43,7 +43,7 @@ class SequenceItem {
 class DeviceAction
 {
   public:
-    PropertyEnum<ActionType> actionType{ActionType::None, Include::ALWAYS};
+    PropertyEnum<ActionType> actionType{ActionType::None, Include::CHECK};
     PropertyBool repeatWillNotHarm{false, Include::ALWAYS};
 
     std::vector<SequenceItem> sequence;

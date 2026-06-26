@@ -751,15 +751,15 @@ bool CmdCatalogue::setDeviceSmActionRepeatWillNotHarm(bool v,
 bool CmdCatalogue::addDeviceStateActionSequenceCommand(uint32_t devicePos,
     uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos)
 {
-  auto *cmd = new AddDeviceSmActionSequenceCommand(c, devicePos, smPos, actPos,
-      t, seqPos);
+  auto *cmd = new AddDeviceActionSequenceCommand(c, devicePos, smPos, actPos, t,
+      seqPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device act-seq pos %1/%2/%3/%4 failed, dropped").arg(
+        tr("modify: device act-seq pos %1/%2a/%3/%4 failed, dropped").arg(
             devicePos).arg(smPos).arg(actPos).arg(seqPos),
         ContentType::PlainText);
     delete cmd;
@@ -771,7 +771,7 @@ bool CmdCatalogue::removeDeviceStateActionSequenceCommand(uint32_t devicePos,
     uint32_t smPos, uint32_t actPos, item::StateTransitionAction t,
     uint32_t seqPos)
 {
-  auto *cmd = new RemoveDeviceSmActionSequenceCommand(c, devicePos, smPos,
+  auto *cmd = new RemoveDeviceActionSequenceCommand(c, devicePos, smPos,
       actPos, t, seqPos);
   auto ret = cmd->valid();
   if (ret == true) {
@@ -779,7 +779,7 @@ bool CmdCatalogue::removeDeviceStateActionSequenceCommand(uint32_t devicePos,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: device act-seq pos %1/%2/%3/%4 doesn't exist, dropped").arg(
+        tr("modify: device act-seq pos %1/%2a/%3/%4 doesn't exist, dropped").arg(
             devicePos).arg(smPos).arg(actPos).arg(seqPos),
         ContentType::PlainText);
     delete cmd;
@@ -872,7 +872,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceMod(const Enum<Modifier> &value,
 }
 
 bool CmdCatalogue::setDeviceStateActionUnknownParam(
-    const data::item::UnknownElement &value, uint32_t devicePos, int smPos,
+    const data::item::UnknownElement &value, uint32_t devicePos, uint32_t smPos,
     item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
 {
   auto *cmd = new SetDeviceStateActionUnknownParamCommand(c, value, devicePos,
@@ -959,6 +959,148 @@ bool CmdCatalogue::setDeviceNumpadFixedDigits(uint32_t value,
             const uint32_t &v) {c.getDevices()[devicePos].getNumpad()->fixedDigits.set(v).setIncluded(Include::ALWAYS);},
         value };
   return setProperty<uint32_t>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionRepeatWillNotHarm(bool v,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set device action repeat will not harm"),
+        [this, devicePos, s, digit]() {return getActionFromNumpadRef(c, devicePos, s, digit)->repeatWillNotHarm.get();},
+        [this, devicePos, s, digit](
+            const bool &v) {getActionFromNumpadRef(c, devicePos, s, digit)->repeatWillNotHarm.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::addDeviceNumpadActionSequenceCommand(uint32_t devicePos,
+    item::DigitSection s, uint32_t digit, int seqPos)
+{
+  auto *cmd = new AddDeviceActionSequenceCommand(c, devicePos, s, digit,
+      seqPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device act-seq pos %1/%2b/%3/%4 failed, dropped").arg(
+            devicePos).arg((int) s).arg(digit).arg(seqPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeDeviceNumpadActionSequenceCommand(uint32_t devicePos,
+    item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  auto *cmd = new RemoveDeviceActionSequenceCommand(c, devicePos, s, digit,
+      seqPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: device act-seq pos %1/%2b/%3/%4 doesn't exist, dropped").arg(
+            devicePos).arg((int) s).arg(digit).arg(seqPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setDeviceNumpadActionSequenceOp(const Enum<Operation> &value,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  PropertyAccess<Enum<Operation>> access =
+      {
+        tr("set device action sequence opcode"),
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].opcode.get();},
+        [this, devicePos, s, digit, seqPos](
+            const Enum<Operation> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].opcode.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<Enum<Operation>>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionSequenceCmd(const std::string &value,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set device action sequence cmd"),
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].cmd.get();},
+        [this, devicePos, s, digit, seqPos](
+            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].cmd.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionSequenceDelayMs(uint32_t value,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set device action sequence delay ms"),
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].delayMs.get();},
+        [this, devicePos, s, digit, seqPos](
+            const uint32_t &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<uint32_t>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionSequenceStateName(
+    const Enum<StateMachineType> &value, uint32_t devicePos,
+    item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  PropertyAccess<Enum<StateMachineType>> access =
+      {
+        tr("set device action sequence state name"),
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.get();},
+        [this, devicePos, s, digit, seqPos](
+            const Enum<StateMachineType> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<Enum<StateMachineType>>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionSequenceStateValue(
+    const std::string &value, uint32_t devicePos, item::DigitSection s,
+    uint32_t digit, uint32_t seqPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set device action sequence state value"),
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.get();},
+        [this, devicePos, s, digit, seqPos](
+            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionSequenceMod(const Enum<Modifier> &value,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  PropertyAccess<Enum<Modifier>> access =
+      {
+        tr("set device action sequence modifier"),
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].mod.get();},
+        [this, devicePos, s, digit, seqPos](
+            const Enum<Modifier> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].mod.set(v).setIncluded(Include::ALWAYS);},
+        value };
+  return setProperty<Enum<Modifier>>(access);
+}
+
+bool CmdCatalogue::setDeviceNumpadActionUnknownParam(
+    const data::item::UnknownElement &value, uint32_t devicePos,
+    item::DigitSection s, uint32_t digit, uint32_t seqPos)
+{
+  auto *cmd = new SetDeviceNumpadActionUnknownParamCommand(c, value, devicePos,
+      s, digit, seqPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
 }
 
 void CmdCatalogue::connectCommand(BaseCommand *cmd)

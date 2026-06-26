@@ -783,27 +783,159 @@ bool ConfigH900::readNumeric(pugi::xml_node &numeric)
   if (firstDigit) {
     ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
         item::DigitSection::First);
-    //todo read data
+    ret &= readNumericActions(firstDigit, item::DigitSection::First);
   }
   auto middleDigit = numeric.child("MiddleDigit");
   if (middleDigit) {
     ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
         item::DigitSection::Middle);
-    //todo read data
+    ret &= readNumericActions(middleDigit, item::DigitSection::Middle);
   }
   auto lastDigit = numeric.child("LastDigit");
   if (lastDigit) {
     ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
         item::DigitSection::Last);
-    //todo read data
+    ret &= readNumericActions(lastDigit, item::DigitSection::Last);
   }
   auto finish = numeric.child("Finish");
   if (finish) {
     ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
         item::DigitSection::Finish);
-    //todo read data
+    ret &= readNumericActionSequences(finish, devicePos,
+        item::DigitSection::Finish, 0);
   }
   return ret;
+}
+
+bool ConfigH900::readNumericActions(pugi::xml_node &actions,
+    item::DigitSection s)
+{
+  uint32_t i;
+  auto ret = true;
+  auto devicePos = c->getDevices().size() - 1;
+
+  if (actions.children().empty()) {
+    return true;
+  }
+  if (std::distance(actions.children().begin(), actions.children().end())
+      != item::Digits().size()) {
+    emit writeLog(LogLevel::Error,
+        tr("xml: numpad items != %1 in %2").arg(item::Digits().size()).arg(
+            QString::fromStdString(c->getDevices().back().label.get())),
+        ContentType::PlainText);
+    return false;
+  }
+
+  i = 0;
+  for (pugi::xml_node prop : actions.children()) {
+    //ignore "Digit value = x"
+    ret &= readNumericActionSequences(prop, devicePos, s, i);
+    i++;
+  }
+  return ret;
+}
+
+bool ConfigH900::readNumericActionSequences(pugi::xml_node &action,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit)
+{
+  auto ret = true;
+
+  for (pugi::xml_node prop : action.children("Action")) {
+    ret &= readNumericActionSequence(prop, devicePos, s, digit);
+  }
+  return ret;
+}
+
+bool ConfigH900::readNumericActionSequence(pugi::xml_node &sequence,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit)
+{
+  uint32_t seqPos;
+
+  worker->addDeviceNumpadActionSequenceCommand(devicePos, s, digit, -1); //append
+  auto &num = c->getDevices()[devicePos].getNumpad().value();
+  switch (s) {
+    case item::DigitSection::First:
+      seqPos = num.first->at(digit).sequence.size() - 1;
+      break;
+    case item::DigitSection::Middle:
+      seqPos = num.middle->at(digit).sequence.size() - 1;
+      break;
+    case item::DigitSection::Last:
+      seqPos = num.last->at(digit).sequence.size() - 1;
+      break;
+    default:
+      seqPos = 0;
+      break;
+  }
+  return readActionSequenceData(sequence, devicePos, s, digit, seqPos);
+}
+
+bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
+    uint32_t devicePos, data::item::DigitSection s, uint32_t digit,
+    uint32_t seqPos)
+{
+  auto target = sequence.child("Target").text().as_string();
+  if (string(target) != "Device") {
+    emit writeLog(LogLevel::Warning,
+        tr("xml: Action Target != Device in %1. This is not supported").arg(
+            QString::fromStdString(c->getDevices().back().label.get())),
+        ContentType::PlainText);
+    return false;
+  }
+  auto operation = sequence.child("Operation");
+  auto opcode = operation.child("Name").text().as_string();
+  worker->setDeviceNumpadActionSequenceOp(Enum<Operation>(opcode), devicePos, s,
+      digit, seqPos);
+  for (pugi::xml_node prop : operation.children("Parameter")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+    switch (h) {
+      case "DeviceId"_hash:
+        //don't store redundant data
+        break;
+      case "Command"_hash: {
+        auto val = prop.text().as_string();
+        worker->setDeviceNumpadActionSequenceCmd(val, devicePos, s, digit,
+            seqPos);
+        break;
+      }
+      case "Modifier"_hash: {
+        auto val = prop.text().as_string();
+        worker->setDeviceNumpadActionSequenceMod(Enum<Modifier>(val), devicePos,
+            s, digit, seqPos);
+        break;
+      }
+      case "DelayValue"_hash: {
+        auto val = prop.text().as_uint();
+        worker->setDeviceNumpadActionSequenceDelayMs(val, devicePos, s, digit,
+            seqPos);
+        break;
+      }
+      case "State"_hash:
+      case "StateName"_hash: {
+        auto val = prop.text().as_string();
+        worker->setDeviceNumpadActionSequenceStateName(
+            Enum<StateMachineType>(val), devicePos, s, digit, seqPos);
+        break;
+      }
+      case "Value"_hash: {
+        auto val = prop.text().as_string();
+        worker->setDeviceNumpadActionSequenceStateValue(val, devicePos, s,
+            digit, seqPos);
+        break;
+      }
+      default: {
+        auto unknown = toUnknownElement(prop);
+        emit writeLog(LogLevel::Debug,
+            tr("import device action: unknown property (value = %1)").arg(
+                QString::fromStdString(unknown.text)), ContentType::PlainText);
+        worker->setDeviceNumpadActionUnknownParam(unknown, devicePos, s, digit,
+            seqPos);
+        break;
+      }
+    }
+  }
+  return true;
 }
 
 bool ConfigH900::readActivities(pugi::xml_node &root)
@@ -990,7 +1122,7 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
   writeProperty(properties, "NumDiscs", data.numDiscs);
   writeProperty(properties, "NumLights", data.numLights);
   writeProperty(properties, "PvrType", data.pvrType);
-  writeProperty(properties, "RecordMedia Fixed Disc", data.recordMediaFixedDisc);
+  writeProperty(properties, "RecordMedia Fixed Disc",data.recordMediaFixedDisc);
   writeProperty(properties, "RecordMedia Removable Videotape", data.recordMediaRemovableVideotape);
   writeProperty(properties, "RevertInput", data.revertInput);
   writeProperty(properties, "Scart", data.scart);
@@ -1004,7 +1136,7 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
   ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
   if (data.getNumpad() != nullopt) {
     auto numeric = device.append_child("Numeric");
-    ret &= writeNumeric(numeric, data.getNumpad().value());
+    ret &= writeNumeric(numeric, data.getId(), data.getNumpad().value());
   }
 
   //todo weitere...
@@ -1176,28 +1308,46 @@ bool ConfigH900::writeDeviceAction(pugi::xml_node &actionType,
   return true;
 }
 
-bool ConfigH900::writeNumeric(pugi::xml_node &numeric, const item::Numpad &data)
+bool ConfigH900::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
+    const item::Numpad &data)
 {
+  bool ret = true;
+
   if (data.fixedDigits.isIncluded() == Include::ALWAYS) {
     numeric.append_child("FixedDigits").text().set(data.fixedDigits.get());
   }
   if (data.finish != nullopt) {
-    numeric.append_child("Finish");
-    //todo content
+    auto actionType = numeric.append_child("Finish");
+    ret &= writeDeviceAction(actionType, deviceId, *data.finish,
+        item::StateTransitionType::Discrete); //dummy
   }
   if (data.first != nullopt) {
-    numeric.append_child("FirstDigit");
-    //todo content
+    auto actionType = numeric.append_child("FirstDigit");
+    ret &= writeNumericActions(actionType, deviceId, *data.first);
   }
   if (data.middle != nullopt) {
-    numeric.append_child("MiddleDigit");
-    //todo content
+    auto actionType = numeric.append_child("MiddleDigit");
+    ret &= writeNumericActions(actionType, deviceId, *data.middle);
   }
   if (data.last != nullopt) {
-    numeric.append_child("LastDigit");
-    //todo content
+    auto actionType = numeric.append_child("LastDigit");
+    ret &= writeNumericActions(actionType, deviceId, *data.last);
   }
   return true;
+}
+
+bool ConfigH900::writeNumericActions(pugi::xml_node &action, uint32_t deviceId,
+    const data::item::Digits &data)
+{
+  bool ret = true;
+
+  for (int i = 0; i < data.size(); i++) {
+    auto actionType = action.append_child("Digit");
+    actionType.append_attribute("value").set_value(to_string(i));
+    ret &= writeDeviceAction(actionType, deviceId, data[i],
+        item::StateTransitionType::Discrete); //dummy
+  }
+  return ret;
 }
 
 void ConfigH900::writeUnknownElement(pugi::xml_node &parent,

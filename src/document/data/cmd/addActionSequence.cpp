@@ -10,11 +10,11 @@ namespace document
 namespace data
 {
 
-AddDeviceSmActionSequenceCommand::AddDeviceSmActionSequenceCommand(ConfigData &c,
+AddDeviceActionSequenceCommand::AddDeviceActionSequenceCommand(ConfigData &c,
     uint32_t devicePos, uint32_t smPos, uint32_t actPos,
     item::StateTransitionAction t, int seqPos, QUndoCommand *parent) :
     BaseCommand(
-        QObject::tr("Add Sequence to Action (to device: %1)").arg(devicePos),
+        QObject::tr("Add Sequence to Action/SM (to device: %1)").arg(devicePos),
         parent)
 {
   uint32_t seqCount;
@@ -31,15 +31,42 @@ AddDeviceSmActionSequenceCommand::AddDeviceSmActionSequenceCommand(ConfigData &c
     return;
   }
 
-  getSeq =
-      [&c, devicePos, smPos, t, actPos]() -> vector<item::SequenceItem>& {
-        return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence;
-      };
+  getSeq = [&c, devicePos, smPos, t, actPos]() -> vector<item::SequenceItem>& {
+    return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence;
+  };
   this->seqPos = seqPos;
   isValid = true;
 }
 
-void AddDeviceSmActionSequenceCommand::redo()
+AddDeviceActionSequenceCommand::AddDeviceActionSequenceCommand(ConfigData &c,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos,
+    QUndoCommand *parent) :
+    BaseCommand(
+        QObject::tr("Add Sequence to Action/NUM (to device: %1)").arg(
+            devicePos), parent)
+{
+  uint32_t seqCount;
+
+  auto *act = getActionFromNumpadRef(c, devicePos, s, digit);
+  if (act == nullptr) {
+    return;
+  }
+  seqCount = act->sequence.size();
+  if (seqPos < 0) {
+    seqPos = seqCount;
+  }
+  if (seqPos > static_cast<int>(seqCount)) {
+    return;
+  }
+
+  getSeq = [&c, devicePos, s, digit]() -> vector<item::SequenceItem>& {
+    return getActionFromNumpadRef(c, devicePos, s, digit)->sequence;
+  };
+  this->seqPos = seqPos;
+  isValid = true;
+}
+
+void AddDeviceActionSequenceCommand::redo()
 {
   if (!isValid) {
     return;
@@ -50,7 +77,7 @@ void AddDeviceSmActionSequenceCommand::redo()
   emit dirtyChanged(true);
 }
 
-void AddDeviceSmActionSequenceCommand::undo()
+void AddDeviceActionSequenceCommand::undo()
 {
   if (!isValid) {
     return;
@@ -61,7 +88,7 @@ void AddDeviceSmActionSequenceCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool AddDeviceSmActionSequenceCommand::valid() const
+bool AddDeviceActionSequenceCommand::valid() const
 {
   return isValid;
 }
