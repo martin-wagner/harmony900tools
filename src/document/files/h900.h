@@ -72,7 +72,8 @@ class ConfigH900 : public QObject
     bool readNumericActionSequences(pugi::xml_node &action, uint32_t devicePos, data::item::DigitSection s, uint32_t digit);
     bool readNumericActionSequence(pugi::xml_node &sequence, uint32_t devicePos, data::item::DigitSection s, uint32_t digit);
     bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, data::item::DigitSection s, uint32_t digit, uint32_t seqPos);
- 
+    bool readIrList(pugi::xml_node &commands);
+    bool readIr(pugi::xml_node &command);
 
 
     bool readActivities(pugi::xml_node &root);
@@ -103,7 +104,9 @@ class ConfigH900 : public QObject
     bool writeDeviceAction(pugi::xml_node &actionType, uint32_t deviceId, const data::item::DeviceAction &data, data::item::StateTransitionType t);
     bool writeNumeric(pugi::xml_node &numeric, uint32_t deviceId, const data::item::Numpad &data);
     bool writeNumericActions(pugi::xml_node &action, uint32_t deviceId, const data::item::Digits &data);
-
+    bool writeIrList(pugi::xml_node &commands, const data::item::Commands &data);
+    bool writeIr(pugi::xml_node &command, const data::item::RawCommand &data);
+    bool writeIr(pugi::xml_node &command, const data::item::ProtoCommand &data);
 
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
 

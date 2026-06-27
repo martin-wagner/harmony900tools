@@ -19,17 +19,17 @@ inline item::DeviceAction* getActionFromSmRef(ConfigData &c, uint32_t devicePos,
       case item::StateTransitionAction::Discrete_Enter:
         return &sm.discrete.enterStateAction.at(actPos);
       case item::StateTransitionAction::Relative_Reset:
-        if (sm.relative.resetAction != std::nullopt) {
+        if (sm.relative.resetAction.has_value()) {
           return &sm.relative.resetAction.value();
         }
         break;
       case item::StateTransitionAction::Relative_Next:
-        if (sm.relative.nextStateAction != std::nullopt) {
+        if (sm.relative.nextStateAction.has_value()) {
           return &sm.relative.nextStateAction.value();
         }
         break;
       case item::StateTransitionAction::Relative_Prev:
-        if (sm.relative.prevStateAction != std::nullopt) {
+        if (sm.relative.prevStateAction.has_value()) {
           return &sm.relative.prevStateAction.value();
         }
         break;
@@ -46,28 +46,28 @@ inline item::DeviceAction* getActionFromNumpadRef(ConfigData &c,
 {
   try {
     auto &num = c.getDevices().at(devicePos).getNumpad();
-    if (num == std::nullopt) {
+    if (!num.has_value()) {
       return nullptr;
     }
 
     switch (s) {
       case item::DigitSection::First:
-        if (num->first != std::nullopt) {
+        if (num->first.has_value()) {
           return &num->first->at(digit);
         }
         break;
       case item::DigitSection::Middle:
-        if (num->middle != std::nullopt) {
+        if (num->middle.has_value()) {
           return &num->middle->at(digit);
         }
         break;
       case item::DigitSection::Last:
-        if (num->last != std::nullopt) {
+        if (num->last.has_value()) {
           return &num->last->at(digit);
         }
         break;
       case item::DigitSection::Finish:
-        if (num->finish != std::nullopt) {
+        if (num->finish.has_value()) {
           return &num->finish.value();
         }
         break;

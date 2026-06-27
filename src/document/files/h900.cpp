@@ -7,6 +7,7 @@
 #include "lib/consthash.h"
 #include "lib/uid.h"
 #include "lib/timestamp.h"
+#include "lib/harmony_endian.h"
 #include "document/data/data.h"
 #include "document/data/catalogue.h"
 #include "document/data/items/unknown.h"
@@ -420,14 +421,9 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
   if (numeric) {
     ret &= readNumeric(numeric);
   }
-
-  if (!ret) {
-    return false;
-  }
-
-  //todo weitere
-
-  return true;
+  auto commands = device.child("Commands");
+  ret &= readIrList(commands);
+  return ret;
 }
 
 bool ConfigH900::readButtons(pugi::xml_node &buttons, enum item::ButtonType t)
@@ -871,7 +867,7 @@ bool ConfigH900::readNumericActionSequence(pugi::xml_node &sequence,
 }
 
 bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
-    uint32_t devicePos, data::item::DigitSection s, uint32_t digit,
+    uint32_t devicePos, item::DigitSection s, uint32_t digit,
     uint32_t seqPos)
 {
   auto target = sequence.child("Target").text().as_string();
@@ -936,6 +932,85 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
     }
   }
   return true;
+}
+
+bool ConfigH900::readIrList(pugi::xml_node &commands)
+{
+  auto devicePos = c->getDevices().size() - 1;
+
+  for (pugi::xml_node prop : commands.child("Properties").children("Property")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+    switch (h) {
+      case "PressPreSilence"_hash: {
+        auto val = prop.text().as_uint(0);
+        worker->setIrPressPreSilenceMs(val, devicePos);
+        break;
+      }
+      case "PressInterKey"_hash: {
+        auto val = prop.text().as_uint(0);
+        worker->setIrPressInterKeyMs(val, devicePos);
+        break;
+      }
+      case "HoldPreSilence"_hash: {
+        auto val = prop.text().as_uint(0);
+        worker->setIrHoldPreSilenceMs(val, devicePos);
+        break;
+      }
+      case "HoldInterKey"_hash: {
+        auto val = prop.text().as_uint(0);
+        worker->setIrHoldInterKeyMs(val, devicePos);
+        break;
+      }
+      default: {
+        auto unknown = toUnknownElement(prop);
+        emit writeLog(LogLevel::Debug,
+            tr("import device: unknown property (value = %1)").arg(
+                QString::fromStdString(unknown.text)), ContentType::PlainText);
+        worker->setIrUnknownProperty(unknown, devicePos);
+        break;
+      }
+    }
+  }
+
+  auto ret = true;
+  for (pugi::xml_node prop : commands.children("Command")) {
+    ret &= readIr(prop);
+  }
+  return ret;
+}
+
+bool ConfigH900::readIr(pugi::xml_node &command)
+{
+  auto devicePos = c->getDevices().size() - 1;
+
+  auto name = command.child("Name").child_value();
+  auto data = command.child("Data");
+  auto protocol = data.child("Protocol").text().as_int(); // -1 -> escape raw cmd
+  auto code = string(data.child("Code").child_value());
+  auto rawData = lib::hexStringToBytes(code);
+  if (protocol < 0) {
+    //raw command
+    if (rawData.size() != 4) {
+      emit writeLog(LogLevel::Warning,
+          tr("xml: Raw cmd size != 4 (%1). This is not supported.").arg(
+              rawData.size()), ContentType::PlainText);
+      return false;
+    }
+    rawData.erase(rawData.begin(), rawData.begin() + 2); //remove 0xffff
+
+    item::RawCommand cmd;
+    cmd.name.set(name);
+    cmd.streamIndex.set(lib::parseHarmony16_file(rawData[0], rawData[1]));
+    return worker->setIrCommand(devicePos, cmd);
+  } else {
+    //protocol command
+    item::ProtoCommand cmd;
+    cmd.name.set(name);
+    cmd.protocolIndex.set(protocol);
+    cmd.data.set(rawData);
+    return worker->setIrCommand(devicePos, cmd);
+  }
 }
 
 bool ConfigH900::readActivities(pugi::xml_node &root)
@@ -1134,13 +1209,12 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
 
   auto states = device.append_child("States");
   ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
-  if (data.getNumpad() != nullopt) {
+  if (data.getNumpad().has_value()) {
     auto numeric = device.append_child("Numeric");
     ret &= writeNumeric(numeric, data.getId(), data.getNumpad().value());
   }
-
-  //todo weitere...
-
+  auto commands = device.append_child("Commands");
+  ret &= writeIrList(commands, data.getIrCommands());
 // @formatter:on
   return ret;
 }
@@ -1256,19 +1330,19 @@ bool ConfigH900::writeRelativeActions(pugi::xml_node &action, uint32_t deviceId,
 {
   bool ret = true;
 
-  if (data.resetAction != nullopt) {
+  if (data.resetAction.has_value()) {
     auto actionType = action.append_child(
         data.resetAction->actionType.get().getString());
     ret &= writeDeviceAction(actionType, deviceId, *data.resetAction,
         item::StateTransitionType::Relative);
   }
-  if (data.nextStateAction != nullopt) {
+  if (data.nextStateAction.has_value()) {
     auto actionType = action.append_child(
         data.nextStateAction->actionType.get().getString());
     ret &= writeDeviceAction(actionType, deviceId, *data.nextStateAction,
         item::StateTransitionType::Relative);
   }
-  if (data.prevStateAction != nullopt) {
+  if (data.prevStateAction.has_value()) {
     auto actionType = action.append_child(
         data.prevStateAction->actionType.get().getString());
     ret &= writeDeviceAction(actionType, deviceId, *data.prevStateAction,
@@ -1316,20 +1390,20 @@ bool ConfigH900::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
   if (data.fixedDigits.isIncluded() == Include::ALWAYS) {
     numeric.append_child("FixedDigits").text().set(data.fixedDigits.get());
   }
-  if (data.finish != nullopt) {
+  if (data.finish.has_value()) {
     auto actionType = numeric.append_child("Finish");
     ret &= writeDeviceAction(actionType, deviceId, *data.finish,
         item::StateTransitionType::Discrete); //dummy
   }
-  if (data.first != nullopt) {
+  if (data.first.has_value()) {
     auto actionType = numeric.append_child("FirstDigit");
     ret &= writeNumericActions(actionType, deviceId, *data.first);
   }
-  if (data.middle != nullopt) {
+  if (data.middle.has_value()) {
     auto actionType = numeric.append_child("MiddleDigit");
     ret &= writeNumericActions(actionType, deviceId, *data.middle);
   }
-  if (data.last != nullopt) {
+  if (data.last.has_value()) {
     auto actionType = numeric.append_child("LastDigit");
     ret &= writeNumericActions(actionType, deviceId, *data.last);
   }
@@ -1337,7 +1411,7 @@ bool ConfigH900::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
 }
 
 bool ConfigH900::writeNumericActions(pugi::xml_node &action, uint32_t deviceId,
-    const data::item::Digits &data)
+    const item::Digits &data)
 {
   bool ret = true;
 
@@ -1348,6 +1422,55 @@ bool ConfigH900::writeNumericActions(pugi::xml_node &action, uint32_t deviceId,
         item::StateTransitionType::Discrete); //dummy
   }
   return ret;
+}
+
+bool ConfigH900::writeIrList(pugi::xml_node &commands,
+    const item::Commands &data)
+{
+  bool ret = true;
+
+  auto properties = commands.append_child("Properties");
+  writeProperty(properties, "PressPreSilence", data.pressPreSilenceMs);
+  writeProperty(properties, "PressInterKey", data.pressInterKeyMs);
+  writeProperty(properties, "HoldPreSilence", data.holdPreSilenceMs);
+  writeProperty(properties, "HoldInterKey", data.holdInterKeyMs);
+  for (const auto &prop : data.getUnknownProperties()) {
+    writeUnknownElement(properties, prop);
+  }
+
+  for (int i = 0; i < data.getRawCommands().size(); i++) {
+    auto command = commands.append_child("Command");
+    ret &= writeIr(command, data.getRawCommands()[i]);
+  }
+  for (int i = 0; i < data.getProtoCommands().size(); i++) {
+    auto command = commands.append_child("Command");
+    ret &= writeIr(command, data.getProtoCommands()[i]);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeIr(pugi::xml_node &command,
+    const item::RawCommand &data)
+{
+  vector<uint8_t> raw { 0xff, 0xff }; //start with 0xffff
+
+  command.append_child("Name").text().set(data.name.get());
+  auto cmdData = command.append_child("Data");
+  cmdData.append_child("Protocol").text().set(-1);
+  lib::setHarmony16_file(data.streamIndex.get(), raw);
+  cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
+  return true;
+}
+
+bool ConfigH900::writeIr(pugi::xml_node &command,
+    const item::ProtoCommand &data)
+{
+  command.append_child("Name").text().set(data.name.get());
+  auto cmdData = command.append_child("Data");
+  cmdData.append_child("Protocol").text().set(data.protocolIndex.get());
+  const auto &raw = data.data.get();
+  cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
+  return true;
 }
 
 void ConfigH900::writeUnknownElement(pugi::xml_node &parent,

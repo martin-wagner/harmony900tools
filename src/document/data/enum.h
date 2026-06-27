@@ -45,6 +45,9 @@ enum class ChannelButtonBehaviour { BasicChannels, Unknown };
 enum class GuideButtonMode { TunerProgramGuide, Unknown };
 enum class MediaButtonMode { ShowMedia, Unknown };
 
+//non-remote enums
+enum class CodeType { Nec, PhilipsRc5, PhilipsRc6, Sony, Panasonic, Samsung, Lg, Jvc, Sharp, Denon, Pioneer, None, Unknown };
+
 /**
  * stores enums as enum value and string.
  *
@@ -90,6 +93,7 @@ template class Enum<ActivityStartPage>;
 template class Enum<ChannelButtonBehaviour>;
 template class Enum<GuideButtonMode>;
 template class Enum<MediaButtonMode>;
+template class Enum<CodeType>;
 
 }
 }

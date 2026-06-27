@@ -91,6 +91,13 @@ class SetDeviceNumpadActionUnknownParamCommand: public SetUnknownPropertyCommand
         uint32_t digit, uint32_t seqPos, QUndoCommand *parent = nullptr);
 };
 
+class SetIrUnknownPropertyCommand: public SetUnknownPropertyCommand
+{
+  public:
+    SetIrUnknownPropertyCommand(ConfigData &c,
+        const UnknownElement &value, uint32_t devicePos, QUndoCommand *parent = nullptr);
+};
+
 
 }
 }

@@ -66,5 +66,15 @@ SetDeviceNumpadActionUnknownParamCommand::SetDeviceNumpadActionUnknownParamComma
 {
 }
 
+SetIrUnknownPropertyCommand::SetIrUnknownPropertyCommand(
+    ConfigData &c, const UnknownElement &value, uint32_t devicePos, QUndoCommand *parent) :
+        SetUnknownPropertyCommand([&c, devicePos]() -> std::vector<UnknownElement>& {
+          return c.getDevices()[devicePos].getIrCommands().getUnknownProperties();
+        }, [&c, devicePos](const UnknownElement &e) {
+          c.getDevices()[devicePos].getIrCommands().getUnknownProperties().push_back(e);
+        }, value, parent)
+{
+}
+
 }
 }

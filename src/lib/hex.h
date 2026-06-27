@@ -86,4 +86,25 @@ inline std::vector<uint8_t> hexStringToBytes(const std::string &code)
   return data;
 }
 
+// convert vector<uint8_t> to hex string "0x1234abcd..."
+inline std::string bytesToHexString(const std::vector<uint8_t> &data, bool addPrefix = true)
+{
+  static const char *hexChars = "0123456789ABCDEF";
+
+  std::string out;
+  out.reserve(data.size() * 2 + (addPrefix ? 2 : 0));
+
+  if (addPrefix) {
+    out += "0x";
+  }
+
+  for (size_t i = 0; i < data.size(); i++) {
+    uint8_t byte = data[i];
+    out.push_back(hexChars[(byte >> 4) & 0x0F]);
+    out.push_back(hexChars[byte & 0x0F]);
+  }
+
+  return out;
+}
+
 }

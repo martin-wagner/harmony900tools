@@ -26,7 +26,7 @@ template<typename T>
 class Property
 {
   public:
-    Property(T v, Include defaultIncluded = Include::ALWAYS) :
+    Property(const T &v, Include defaultIncluded = Include::ALWAYS) :
         include(defaultIncluded), value(v)
     {
     }
@@ -46,7 +46,7 @@ class Property
       return value;
     }
 
-    Property& set(T v)
+    Property& set(const T &v)
     {
       value = v;
       return *this;

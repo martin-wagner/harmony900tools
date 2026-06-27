@@ -19,7 +19,7 @@ RemoveNumpadCommand::RemoveNumpadCommand(ConfigData &c, uint32_t devicePos,
     return;
   }
   auto &optPad = c.getDevices()[devicePos].getNumpad();
-  if (optPad == nullopt) {
+  if (optPad.has_value()) {
     return;
   }
   pad = *(c.getDevices()[devicePos].getNumpad());

@@ -20,68 +20,24 @@ namespace item
 class RawCommand
 {
   public:
-    RawCommand(const std::string &name, uint32_t index = 0) :
-        name(name), streamIndex(index)
-    {
-    }
+    PropertyString name { "Unknown" };
+    PropertyU16 streamIndex { 0 };
 
-    const std::string& getName() const
-    {
-      return name;
-    }
-
-    void setName(const std::string &name)
-    {
-      this->name = name;
-    }
-
-    uint32_t getStreamIndex() const
-    {
-      return streamIndex;
-    }
-
-    void setStreamIndex(uint32_t streamIndex)
-    {
-      this->streamIndex = streamIndex;
-    }
-
-  protected:
-    std::string name;
-    uint32_t streamIndex;
 };
 
 /** command builder */
 class ProtoCommand
 {
   public:
-    ProtoCommand(const std::string &name, uint32_t index = 0) :
-        name(name), protocolIndex(index)
-    {
-    }
+    //command creator. false = read from xml
+    PropertyBool usesParentInfo { false, Include::CHECK };
+    PropertyU32 field3 {0, Include::CHECK};
+    PropertyU32 field4 {0, Include::CHECK};
 
-    const std::string& getName() const
-    {
-      return name;
-    }
-
-    void setName(const std::string &name)
-    {
-      this->name = name;
-    }
-
-    uint32_t getIndex() const
-    {
-      return protocolIndex;
-    }
-
-    void setIndex(uint32_t protocolIndex)
-    {
-      this->protocolIndex = protocolIndex;
-    }
-
-  protected:
-    std::string name;
-    uint32_t protocolIndex;
+    //for serialise
+    PropertyString name { "Unknown" };
+    PropertyU32 protocolIndex { 0 };
+    Property<std::vector<uint8_t>> data {{}}; //encoded IR protocol config stream
 };
 
 /** IR command list
@@ -91,48 +47,14 @@ class ProtoCommand
 class Commands
 {
   public:
-    Commands()
+    const std::vector<RawCommand>& getRawCommands() const
     {
+      return rawCommands;
     }
 
-    const std::chrono::milliseconds& getHoldInterKey() const
+    std::vector<RawCommand>& getRawCommands()
     {
-      return holdInterKey;
-    }
-
-    void setHoldInterKey(const std::chrono::milliseconds &holdInterKey)
-    {
-      this->holdInterKey = holdInterKey;
-    }
-
-    const std::chrono::milliseconds& getHoldPreSilence() const
-    {
-      return holdPreSilence;
-    }
-
-    void setHoldPreSilence(const std::chrono::milliseconds &holdPreSilence)
-    {
-      this->holdPreSilence = holdPreSilence;
-    }
-
-    const std::chrono::milliseconds& getPressInterKey() const
-    {
-      return pressInterKey;
-    }
-
-    void setPressInterKey(const std::chrono::milliseconds &pressInterKey)
-    {
-      this->pressInterKey = pressInterKey;
-    }
-
-    const std::chrono::milliseconds& getPressPreSilence() const
-    {
-      return pressPreSilence;
-    }
-
-    void setPressPreSilence(const std::chrono::milliseconds &pressPreSilence)
-    {
-      this->pressPreSilence = pressPreSilence;
+      return rawCommands;
     }
 
     const std::vector<ProtoCommand>& getProtoCommands() const
@@ -140,31 +62,55 @@ class Commands
       return protoCommands;
     }
 
-    void setProtoCommands(const std::vector<ProtoCommand> &protoCommands)
+    std::vector<ProtoCommand>& getProtoCommands()
     {
-      this->protoCommands = protoCommands;
+      return protoCommands;
     }
 
-    const std::vector<RawCommand>& getRawCommands() const
+    bool nameExists(const std::string &name) const
     {
-      return rawCommands;
+      for (const RawCommand &cmd : rawCommands) {
+        if (cmd.name.get() == name) {
+          return true;
+        }
+      }
+
+      for (const ProtoCommand &cmd : protoCommands) {
+        if (cmd.name.get() == name) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
-    void setRawCommands(const std::vector<RawCommand> &rawCommands)
+    PropertyU32 pressPreSilenceMs {0, Include::ALWAYS};
+    PropertyU32 pressInterKeyMs {0, Include::ALWAYS};
+    PropertyU32 holdPreSilenceMs {0, Include::ALWAYS};
+    PropertyU32 holdInterKeyMs {0, Include::ALWAYS};
+
+    /** Info for building IR commands. IR commands seem to use max two static
+     * params + command. We have space for three params. */
+    PropertyEnum<CodeType> codeType { CodeType::None, Include::CHECK} ;
+    PropertyU32 field0 {0, Include::CHECK};
+    PropertyU32 field1 {0, Include::CHECK};
+    PropertyU32 field2 {0, Include::CHECK};
+
+    const std::vector<UnknownElement> &getUnknownProperties() const
     {
-      this->rawCommands = rawCommands;
+      return unknownProperties;
+    }
+
+    std::vector<UnknownElement> &getUnknownProperties()
+    {
+      return unknownProperties;
     }
 
   protected:
-    std::chrono::milliseconds pressPreSilence;
-    std::chrono::milliseconds pressInterKey;
-    std::chrono::milliseconds holdPreSilence;
-    std::chrono::milliseconds holdInterKey;
-
     std::vector<RawCommand> rawCommands;
     std::vector<ProtoCommand> protoCommands;
 
-
+    std::vector<UnknownElement> unknownProperties;
 };
 
 }

@@ -24,7 +24,7 @@ void RemoveStatemachineFromActivityCommand::undo()
 {
 }
 
-RemoveStatemachineCommand::RemoveStatemachineCommand(ConfigData &c,
+RemoveIrCommand::RemoveIrCommand(ConfigData &c,
     uint32_t devicePos, uint32_t smPos, QUndoCommand *parent) :
     BaseCommand(QObject::tr("Remove Statemachine (Pos: %1)").arg(devicePos), parent), c(
         c), devicePos(devicePos), smPos(smPos)
@@ -60,7 +60,7 @@ RemoveStatemachineCommand::RemoveStatemachineCommand(ConfigData &c,
   isValid = true;
 }
 
-void RemoveStatemachineCommand::redo()
+void RemoveIrCommand::redo()
 {
   if (!isValid) {
     return;
@@ -73,7 +73,7 @@ void RemoveStatemachineCommand::redo()
   emit dirtyChanged(true);
 }
 
-void RemoveStatemachineCommand::undo()
+void RemoveIrCommand::undo()
 {
   if (!isValid) {
     return;
@@ -84,7 +84,7 @@ void RemoveStatemachineCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool RemoveStatemachineCommand::valid() const
+bool RemoveIrCommand::valid() const
 {
   return isValid;
 }

@@ -19,11 +19,11 @@ class RemoveStatemachineFromActivityCommand: public BaseCommand
     void undo() override;
 };
 
-class RemoveStatemachineCommand: public BaseCommand
+class RemoveIrCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    RemoveStatemachineCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, QUndoCommand *parent = nullptr);
+    RemoveIrCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
