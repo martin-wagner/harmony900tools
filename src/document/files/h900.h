@@ -110,13 +110,20 @@ class ConfigH900 : public QObject
 
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
 
+    bool dumpActionListXml();
+    bool exportDevices(pugi::xml_node &root);
+    bool exportDevice(pugi::xml_node &root, const data::item::Device &data);
+    bool exportButtons(pugi::xml_node &root, uint32_t deviceId, const std::vector<data::item::Button> &data);
+    bool exportButton(pugi::xml_node &root, uint32_t deviceId, const data::item::Button &data);
+
   protected:
     const QString wp;
 
   private:
     const data::ConfigData *c = nullptr;
     data::CmdCatalogue *worker = nullptr;
-
+    std::string writerTime;
+    std::string hash;
 };
 
 }

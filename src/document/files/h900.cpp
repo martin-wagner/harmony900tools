@@ -55,14 +55,18 @@ ConfigH900::ConfigH900(const QString &workPath) :
 bool ConfigH900::dump(const ConfigData *c)
 {
   bool ret = true;
+  vector<uint8_t> tmp;
 
   this->c = c;
   this->worker = nullptr;
+  writerTime = lib::writeTimeH900Xml();
+  lib::setHarmony32_file(0xdeadbeef, tmp); //todo calc protcachehash / crc32 / endian
+  hash = lib::bytesToHexString(tmp);
 
   try {
     ret &= dumpUserConfigXml();
+    ret &= dumpActionListXml();
 
-//  pugi::xml_document actionList;
 //  pugi::xml_document userConfiguration;
 //  vector<uint8_t> irProto;
 //  vector<uint8_t> ssir;
@@ -867,8 +871,7 @@ bool ConfigH900::readNumericActionSequence(pugi::xml_node &sequence,
 }
 
 bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
-    uint32_t devicePos, item::DigitSection s, uint32_t digit,
-    uint32_t seqPos)
+    uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
 {
   auto target = sequence.child("Target").text().as_string();
   if (string(target) != "Device") {
@@ -1103,11 +1106,10 @@ bool ConfigH900::writeProperties(pugi::xml_node &root)
   property.text().set("1.0");
   property = properties.append_child("Property");
   property.append_attribute("name").set_value("ProtocolCacheHash");
-  property.text().set("0xdeadbeef"); //todo get the crc32
+  property.text().set(hash);
   property = properties.append_child("Property");
   property.append_attribute("name").set_value("LastUpdated");
-  auto time = lib::writeTimeH900Xml();
-  property.text().set(time);
+  property.text().set(writerTime);
   return true;
 }
 
@@ -1449,8 +1451,7 @@ bool ConfigH900::writeIrList(pugi::xml_node &commands,
   return ret;
 }
 
-bool ConfigH900::writeIr(pugi::xml_node &command,
-    const item::RawCommand &data)
+bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
 {
   vector<uint8_t> raw { 0xff, 0xff }; //start with 0xffff
 
@@ -1489,6 +1490,96 @@ void ConfigH900::writeUnknownElement(pugi::xml_node &parent,
   for (const auto &child : element.children) {
     writeUnknownElement(node, child);
   }
+}
+
+bool ConfigH900::dumpActionListXml()
+{
+  pugi::xml_document xml;
+
+  auto decl = xml.prepend_child(pugi::node_declaration);
+  decl.append_attribute("version").set_value("1.0");
+  decl.append_attribute("encoding").set_value("UTF-8");
+
+  auto root = xml.append_child("Root");
+  auto ret = exportDevices(root);
+
+  auto properties = root.append_child("Properties");
+  auto property = properties.append_child("Property");
+  property.append_attribute("name").set_value("ProtocolCacheHash");
+  property.text().set(hash);
+  property = properties.append_child("Property");
+  property.append_attribute("name").set_value("LastUpdated");
+  property.text().set(writerTime);
+  auto protocols = root.append_child("Protocols");
+  protocols.append_child("Hash").text().set(hash);
+  if (!ret) {
+    return false;
+  }
+
+  QDir().mkpath(wp + "/" + QFileInfo(actionListPath).path());
+#ifdef _WIN32
+  ret = xml.save_file(QString(wp + "/" + actionListPath).toStdWString().c_str(),
+      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+#else
+  ret = xml.save_file(QString(wp + "/" + actionListPath).toUtf8(),
+      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+#endif
+  return true;
+}
+
+bool ConfigH900::exportDevices(pugi::xml_node &root)
+{
+  bool ret = true;
+
+  const auto &devices = c->getDevices();
+  for (const auto &data : devices) {
+    ret &= exportDevice(root, data);
+  }
+  return ret;
+}
+
+bool ConfigH900::exportDevice(pugi::xml_node &root, const item::Device &data)
+{
+  bool ret = true;
+
+  ret &= exportButtons(root, data.getId(), data.getSoftButtons());
+  ret &= exportButtons(root, data.getId(), data.getHardButtons());
+  return ret;
+}
+
+bool ConfigH900::exportButtons(pugi::xml_node &root, uint32_t deviceId,
+    const std::vector<data::item::Button> &data)
+{
+  bool ret = true;
+
+  for (const auto &d : data) {
+    ret &= exportButton(root, deviceId, d);
+  }
+  return ret;
+}
+
+bool ConfigH900::exportButton(pugi::xml_node &root, uint32_t deviceId,
+    const data::item::Button &data)
+{
+  string str;
+
+  auto actionList = root.append_child("ActionList");
+  actionList.append_attribute("name").set_value(data.getActionId(deviceId));
+  auto action = actionList.append_child("Action");
+  action.append_child("Target").text().set("Device");
+  auto op = action.append_child("Operation");
+  op.append_child("Name").text().set("SendCommand");
+
+  auto param = op.append_child("Parameter");
+  param.append_attribute("name").set_value("DeviceId");
+  param.text().set(deviceId);
+  param = op.append_child("Parameter");
+  param.append_attribute("name").set_value("Command");
+  param.text().set(data.action.get());
+  param = op.append_child("Parameter");
+  param.append_attribute("name").set_value("Modifier");
+  param.text().set("Hold");
+  return true;
 }
 
 }
