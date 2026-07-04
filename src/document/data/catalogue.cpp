@@ -21,6 +21,8 @@
 #include "cmd/removeNumpad.h"
 #include "cmd/setIr.h"
 #include "cmd/removeIr.h"
+#include "cmd/addActivity.h"
+#include "cmd/removeActivity.h"
 #include "cmd/setIrProto.h"
 #include "cmd/removeIrProto.h"
 #include "cmd/setIrStream.h"
@@ -1273,6 +1275,460 @@ bool CmdCatalogue::removeIrRawCommand(uint32_t devicePos, uint32_t cmdPos)
         ContentType::PlainText);
     delete cmd;
   }
+  return true;
+}
+
+bool CmdCatalogue::addActivityCommand(int pos, uint32_t id)
+{
+  auto *cmd = new AddActivityCommand(c, id, pos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: activity pos %1 already exists, dropped").arg(pos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::addActivityCommand(int pos, uint32_t *id)
+{
+  auto *cmd = new AddActivityCommand(c, pos);
+  if (id != nullptr) {
+    *id = cmd->getUid();
+  }
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::removeActivityCommand(int pos)
+{
+  auto *cmd = new RemoveDeviceCommand(c, pos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: activity pos %1 doesn't exist, dropped").arg(pos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setActivityType(const Enum<ActivityType> &v, uint32_t pos)
+{
+  PropertyAccess<Enum<ActivityType>> access =
+      {
+        tr("set device type"),
+        [this, pos]() {return c.getActivities()[pos].type.get();},
+        [this, pos](
+            const Enum<ActivityType> &v) {c.getActivities()[pos].type.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<ActivityType>>(access);
+}
+
+bool CmdCatalogue::setActivityLabel(const QString &v, uint32_t pos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set label"),
+        [this, pos]() {return c.getActivities()[pos].label.get();},
+        [this, pos](
+            const string &v) {c.getActivities()[pos].label.set(v).setIncluded(Include::ALWAYS);},
+        v.toStdString() };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityPvrType(const Enum<ActivityStartPage> &v,
+    uint32_t pos)
+{
+  PropertyAccess<Enum<ActivityStartPage>> access = { tr("set pvr type"), [this,
+      pos]() {return c.getActivities()[pos].pvrType.get();}, [this, pos](
+      const Enum<ActivityStartPage> &v) {
+        c.getActivities()[pos].pvrType.set(v).setIncluded(Include::ALWAYS);
+      }, v };
+
+  return setProperty<Enum<ActivityStartPage>>(access);
+}
+
+bool CmdCatalogue::setActivityControlGroupHardButtons(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set control group hard buttons"),
+        [this, pos]() {return c.getActivities()[pos].controlGroup_HardButtons.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].controlGroup_HardButtons.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityPowerOffUnusedDevices(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set power off unused Activitys"),
+        [this, pos]() {return c.getActivities()[pos].powerOffUnusedDevices.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].powerOffUnusedDevices.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityTrainingWheels(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access = {
+    tr("set training wheels"),
+    [this, pos]() {return c.getActivities()[pos].trainingWheels.get();},
+    [this, pos](const bool &v) {
+      c.getActivities()[pos].trainingWheels.set(v).setIncluded(Include::ALWAYS);
+    },
+    v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityUnusedDevicesHelp(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set unused Activitys help"),
+        [this, pos]() {return c.getActivities()[pos].unusedDevicesHelp.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].unusedDevicesHelp.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityChannelButtonBehaviour(
+    const Enum<ChannelButtonBehaviour> &v, uint32_t pos)
+{
+  PropertyAccess<Enum<ChannelButtonBehaviour>> access =
+      {
+        tr("set channel button behaviour"),
+        [this, pos]() {return c.getActivities()[pos].channelButtonBehaviour.get();},
+        [this, pos](
+            const Enum<ChannelButtonBehaviour> &v) {
+              c.getActivities()[pos].channelButtonBehaviour.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<Enum<ChannelButtonBehaviour>>(access);
+}
+
+bool CmdCatalogue::setActivityControlGroupSoftButtons(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set control group soft buttons"),
+        [this, pos]() {return c.getActivities()[pos].controlGroup_SoftButtons.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].controlGroup_SoftButtons.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityEnableSmartMenu(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set enable smart menu"),
+        [this, pos]() {return c.getActivities()[pos].enableSmartMenu.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].enableSmartMenu.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityEnableSmartZoom(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set enable smart zoom"),
+        [this, pos]() {return c.getActivities()[pos].enableSmartZoom.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].enableSmartZoom.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityGuideButtonMode(const Enum<GuideButtonMode> &v,
+    uint32_t pos)
+{
+  PropertyAccess<Enum<GuideButtonMode>> access =
+      {
+        tr("set guide button mode"),
+        [this, pos]() {return c.getActivities()[pos].guideButtonMode.get();},
+        [this, pos](
+            const Enum<GuideButtonMode> &v) {
+              c.getActivities()[pos].guideButtonMode.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<Enum<GuideButtonMode>>(access);
+}
+
+bool CmdCatalogue::setActivityHideModeControl(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide mode control"),
+        [this, pos]() {return c.getActivities()[pos].hideModeControl.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideModeControl.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideModeListen(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access = {
+    tr("set hide mode listen"),
+    [this, pos]() {return c.getActivities()[pos].hideModeListen.get();},
+    [this, pos](const bool &v) {
+      c.getActivities()[pos].hideModeListen.set(v).setIncluded(Include::ALWAYS);
+    },
+    v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideModeNavigate(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide mode navigate"),
+        [this, pos]() {return c.getActivities()[pos].hideModeNavigate.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideModeNavigate.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideModePlay(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access = {
+    tr("set hide mode play"),
+    [this, pos]() {return c.getActivities()[pos].hideModePlay.get();},
+    [this, pos](const bool &v) {
+      c.getActivities()[pos].hideModePlay.set(v).setIncluded(Include::ALWAYS);
+    },
+    v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideModePlayMode(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide mode play mode"),
+        [this, pos]() {return c.getActivities()[pos].hideModePlayMode.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideModePlayMode.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideSurfAllChannels(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide surf all channels"),
+        [this, pos]() {return c.getActivities()[pos].hideSurfAllChannels.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideSurfAllChannels.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideSurfAllShows(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide surf all shows"),
+        [this, pos]() {return c.getActivities()[pos].hideSurfAllShows.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideSurfAllShows.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideSurfFavoriteChannels(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide surf favorite channels"),
+        [this, pos]() {return c.getActivities()[pos].hideSurfFavoriteChannels.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideSurfFavoriteChannels.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityHideSurfFavoriteShows(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set hide surf favorite shows"),
+        [this, pos]() {return c.getActivities()[pos].hideSurfFavoriteShows.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].hideSurfFavoriteShows.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityMaxTvContentDays(int32_t v, uint32_t pos)
+{
+  PropertyAccess<int32_t> access =
+      {
+        tr("set max tv content days"),
+        [this, pos]() {return c.getActivities()[pos].maxTvContentDays.get();},
+        [this, pos](
+            const int32_t &v) {
+              c.getActivities()[pos].maxTvContentDays.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<int32_t>(access);
+}
+
+bool CmdCatalogue::setActivityMediaButtonMode(const Enum<MediaButtonMode> &v,
+    uint32_t pos)
+{
+  PropertyAccess<Enum<MediaButtonMode>> access =
+      {
+        tr("set media button mode"),
+        [this, pos]() {return c.getActivities()[pos].mediaButtonMode.get();},
+        [this, pos](
+            const Enum<MediaButtonMode> &v) {
+              c.getActivities()[pos].mediaButtonMode.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<Enum<MediaButtonMode>>(access);
+}
+
+bool CmdCatalogue::setActivityPlayOnEnter(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access = {
+    tr("set play on enter"),
+    [this, pos]() {return c.getActivities()[pos].playOnEnter.get();},
+    [this, pos](const bool &v) {
+      c.getActivities()[pos].playOnEnter.set(v).setIncluded(Include::ALWAYS);
+    },
+    v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityRetainStop(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access = {
+    tr("set retain stop"),
+    [this, pos]() {return c.getActivities()[pos].retainStop.get();},
+    [this, pos](const bool &v) {
+      c.getActivities()[pos].retainStop.set(v).setIncluded(Include::ALWAYS);
+    },
+    v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityScrollChannelsByPage(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set scroll channels by page"),
+        [this, pos]() {return c.getActivities()[pos].scrollChannelsByPage.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].scrollChannelsByPage.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityScrollShowsByPage(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access =
+      {
+        tr("set scroll shows by page"),
+        [this, pos]() {return c.getActivities()[pos].scrollShowsByPage.get();},
+        [this, pos](
+            const bool &v) {
+              c.getActivities()[pos].scrollShowsByPage.set(v).setIncluded(Include::ALWAYS);
+            },
+        v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityStopOnExit(bool v, uint32_t pos)
+{
+  PropertyAccess<bool> access = {
+    tr("set stop on exit"),
+    [this, pos]() {return c.getActivities()[pos].stopOnExit.get();},
+    [this, pos](const bool &v) {
+      c.getActivities()[pos].stopOnExit.set(v).setIncluded(Include::ALWAYS);
+    },
+    v };
+
+  return setProperty<bool>(access);
+}
+
+bool CmdCatalogue::setActivityUnknownProperty(
+    const data::item::UnknownElement &value, uint32_t pos)
+{
+  auto *cmd = new SetActivityUnknownPropertyCommand(c, value, pos);
+  connectCommand(cmd);
+  undo.push(cmd);
   return true;
 }
 

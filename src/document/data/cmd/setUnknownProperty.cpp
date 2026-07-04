@@ -76,5 +76,15 @@ SetIrUnknownPropertyCommand::SetIrUnknownPropertyCommand(
 {
 }
 
+SetActivityUnknownPropertyCommand::SetActivityUnknownPropertyCommand(ConfigData &c,
+    const UnknownElement &value, uint32_t pos, QUndoCommand *parent) :
+    SetUnknownPropertyCommand([&c, pos]() -> std::vector<UnknownElement>& {
+      return c.getActivities()[pos].getUnknownProperties();
+    }, [&c, pos](const UnknownElement &e) {
+      c.getActivities()[pos].getUnknownProperties().push_back(e);
+    }, value, parent)
+{
+}
+
 }
 }

@@ -29,109 +29,80 @@ namespace item
 class Activity
 {
   public:
-    Activity(uint32_t id, bool powerOff = false);
+    Activity(uint32_t id) : id(id)
+    {
+    }
 
     uint32_t getId() const
     {
       return id;
     }
 
-    PROPERTY_GETTER(Property<Enum<ActivityStartPage>>, pvrType, getPvrType)
-    PROPERTY_GETTER(Property<bool>, controlGroup_HardButtons, getControlGroup_HardButtons)
-    PROPERTY_GETTER(Property<bool>, powerOffUnusedDevices, getPowerOffUnusedDevices)
-    PROPERTY_GETTER(Property<bool>, trainingWheels, getTrainingWheels)
-    PROPERTY_GETTER(Property<bool>, unusedDevicesHelp, getUnusedDevicesHelp)
-    PROPERTY_GETTER(Property<Enum<ChannelButtonBehaviour>>, channelButtonBehaviour, getChannelButtonBehaviour)
-    PROPERTY_GETTER(Property<bool>, controlGroup_SoftButtons, getControlGroup_SoftButtons)
-    PROPERTY_GETTER(Property<bool>, enableSmartMenu, getEnableSmartMenu)
-    PROPERTY_GETTER(Property<bool>, enableSmartZoom, getEnableSmartZoom)
-    PROPERTY_GETTER(Property<Enum<GuideButtonMode>>, guideButtonMode, getGuideButtonMode)
-    PROPERTY_GETTER(Property<bool>, hideModeControl, getHideModeControl)
-    PROPERTY_GETTER(Property<bool>, hideModeListen, getHideModeListen)
-    PROPERTY_GETTER(Property<bool>, hideModeNavigate, getHideModeNavigate)
-    PROPERTY_GETTER(Property<bool>, hideModePlay, getHideModePlay)
-    PROPERTY_GETTER(Property<bool>, hideModePlayMode, getHideModePlayMode)
-    PROPERTY_GETTER(Property<bool>, hideSurfAllChannels, getHideSurfAllChannels)
-    PROPERTY_GETTER(Property<bool>, hideSurfAllShows, getHideSurfAllShows)
-    PROPERTY_GETTER(Property<bool>, hideSurfFavoriteChannels, getHideSurfFavoriteChannels)
-    PROPERTY_GETTER(Property<bool>, hideSurfFavoriteShows, getHideSurfFavoriteShows)
-    PROPERTY_GETTER(Property<uint32_t>, maxTvContentDays, getMaxTvContentDays)
-    PROPERTY_GETTER(Property<Enum<MediaButtonMode>>, mediaButtonMode, getMediaButtonMode)
-    PROPERTY_GETTER(Property<bool>, playOnEnter, getPlayOnEnter)
-    PROPERTY_GETTER(Property<bool>, retainStop, getRetainStop)
-    PROPERTY_GETTER(Property<bool>, scrollChannelsByPage, getScrollChannelsByPage)
-    PROPERTY_GETTER(Property<bool>, scrollShowsByPage, getScrollShowsByPage)
-    PROPERTY_GETTER(Property<bool>, stopOnExit, getStopOnExit)
-
-    //todo getter/setter
-
-    const std::vector<UnknownElement> &getUnknownItems() const
+    const std::vector<Button>& getButtons() const
     {
-      return u;
+      return buttons;
     }
 
-    void setUnknownItems(const std::vector<UnknownElement> &u)
+    std::vector<Button>& getButtons()
     {
-      this->u = u;
+      return buttons;
     }
+
+    PropertyEnum<ActivityType> type{ActivityType::VirtualGeneric};
+    PropertyString label{"My C64"};
+
+    //general
+    PropertyEnum<ActivityStartPage> pvrType{ActivityStartPage::Transport, Include::ALWAYS};
+    PropertyBool controlGroup_HardButtons{true, Include::ALWAYS};
+    PropertyBool powerOffUnusedDevices{true, Include::ALWAYS};
+    PropertyBool trainingWheels{true, Include::ALWAYS};
+    PropertyBool unusedDevicesHelp{false, Include::ALWAYS};
+
+    //other
+    PropertyEnum<ChannelButtonBehaviour> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Include::CHECK};
+    PropertyBool controlGroup_SoftButtons{true, Include::CHECK};
+    PropertyBool enableSmartMenu{true, Include::CHECK};
+    PropertyBool enableSmartZoom{true, Include::CHECK};
+    PropertyEnum<GuideButtonMode> guideButtonMode{GuideButtonMode::TunerProgramGuide, Include::CHECK};
+    PropertyBool hideModeControl{false, Include::CHECK};
+    PropertyBool hideModeListen{false, Include::CHECK};
+    PropertyBool hideModeNavigate{false, Include::CHECK};
+    PropertyBool hideModePlay{false, Include::CHECK};
+    PropertyBool hideModePlayMode{false, Include::CHECK};
+    PropertyBool hideSurfAllChannels{false, Include::CHECK};
+    PropertyBool hideSurfAllShows{false, Include::CHECK};
+    PropertyBool hideSurfFavoriteChannels{false, Include::CHECK};
+    PropertyBool hideSurfFavoriteShows{false, Include::CHECK};
+    PropertyI32 maxTvContentDays{0, Include::CHECK};
+    PropertyEnum<MediaButtonMode> mediaButtonMode{MediaButtonMode::ShowMedia, Include::CHECK};
+    PropertyBool playOnEnter{true, Include::CHECK};
+    PropertyBool retainStop{false, Include::CHECK};
+    PropertyBool scrollChannelsByPage{true, Include::CHECK};
+    PropertyBool scrollShowsByPage{true, Include::CHECK};
+    PropertyBool stopOnExit{false, Include::CHECK};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {
-      return u;
+      return unknownProperties;
     }
 
-    void setUnknownProperties(const std::vector<UnknownElement> &u)
+    std::vector<UnknownElement> &getUnknownProperties()
     {
-      p.u = u;
+      return unknownProperties;
     }
 
   protected:
-    struct Properties {
-      //general
-      Property<Enum<ActivityStartPage>> pvrType{ActivityStartPage::Transport, Include::ALWAYS};
-      Property<bool> controlGroup_HardButtons{true, Include::ALWAYS};
-      Property<bool> powerOffUnusedDevices{true, Include::ALWAYS};
-      Property<bool> trainingWheels{true, Include::ALWAYS};
-      Property<bool> unusedDevicesHelp{false, Include::ALWAYS};
-      //other
-      Property<Enum<ChannelButtonBehaviour>> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Include::CHECK};
-      Property<bool> controlGroup_SoftButtons{true, Include::CHECK};
-      Property<bool> enableSmartMenu{true, Include::CHECK};
-      Property<bool> enableSmartZoom{true, Include::CHECK};
-      Property<Enum<GuideButtonMode>> guideButtonMode{GuideButtonMode::TunerProgramGuide, Include::CHECK};
-      Property<bool> hideModeControl{false, Include::CHECK};
-      Property<bool> hideModeListen{false, Include::CHECK};
-      Property<bool> hideModeNavigate{false, Include::CHECK};
-      Property<bool> hideModePlay{false, Include::CHECK};
-      Property<bool> hideModePlayMode{false, Include::CHECK};
-      Property<bool> hideSurfAllChannels{false, Include::CHECK};
-      Property<bool> hideSurfAllShows{false, Include::CHECK};
-      Property<bool> hideSurfFavoriteChannels{false, Include::CHECK};
-      Property<bool> hideSurfFavoriteShows{false, Include::CHECK};
-      Property<uint32_t> maxTvContentDays{false, Include::CHECK};
-      Property<Enum<MediaButtonMode>> mediaButtonMode{MediaButtonMode::ShowMedia, Include::CHECK};
-      Property<bool> playOnEnter{true, Include::CHECK};
-      Property<bool> retainStop{false, Include::CHECK};
-      Property<bool> scrollChannelsByPage{true, Include::CHECK};
-      Property<bool> scrollShowsByPage{true, Include::CHECK};
-      Property<bool> stopOnExit{false, Include::CHECK};
-
-      //other other
-      std::vector<UnknownElement> u;
-    } p;
-
-    bool powerOff; //has no id, no properties
-    const uint32_t id;
-    Enum<ActivityType> type{ActivityType::VirtualGeneric};
-    std::vector<Button> softButtons;
-    std::vector<Button> hardButtons;
+    uint32_t id;
+    //todo channel list
+    std::vector<Button> buttons;
 //    std::vector<StateAction> enterActions; todo
 //    std::vector<StateAction> leaveActions;
     std::vector<uint32_t> powerOnDeviceIds;
-    std::vector<uint32_t> powerOffDeviceIds;
+//    std::vector<uint32_t> powerOffDeviceIds;
     std::vector<Role> roles;
 
-    std::vector<UnknownElement> u;
+    std::vector<UnknownElement> unknownProperties;
+
 };
 
 }

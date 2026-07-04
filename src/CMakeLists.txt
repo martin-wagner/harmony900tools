@@ -43,6 +43,7 @@ set(sources
   document/data/enum.cpp
   document/data/cmd/base.cpp
   document/data/cmd/addActionSequence.cpp
+  document/data/cmd/addActivity.cpp
   document/data/cmd/addButton.cpp
   document/data/cmd/addDevice.cpp
   document/data/cmd/addNumpad.cpp
@@ -53,6 +54,7 @@ set(sources
   document/data/cmd/setIrStream.cpp
   document/data/cmd/setId.cpp
   document/data/cmd/removeActionSequence.cpp
+  document/data/cmd/removeActivity.cpp
   document/data/cmd/removeButton.cpp
   document/data/cmd/removeDevice.cpp
   document/data/cmd/removeIr.cpp
@@ -64,7 +66,6 @@ set(sources
   document/data/cmd/setControllerMetadata.cpp
   document/data/cmd/setUnknownProperty.cpp
   document/data/cmd/setUserData.cpp
-  document/data/items/activity.cpp
   document/data/items/button.cpp
   document/files/h900.cpp
   document/files/storage.cpp

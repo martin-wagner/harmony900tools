@@ -145,8 +145,39 @@ class CmdCatalogue : public QObject
     bool setIrCommand(uint32_t devicePos, item::RawCommand &cmd, int cmdPos = -1, bool overwrite = false);
     bool removeIrProtoCommand(uint32_t devicePos, uint32_t cmdPos);
     bool removeIrRawCommand(uint32_t devicePos, uint32_t cmdPos);
-
-
+    //activity
+    bool addActivityCommand(int pos, uint32_t id); //existing id
+    bool addActivityCommand(int pos, uint32_t *id = nullptr); //assign id
+    bool removeActivityCommand(int pos);
+    bool setActivityType(const Enum<ActivityType> &v, uint32_t pos);
+    bool setActivityLabel(const QString &v, uint32_t pos);
+    bool setActivityPvrType(const Enum<ActivityStartPage> &v, uint32_t pos);
+    bool setActivityControlGroupHardButtons(bool v, uint32_t pos);
+    bool setActivityPowerOffUnusedDevices(bool v, uint32_t pos);
+    bool setActivityTrainingWheels(bool v, uint32_t pos);
+    bool setActivityUnusedDevicesHelp(bool v, uint32_t pos);
+    bool setActivityChannelButtonBehaviour(const Enum<ChannelButtonBehaviour> &v, uint32_t pos);
+    bool setActivityControlGroupSoftButtons(bool v, uint32_t pos);
+    bool setActivityEnableSmartMenu(bool v, uint32_t pos);
+    bool setActivityEnableSmartZoom(bool v, uint32_t pos);
+    bool setActivityGuideButtonMode(const Enum<GuideButtonMode> &v, uint32_t pos);
+    bool setActivityHideModeControl(bool v, uint32_t pos);
+    bool setActivityHideModeListen(bool v, uint32_t pos);
+    bool setActivityHideModeNavigate(bool v, uint32_t pos);
+    bool setActivityHideModePlay(bool v, uint32_t pos);
+    bool setActivityHideModePlayMode(bool v, uint32_t pos);
+    bool setActivityHideSurfAllChannels(bool v, uint32_t pos);
+    bool setActivityHideSurfAllShows(bool v, uint32_t pos);
+    bool setActivityHideSurfFavoriteChannels(bool v, uint32_t pos);
+    bool setActivityHideSurfFavoriteShows(bool v, uint32_t pos);
+    bool setActivityMaxTvContentDays(int32_t v, uint32_t pos);
+    bool setActivityMediaButtonMode(const Enum<MediaButtonMode> &v, uint32_t pos);
+    bool setActivityPlayOnEnter(bool v, uint32_t pos);
+    bool setActivityRetainStop(bool v, uint32_t pos);
+    bool setActivityScrollChannelsByPage(bool v, uint32_t pos);
+    bool setActivityScrollShowsByPage(bool v, uint32_t pos);
+    bool setActivityStopOnExit(bool v, uint32_t pos);
+    bool setActivityUnknownProperty(const data::item::UnknownElement& value, uint32_t pos);
 
     //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
     bool setIrProtoLib(const binary::irProto::File &file);

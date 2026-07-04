@@ -233,7 +233,8 @@ bool ConfigH900::readUser(pugi::xml_node &root)
       default: {
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
-            tr("import user: unknown property (value = %1)").arg(
+            tr("import user: unknown property (name = %1, value = %2)").arg(
+                QString::fromStdString(name)).arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
         worker->setUserUnknownProperty(unknown);
         break;
@@ -271,6 +272,9 @@ bool ConfigH900::readController(pugi::xml_node &root)
 bool ConfigH900::readDevices(pugi::xml_node &root)
 {
   bool ret = true;
+
+  emit writeLog(LogLevel::Info, tr("Reading devices..."),
+      ContentType::PlainText);
 
   for (pugi::xml_node device : root.children("Device")) {
     ret &= readDevice(device);
@@ -408,7 +412,8 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
       default: {
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
-            tr("import device: unknown property (value = %1)").arg(
+            tr("import device: unknown property (name = %1, value = %2)").arg(
+                QString::fromStdString(name)).arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
         worker->setDeviceUnknownProperty(unknown, pos);
         break;
@@ -422,11 +427,11 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
     auto h = lib::hash_fnv1a(name.data(), name.size());
     switch (h) {
       case "Misc"_hash: {
-        ret &= readButtons(prop, item::ButtonType::Soft);
+        ret &= readDeviceButtons(prop, item::ButtonType::Soft);
         break;
       }
       case "HardButtons"_hash: {
-        ret &= readButtons(prop, item::ButtonType::Hard);
+        ret &= readDeviceButtons(prop, item::ButtonType::Hard);
         break;
       }
     }
@@ -442,16 +447,18 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
   return ret;
 }
 
-bool ConfigH900::readButtons(pugi::xml_node &buttons, enum item::ButtonType t)
+bool ConfigH900::readDeviceButtons(pugi::xml_node &buttons,
+    enum item::ButtonType t)
 {
   auto ret = true;
   for (pugi::xml_node prop : buttons.children("Button")) {
-    ret &= readButton(prop, t);
+    ret &= readDeviceButton(prop, t);
   }
   return ret;
 }
 
-bool ConfigH900::readButton(pugi::xml_node &button, enum item::ButtonType t)
+bool ConfigH900::readDeviceButton(pugi::xml_node &button,
+    enum item::ButtonType t)
 {
   int buttonPos;
 
@@ -762,7 +769,8 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
       default: {
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
-            tr("import device action: unknown property (value = %1)").arg(
+            tr("import device action: unknown property (name = %1, value = %2)").arg(
+                QString::fromStdString(name)).arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
         worker->setDeviceStateActionUnknownParam(unknown, devicePos, smPos, t,
             actPos, seqPos);
@@ -934,7 +942,8 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
       default: {
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
-            tr("import device action: unknown property (value = %1)").arg(
+            tr("import device action: unknown property (name = %1, value = %2)").arg(
+                QString::fromStdString(name)).arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
         worker->setDeviceNumpadActionUnknownParam(unknown, devicePos, s, digit,
             seqPos);
@@ -976,7 +985,8 @@ bool ConfigH900::readIrList(pugi::xml_node &commands)
       default: {
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
-            tr("import device: unknown property (value = %1)").arg(
+            tr("import device: unknown property (name = %1, value = %2)").arg(
+                QString::fromStdString(name)).arg(
                 QString::fromStdString(unknown.text)), ContentType::PlainText);
         worker->setIrUnknownProperty(unknown, devicePos);
         break;
@@ -1026,11 +1036,264 @@ bool ConfigH900::readIr(pugi::xml_node &command)
 
 bool ConfigH900::readActivities(pugi::xml_node &root)
 {
-  return true;
+  auto ret = true;
+
+  emit writeLog(LogLevel::Info, tr("Reading activities..."),
+      ContentType::PlainText);
+
+  for (pugi::xml_node prop : root.children("Activity")) {
+    auto id = prop.child("Id").text().as_int();
+    if (id == -1) {
+      //power off activity, createt from other data.
+      continue;
+    }
+    ret &= readActivitiy(prop, id);
+  }
+  return ret;
 }
 
-bool ConfigH900::readActivitiy(pugi::xml_node &activitie)
+bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
 {
+  addId(id);
+  auto ret = worker->addActivityCommand(-1, id); //append
+  if (!ret) {
+    return false;
+  }
+  auto pos = c->getActivities().size() - 1;
+
+  auto typeStr = activity.child("Type").child_value();
+  Enum<ActivityType> type(typeStr);
+  worker->setActivityType(type, pos);
+  auto presentation = activity.child("Presentation");
+  auto label = presentation.child("Label").child_value();
+  worker->setActivityLabel(label, pos);
+
+  for (pugi::xml_node prop : activity.child("Properties").children("Property")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+
+    switch (h) {
+      case "ActivityStartPage"_hash: {
+        auto valStr = prop.text().as_string("Transport");
+        auto val = Enum<ActivityStartPage>(valStr);
+        worker->setActivityPvrType(val, pos);
+        break;
+      }
+      case "ControlGroup_Hard Buttons"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityControlGroupHardButtons(val, pos);
+        break;
+      }
+      case "PowerOffUnusedDevices"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityPowerOffUnusedDevices(val, pos);
+        break;
+      }
+      case "TrainingWheels"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityTrainingWheels(val, pos);
+        break;
+      }
+      case "UnusedDevicesHelp"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityUnusedDevicesHelp(val, pos);
+        break;
+      }
+      case "ChannelButtonBehaviour"_hash: {
+        auto valStr = prop.text().as_string("BasicChannels");
+        auto val = Enum<ChannelButtonBehaviour>(valStr);
+        worker->setActivityChannelButtonBehaviour(val, pos);
+        break;
+      }
+      case "ControlGroup_Soft Buttons"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityControlGroupSoftButtons(val, pos);
+        break;
+      }
+      case "EnableSmartMenu"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityEnableSmartMenu(val, pos);
+        break;
+      }
+      case "EnableSmartZoom"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityEnableSmartZoom(val, pos);
+        break;
+      }
+      case "GuideButtonMode"_hash: {
+        auto valStr = prop.text().as_string("TunerProgramGuide");
+        auto val = Enum<GuideButtonMode>(valStr);
+        worker->setActivityGuideButtonMode(val, pos);
+        break;
+      }
+      case "HideModeControl"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideModeControl(val, pos);
+        break;
+      }
+      case "HideModeListen"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideModeListen(val, pos);
+        break;
+      }
+      case "HideModeNavigate"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideModeNavigate(val, pos);
+        break;
+      }
+      case "HideModePlay"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideModePlay(val, pos);
+        break;
+      }
+      case "HideModePlayMode"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideModePlayMode(val, pos);
+        break;
+      }
+      case "HideSurfAllChannels"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideSurfAllChannels(val, pos);
+        break;
+      }
+      case "HideSurfAllShows"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideSurfAllShows(val, pos);
+        break;
+      }
+      case "HideSurfFavoriteChannels"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideSurfFavoriteChannels(val, pos);
+        break;
+      }
+      case "HideSurfFavoriteShows"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityHideSurfFavoriteShows(val, pos);
+        break;
+      }
+      case "MaxTvContentDays"_hash: {
+        auto val = prop.text().as_int(0);
+        worker->setActivityMaxTvContentDays(val, pos);
+        break;
+      }
+      case "MediaButtonMode"_hash: {
+        auto valStr = prop.text().as_string("ShowMedia");
+        auto val = Enum<MediaButtonMode>(valStr);
+        worker->setActivityMediaButtonMode(val, pos);
+        break;
+      }
+      case "PlayOnEnter"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityPlayOnEnter(val, pos);
+        break;
+      }
+      case "RetainStop"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityRetainStop(val, pos);
+        break;
+      }
+      case "ScrollChannelsByPage"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityScrollChannelsByPage(val, pos);
+        break;
+      }
+      case "ScrollShowsByPage"_hash: {
+        auto val = prop.text().as_bool(true);
+        worker->setActivityScrollShowsByPage(val, pos);
+        break;
+      }
+      case "StopOnExit"_hash: {
+        auto val = prop.text().as_bool(false);
+        worker->setActivityStopOnExit(val, pos);
+        break;
+      }
+      default: {
+        auto unknown = toUnknownElement(prop);
+        emit writeLog(LogLevel::Debug,
+            tr("import activity: unknown property (name = %1, value = %2)").arg(
+                QString::fromStdString(name)).arg(
+                QString::fromStdString(unknown.text)), ContentType::PlainText);
+        worker->setDeviceUnknownProperty(unknown, pos);
+        break;
+      }
+    }
+  }
+
+  ret = true;
+  for (pugi::xml_node prop : activity.children("ControlGroup")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+    switch (h) {
+      case "Misc"_hash: {
+        ret &= readActivityButtons(prop, item::ButtonType::Soft);
+        break;
+      }
+      case "HardButtons"_hash: {
+        ret &= readActivityButtons(prop, item::ButtonType::Hard);
+        break;
+      }
+    }
+  }
+//  auto states = activity.child("States");
+//  ret &= readStatemachines(states);
+//  auto numeric = activity.child("Numeric");
+//  if (numeric) {
+//    ret &= readNumeric(numeric);
+//  }
+//  auto commands = activity.child("Commands");
+//  ret &= readIrList(commands); todo
+  return ret;
+}
+
+bool ConfigH900::readActivityButtons(pugi::xml_node &buttons,
+    enum item::ButtonType t)
+{
+  auto ret = true;
+  for (pugi::xml_node prop : buttons.children("Button")) {
+    ret &= readActivityButton(prop, t);
+  }
+  return ret;
+}
+
+bool ConfigH900::readActivityButton(pugi::xml_node &button,
+    enum item::ButtonType t)
+{
+//  int buttonPos;
+//
+//  auto activityPos = c->getActivities().size() - 1;
+//
+//  auto ret = worker->addActivityButtonCommand(t, activityPos, -1); //append
+//  if (!ret) {
+//    return false;
+//  }
+//  buttonPos = c->getActivities()[activityPos].getButtons().size() - 1;
+//
+//  auto actionId = string(
+//      button.child("ActionId").text().as_string("1_unknown_Hold"));
+//  auto action = item::Button::getAction(actionId);
+//  worker->setActivityButtonAction(action, activityPos, buttonPos);
+//
+//  //hard/soft are different
+//  auto name = button.attribute("name");
+//  if (name) {
+//    auto c = name.value();
+//    worker->setActivityButtonName(string(c), activityPos, buttonPos);
+//  } else {
+//    auto c = button.child("Label").child_value();
+//    worker->setActivityButtonName(string(c), activityPos, buttonPos);
+//  }
+//
+//  //only soft buttons
+//  auto pos = button.child("Position");
+//  if (pos) {
+//    auto p = pos.text().as_uint(0);
+//    worker->setActivityButtonPosition(p, activityPos, buttonPos);
+//  }
+//  auto file = button.child("Icon");
+//  if (file) {
+//    auto c = name.value();
+//    worker->setActivityButtonFile(string(c), activityPos, buttonPos);
+//  }
   return true;
 }
 
@@ -1105,8 +1368,8 @@ bool ConfigH900::readIrStream()
   }
   auto ret = worker->setIrStreams(streams);
   emit writeLog(LogLevel::Debug,
-      tr("read %1 binary ir streams").arg(
-          c->getStreamLib().getStreamCount()), ContentType::PlainText);
+      tr("read %1 binary ir streams").arg(c->getStreamLib().getStreamCount()),
+      ContentType::PlainText);
   return ret;
 }
 
@@ -1221,10 +1484,10 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
   presentation.append_child("Label").text().set(data.label.get());
   auto softButtons = presentation.append_child("ControlGroup");
   softButtons.append_attribute("name").set_value("Misc");
-  ret &= writeButtons(softButtons, data.getId(), data.getButtons(), item::ButtonType::Soft);
+  ret &= writeDeviceButtons(softButtons, data.getId(), data.getButtons(), item::ButtonType::Soft);
   auto hardButtons = presentation.append_child("ControlGroup");
   hardButtons.append_attribute("name").set_value("HardButtons");
-  ret &= writeButtons(hardButtons, data.getId(), data.getButtons(), item::ButtonType::Hard);
+  ret &= writeDeviceButtons(hardButtons, data.getId(), data.getButtons(), item::ButtonType::Hard);
 
   auto properties = device.append_child("Properties");
   writeProperty(properties, "AlwaysOn", data.alwaysOn);
@@ -1263,27 +1526,7 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
   return ret;
 }
 
-bool ConfigH900::writeActivities(pugi::xml_node &root)
-{
-  return true;
-}
-
-bool ConfigH900::writeActivitiy(pugi::xml_node &activitie)
-{
-  return true;
-}
-
-bool ConfigH900::writeProtocols(pugi::xml_node &root)
-{
-  return true;
-}
-
-bool ConfigH900::writeProtocol(pugi::xml_node &protocol)
-{
-  return true;
-}
-
-bool ConfigH900::writeButtons(pugi::xml_node &buttons, uint32_t deviceId,
+bool ConfigH900::writeDeviceButtons(pugi::xml_node &buttons, uint32_t deviceId,
     const vector<item::Button> &data, enum item::ButtonType t)
 {
   bool ret = true;
@@ -1293,12 +1536,12 @@ bool ConfigH900::writeButtons(pugi::xml_node &buttons, uint32_t deviceId,
       continue;
     }
     auto button = buttons.append_child("Button");
-    ret &= writeButton(button, deviceId, d);
+    ret &= writeDeviceButton(button, deviceId, d);
   }
   return ret;
 }
 
-bool ConfigH900::writeButton(pugi::xml_node &button, uint32_t deviceId,
+bool ConfigH900::writeDeviceButton(pugi::xml_node &button, uint32_t deviceId,
     const item::Button &data)
 {
   if (data.getButtonType() == item::ButtonType::Hard) {
@@ -1516,6 +1759,122 @@ bool ConfigH900::writeIr(pugi::xml_node &command,
   cmdData.append_child("Protocol").text().set(data.protocolIndex.get());
   const auto &raw = data.data.get();
   cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
+  return true;
+}
+
+bool ConfigH900::writeActivities(pugi::xml_node &root)
+{
+  bool ret = true;
+
+  //todo activity -1 power off
+
+  const auto &activities = c->getActivities();
+  for (const auto &data : activities) {
+    auto activity = root.append_child("Activity");
+    ret &= writeActivity(activity, data);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeActivity(pugi::xml_node &activity,
+    const data::item::Activity &data)
+{
+  bool ret = true;
+
+  // @formatter:off
+  activity.append_child("Id").text().set(data.getId());
+  activity.append_child("Type").text().set(data.type.get().getString());
+
+  auto properties = activity.append_child("Properties");
+  writeProperty(properties, "ActivityStartPage", data.pvrType);
+  writeProperty(properties, "ControlGroup_Hard Buttons", data.controlGroup_HardButtons);
+  writeProperty(properties, "PowerOffUnusedDevices", data.powerOffUnusedDevices);
+  writeProperty(properties, "TrainingWheels", data.trainingWheels);
+  writeProperty(properties, "UnusedDevicesHelp", data.unusedDevicesHelp);
+  writeProperty(properties, "ChannelButtonBehaviour", data.channelButtonBehaviour);
+  writeProperty(properties, "ControlGroup_Soft Buttons", data.controlGroup_SoftButtons);
+  writeProperty(properties, "EnableSmartMenu", data.enableSmartMenu);
+  writeProperty(properties, "EnableSmartZoom", data.enableSmartZoom);
+  writeProperty(properties, "GuideButtonMode", data.guideButtonMode);
+  writeProperty(properties, "HideModeControl", data.hideModeControl);
+  writeProperty(properties, "HideModeListen", data.hideModeListen);
+  writeProperty(properties, "HideModeNavigate", data.hideModeNavigate);
+  writeProperty(properties, "HideModePlay", data.hideModePlay);
+  writeProperty(properties, "HideModePlayMode", data.hideModePlayMode);
+  writeProperty(properties, "HideSurfAllChannels", data.hideSurfAllChannels);
+  writeProperty(properties, "HideSurfAllShows", data.hideSurfAllShows);
+  writeProperty(properties, "HideSurfFavoriteChannels", data.hideSurfFavoriteChannels);
+  writeProperty(properties, "HideSurfFavoriteShows", data.hideSurfFavoriteShows);
+  writeProperty(properties, "MaxTvContentDays", data.maxTvContentDays);
+  writeProperty(properties, "MediaButtonMode", data.mediaButtonMode);
+  writeProperty(properties, "PlayOnEnter", data.playOnEnter);
+  writeProperty(properties, "RetainStop", data.retainStop);
+  writeProperty(properties, "ScrollChannelsByPage", data.scrollChannelsByPage);
+  writeProperty(properties, "ScrollShowsByPage", data.scrollShowsByPage);
+  writeProperty(properties, "StopOnExit", data.stopOnExit);
+  for (const auto &prop : data.getUnknownProperties()) {
+    writeUnknownElement(properties, prop);
+  }
+
+  auto presentation = activity.append_child("Presentation");
+  presentation.append_child("Label").text().set(data.label.get());
+  auto softButtons = presentation.append_child("ControlGroup");
+  softButtons.append_attribute("name").set_value("Misc");
+  ret &= writeActivityButtons(softButtons, data.getButtons(), item::ButtonType::Soft);
+  auto hardButtons = presentation.append_child("ControlGroup");
+  hardButtons.append_attribute("name").set_value("HardButtons");
+  ret &= writeActivityButtons(hardButtons, data.getButtons(), item::ButtonType::Hard);
+
+//  auto states = activity.append_child("States");
+//  ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
+//  if (data.getNumpad().has_value()) {
+//    auto numeric = activity.append_child("Numeric");
+//    ret &= writeNumeric(numeric, data.getId(), data.getNumpad().value());
+//  }
+//  auto commands = activity.append_child("Commands");
+//  ret &= writeIrList(commands, data.getIrCommands());
+// @formatter:on
+  return ret;
+}
+
+bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
+    const std::vector<data::item::Button> &data, enum data::item::ButtonType t)
+{
+  bool ret = true;
+
+  for (const auto &d : data) {
+    if (t != d.getButtonType()) {
+      continue;
+    }
+    auto button = buttons.append_child("Button");
+    ret &= writeActivityButton(button, d);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeActivityButton(pugi::xml_node &button,
+    const data::item::Button &data)
+{
+  if (data.getButtonType() == item::ButtonType::Hard) {
+    button.append_attribute("name").set_value(data.name.get());
+    button.append_child("Label"); //empty
+  } else {
+    button.append_child("Label").text().set(data.name.get());
+  }
+  if (data.position.isIncluded() == Include::ALWAYS) {
+    button.append_child("Position").text().set(data.position.get());
+  }
+  //todo button.append_child("ActionId").text().set(data.getActionId(deviceId));
+  return true;
+}
+
+bool ConfigH900::writeProtocols(pugi::xml_node &root)
+{
+  return true;
+}
+
+bool ConfigH900::writeProtocol(pugi::xml_node &protocol)
+{
   return true;
 }
 

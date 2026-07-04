@@ -98,6 +98,15 @@ class SetIrUnknownPropertyCommand: public SetUnknownPropertyCommand
         const UnknownElement &value, uint32_t devicePos, QUndoCommand *parent = nullptr);
 };
 
+class SetActivityUnknownPropertyCommand: public SetUnknownPropertyCommand
+{
+  public:
+    SetActivityUnknownPropertyCommand(ConfigData& c,
+        const UnknownElement& value, uint32_t pos,
+        QUndoCommand* parent = nullptr);
+};
+
+
 
 }
 }
