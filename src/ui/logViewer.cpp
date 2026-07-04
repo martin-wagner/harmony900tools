@@ -137,6 +137,10 @@ void LogViewer::addEntry(LogLevel level, const QString &message,
   }
 
   emit entryAdded(level, message);
+  //make the output visible, even while caller is blocking the loop
+  if (isVisible()) {
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+  }
 }
 
 void LogViewer::addMessage(const QString &message)
