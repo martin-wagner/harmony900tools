@@ -114,7 +114,6 @@ void MainWindow::import()
     }
     importData(data);
     QGuiApplication::restoreOverrideCursor();
-    log->addMessage(tr("Project loaded"));
   }
 }
 

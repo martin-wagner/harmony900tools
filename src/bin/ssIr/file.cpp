@@ -206,6 +206,16 @@ void File::appendStream(TimingStream &stream, double clock, int &index)
   streams.push_back(move(s));
 }
 
+bool File::insertStream(TimingStream &stream, double clock, int index)
+{
+  if ((index < 0) || (index > static_cast<int>(streams.size()))) {
+    return false;
+  }
+  auto s = SerialStreamIr(stream, clock);
+  streams.insert(streams.begin() + index, s);
+  return true;
+}
+
 vector<uint8_t> File::serialise() const
 {
   int pos;

@@ -85,6 +85,7 @@ class ConfigH900 : public QObject
     void addId(uint32_t id);
 
     bool readIrProto();
+    bool readIrStream();
 
   protected:
     bool dumpUserConfigXml();
@@ -119,6 +120,7 @@ class ConfigH900 : public QObject
     bool exportButton(pugi::xml_node &root, uint32_t deviceId, const data::item::Button &data);
 
     bool writeIrProto();
+    bool writeIrStream();
 
   protected:
     const QString wp;

@@ -31,9 +31,9 @@ class Block
     }
 
   public:
-    const uint16_t mark_us;
-    const uint16_t pause_us;
-    const uint16_t segment_us;
+    uint16_t mark_us;
+    uint16_t pause_us;
+    uint16_t segment_us;
 
     std::chrono::microseconds mark() const
     {

@@ -61,22 +61,27 @@ bool ConfigH900::dump(const ConfigData *c)
   this->worker = nullptr;
   writerTime = lib::writeTimeH900Xml();
 
+  emit writeLog(LogLevel::Info, tr("Exporting data..."),
+      ContentType::PlainText);
+
   try {
     ret &= writeIrProto(); //side effect: creates hash for xml files
+    ret &= writeIrStream();
     ret &= dumpUserConfigXml();
     ret &= dumpActionListXml();
-
-//  vector<uint8_t> irProto;
-//  vector<uint8_t> ssir;
-
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("export: exception: %1").arg(QString(e.what())),
         ContentType::PlainText);
+    ret = false;
   }
 
   this->c = nullptr;
 
+  if (ret == true) {
+    emit writeLog(LogLevel::Info, tr("Export successful"),
+        ContentType::PlainText);
+  }
   return ret;
 }
 
@@ -87,22 +92,27 @@ bool ConfigH900::read(const ConfigData *c, CmdCatalogue *worker)
   this->c = c;
   this->worker = worker;
 
+  emit writeLog(LogLevel::Info, tr("Importing user config..."),
+      ContentType::PlainText);
+
   try {
     ret &= readUserConfigXml();
     ret &= readIrProto();
-
-//  vector<uint8_t> irProto;
-//  vector<uint8_t> ssir;
-
+    ret &= readIrStream();
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("import: exception: %1").arg(QString(e.what())),
         ContentType::PlainText);
+    ret = false;
   }
 
   this->c = nullptr;
   this->worker = nullptr;
 
+  if (ret == true) {
+    emit writeLog(LogLevel::Info, tr("Import successful"),
+        ContentType::PlainText);
+  }
   return ret;
 }
 
@@ -124,8 +134,6 @@ bool ConfigH900::readUserConfigXml()
     return false;
   }
 
-  emit writeLog(LogLevel::Debug, tr("Importing xml"), ContentType::PlainText);
-
   auto root = xml.child("Root");
   auto ret = readProperties(root); //version check
   if (!ret) {
@@ -136,6 +144,15 @@ bool ConfigH900::readUserConfigXml()
   ret &= readDevices(root);
   ret &= readActivities(root);
   ret &= readProtocols(root);
+  if (ret) {
+    emit writeLog(LogLevel::Debug,
+        tr("Importing xml successful, contains %1 devices and %2 activities").arg(
+            c->getDevices().size()).arg(c->getActivities().size()),
+        ContentType::PlainText);
+  } else {
+    emit writeLog(LogLevel::Error, tr("Importing xml failed"),
+        ContentType::PlainText);
+  }
   return ret;
 }
 
@@ -159,15 +176,13 @@ bool ConfigH900::readProperties(pugi::xml_node &root)
       }
       case "ProtocolCacheHash"_hash: {
         QString s = prop.child_value();
-        emit writeLog(LogLevel::Debug,
-            tr("import %1: irproto crc %2").arg(userConfigPath).arg(s),
+        emit writeLog(LogLevel::Debug, tr("import: irproto crc %1").arg(s),
             ContentType::PlainText);
         break;
       }
       case "LastUpdated"_hash: {
         QString s = prop.child_value();
-        emit writeLog(LogLevel::Info,
-            tr("import %1: last update at %2").arg(userConfigPath).arg(s),
+        emit writeLog(LogLevel::Info, tr("import: last update at %1").arg(s),
             ContentType::PlainText);
         break;
       }
@@ -1071,7 +1086,28 @@ bool ConfigH900::readIrProto()
         ContentType::PlainText);
     return false;
   }
-  return worker->setIrProtoLib(protocols);
+  auto ret = worker->setIrProtoLib(protocols);
+  emit writeLog(LogLevel::Debug,
+      tr("read %1 binary ir protocols").arg(
+          c->getProtocolLib().getProtocolCount()), ContentType::PlainText);
+  return ret;
+}
+
+bool ConfigH900::readIrStream()
+{
+  binary::ssIr::File streams;
+  auto status = streams.parse(QString(wp + "/" + ssIrPath).toStdString());
+  if (status != binary::ssIr::Status::OK) {
+    emit writeLog(LogLevel::Error,
+        tr("import ir stream parser error: %d").arg((int) status),
+        ContentType::PlainText);
+    return false;
+  }
+  auto ret = worker->setIrStreams(streams);
+  emit writeLog(LogLevel::Debug,
+      tr("read %1 binary ir streams").arg(
+          c->getStreamLib().getStreamCount()), ContentType::PlainText);
+  return ret;
 }
 
 bool ConfigH900::dumpUserConfigXml()
@@ -1603,8 +1639,24 @@ bool ConfigH900::writeIrProto()
   lib::setHarmony32_network(crc, tmp);
   hash = lib::bytesToHexString(tmp);
   emit writeLog(LogLevel::Debug,
-      tr("wrote %1 binary protocols: %d").arg(
+      tr("wrote %1 binary ir protocols").arg(
           c->getProtocolLib().getProtocolCount()), ContentType::PlainText);
+  return true;
+}
+
+bool ConfigH900::writeIrStream()
+{
+  auto status = c->getStreamLib().serialise(
+      QString(wp + "/" + ssIrPath).toStdString());
+  if (status != binary::ssIr::Status::OK) {
+    emit writeLog(LogLevel::Error,
+        tr("write ir stream parser error: %d").arg((int) status),
+        ContentType::PlainText);
+    return false;
+  }
+  emit writeLog(LogLevel::Debug,
+      tr("wrote %1 binary ir streams").arg(c->getStreamLib().getStreamCount()),
+      ContentType::PlainText);
   return true;
 }
 

@@ -55,8 +55,8 @@ class File
 {
   protected:
     inline static const std::vector<uint8_t> header = { 0x01, 0x01, 0x05, 0x00, 0x00, 0x01 };
-    const int MIN_FILE_SIZE = 8; //header + 0x01 + array count
-    const int HEADER_SIZE = 5; //last 0x01 of header above belongs to payload with unknown use.
+    static constexpr int MIN_FILE_SIZE = 8; //header + 0x01 + array count
+    static constexpr int HEADER_SIZE = 5; //last 0x01 of header above belongs to payload with unknown use.
 
     std::vector<SerialStreamIr> streams;
 
@@ -86,6 +86,14 @@ class File
      * @param index [out] position where stream was added
      */
     void appendStream(TimingStream &stream, double clock, int &index);
+
+    /** insert a stream
+     *
+     * @param stream stream ready-to-use, e.g. from irlearn. takes ownership!
+     * @param index where to insert
+     * @return true = ok
+     */
+    bool insertStream(TimingStream &stream, double clock, int index);
 
     /** remove a stream */
     void removeStream(int index);

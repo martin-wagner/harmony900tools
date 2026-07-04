@@ -23,6 +23,8 @@
 #include "cmd/removeIr.h"
 #include "cmd/setIrProto.h"
 #include "cmd/removeIrProto.h"
+#include "cmd/setIrStream.h"
+#include "cmd/removeIrStream.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -1310,6 +1312,45 @@ bool CmdCatalogue::removeIrProtoLibItem(int pos)
     emit writeLog(LogLevel::Warning,
         tr("modify: remove ir proto from lib failed, dropped"),
         ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::setIrStreams(const binary::ssIr::File &file)
+{
+  auto *cmd = new SetIrStreamsCommand(c, file);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::addIrStreamItem(binary::TimingStream stream, double clock,
+    int pos)
+{
+  auto *cmd = new AddIrStreamtemCommand(c, stream, clock, pos); //stream -- non-const
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: add ir stream failed, dropped"), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeIrStreamItem(int pos)
+{
+  auto *cmd = new RemoveIrStreamtemCommand(c, pos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: remove ir stream failed, dropped"), ContentType::PlainText);
     delete cmd;
   }
   return true;

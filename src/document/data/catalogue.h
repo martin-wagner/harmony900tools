@@ -153,6 +153,11 @@ class CmdCatalogue : public QObject
     bool addIrProtoLibItem(const binary::irProto::IrProto &prot, int pos = -1);
     bool removeIrProtoLibItem(int pos = -1);
 
+    //irstream binary list. items can be added/removed, but currently not directly modified/overwritten
+    bool setIrStreams(const binary::ssIr::File &file);
+    bool addIrStreamItem(binary::TimingStream stream, double clock, int pos = -1);
+    bool removeIrStreamItem(int pos = -1);
+
   protected:
     //template for setting a property inside user data that uses the Property<x> template.
     //all property setters above use this.
