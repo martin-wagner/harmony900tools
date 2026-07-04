@@ -9,7 +9,7 @@ namespace document
 namespace data
 {
 
-AddButtonCommand::AddButtonCommand(ConfigData &c, item::ButtonType t,
+AddDeviceButtonCommand::AddDeviceButtonCommand(ConfigData &c, item::ButtonType t,
     uint32_t devicePos, int buttonPos, QUndoCommand *parent) :
     BaseCommand(QObject::tr("Add Button (to device: %1)").arg(devicePos),
         parent), c(c), type(t), devicePos(devicePos)
@@ -31,7 +31,7 @@ AddButtonCommand::AddButtonCommand(ConfigData &c, item::ButtonType t,
   isValid = true;
 }
 
-void AddButtonCommand::redo()
+void AddDeviceButtonCommand::redo()
 {
   if (!isValid) {
     return;
@@ -41,7 +41,7 @@ void AddButtonCommand::redo()
   emit dirtyChanged(true);
 }
 
-void AddButtonCommand::undo()
+void AddDeviceButtonCommand::undo()
 {
   if (!isValid) {
     return;
@@ -51,7 +51,54 @@ void AddButtonCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool AddButtonCommand::valid() const
+bool AddDeviceButtonCommand::valid() const
+{
+  return isValid;
+}
+
+AddActivityButtonCommand::AddActivityButtonCommand(ConfigData &c, item::ButtonType t,
+    uint32_t activityPos, int buttonPos, QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Add Button (to activity: %1)").arg(activityPos),
+        parent), c(c), type(t), activityPos(activityPos)
+{
+  uint32_t buttonCount;
+
+  if (activityPos >= c.getActivities().size()) {
+    return;
+  }
+  buttonCount = c.getActivities()[activityPos].getButtons().size();
+  if (buttonPos < 0) {
+    //append
+    buttonPos = buttonCount;
+  }
+  if (buttonPos > buttonCount) {
+    return;
+  }
+  this->buttonPos = buttonPos;
+  isValid = true;
+}
+
+void AddActivityButtonCommand::redo()
+{
+  if (!isValid) {
+    return;
+  }
+  auto &buttons = c.getActivities()[activityPos].getButtons();
+  buttons.insert(buttons.begin() + buttonPos, item::Button(type));
+  emit dirtyChanged(true);
+}
+
+void AddActivityButtonCommand::undo()
+{
+  if (!isValid) {
+    return;
+  }
+  auto &buttons = c.getActivities()[activityPos].getButtons();
+  buttons.erase(buttons.begin() + buttonPos);
+  emit dirtyChanged(true);
+}
+
+bool AddActivityButtonCommand::valid() const
 {
   return isValid;
 }

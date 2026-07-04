@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QString>
 #include <QList>
+#include <QElapsedTimer>
 
 #include "lib/logLevel.h"
 
@@ -78,4 +79,6 @@ class LogViewer: public QWidget
     int maxEntries = 0;     // 0 = unlimited
     bool scrollLocked = false;
     LogLevel loglevel = LogLevel::Notice;
+
+    QElapsedTimer processEventsTimer;
 };

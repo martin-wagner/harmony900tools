@@ -49,6 +49,26 @@ class Device
       return buttons;
     }
 
+    bool hasSoftButtons() const
+    {
+      for (const auto &b : buttons) {
+        if (b.getButtonType() == ButtonType::Soft) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    bool hasHardButtons() const
+    {
+      for (const auto &b : buttons) {
+        if (b.getButtonType() == ButtonType::Hard) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     const std::vector<StateMachine>& getStateMachines() const
     {
       return stateMachines;

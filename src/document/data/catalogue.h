@@ -178,6 +178,21 @@ class CmdCatalogue : public QObject
     bool setActivityScrollShowsByPage(bool v, uint32_t pos);
     bool setActivityStopOnExit(bool v, uint32_t pos);
     bool setActivityUnknownProperty(const data::item::UnknownElement& value, uint32_t pos);
+    //channels
+    bool addActivityChannelCommand(uint32_t activityPos, int chPos);
+    bool removeActivityChannelCommand(uint32_t activityPos, uint32_t chPos);
+    bool setActivityChannelStation(const std::string &v, uint32_t activityPos, uint32_t chPos);
+    bool setActivityChannelNumber(const uint32_t v, uint32_t activityPos, uint32_t chPos);
+    bool setActivityChannelPosition(const uint32_t v, uint32_t activityPos, uint32_t chPos);
+    bool setActivityChannelImage(const std::string &v, uint32_t activityPos, uint32_t chPos);
+    //buttons
+    bool addActivityButtonCommand(item::ButtonType t, uint32_t activityPos, int buttonPos);
+    bool removeActivityButtonCommand(uint32_t activityPos, int buttonPos);
+    bool setActivityButtonAction(const std::string &v, uint32_t activityPos, int buttonPos);
+    bool setActivityButtonName(const std::string &v, uint32_t activityPos, int buttonPos);
+    bool setActivityButtonFile(const std::string &v, uint32_t activityPos, int buttonPos);
+    bool setActivityButtonPosition(const int32_t &v, uint32_t activityPos, int buttonPos);
+
 
     //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
     bool setIrProtoLib(const binary::irProto::File &file);

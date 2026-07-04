@@ -27,6 +27,8 @@
 #include "cmd/removeIrProto.h"
 #include "cmd/setIrStream.h"
 #include "cmd/removeIrStream.h"
+#include "cmd/addChannel.h"
+#include "cmd/removeChannel.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -517,15 +519,15 @@ bool CmdCatalogue::setDeviceUnknownProperty(
 bool CmdCatalogue::addDeviceButtonCommand(item::ButtonType t,
     uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new AddButtonCommand(c, t, devicePos, buttonPos);
+  auto *cmd = new AddDeviceButtonCommand(c, t, devicePos, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: button pos %1/%2 already exists, dropped").arg(devicePos).arg(
-            buttonPos), ContentType::PlainText);
+        tr("modify: button device pos %1/%2 already exists, dropped").arg(
+            devicePos).arg(buttonPos), ContentType::PlainText);
     delete cmd;
   }
   return true;
@@ -533,15 +535,15 @@ bool CmdCatalogue::addDeviceButtonCommand(item::ButtonType t,
 
 bool CmdCatalogue::removeDeviceButtonCommand(uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new RemoveButtonCommand(c, devicePos, buttonPos);
+  auto *cmd = new RemoveDeviceButtonCommand(c, devicePos, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: button pos %1/%2 doesn't exist, dropped").arg(devicePos).arg(
-            buttonPos), ContentType::PlainText);
+        tr("modify: button device pos %1/%2 doesn't exist, dropped").arg(
+            devicePos).arg(buttonPos), ContentType::PlainText);
     delete cmd;
   }
   return ret;
@@ -552,7 +554,7 @@ bool CmdCatalogue::setDeviceButtonAction(const string &v, uint32_t devicePos,
 {
   PropertyAccess<string> access =
       {
-        tr("set button action"),
+        tr("set button device action"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].action.get();},
         [this, devicePos, buttonPos](
             const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].action.set(v).setIncluded(Include::ALWAYS);},
@@ -565,7 +567,7 @@ bool CmdCatalogue::setDeviceButtonName(const string &v, uint32_t devicePos,
 {
   PropertyAccess<string> access =
       {
-        tr("set button name"),
+        tr("set button device name"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].name.get();},
         [this, devicePos, buttonPos](
             const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].name.set(v).setIncluded(Include::ALWAYS);},
@@ -578,7 +580,7 @@ bool CmdCatalogue::setDeviceButtonFile(const string &v, uint32_t devicePos,
 {
   PropertyAccess<string> access =
       {
-        tr("set button file"),
+        tr("set button device file"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].file.get();},
         [this, devicePos, buttonPos](
             const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].file.set(v).setIncluded(Include::ALWAYS);},
@@ -591,7 +593,7 @@ bool CmdCatalogue::setDeviceButtonPosition(const int32_t &v, uint32_t devicePos,
 {
   PropertyAccess<int32_t> access =
       {
-        tr("set button position"),
+        tr("set button device position"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].position.get();},
         [this, devicePos, buttonPos](
             const int32_t &v) {c.getDevices()[devicePos].getButtons()[buttonPos].position.set(v).setIncluded(Include::ALWAYS);},
@@ -1730,6 +1732,177 @@ bool CmdCatalogue::setActivityUnknownProperty(
   connectCommand(cmd);
   undo.push(cmd);
   return true;
+}
+
+bool CmdCatalogue::addActivityChannelCommand(uint32_t activityPos, int chPos)
+{
+  auto *cmd = new AddActivityChannelCommand(c, activityPos, chPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: channel activity pos %1/%2 already exists, dropped").arg(
+            activityPos).arg(chPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeActivityChannelCommand(uint32_t activityPos,
+    uint32_t chPos)
+{
+  auto *cmd = new RemoveActivityChannelCommand(c, activityPos, chPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: button activity pos %1/%2 doesn't exist, dropped").arg(
+            activityPos).arg(chPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setActivityChannelStation(const std::string &v,
+    uint32_t activityPos, uint32_t chPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set button activity station name"),
+        [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].station.get();},
+        [this, activityPos, chPos](
+            const string &v) {c.getActivities()[activityPos].getChannels()[chPos].station.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityChannelNumber(const uint32_t v,
+    uint32_t activityPos, uint32_t chPos)
+{
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set button activity channel number"),
+        [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].channel.get();},
+        [this, activityPos, chPos](
+            uint32_t v) {c.getActivities()[activityPos].getChannels()[chPos].channel.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<uint32_t>(access);
+}
+
+bool CmdCatalogue::setActivityChannelPosition(const uint32_t v,
+    uint32_t activityPos, uint32_t chPos)
+{
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set button activity channel button position"),
+        [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].position.get();},
+        [this, activityPos, chPos](
+            uint32_t v) {c.getActivities()[activityPos].getChannels()[chPos].position.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<uint32_t>(access);
+}
+
+bool CmdCatalogue::setActivityChannelImage(const std::string &v,
+    uint32_t activityPos, uint32_t chPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set button activity channel button image"),
+        [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].img.get();},
+        [this, activityPos, chPos](
+            const string &v) {c.getActivities()[activityPos].getChannels()[chPos].img.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::addActivityButtonCommand(item::ButtonType t,
+    uint32_t activityPos, int buttonPos)
+{
+  auto *cmd = new AddActivityButtonCommand(c, t, activityPos, buttonPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: button activity pos %1/%2 already exists, dropped").arg(
+            activityPos).arg(buttonPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeActivityButtonCommand(uint32_t activityPos,
+    int buttonPos)
+{
+  auto *cmd = new RemoveActivityButtonCommand(c, activityPos, buttonPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: button activity pos %1/%2 doesn't exist, dropped").arg(
+            activityPos).arg(buttonPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setActivityButtonAction(const string &v,
+    uint32_t activityPos, int buttonPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set button activity action"),
+        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].action.get();},
+        [this, activityPos, buttonPos](
+            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].action.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityButtonName(const string &v, uint32_t activityPos,
+    int buttonPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set button activity name"),
+        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].name.get();},
+        [this, activityPos, buttonPos](
+            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].name.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityButtonFile(const string &v, uint32_t activityPos,
+    int buttonPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set button activity file"),
+        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].file.get();},
+        [this, activityPos, buttonPos](
+            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].file.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityButtonPosition(const int32_t &v,
+    uint32_t activityPos, int buttonPos)
+{
+  PropertyAccess<int32_t> access =
+      {
+        tr("set button activity position"),
+        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].position.get();},
+        [this, activityPos, buttonPos](
+            const int32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].position.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<int32_t>(access);
 }
 
 bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)

@@ -48,6 +48,36 @@ class Activity
       return buttons;
     }
 
+    const std::vector<Channel>& getChannels() const
+    {
+      return channels;
+    }
+
+    std::vector<Channel>& getChannels()
+    {
+      return channels;
+    }
+
+    bool hasSoftButtons() const
+    {
+      for (const auto &b : buttons) {
+        if (b.getButtonType() == ButtonType::Soft) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    bool hasHardButtons() const
+    {
+      for (const auto &b : buttons) {
+        if (b.getButtonType() == ButtonType::Hard) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     PropertyEnum<ActivityType> type{ActivityType::VirtualGeneric};
     PropertyString label{"My C64"};
 
@@ -93,7 +123,7 @@ class Activity
 
   protected:
     uint32_t id;
-    //todo channel list
+    std::vector<Channel> channels;
     std::vector<Button> buttons;
 //    std::vector<StateAction> enterActions; todo
 //    std::vector<StateAction> leaveActions;

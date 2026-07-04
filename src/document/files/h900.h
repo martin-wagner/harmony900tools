@@ -76,6 +76,8 @@ class ConfigH900 : public QObject
     bool readIr(pugi::xml_node &command);
     bool readActivities(pugi::xml_node &root);
     bool readActivitiy(pugi::xml_node &activity, uint32_t id);
+    bool readActivityChannels(pugi::xml_node &channels);
+    bool readActivityChannel(pugi::xml_node &channel);
     bool readActivityButtons(pugi::xml_node &buttons, enum data::item::ButtonType t);
     bool readActivityButton(pugi::xml_node &button, enum data::item::ButtonType t);
 
@@ -111,6 +113,8 @@ class ConfigH900 : public QObject
     bool writeIr(pugi::xml_node &command, const data::item::ProtoCommand &data);
     bool writeActivities(pugi::xml_node &root);
     bool writeActivity(pugi::xml_node &activity, const data::item::Activity &data);
+    bool writeActivityChannels(pugi::xml_node &channels, const std::vector<data::item::Channel> &data);
+    bool writeActivityChannel(pugi::xml_node &channel, const data::item::Channel &data);
     bool writeActivityButtons(pugi::xml_node &buttons, const std::vector<data::item::Button> &data, enum data::item::ButtonType t);
     bool writeActivityButton(pugi::xml_node &button, const data::item::Button &data);
 

@@ -30,6 +30,8 @@ LogViewer::LogViewer(QWidget *parent) :
   textBrowser->setLineWrapMode(QTextEdit::NoWrap);
   textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   layout->addWidget(textBrowser);
+
+  processEventsTimer.start();
 }
 
 void LogViewer::buildToolBar()
@@ -137,9 +139,11 @@ void LogViewer::addEntry(LogLevel level, const QString &message,
   }
 
   emit entryAdded(level, message);
-  //make the output visible, even while caller is blocking the loop
-  if (isVisible()) {
+
+  if (processEventsTimer.elapsed() >= 1000) {
+    // Make the output visible, even while the caller is blocking the event loop.
     QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    processEventsTimer.restart();
   }
 }
 

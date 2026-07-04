@@ -24,9 +24,9 @@ void RemoveButtonFromActivityCommand::undo()
 {
 }
 
-RemoveButtonCommand::RemoveButtonCommand(ConfigData &c, uint32_t devicePos,
+RemoveDeviceButtonCommand::RemoveDeviceButtonCommand(ConfigData &c, uint32_t devicePos,
     uint32_t buttonPos, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Remove Button (Pos: %1)").arg(devicePos), parent), c(
+    BaseCommand(QObject::tr("Remove Button (from device: %1)").arg(devicePos), parent), c(
         c), devicePos(devicePos), buttonPos(buttonPos), button(
         item::ButtonType::Hard)
 {
@@ -63,7 +63,7 @@ RemoveButtonCommand::RemoveButtonCommand(ConfigData &c, uint32_t devicePos,
   isValid = true;
 }
 
-void RemoveButtonCommand::redo()
+void RemoveDeviceButtonCommand::redo()
 {
   if (!isValid) {
     return;
@@ -75,7 +75,7 @@ void RemoveButtonCommand::redo()
   emit dirtyChanged(true);
 }
 
-void RemoveButtonCommand::undo()
+void RemoveDeviceButtonCommand::undo()
 {
   if (!isValid) {
     return;
@@ -87,7 +87,58 @@ void RemoveButtonCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool RemoveButtonCommand::valid() const
+bool RemoveDeviceButtonCommand::valid() const
+{
+  return isValid;
+}
+
+RemoveActivityButtonCommand::RemoveActivityButtonCommand(ConfigData &c, uint32_t activityPos,
+    uint32_t buttonPos, QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Remove Button (from activity: %1)").arg(activityPos), parent), c(
+        c), activityPos(activityPos), buttonPos(buttonPos), button(
+        item::ButtonType::Hard)
+{
+  uint32_t buttonCount;
+
+  if (activityPos >= c.getActivities().size()) {
+    //beyond end
+    return;
+  }
+  buttonCount = c.getActivities()[activityPos].getButtons().size();
+  if (buttonPos >= buttonCount) {
+    return;
+  }
+
+  // copy Button for undo
+  button = c.getActivities()[activityPos].getButtons()[buttonPos];
+  isValid = true;
+}
+
+void RemoveActivityButtonCommand::redo()
+{
+  if (!isValid) {
+    return;
+  }
+  QUndoCommand::redo();
+
+  auto &buttons = c.getActivities()[activityPos].getButtons();
+  buttons.erase(buttons.begin() + buttonPos);
+  emit dirtyChanged(true);
+}
+
+void RemoveActivityButtonCommand::undo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  auto &buttons = c.getActivities()[activityPos].getButtons();
+  buttons.insert(buttons.begin() + buttonPos, button);
+  QUndoCommand::undo();
+  emit dirtyChanged(true);
+}
+
+bool RemoveActivityButtonCommand::valid() const
 {
   return isValid;
 }

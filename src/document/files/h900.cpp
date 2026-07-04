@@ -291,6 +291,8 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
     return false;
   }
   auto pos = c->getDevices().size() - 1;
+  emit writeLog(LogLevel::Info, tr("Device %1...").arg(pos),
+      ContentType::PlainText);
 
   auto typeStr = device.child("Type").child_value();
   Enum<DeviceType> type(typeStr);
@@ -472,7 +474,7 @@ bool ConfigH900::readDeviceButton(pugi::xml_node &button,
 
   auto actionId = string(
       button.child("ActionId").text().as_string("1_unknown_Hold"));
-  auto action = item::Button::getAction(actionId);
+  auto action = item::Button::getActionDevice(actionId);
   worker->setDeviceButtonAction(action, devicePos, buttonPos);
 
   //hard/soft are different
@@ -493,7 +495,7 @@ bool ConfigH900::readDeviceButton(pugi::xml_node &button,
   }
   auto file = button.child("Icon");
   if (file) {
-    auto c = name.value();
+    auto c = file.text().as_string();
     worker->setDeviceButtonFile(string(c), devicePos, buttonPos);
   }
   return true;
@@ -1060,6 +1062,8 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
     return false;
   }
   auto pos = c->getActivities().size() - 1;
+  emit writeLog(LogLevel::Info, tr("Activity %1...").arg(pos),
+      ContentType::PlainText);
 
   auto typeStr = activity.child("Type").child_value();
   Enum<ActivityType> type(typeStr);
@@ -1220,7 +1224,9 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
   }
 
   ret = true;
-  for (pugi::xml_node prop : activity.children("ControlGroup")) {
+  auto channels = presentation.child("ChannelList");
+  ret = readActivityChannels(channels);
+  for (pugi::xml_node prop : presentation.children("ControlGroup")) {
     auto name = string(prop.attribute("name").as_string());
     auto h = lib::hash_fnv1a(name.data(), name.size());
     switch (h) {
@@ -1245,6 +1251,38 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
   return ret;
 }
 
+bool ConfigH900::readActivityChannels(pugi::xml_node &channels)
+{
+  auto ret = true;
+  for (pugi::xml_node prop : channels.children("Channel")) {
+    ret &= readActivityChannel(prop);
+  }
+  return ret;
+}
+
+bool ConfigH900::readActivityChannel(pugi::xml_node &channel)
+{
+  int channelPos;
+
+  auto activityPos = c->getActivities().size() - 1;
+
+  auto ret = worker->addActivityChannelCommand(activityPos, -1); //append
+  if (!ret) {
+    return false;
+  }
+  channelPos = c->getActivities()[activityPos].getChannels().size() - 1;
+
+  auto station = string(channel.child("Station").text().as_string("Other"));
+  worker->setActivityChannelStation(station, activityPos, channelPos);
+  auto chNumber = channel.child("Number").text().as_uint(1);
+  worker->setActivityChannelNumber(chNumber, activityPos, channelPos);
+  auto chPosOnLcd = channel.child("Slot").text().as_uint(1);
+  worker->setActivityChannelPosition(chPosOnLcd, activityPos, channelPos);
+  auto image = string(channel.child("Image").text().as_string("0.png"));
+  worker->setActivityChannelImage(image, activityPos, channelPos);
+  return true;
+}
+
 bool ConfigH900::readActivityButtons(pugi::xml_node &buttons,
     enum item::ButtonType t)
 {
@@ -1258,42 +1296,42 @@ bool ConfigH900::readActivityButtons(pugi::xml_node &buttons,
 bool ConfigH900::readActivityButton(pugi::xml_node &button,
     enum item::ButtonType t)
 {
-//  int buttonPos;
-//
-//  auto activityPos = c->getActivities().size() - 1;
-//
-//  auto ret = worker->addActivityButtonCommand(t, activityPos, -1); //append
-//  if (!ret) {
-//    return false;
-//  }
-//  buttonPos = c->getActivities()[activityPos].getButtons().size() - 1;
-//
-//  auto actionId = string(
-//      button.child("ActionId").text().as_string("1_unknown_Hold"));
-//  auto action = item::Button::getAction(actionId);
-//  worker->setActivityButtonAction(action, activityPos, buttonPos);
-//
-//  //hard/soft are different
-//  auto name = button.attribute("name");
-//  if (name) {
-//    auto c = name.value();
-//    worker->setActivityButtonName(string(c), activityPos, buttonPos);
-//  } else {
-//    auto c = button.child("Label").child_value();
-//    worker->setActivityButtonName(string(c), activityPos, buttonPos);
-//  }
-//
-//  //only soft buttons
-//  auto pos = button.child("Position");
-//  if (pos) {
-//    auto p = pos.text().as_uint(0);
-//    worker->setActivityButtonPosition(p, activityPos, buttonPos);
-//  }
-//  auto file = button.child("Icon");
-//  if (file) {
-//    auto c = name.value();
-//    worker->setActivityButtonFile(string(c), activityPos, buttonPos);
-//  }
+  int buttonPos;
+
+  auto activityPos = c->getActivities().size() - 1;
+
+  auto ret = worker->addActivityButtonCommand(t, activityPos, -1); //append
+  if (!ret) {
+    return false;
+  }
+  buttonPos = c->getActivities()[activityPos].getButtons().size() - 1;
+
+  auto actionId = string(
+      button.child("ActionId").text().as_string("1_unknown_Hold"));
+  auto action = item::Button::getActionActivity(actionId);
+  worker->setActivityButtonAction(action, activityPos, buttonPos);
+
+  //hard/soft are different
+  auto name = button.attribute("name");
+  if (name) {
+    auto c = name.value();
+    worker->setActivityButtonName(string(c), activityPos, buttonPos);
+  } else {
+    auto c = button.child("Label").child_value();
+    worker->setActivityButtonName(string(c), activityPos, buttonPos);
+  }
+
+  //only soft buttons
+  auto pos = button.child("Position");
+  if (pos) {
+    auto p = pos.text().as_uint(0);
+    worker->setActivityButtonPosition(p, activityPos, buttonPos);
+  }
+  auto file = button.child("Icon");
+  if (file) {
+    auto c = file.text().as_string();
+    worker->setActivityButtonFile(string(c), activityPos, buttonPos);
+  }
   return true;
 }
 
@@ -1482,12 +1520,18 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
 
   auto presentation = device.append_child("Presentation");
   presentation.append_child("Label").text().set(data.label.get());
-  auto softButtons = presentation.append_child("ControlGroup");
-  softButtons.append_attribute("name").set_value("Misc");
-  ret &= writeDeviceButtons(softButtons, data.getId(), data.getButtons(), item::ButtonType::Soft);
-  auto hardButtons = presentation.append_child("ControlGroup");
-  hardButtons.append_attribute("name").set_value("HardButtons");
-  ret &= writeDeviceButtons(hardButtons, data.getId(), data.getButtons(), item::ButtonType::Hard);
+  if (data.hasSoftButtons()) {
+    auto softButtons = presentation.append_child("ControlGroup");
+    softButtons.append_attribute("name").set_value("Misc");
+    ret &= writeDeviceButtons(softButtons, data.getId(), data.getButtons(),
+        item::ButtonType::Soft);
+  }
+  if (data.hasHardButtons()) {
+    auto hardButtons = presentation.append_child("ControlGroup");
+    hardButtons.append_attribute("name").set_value("HardButtons");
+    ret &= writeDeviceButtons(hardButtons, data.getId(), data.getButtons(),
+        item::ButtonType::Hard);
+  }
 
   auto properties = device.append_child("Properties");
   writeProperty(properties, "AlwaysOn", data.alwaysOn);
@@ -1514,8 +1558,10 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
     writeUnknownElement(properties, prop);
   }
 
-  auto states = device.append_child("States");
-  ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
+  if (!data.getStateMachines().empty()) {
+    auto states = device.append_child("States");
+    ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
+  }
   if (data.getNumpad().has_value()) {
     auto numeric = device.append_child("Numeric");
     ret &= writeNumeric(numeric, data.getId(), data.getNumpad().value());
@@ -1547,8 +1593,13 @@ bool ConfigH900::writeDeviceButton(pugi::xml_node &button, uint32_t deviceId,
   if (data.getButtonType() == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
     button.append_child("Label"); //empty
-  } else {
+  } else if (!data.name.get().empty()) {
     button.append_child("Label").text().set(data.name.get());
+  } else {
+    button.append_child("Label"); //empty
+  }
+  if (data.file.isIncluded() == Include::ALWAYS) {
+    button.append_child("Icon").text().set(data.file.get());
   }
   if (data.position.isIncluded() == Include::ALWAYS) {
     button.append_child("Position").text().set(data.position.get());
@@ -1818,12 +1869,22 @@ bool ConfigH900::writeActivity(pugi::xml_node &activity,
 
   auto presentation = activity.append_child("Presentation");
   presentation.append_child("Label").text().set(data.label.get());
-  auto softButtons = presentation.append_child("ControlGroup");
-  softButtons.append_attribute("name").set_value("Misc");
-  ret &= writeActivityButtons(softButtons, data.getButtons(), item::ButtonType::Soft);
-  auto hardButtons = presentation.append_child("ControlGroup");
-  hardButtons.append_attribute("name").set_value("HardButtons");
-  ret &= writeActivityButtons(hardButtons, data.getButtons(), item::ButtonType::Hard);
+  if (!data.getChannels().empty()) {
+    auto channelButtons = presentation.append_child("ChannelList");
+    ret &= writeActivityChannels(channelButtons, data.getChannels());
+  }
+  if (data.hasSoftButtons()) {
+    auto softButtons = presentation.append_child("ControlGroup");
+    softButtons.append_attribute("name").set_value("Misc");
+    ret &= writeActivityButtons(softButtons, data.getButtons(),
+        item::ButtonType::Soft);
+  }
+  if (data.hasHardButtons()) {
+    auto hardButtons = presentation.append_child("ControlGroup");
+    hardButtons.append_attribute("name").set_value("HardButtons");
+    ret &= writeActivityButtons(hardButtons, data.getButtons(),
+        item::ButtonType::Hard);
+  }
 
 //  auto states = activity.append_child("States");
 //  ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
@@ -1835,6 +1896,28 @@ bool ConfigH900::writeActivity(pugi::xml_node &activity,
 //  ret &= writeIrList(commands, data.getIrCommands());
 // @formatter:on
   return ret;
+}
+
+bool ConfigH900::writeActivityChannels(pugi::xml_node &channels,
+    const std::vector<data::item::Channel> &data)
+{
+  bool ret = true;
+
+  for (const auto &d : data) {
+    auto channel = channels.append_child("Channel");
+    ret &= writeActivityChannel(channel, d);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeActivityChannel(pugi::xml_node &channel,
+    const data::item::Channel &data)
+{
+  channel.append_child("Station").text().set(data.station.get());
+  channel.append_child("Number").text().set(data.channel.get());
+  channel.append_child("Slot").text().set(data.position.get());
+  channel.append_child("Image").text().set(data.img.get());
+  return true;
 }
 
 bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
@@ -1858,13 +1941,18 @@ bool ConfigH900::writeActivityButton(pugi::xml_node &button,
   if (data.getButtonType() == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
     button.append_child("Label"); //empty
-  } else {
+  } else if (!data.name.get().empty()) {
     button.append_child("Label").text().set(data.name.get());
+  } else {
+    button.append_child("Label"); //empty
+  }
+  if (data.file.isIncluded() == Include::ALWAYS) {
+    button.append_child("Icon").text().set(data.file.get());
   }
   if (data.position.isIncluded() == Include::ALWAYS) {
     button.append_child("Position").text().set(data.position.get());
   }
-  //todo button.append_child("ActionId").text().set(data.getActionId(deviceId));
+  button.append_child("ActionId").text().set(data.getActionId());
   return true;
 }
 
