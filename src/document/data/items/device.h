@@ -39,24 +39,14 @@ class Device
     /** get device uid + all command uids */
     std::set<uint32_t> getAllIds() { return {}; }; //todo
 
-    const std::vector<Button>& getSoftButtons() const
+    const std::vector<Button>& getButtons() const
     {
-      return softButtons;
+      return buttons;
     }
 
-    std::vector<Button>& getSoftButtons()
+    std::vector<Button>& getButtons()
     {
-      return softButtons;
-    }
-
-    const std::vector<Button>& getHardButtons() const
-    {
-      return hardButtons;
-    }
-
-    std::vector<Button>& getHardButtons()
-    {
-      return hardButtons;
+      return buttons;
     }
 
     const std::vector<StateMachine>& getStateMachines() const
@@ -133,8 +123,7 @@ class Device
     }
 
   protected:
-    std::vector<Button> softButtons;
-    std::vector<Button> hardButtons;
+    std::vector<Button> buttons;
     std::vector<StateMachine> stateMachines;
     std::optional<Numpad> numpad;
     Commands irCommands;

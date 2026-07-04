@@ -17,7 +17,6 @@
 #include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
 #include "cmd/setActionData.h"
-#include "cmd/setButtonData.h"
 #include "cmd/addNumpad.h"
 #include "cmd/removeNumpad.h"
 #include "cmd/setIr.h"
@@ -528,10 +527,9 @@ bool CmdCatalogue::addDeviceButtonCommand(item::ButtonType t,
   return true;
 }
 
-bool CmdCatalogue::removeDeviceButtonCommand(item::ButtonType t,
-    uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::removeDeviceButtonCommand(uint32_t devicePos, int buttonPos)
 {
-  auto *cmd = new RemoveButtonCommand(c, t, devicePos, buttonPos);
+  auto *cmd = new RemoveButtonCommand(c, devicePos, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
@@ -545,54 +543,54 @@ bool CmdCatalogue::removeDeviceButtonCommand(item::ButtonType t,
   return ret;
 }
 
-bool CmdCatalogue::setDeviceButtonAction(const string &v, item::ButtonType t,
-    uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::setDeviceButtonAction(const string &v, uint32_t devicePos,
+    int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button action"),
-        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).action.get();},
-        [this, t, devicePos, buttonPos](
-            const string &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).action.set(v).setIncluded(Include::ALWAYS);},
+        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].action.get();},
+        [this, devicePos, buttonPos](
+            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].action.set(v).setIncluded(Include::ALWAYS);},
         v };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonName(const string &v, item::ButtonType t,
-    uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::setDeviceButtonName(const string &v, uint32_t devicePos,
+    int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button name"),
-        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).name.get();},
-        [this, t, devicePos, buttonPos](
-            const string &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).name.set(v).setIncluded(Include::ALWAYS);},
+        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].name.get();},
+        [this, devicePos, buttonPos](
+            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].name.set(v).setIncluded(Include::ALWAYS);},
         v };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonFile(const string &v, item::ButtonType t,
-    uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::setDeviceButtonFile(const string &v, uint32_t devicePos,
+    int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button file"),
-        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).file.get();},
-        [this, t, devicePos, buttonPos](
-            const string &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).file.set(v).setIncluded(Include::ALWAYS);},
+        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].file.get();},
+        [this, devicePos, buttonPos](
+            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].file.set(v).setIncluded(Include::ALWAYS);},
         v };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonPosition(const int32_t &v, item::ButtonType t,
-    uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::setDeviceButtonPosition(const int32_t &v, uint32_t devicePos,
+    int buttonPos)
 {
   PropertyAccess<int32_t> access =
       {
         tr("set button position"),
-        [this, t, devicePos, buttonPos]() {return getButtonFromDeviceRef(c, t, devicePos, buttonPos).position.get();},
-        [this, t, devicePos, buttonPos](
-            const int32_t &v) {getButtonFromDeviceRef(c, t, devicePos, buttonPos).position.set(v).setIncluded(Include::ALWAYS);},
+        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].position.get();},
+        [this, devicePos, buttonPos](
+            const int32_t &v) {c.getDevices()[devicePos].getButtons()[buttonPos].position.set(v).setIncluded(Include::ALWAYS);},
         v };
   return setProperty<int32_t>(access);
 }

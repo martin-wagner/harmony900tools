@@ -86,11 +86,11 @@ class CmdCatalogue : public QObject
     bool setDeviceUnknownProperty(const data::item::UnknownElement& value, uint32_t pos);
     //buttons
     bool addDeviceButtonCommand(item::ButtonType t, uint32_t devicePos, int buttonPos);
-    bool removeDeviceButtonCommand(item::ButtonType t, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonAction(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonName(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonFile(const std::string &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonPosition(const int32_t &v, item::ButtonType t, uint32_t devicePos, int buttonPos);
+    bool removeDeviceButtonCommand(uint32_t devicePos, int buttonPos);
+    bool setDeviceButtonAction(const std::string &v, uint32_t devicePos, int buttonPos);
+    bool setDeviceButtonName(const std::string &v, uint32_t devicePos, int buttonPos);
+    bool setDeviceButtonFile(const std::string &v, uint32_t devicePos, int buttonPos);
+    bool setDeviceButtonPosition(const int32_t &v, uint32_t devicePos, int buttonPos);
     //state machines
     bool addDeviceStatemachineCommand(uint32_t devicePos, int smPos);
     bool removeDeviceStatemachineCommand(uint32_t devicePos, int smPos);

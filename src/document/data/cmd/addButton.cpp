@@ -19,16 +19,7 @@ AddButtonCommand::AddButtonCommand(ConfigData &c, item::ButtonType t,
   if (devicePos >= c.getDevices().size()) {
     return;
   }
-  switch (t) {
-    case item::ButtonType::Hard:
-      buttonCount = c.getDevices()[devicePos].getHardButtons().size();
-      break;
-    case item::ButtonType::Soft:
-      buttonCount = c.getDevices()[devicePos].getSoftButtons().size();
-      break;
-    default:
-      return;
-  }
+  buttonCount = c.getDevices()[devicePos].getButtons().size();
   if (buttonPos < 0) {
     //append
     buttonPos = buttonCount;
@@ -45,20 +36,8 @@ void AddButtonCommand::redo()
   if (!isValid) {
     return;
   }
-  switch (type) {
-    case item::ButtonType::Hard: {
-      auto &buttons = c.getDevices()[devicePos].getHardButtons();
-      buttons.insert(buttons.begin() + buttonPos, item::Button(type));
-      break;
-    }
-    case item::ButtonType::Soft: {
-      auto &buttons = c.getDevices()[devicePos].getSoftButtons();
-      buttons.insert(buttons.begin() + buttonPos, item::Button(type));
-      break;
-    }
-    default:
-      return;
-  }
+  auto &buttons = c.getDevices()[devicePos].getButtons();
+  buttons.insert(buttons.begin() + buttonPos, item::Button(type));
   emit dirtyChanged(true);
 }
 
@@ -67,20 +46,8 @@ void AddButtonCommand::undo()
   if (!isValid) {
     return;
   }
-  switch (type) {
-    case item::ButtonType::Hard: {
-      auto &buttons = c.getDevices()[devicePos].getHardButtons();
-      buttons.erase(buttons.begin() + buttonPos);
-      break;
-    }
-    case item::ButtonType::Soft: {
-      auto &buttons = c.getDevices()[devicePos].getSoftButtons();
-      buttons.erase(buttons.begin() + buttonPos);
-      break;
-    }
-    default:
-      return;
-  }
+  auto &buttons = c.getDevices()[devicePos].getButtons();
+  buttons.erase(buttons.begin() + buttonPos);
   emit dirtyChanged(true);
 }
 

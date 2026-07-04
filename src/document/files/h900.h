@@ -97,7 +97,7 @@ class ConfigH900 : public QObject
     bool writeActivitiy(pugi::xml_node &activitie);
     bool writeProtocols(pugi::xml_node &root);
     bool writeProtocol(pugi::xml_node &protocol);
-    bool writeButtons(pugi::xml_node &buttons, uint32_t deviceId, const std::vector<data::item::Button> &data);
+    bool writeButtons(pugi::xml_node &buttons, uint32_t deviceId, const std::vector<data::item::Button> &data, enum data::item::ButtonType t);
     bool writeButton(pugi::xml_node &button, uint32_t deviceId, const data::item::Button &data);
     bool writeStatemachines(pugi::xml_node &states, uint32_t deviceId, const std::vector<data::item::StateMachine> &data);
     bool writeStatemachine(pugi::xml_node &state, uint32_t deviceId, const data::item::StateMachine &data);

@@ -78,16 +78,6 @@ class SetPropertyBaseCommand: public BaseCommand
     Setter set;
 };
 
-inline auto& getButtonInDeviceRef(ConfigData &c, item::ButtonType t, uint32_t devicePos,
-    int buttonPos)
-{
-  if (t == item::ButtonType::Hard) {
-    return c.getDevices()[devicePos].getHardButtons()[buttonPos];
-  } else {
-    return c.getDevices()[devicePos].getSoftButtons()[buttonPos];
-  }
-}
-
 inline item::DeviceAction* getActionInSmRef(ConfigData &c, uint32_t devicePos,
     uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
 {
