@@ -60,14 +60,12 @@ bool ConfigH900::dump(const ConfigData *c)
   this->c = c;
   this->worker = nullptr;
   writerTime = lib::writeTimeH900Xml();
-  lib::setHarmony32_file(0xdeadbeef, tmp); //todo calc protcachehash / crc32 / endian
-  hash = lib::bytesToHexString(tmp);
 
   try {
+    ret &= writeIrProto(); //side effect: creates hash for xml files
     ret &= dumpUserConfigXml();
     ret &= dumpActionListXml();
 
-//  pugi::xml_document userConfiguration;
 //  vector<uint8_t> irProto;
 //  vector<uint8_t> ssir;
 
@@ -91,9 +89,8 @@ bool ConfigH900::read(const ConfigData *c, CmdCatalogue *worker)
 
   try {
     ret &= readUserConfigXml();
+    ret &= readIrProto();
 
-//  pugi::xml_document actionList;
-//  pugi::xml_document userConfiguration;
 //  vector<uint8_t> irProto;
 //  vector<uint8_t> ssir;
 
@@ -1068,6 +1065,19 @@ void ConfigH900::addId(uint32_t id)
   lib::UidGenerator::getInstance().markUsed(id);
 }
 
+bool ConfigH900::readIrProto()
+{
+  binary::irProto::File protocols;
+  auto status = protocols.parse(QString(wp + "/" + irProtoPath).toStdString());
+  if (status != binary::irProto::Status::OK) {
+    emit writeLog(LogLevel::Error,
+        tr("import ir protocols parser error: %d").arg((int) status),
+        ContentType::PlainText);
+    return false;
+  }
+  return worker->setIrProtoLib(protocols);
+}
+
 bool ConfigH900::dumpUserConfigXml()
 {
   pugi::xml_document xml;
@@ -1579,6 +1589,27 @@ bool ConfigH900::exportButton(pugi::xml_node &root, uint32_t deviceId,
   param = op.append_child("Parameter");
   param.append_attribute("name").set_value("Modifier");
   param.text().set("Hold");
+  return true;
+}
+
+bool ConfigH900::writeIrProto()
+{
+  uint32_t crc;
+  vector<uint8_t> tmp;
+
+  auto status = c->getProtocolLib().serialise(
+      QString(wp + "/" + irProtoPath).toStdString(), &crc);
+  if (status != binary::irProto::Status::OK) {
+    emit writeLog(LogLevel::Error,
+        tr("write ir protocols parser error: %d").arg((int) status),
+        ContentType::PlainText);
+    return false;
+  }
+  lib::setHarmony32_network(crc, tmp);
+  hash = lib::bytesToHexString(tmp);
+  emit writeLog(LogLevel::Debug,
+      tr("wrote %1 binary protocols: %d").arg(
+          c->getProtocolLib().getProtocolCount()), ContentType::PlainText);
   return true;
 }
 

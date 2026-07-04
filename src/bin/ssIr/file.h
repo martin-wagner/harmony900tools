@@ -54,7 +54,7 @@ class SerialStreamIr
 class File
 {
   protected:
-    const std::vector<uint8_t> header = { 0x01, 0x01, 0x05, 0x00, 0x00, 0x01 };
+    inline static const std::vector<uint8_t> header = { 0x01, 0x01, 0x05, 0x00, 0x00, 0x01 };
     const int MIN_FILE_SIZE = 8; //header + 0x01 + array count
     const int HEADER_SIZE = 5; //last 0x01 of header above belongs to payload with unknown use.
 

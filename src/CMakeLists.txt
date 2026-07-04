@@ -33,6 +33,9 @@ set(sources
   main.cpp
   mainwindow.cpp
   bin/timing.cpp
+  bin/irProto/code.cpp
+  bin/irProto/file.cpp
+  bin/ssIr/file.cpp
   comm/concord.cpp
   document/config.cpp
   document/data/catalogue.cpp
@@ -46,11 +49,13 @@ set(sources
   document/data/cmd/addState.cpp
   document/data/cmd/addStatemachine.cpp
   document/data/cmd/setIr.cpp
+  document/data/cmd/setIrProto.cpp
   document/data/cmd/setId.cpp
   document/data/cmd/removeActionSequence.cpp
   document/data/cmd/removeButton.cpp
   document/data/cmd/removeDevice.cpp
   document/data/cmd/removeIr.cpp
+  document/data/cmd/removeIrProto.cpp
   document/data/cmd/removeNumpad.cpp
   document/data/cmd/removeState.cpp
   document/data/cmd/removeStatemachine.cpp

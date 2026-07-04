@@ -147,6 +147,12 @@ class CmdCatalogue : public QObject
     bool removeIrRawCommand(uint32_t devicePos, uint32_t cmdPos);
 
 
+
+    //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
+    bool setIrProtoLib(const binary::irProto::File &file);
+    bool addIrProtoLibItem(const binary::irProto::IrProto &prot, int pos = -1);
+    bool removeIrProtoLibItem(int pos = -1);
+
   protected:
     //template for setting a property inside user data that uses the Property<x> template.
     //all property setters above use this.

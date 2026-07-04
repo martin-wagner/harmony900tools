@@ -130,24 +130,24 @@ bool& ConfigData::isIgnoreDeviceLimit()
   return ignoreDeviceLimit;
 }
 
-const vector<binary::irProto::File>& ConfigData::getProtocols() const
+const binary::irProto::File& ConfigData::getProtocolLib() const
 {
-  return protocols;
+  return protocolLib;
 }
 
-vector<binary::irProto::File>& ConfigData::getProtocols()
+binary::irProto::File& ConfigData::getProtocolLib()
 {
-  return protocols;
+  return protocolLib;
 }
 
-const vector<binary::ssIr::File>& ConfigData::getStreams() const
+const binary::ssIr::File& ConfigData::getStreamLib() const
 {
-  return streams;
+  return streamLib;
 }
 
-vector<binary::ssIr::File>& ConfigData::getStreams()
+binary::ssIr::File& ConfigData::getStreamLib()
 {
-  return streams;
+  return streamLib;
 }
 
 const item::UserInfo& ConfigData::getUser() const

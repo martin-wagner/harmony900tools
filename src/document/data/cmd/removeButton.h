@@ -9,6 +9,8 @@ namespace document
 namespace data
 {
 
+//todo remove command from command list (1:1 button/command. / check?)
+
 class RemoveButtonFromActivityCommand: public BaseCommand
 {
   Q_OBJECT

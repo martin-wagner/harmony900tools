@@ -84,6 +84,8 @@ class ConfigH900 : public QObject
     data::item::UnknownElement toUnknownElement(const pugi::xml_node& node);
     void addId(uint32_t id);
 
+    bool readIrProto();
+
   protected:
     bool dumpUserConfigXml();
     bool writeProperties(pugi::xml_node &root);
@@ -115,6 +117,8 @@ class ConfigH900 : public QObject
     bool exportDevice(pugi::xml_node &root, const data::item::Device &data);
     bool exportButtons(pugi::xml_node &root, uint32_t deviceId, const std::vector<data::item::Button> &data);
     bool exportButton(pugi::xml_node &root, uint32_t deviceId, const data::item::Button &data);
+
+    bool writeIrProto();
 
   protected:
     const QString wp;

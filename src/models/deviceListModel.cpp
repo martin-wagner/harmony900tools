@@ -197,7 +197,7 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
     return false;
   }
 
-  auto &worker = config.modify();
+  //auto &worker = config.modify();
 
   //todo auto ret = worker-setData(value);
   //if ret

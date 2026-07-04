@@ -22,6 +22,8 @@
 #include "cmd/removeNumpad.h"
 #include "cmd/setIr.h"
 #include "cmd/removeIr.h"
+#include "cmd/setIrProto.h"
+#include "cmd/removeIrProto.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -1268,6 +1270,47 @@ bool CmdCatalogue::removeIrRawCommand(uint32_t devicePos, uint32_t cmdPos)
   } else {
     emit writeLog(LogLevel::Warning,
         tr("modify: remove ir raw in device %1 failed, dropped").arg(devicePos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)
+{
+  auto *cmd = new SetIrProtoLibCommand(c, file);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
+}
+
+bool CmdCatalogue::addIrProtoLibItem(const binary::irProto::IrProto &prot,
+    int pos)
+{
+  auto *cmd = new AddIrProtoLibItemCommand(c, prot, pos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: add ir proto to lib failed, dropped"),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeIrProtoLibItem(int pos)
+{
+  auto *cmd = new RemoveIrProtoLibItemCommand(c, pos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: remove ir proto from lib failed, dropped"),
         ContentType::PlainText);
     delete cmd;
   }

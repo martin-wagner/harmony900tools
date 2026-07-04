@@ -12,7 +12,8 @@ namespace data
 SetIrCommand::SetIrCommand(ConfigData &c, uint32_t devicePos,
     item::ProtoCommand &cmd, int cmdPos, bool overwrite, QUndoCommand *parent) :
     BaseCommand(QObject::tr("Set Proto Cmd (device: %1)").arg(devicePos),
-        parent), c(c), devicePos(devicePos), overwrite(overwrite), proto(cmd)
+        parent), isValid(false), overwrite(overwrite), c(c), devicePos(
+        devicePos), cmdPos(cmdPos), proto(cmd)
 {
   if (devicePos >= c.getDevices().size()) {
     return;
@@ -50,8 +51,8 @@ SetIrCommand::SetIrCommand(ConfigData &c, uint32_t devicePos,
 
 SetIrCommand::SetIrCommand(ConfigData &c, uint32_t devicePos,
     item::RawCommand &cmd, int cmdPos, bool overwrite, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Set Raw Cmd (device: %1)").arg(devicePos), parent), c(
-        c), devicePos(devicePos), overwrite(overwrite), raw(cmd)
+    BaseCommand(QObject::tr("Set Raw Cmd (device: %1)").arg(devicePos), parent), overwrite(
+        overwrite), c(c), devicePos(devicePos), raw(cmd)
 {
   if (devicePos >= c.getDevices().size()) {
     return;

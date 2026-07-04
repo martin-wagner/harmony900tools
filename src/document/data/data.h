@@ -48,17 +48,17 @@ class ConfigData
     bool isIgnoreDeviceLimit() const;
     bool& isIgnoreDeviceLimit();
 
-    const std::vector<binary::irProto::File>& getProtocols() const;
-    std::vector<binary::irProto::File>& getProtocols();
+    const binary::irProto::File& getProtocolLib() const;
+    binary::irProto::File& getProtocolLib();
 
-    const std::vector<binary::ssIr::File>& getStreams() const;
-    std::vector<binary::ssIr::File>& getStreams();
+    const binary::ssIr::File& getStreamLib() const;
+    binary::ssIr::File& getStreamLib();
 
     const item::UserInfo& getUser() const;
     item::UserInfo& getUser();
 
     /** max 15 devices (limit from the user manual, not actually checked) */
-    static constexpr uint32_t DEVICE_LIMIT = 15;
+    static constexpr uint32_t DEVICE_LIMIT = 15; //todo use this
 
   protected:
     /** device limit. set once, clear never */
@@ -72,9 +72,9 @@ class ConfigData
     std::vector<item::Blob> blobs;
 
     /** ir command data */
-    std::vector<binary::ssIr::File> streams; //raw timing streams
-    std::vector<binary::irProto::Code> commands; // command data
-    std::vector<binary::irProto::File> protocols; // command-to-stream encoder data
+    binary::ssIr::File streamLib; //raw timing streams
+    std::vector<binary::irProto::Code> commands; // command data todo zu den devices sortieren?
+    binary::irProto::File protocolLib; // command-to-stream encoder data
 };
 
 

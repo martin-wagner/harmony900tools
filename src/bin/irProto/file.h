@@ -202,7 +202,7 @@ class IrProto
 class File
 {
   protected:
-    const std::vector<uint8_t> header = { 0x01, 0x01, 0x05, 0x00, 0x00, 0x01 };
+    inline static const std::vector<uint8_t> header = { 0x01, 0x01, 0x05, 0x00, 0x00, 0x01 };
     static constexpr int WRAPPER_SIZE = 8;
     static constexpr int MIN_FILE_SIZE = WRAPPER_SIZE + 8; //file wrapper + header + 0x01 + array count
     static constexpr int HEADER_SIZE = 5; //last 0x01 of header above belongs to payload with unknown use.
@@ -233,6 +233,14 @@ class File
      * @return index of added protocol
      */
     uint16_t appendProtocol(const IrProto &proto);
+
+    /** insert a protocol
+     *
+     * @param proto protocol ready-to-use
+     * @param index where to insert
+     * @return true = ok
+     */
+    bool insertProtocol(const IrProto &proto, int index);
 
     /** remove a protocol */
     void removeProtocol(int index);

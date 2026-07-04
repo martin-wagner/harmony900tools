@@ -607,6 +607,15 @@ uint16_t File::appendProtocol(const IrProto &proto)
   return (protocols.size() - 1);
 }
 
+bool File::insertProtocol(const IrProto &proto, int index)
+{
+  if ((index < 0) || (index > static_cast<int>(protocols.size()))) {
+    return false;
+  }
+  protocols.insert(protocols.begin() + index, proto);
+  return true;
+}
+
 void File::removeProtocol(int index)
 {
   if ((index < 0) || (index >= static_cast<int>(protocols.size()))) {
