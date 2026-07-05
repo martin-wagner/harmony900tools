@@ -53,6 +53,17 @@ SetDeviceStateActionUnknownParamCommand::SetDeviceStateActionUnknownParamCommand
 {
 }
 
+SetActivityActionUnknownParamCommand::SetActivityActionUnknownParamCommand(
+    ConfigData &c, const data::item::UnknownElement &value, uint32_t activityPos,
+    item::ActivityAction t, int actionPos, uint32_t seqPos,
+    QUndoCommand *parent) :
+        SetUnknownPropertyCommand([&c, activityPos, t, actionPos, seqPos]() -> std::vector<UnknownElement>& {
+          return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].getUnknownParams();
+        }, [&c, activityPos, t, actionPos, seqPos](const UnknownElement &e) {
+          getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].getUnknownParams().push_back(e);
+        }, value, parent)
+{
+}
 
 SetDeviceNumpadActionUnknownParamCommand::SetDeviceNumpadActionUnknownParamCommand(
     ConfigData &c, const UnknownElement &value, uint32_t devicePos,

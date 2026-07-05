@@ -79,5 +79,25 @@ inline item::DeviceAction* getActionFromNumpadRef(ConfigData &c,
   return nullptr;
 }
 
+inline item::DeviceAction* getActionFromActivity(ConfigData &c,
+    uint32_t activityPos, item::ActivityAction t, uint32_t actionPos)
+{
+  try {
+    auto &activity = c.getActivities().at(activityPos);
+    switch (t) {
+      case item::ActivityAction::Enter:
+        return &activity.getEnterActions().at(actionPos);
+        break;
+      case item::ActivityAction::Leave:
+        return &activity.getLeaveActions().at(actionPos);
+        break;
+      default:
+        return nullptr;
+    }
+  } catch (std::out_of_range&) {
+  }
+  return nullptr;
+}
+
 }
 }

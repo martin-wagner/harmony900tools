@@ -192,7 +192,20 @@ class CmdCatalogue : public QObject
     bool setActivityButtonName(const std::string &v, uint32_t activityPos, int buttonPos);
     bool setActivityButtonFile(const std::string &v, uint32_t activityPos, int buttonPos);
     bool setActivityButtonPosition(const int32_t &v, uint32_t activityPos, int buttonPos);
-
+    //activity actions
+    bool addActivityActionCommand(uint32_t activityPos, item::ActivityAction t, int actionPos);
+    bool removActivityActionCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos);
+    //activity action list items
+    bool addActivityActionSequenceCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos, int seqPos);
+    bool removeActivityActionSequenceCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceOp(const Enum<Operation> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceCmd(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceDeviceId(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceDelayMs(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceStateName(const Enum<StateMachineType> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceStateValue(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceMod(const Enum<Modifier> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionUnknownParam(const data::item::UnknownElement& v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
 
     //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
     bool setIrProtoLib(const binary::irProto::File &file);

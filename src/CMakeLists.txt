@@ -44,6 +44,7 @@ set(sources
   document/data/cmd/base.cpp
   document/data/cmd/addActionSequence.cpp
   document/data/cmd/addActivity.cpp
+  document/data/cmd/addActivityAction.cpp
   document/data/cmd/addButton.cpp
   document/data/cmd/addChannel.cpp
   document/data/cmd/addDevice.cpp
@@ -56,6 +57,7 @@ set(sources
   document/data/cmd/setId.cpp
   document/data/cmd/removeActionSequence.cpp
   document/data/cmd/removeActivity.cpp
+  document/data/cmd/removeActivityAction.cpp
   document/data/cmd/removeButton.cpp
   document/data/cmd/removeChannel.cpp  
   document/data/cmd/removeDevice.cpp

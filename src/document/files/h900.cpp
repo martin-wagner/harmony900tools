@@ -1225,7 +1225,7 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
 
   ret = true;
   auto channels = presentation.child("ChannelList");
-  ret = readActivityChannels(channels);
+  ret &= readActivityChannels(channels);
   for (pugi::xml_node prop : presentation.children("ControlGroup")) {
     auto name = string(prop.attribute("name").as_string());
     auto h = lib::hash_fnv1a(name.data(), name.size());
@@ -1240,12 +1240,16 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
       }
     }
   }
-//  auto states = activity.child("States");
-//  ret &= readStatemachines(states);
-//  auto numeric = activity.child("Numeric");
-//  if (numeric) {
-//    ret &= readNumeric(numeric);
-//  }
+
+  auto enter = activity.child("EnterActions");
+  if (enter) {
+    ret &= readActivityAction(enter, item::ActivityAction::Enter);
+  }
+  auto leave = activity.child("LeaveActions");
+  if (leave) {
+    ret &= readActivityAction(leave, item::ActivityAction::Leave);
+  }
+
 //  auto commands = activity.child("Commands");
 //  ret &= readIrList(commands); todo
   return ret;
@@ -1331,6 +1335,131 @@ bool ConfigH900::readActivityButton(pugi::xml_node &button,
   if (file) {
     auto c = file.text().as_string();
     worker->setActivityButtonFile(string(c), activityPos, buttonPos);
+  }
+  return true;
+}
+
+bool ConfigH900::readActivityAction(pugi::xml_node &actions,
+    item::ActivityAction t)
+{
+  auto activityPos = c->getActivities().size() - 1;
+
+  auto ret = worker->addActivityActionCommand(activityPos, t, -1); //append
+  if (!ret) {
+    return false;
+  }
+  return readActivityActionSequences(actions, t);
+}
+
+bool ConfigH900::readActivityActionSequences(pugi::xml_node &action,
+    item::ActivityAction t)
+{
+  auto ret = true;
+
+  for (pugi::xml_node prop : action.children("Action")) {
+    ret &= readActivityActionSequence(prop, t);
+  }
+  return ret;
+}
+
+bool ConfigH900::readActivityActionSequence(pugi::xml_node &sequence,
+    item::ActivityAction t)
+{
+  uint32_t actionPos;
+  uint32_t seqPos;
+
+  auto activityPos = c->getActivities().size() - 1;
+  switch (t) {
+    case item::ActivityAction::Enter:
+      actionPos = c->getActivities()[activityPos].getEnterActions().size() - 1;
+      seqPos =
+          c->getActivities()[activityPos].getEnterActions()[actionPos].sequence.size(); //before append -- not "-1"
+      break;
+    case item::ActivityAction::Leave:
+      actionPos = c->getActivities()[activityPos].getLeaveActions().size() - 1;
+      seqPos =
+          c->getActivities()[activityPos].getLeaveActions()[actionPos].sequence.size(); //before append -- not "-1"
+      break;
+    default:
+      return false;
+  }
+  auto ret = worker->addActivityActionSequenceCommand(activityPos, t, actionPos,
+      -1); //append
+  if (!ret) {
+    return false;
+  }
+
+  return readActivityActionSequenceData(sequence, activityPos, actionPos, t,
+      seqPos);
+}
+
+bool ConfigH900::readActivityActionSequenceData(pugi::xml_node &sequence,
+    uint32_t activityPos, uint32_t actionPos, item::ActivityAction t,
+    uint32_t seqPos)
+{
+  auto target = sequence.child("Target").text().as_string();
+  if (string(target) != "Device") {
+    emit writeLog(LogLevel::Warning,
+        tr("xml: Action Target != Device in %1. This is not supported").arg(
+            QString::fromStdString(c->getDevices().back().label.get())),
+        ContentType::PlainText);
+    return false;
+  }
+  auto operation = sequence.child("Operation");
+  auto opcode = operation.child("Name").text().as_string();
+  worker->setActivityActionSequenceOp(Enum<Operation>(opcode), activityPos, t,
+      actionPos, seqPos);
+  for (pugi::xml_node prop : operation.children("Parameter")) {
+    auto name = string(prop.attribute("name").as_string());
+    auto h = lib::hash_fnv1a(name.data(), name.size());
+    switch (h) {
+      case "DeviceId"_hash: {
+        auto val = prop.text().as_uint();
+        worker->setActivityActionSequenceDeviceId(val, activityPos, t,
+            actionPos, seqPos);
+        break;
+      }
+      case "Command"_hash: {
+        auto val = prop.text().as_string();
+        worker->setActivityActionSequenceCmd(val, activityPos, t, actionPos,
+            seqPos);
+        break;
+      }
+      case "Modifier"_hash: {
+        auto val = prop.text().as_string();
+        worker->setActivityActionSequenceMod(Enum<Modifier>(val), activityPos,
+            t, actionPos, seqPos);
+        break;
+      }
+      case "DelayValue"_hash: {
+        auto val = prop.text().as_uint();
+        worker->setActivityActionSequenceDelayMs(val, activityPos, t, actionPos,
+            seqPos);
+        break;
+      }
+      case "State"_hash: {
+        auto val = prop.text().as_string();
+        worker->setActivityActionSequenceStateName(Enum<StateMachineType>(val),
+            activityPos, t, actionPos, seqPos);
+        break;
+      }
+      case "Value"_hash: {
+        auto val = prop.text().as_string();
+        worker->setActivityActionSequenceStateValue(val, activityPos, t,
+            actionPos, seqPos);
+        break;
+      }
+      default: {
+        auto unknown = toUnknownElement(prop);
+        emit writeLog(LogLevel::Debug,
+            tr("import activity action: unknown property (name = %1, "
+                "value = %2)").arg(QString::fromStdString(name)).arg(
+                QString::fromStdString(unknown.text)), ContentType::PlainText);
+        worker->setActivityActionUnknownParam(unknown, activityPos, t,
+            actionPos, seqPos);
+        break;
+      }
+    }
   }
   return true;
 }
@@ -1828,7 +1957,7 @@ bool ConfigH900::writeActivities(pugi::xml_node &root)
 }
 
 bool ConfigH900::writeActivity(pugi::xml_node &activity,
-    const data::item::Activity &data)
+    const item::Activity &data)
 {
   bool ret = true;
 
@@ -1885,6 +2014,15 @@ bool ConfigH900::writeActivity(pugi::xml_node &activity,
     ret &= writeActivityButtons(hardButtons, data.getButtons(),
         item::ButtonType::Hard);
   }
+  if (!data.getEnterActions().empty()) {
+    auto enterAction = activity.append_child("EnterActions");
+    ret &= writeActivityActions(enterAction, data.getEnterActions());
+  }
+  if (!data.getLeaveActions().empty()) {
+    auto leaveAction = activity.append_child("LeaveActions");
+    ret &= writeActivityActions(leaveAction, data.getLeaveActions());
+  }
+
 
 //  auto states = activity.append_child("States");
 //  ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
@@ -1899,7 +2037,7 @@ bool ConfigH900::writeActivity(pugi::xml_node &activity,
 }
 
 bool ConfigH900::writeActivityChannels(pugi::xml_node &channels,
-    const std::vector<data::item::Channel> &data)
+    const std::vector<item::Channel> &data)
 {
   bool ret = true;
 
@@ -1911,7 +2049,7 @@ bool ConfigH900::writeActivityChannels(pugi::xml_node &channels,
 }
 
 bool ConfigH900::writeActivityChannel(pugi::xml_node &channel,
-    const data::item::Channel &data)
+    const item::Channel &data)
 {
   channel.append_child("Station").text().set(data.station.get());
   channel.append_child("Number").text().set(data.channel.get());
@@ -1921,7 +2059,7 @@ bool ConfigH900::writeActivityChannel(pugi::xml_node &channel,
 }
 
 bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
-    const std::vector<data::item::Button> &data, enum data::item::ButtonType t)
+    const std::vector<item::Button> &data, enum item::ButtonType t)
 {
   bool ret = true;
 
@@ -1936,7 +2074,7 @@ bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
 }
 
 bool ConfigH900::writeActivityButton(pugi::xml_node &button,
-    const data::item::Button &data)
+    const item::Button &data)
 {
   if (data.getButtonType() == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
@@ -1953,6 +2091,38 @@ bool ConfigH900::writeActivityButton(pugi::xml_node &button,
     button.append_child("Position").text().set(data.position.get());
   }
   button.append_child("ActionId").text().set(data.getActionId());
+  return true;
+}
+
+bool ConfigH900::writeActivityActions(pugi::xml_node &action,
+    const std::vector<item::DeviceAction> &data)
+{
+  bool ret = true;
+
+  for (const auto &item : data) {
+    ret &= writeActivityAction(action, item);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeActivityAction(pugi::xml_node &actionType,
+    const item::DeviceAction &data)
+{
+  for (const auto &s : data.sequence) {
+    auto sequence = actionType.append_child("Action");
+    sequence.append_child("Target").text().set("Device"); //static value
+    auto operation = sequence.append_child("Operation");
+    operation.append_child("Name").text().set(s.opcode.get().getString());
+    writeProperty(operation, "DeviceId", s.deviceId, "Parameter");
+    writeProperty(operation, "Command", s.cmd, "Parameter");
+    writeProperty(operation, "Modifier", s.mod, "Parameter");
+    writeProperty(operation, "DelayValue", s.delayMs, "Parameter");
+    writeProperty(operation, "State", s.stateName, "Parameter");
+    writeProperty(operation, "Value", s.stateValue, "Parameter");
+    for (const auto &prop : s.getUnknownParams()) {
+      writeUnknownElement(operation, prop);
+    }
+  }
   return true;
 }
 
@@ -2036,7 +2206,7 @@ bool ConfigH900::exportDevice(pugi::xml_node &root, const item::Device &data)
 }
 
 bool ConfigH900::exportButtons(pugi::xml_node &root, uint32_t deviceId,
-    const std::vector<data::item::Button> &data)
+    const std::vector<item::Button> &data)
 {
   bool ret = true;
 
@@ -2047,7 +2217,7 @@ bool ConfigH900::exportButtons(pugi::xml_node &root, uint32_t deviceId,
 }
 
 bool ConfigH900::exportButton(pugi::xml_node &root, uint32_t deviceId,
-    const data::item::Button &data)
+    const item::Button &data)
 {
   string str;
 

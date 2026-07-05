@@ -24,6 +24,12 @@ namespace data
 namespace item
 {
 
+enum class ActivityAction {
+    Unknown,
+    Enter,
+    Leave
+};
+
 /** stores one single activity info struct from UserConfiguration.xml
  */
 class Activity
@@ -38,16 +44,6 @@ class Activity
       return id;
     }
 
-    const std::vector<Button>& getButtons() const
-    {
-      return buttons;
-    }
-
-    std::vector<Button>& getButtons()
-    {
-      return buttons;
-    }
-
     const std::vector<Channel>& getChannels() const
     {
       return channels;
@@ -56,6 +52,16 @@ class Activity
     std::vector<Channel>& getChannels()
     {
       return channels;
+    }
+
+    const std::vector<Button>& getButtons() const
+    {
+      return buttons;
+    }
+
+    std::vector<Button>& getButtons()
+    {
+      return buttons;
     }
 
     bool hasSoftButtons() const
@@ -76,6 +82,26 @@ class Activity
         }
       }
       return false;
+    }
+
+    const std::vector<DeviceAction>& getEnterActions() const
+    {
+      return enterActions;
+    }
+
+    std::vector<DeviceAction>& getEnterActions()
+    {
+      return enterActions;
+    }
+
+    const std::vector<DeviceAction>& getLeaveActions() const
+    {
+      return leaveActions;
+    }
+
+    std::vector<DeviceAction>& getLeaveActions()
+    {
+      return leaveActions;
     }
 
     PropertyEnum<ActivityType> type{ActivityType::VirtualGeneric};
@@ -125,8 +151,8 @@ class Activity
     uint32_t id;
     std::vector<Channel> channels;
     std::vector<Button> buttons;
-//    std::vector<StateAction> enterActions; todo
-//    std::vector<StateAction> leaveActions;
+    std::vector<DeviceAction> enterActions;
+    std::vector<DeviceAction> leaveActions;
     std::vector<uint32_t> powerOnDeviceIds;
 //    std::vector<uint32_t> powerOffDeviceIds;
     std::vector<Role> roles;

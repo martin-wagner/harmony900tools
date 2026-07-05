@@ -14,8 +14,8 @@ RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
     ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos,
     item::StateTransitionAction t, uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
-        QObject::tr("Remove Sequence from Action/SM (Pos: %1)").arg(devicePos),
-        parent)
+        QObject::tr("Remove Sequence from Action/SM (device: %1)").arg(
+            devicePos), parent)
 {
   auto *act = getActionFromSmRef(c, devicePos, smPos, t, actPos);
   if (act == nullptr) {
@@ -35,10 +35,10 @@ RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
 
 RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
     ConfigData &c, uint32_t devicePos, item::DigitSection s, uint32_t digit,
-    int seqPos, QUndoCommand *parent) :
+    uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
-        QObject::tr("Remove Sequence from Action/NUM (Pos: %1)").arg(devicePos),
-        parent)
+        QObject::tr("Remove Sequence from Action/NUM (device: %1)").arg(
+            devicePos), parent)
 {
   auto *act = getActionFromNumpadRef(c, devicePos, s, digit);
   if (act == nullptr) {
@@ -50,6 +50,29 @@ RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
 
   getSeq = [&c, devicePos, s, digit]() -> vector<item::SequenceItem>& {
     return getActionFromNumpadRef(c, devicePos, s, digit)->sequence;
+  };
+  this->seqPos = seqPos;
+  sequenceItem = getSeq()[seqPos];
+  isValid = true;
+}
+
+document::data::RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
+    ConfigData &c, uint32_t activityPos, item::ActivityAction t,
+    uint32_t actionPos, uint32_t seqPos, QUndoCommand *parent) :
+    BaseCommand(
+        QObject::tr("Remove Sequence from Action (activity:  %1)").arg(
+            activityPos), parent)
+{
+  auto *action = getActionFromActivity(c, activityPos, t, actionPos);
+  if (action == nullptr) {
+    return;
+  }
+  if (seqPos >= action->sequence.size()) {
+    return;
+  }
+
+  getSeq = [&c, activityPos, t, actionPos]() -> vector<item::SequenceItem>& {
+    return getActionFromActivity(c, activityPos, t, actionPos)->sequence;
   };
   this->seqPos = seqPos;
   sequenceItem = getSeq()[seqPos];

@@ -10,7 +10,7 @@ namespace document
 namespace data
 {
 
-AddDeviceActionSequenceCommand::AddDeviceActionSequenceCommand(ConfigData &c,
+AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
     uint32_t devicePos, uint32_t smPos, uint32_t actPos,
     item::StateTransitionAction t, int seqPos, QUndoCommand *parent) :
     BaseCommand(
@@ -38,7 +38,7 @@ AddDeviceActionSequenceCommand::AddDeviceActionSequenceCommand(ConfigData &c,
   isValid = true;
 }
 
-AddDeviceActionSequenceCommand::AddDeviceActionSequenceCommand(ConfigData &c,
+AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
     uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos,
     QUndoCommand *parent) :
     BaseCommand(
@@ -66,7 +66,35 @@ AddDeviceActionSequenceCommand::AddDeviceActionSequenceCommand(ConfigData &c,
   isValid = true;
 }
 
-void AddDeviceActionSequenceCommand::redo()
+AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
+    uint32_t activityPos, item::ActivityAction t, uint32_t actionPos,
+    int seqPos, QUndoCommand *parent) :
+    BaseCommand(
+        QObject::tr("Add Sequence to Action (to activity: %1)").arg(
+            activityPos), parent)
+{
+  uint32_t seqCount;
+
+  auto *action = getActionFromActivity(c, activityPos, t, actionPos);
+  if (action == nullptr) {
+    return;
+  }
+  seqCount = action->sequence.size();
+  if (seqPos < 0) {
+    seqPos = seqCount;
+  }
+  if (seqPos > static_cast<int>(seqCount)) {
+    return;
+  }
+
+  getSeq = [&c, activityPos, t, actionPos]() -> vector<item::SequenceItem>& {
+    return getActionFromActivity(c, activityPos, t, actionPos)->sequence;
+  };
+  this->seqPos = seqPos;
+  isValid = true;
+}
+
+void AddActionSequenceCommand::redo()
 {
   if (!isValid) {
     return;
@@ -77,7 +105,7 @@ void AddDeviceActionSequenceCommand::redo()
   emit dirtyChanged(true);
 }
 
-void AddDeviceActionSequenceCommand::undo()
+void AddActionSequenceCommand::undo()
 {
   if (!isValid) {
     return;
@@ -88,7 +116,7 @@ void AddDeviceActionSequenceCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool AddDeviceActionSequenceCommand::valid() const
+bool AddActionSequenceCommand::valid() const
 {
   return isValid;
 }

@@ -20,6 +20,7 @@ class SequenceItem {
   public:
     PropertyEnum<Operation> opcode{Operation::SendCommand, Include::ALWAYS};
     PropertyString cmd{"", Include::CHECK};
+    PropertyU32 deviceId{0, Include::CHECK}; //device -- not needed (id of parent, redundant); activity -- referenced device
     PropertyU32 delayMs{1000, Include::CHECK};
     PropertyEnum<StateMachineType> stateName{StateMachineType::Unknown, Include::CHECK};
     PropertyString stateValue{"", Include::CHECK};

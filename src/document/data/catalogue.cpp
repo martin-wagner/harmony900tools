@@ -29,6 +29,8 @@
 #include "cmd/removeIrStream.h"
 #include "cmd/addChannel.h"
 #include "cmd/removeChannel.h"
+#include "cmd/addActivityAction.h"
+#include "cmd/removeActivityAction.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -759,7 +761,7 @@ bool CmdCatalogue::setDeviceSmActionRepeatWillNotHarm(bool v,
 bool CmdCatalogue::addDeviceStateActionSequenceCommand(uint32_t devicePos,
     uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos)
 {
-  auto *cmd = new AddDeviceActionSequenceCommand(c, devicePos, smPos, actPos, t,
+  auto *cmd = new AddActionSequenceCommand(c, devicePos, smPos, actPos, t,
       seqPos);
   auto ret = cmd->valid();
   if (ret == true) {
@@ -984,8 +986,7 @@ bool CmdCatalogue::setDeviceNumpadActionRepeatWillNotHarm(bool v,
 bool CmdCatalogue::addDeviceNumpadActionSequenceCommand(uint32_t devicePos,
     item::DigitSection s, uint32_t digit, int seqPos)
 {
-  auto *cmd = new AddDeviceActionSequenceCommand(c, devicePos, s, digit,
-      seqPos);
+  auto *cmd = new AddActionSequenceCommand(c, devicePos, s, digit, seqPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
@@ -1903,6 +1904,187 @@ bool CmdCatalogue::setActivityButtonPosition(const int32_t &v,
             const int32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].position.set(v).setIncluded(Include::ALWAYS);},
         v };
   return setProperty<int32_t>(access);
+}
+
+bool CmdCatalogue::addActivityActionCommand(uint32_t activityPos,
+    item::ActivityAction t, int actionPos)
+{
+  auto *cmd = new AddActivityActionCommand(c, activityPos, t, actionPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: action activity pos %1/%2/%3 already exists, dropped").arg(
+            activityPos).arg((int) t).arg(actionPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removActivityActionCommand(uint32_t activityPos,
+    item::ActivityAction t, int actionPos)
+{
+  auto *cmd = new RemoveActivityActionCommand(c, activityPos, t, actionPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: action activity pos %1/%2/%3 doesn't exist, dropped").arg(
+            activityPos).arg((int) t).arg(actionPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::addActivityActionSequenceCommand(uint32_t activityPos,
+    item::ActivityAction t, int actionPos, int seqPos)
+{
+  auto *cmd = new AddActionSequenceCommand(c, activityPos, t, actionPos,
+      seqPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: activity act-seq pos %1/%2b/%3/%4 failed, dropped").arg(
+            activityPos).arg((int) t).arg(actionPos).arg(seqPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeActivityActionSequenceCommand(uint32_t activityPos,
+    item::ActivityAction t, int actionPos, uint32_t seqPos)
+{
+  auto *cmd = new RemoveDeviceActionSequenceCommand(c, activityPos, t,
+      actionPos, seqPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: activity act-seq pos %1/%2b/%3/%4 doesn't exist, dropped").arg(
+            activityPos).arg((int) t).arg(actionPos).arg(seqPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::setActivityActionSequenceOp(const Enum<Operation> &v,
+    uint32_t activityPos, item::ActivityAction t, int actionPos,
+    uint32_t seqPos)
+{
+  PropertyAccess<Enum<Operation>> access =
+      {
+        tr("set activity action sequence opcode"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const Enum<Operation> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<Operation>>(access);
+}
+
+bool CmdCatalogue::setActivityActionSequenceCmd(const std::string &v,
+    uint32_t activityPos, item::ActivityAction t, int actionPos,
+    uint32_t seqPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set activity action cmd"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityActionSequenceDeviceId(uint32_t v,
+    uint32_t activityPos, item::ActivityAction t, int actionPos,
+    uint32_t seqPos)
+{
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set activity action controlled device id"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<uint32_t>(access);
+}
+
+bool CmdCatalogue::setActivityActionSequenceDelayMs(uint32_t v,
+    uint32_t activityPos, item::ActivityAction t, int actionPos,
+    uint32_t seqPos)
+{
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set activity action delay"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<uint32_t>(access);
+}
+
+bool CmdCatalogue::setActivityActionSequenceStateName(
+    const Enum<StateMachineType> &v, uint32_t activityPos,
+    item::ActivityAction t, int actionPos, uint32_t seqPos)
+{
+  PropertyAccess<Enum<StateMachineType>> access =
+      {
+        tr("set activity action state name"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const Enum<StateMachineType> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<StateMachineType>>(access);
+}
+
+bool CmdCatalogue::setActivityActionSequenceStateValue(const std::string &v,
+    uint32_t activityPos, item::ActivityAction t, int actionPos,
+    uint32_t seqPos)
+{
+  PropertyAccess<string> access =
+      {
+        tr("set activity action state value"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<string>(access);
+}
+
+bool CmdCatalogue::setActivityActionSequenceMod(const Enum<Modifier> &v,
+    uint32_t activityPos, item::ActivityAction t, int actionPos,
+    uint32_t seqPos)
+{
+  PropertyAccess<Enum<Modifier>> access =
+      {
+        tr("set activity action state modifier"),
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.get();},
+        [this, activityPos, t, actionPos, seqPos](
+            const Enum<Modifier> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.set(v).setIncluded(Include::ALWAYS);},
+        v };
+  return setProperty<Enum<Modifier>>(access);
+}
+
+bool CmdCatalogue::setActivityActionUnknownParam(
+    const data::item::UnknownElement &v, uint32_t activityPos,
+    item::ActivityAction t, int actionPos, uint32_t seqPos)
+{
+  auto *cmd = new SetActivityActionUnknownParamCommand(c, v, activityPos, t,
+      actionPos, seqPos);
+  connectCommand(cmd);
+  undo.push(cmd);
+  return true;
 }
 
 bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)

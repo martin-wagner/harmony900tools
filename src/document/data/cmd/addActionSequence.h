@@ -12,17 +12,20 @@ namespace document
 namespace data
 {
 
-class AddDeviceActionSequenceCommand: public BaseCommand
+class AddActionSequenceCommand: public BaseCommand
 {
   Q_OBJECT
   public:
     //add item to sm action
     //pos -1 = append
     //device -- discrete action
-    AddDeviceActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos = -1, QUndoCommand *parent = nullptr);
+    AddActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos = -1, QUndoCommand *parent = nullptr);
 
     //add item to num action
-    AddDeviceActionSequenceCommand(ConfigData &c, uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos = -1, QUndoCommand *parent = nullptr);
+    AddActionSequenceCommand(ConfigData &c, uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos = -1, QUndoCommand *parent = nullptr);
+
+    //add item to activity action
+    AddActionSequenceCommand(ConfigData &c, uint32_t activityPos, item::ActivityAction t, uint32_t actionPos, int seqPos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -34,6 +37,7 @@ class AddDeviceActionSequenceCommand: public BaseCommand
     int seqPos;
     std::function<std::vector<item::SequenceItem>&()> getSeq;
 };
+
 
 }
 }
