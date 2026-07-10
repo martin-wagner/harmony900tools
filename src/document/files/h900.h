@@ -128,12 +128,9 @@ class ConfigH900 : public QObject
     bool writeActivityRoles(pugi::xml_node &activity, const std::vector<data::item::Role> &data);
     bool writeActivityRole(pugi::xml_node &activity, const data::item::Role &data);
     bool writeActivityPowerStateDevices(pugi::xml_node &power, const data::item::Activity &data);
-
     bool writeProtocols(pugi::xml_node &root);
-    bool writeProtocol(pugi::xml_node &protocol);
-
+    bool writeProtocol(pugi::xml_node &protocols, int idx, const binary::irProto::IrProto &irProto);
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
-
     bool dumpActionListXml();
     bool exportDevices(pugi::xml_node &root);
     bool exportDevice(pugi::xml_node &root, const data::item::Device &data);

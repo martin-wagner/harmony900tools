@@ -2031,16 +2031,16 @@ bool ConfigH900::writePowerOffActivity(pugi::xml_node &activity)
         auto operation = sequence.append_child("Operation");
         operation.append_child("Name").text().set(
             Enum<Operation>(Operation::SetValue).getString());
-        auto property = operation.append_child("Parameter");
-        property.append_attribute("name").set_value("DeviceId");
-        property.text().set(device.getId());
-        property = operation.append_child("Parameter");
-        property.append_attribute("name").set_value("State");
-        property.text().set(
+        auto param = operation.append_child("Parameter");
+        param.append_attribute("name").set_value("DeviceId");
+        param.text().set(device.getId());
+        param = operation.append_child("Parameter");
+        param.append_attribute("name").set_value("State");
+        param.text().set(
             Enum<StateMachineType>(StateMachineType::Power).getString());
-        property = operation.append_child("Parameter");
-        property.append_attribute("name").set_value("Value");
-        property.text().set("Off");
+        param = operation.append_child("Parameter");
+        param.append_attribute("name").set_value("Value");
+        param.text().set("Off");
 
         //found
         break;
@@ -2256,11 +2256,38 @@ bool ConfigH900::writeActivityPowerStateDevices(pugi::xml_node &power,
 
 bool ConfigH900::writeProtocols(pugi::xml_node &root)
 {
-  return true;
+  bool ret = true;
+
+  auto prot = root.append_child("Protocols");
+  for (int i = 0; i < c->getProtocolLib().getProtocolCount(); i++) {
+    ret &= writeProtocol(prot, i, c->getProtocolLib().accessProtocol(i));
+  }
+  prot.append_child("Hash").text().set(hash);
+  return ret;
 }
 
-bool ConfigH900::writeProtocol(pugi::xml_node &protocol)
+bool ConfigH900::writeProtocol(pugi::xml_node &protocols, int idx,
+    const binary::irProto::IrProto &irProto)
 {
+  for (int i = 0; i < irProto.getSectionCount(); i++) {
+    if (i > 0) {
+      //fixme we have exactly one sample for this.
+      //toggle bits are only dumped when in section 0, but ignored in other sections
+      //is this a bug in the original h900 software or intentional?
+      return true;
+    }
+    const auto &section = irProto.accessSection(i);
+    if (!section.hasToggle()) {
+      continue;
+    }
+
+    auto prot = protocols.append_child("Protocol");
+    prot.append_attribute("index").set_value(idx);
+    pugi::xml_node codeSequence = prot.append_child("CodeSequence");
+    codeSequence.append_attribute("index").set_value(0);
+    codeSequence.append_child("ToggleBit1").text().set(section.getToggle());
+    //never seen two toggle bits
+  }
   return true;
 }
 
