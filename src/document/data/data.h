@@ -45,6 +45,8 @@ class ConfigData
     const item::Device* getDevice(uint32_t idx, uint32_t *pos = nullptr) const;
     item::Device* getDevice(uint32_t idx, uint32_t *pos = nullptr);
 
+    const std::vector<uint32_t> getDeviceIds() const;
+
     bool isIgnoreDeviceLimit() const;
     bool& isIgnoreDeviceLimit();
 

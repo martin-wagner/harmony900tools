@@ -84,6 +84,9 @@ class ConfigH900 : public QObject
     bool readActivityActionSequences(pugi::xml_node &action, data::item::ActivityAction t);
     bool readActivityActionSequence(pugi::xml_node &sequence, data::item::ActivityAction t);
     bool readActivityActionSequenceData(pugi::xml_node &sequence, uint32_t activityPos, uint32_t actionPos, data::item::ActivityAction t, uint32_t seqPos);
+    bool readActivityRoles(pugi::xml_node &activity);
+    bool readActivityRole(pugi::xml_node &role);
+    bool readActivityPowerStateDevices(pugi::xml_node &power);
 
     bool readProtocols(pugi::xml_node &root);
     bool readProtocol(pugi::xml_node &protocol);
@@ -121,7 +124,9 @@ class ConfigH900 : public QObject
     bool writeActivityButton(pugi::xml_node &button, const data::item::Button &data);
     bool writeActivityActions(pugi::xml_node &action, const std::vector<data::item::DeviceAction> &data);
     bool writeActivityAction(pugi::xml_node &actionType, const data::item::DeviceAction &data);
-
+    bool writeActivityRoles(pugi::xml_node &activity, const std::vector<data::item::Role> &data);
+    bool writeActivityRole(pugi::xml_node &activity, const data::item::Role &data);
+    bool writeActivityPowerStateDevices(pugi::xml_node &power, const data::item::Activity &data);
 
     bool writeProtocols(pugi::xml_node &root);
     bool writeProtocol(pugi::xml_node &protocol);

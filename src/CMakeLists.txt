@@ -49,11 +49,13 @@ set(sources
   document/data/cmd/addChannel.cpp
   document/data/cmd/addDevice.cpp
   document/data/cmd/addNumpad.cpp
+  document/data/cmd/addPowerOnDevice.cpp
   document/data/cmd/addState.cpp
   document/data/cmd/addStatemachine.cpp
   document/data/cmd/setIr.cpp
   document/data/cmd/setIrProto.cpp
   document/data/cmd/setIrStream.cpp
+  document/data/cmd/setRole.cpp
   document/data/cmd/setId.cpp
   document/data/cmd/removeActionSequence.cpp
   document/data/cmd/removeActivity.cpp
@@ -65,6 +67,8 @@ set(sources
   document/data/cmd/removeIrProto.cpp
   document/data/cmd/removeIrStream.cpp
   document/data/cmd/removeNumpad.cpp
+  document/data/cmd/removePowerOnDevice.cpp
+  document/data/cmd/removeRole.cpp
   document/data/cmd/removeState.cpp
   document/data/cmd/removeStatemachine.cpp
   document/data/cmd/setControllerMetadata.cpp

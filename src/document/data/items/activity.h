@@ -104,6 +104,36 @@ class Activity
       return leaveActions;
     }
 
+    const std::vector<Role>& getRoles() const
+    {
+      return roles;
+    }
+
+    std::vector<Role>& getRoles()
+    {
+      return roles;
+    }
+
+    const std::vector<uint32_t>& getPowerOnDevices() const
+    {
+      return powerOnDeviceIds;
+    }
+
+    std::vector<uint32_t>& getPowerOnDevices()
+    {
+      return powerOnDeviceIds;
+    }
+
+    const std::vector<uint32_t>& getPowerOffDevices() const
+    {
+      return powerOffDeviceIds;
+    }
+
+    std::vector<uint32_t>& getPowerOffDevices()
+    {
+      return powerOffDeviceIds;
+    }
+
     PropertyEnum<ActivityType> type{ActivityType::VirtualGeneric};
     PropertyString label{"My C64"};
 
@@ -153,9 +183,10 @@ class Activity
     std::vector<Button> buttons;
     std::vector<DeviceAction> enterActions;
     std::vector<DeviceAction> leaveActions;
-    std::vector<uint32_t> powerOnDeviceIds;
-//    std::vector<uint32_t> powerOffDeviceIds;
     std::vector<Role> roles;
+    std::vector<uint32_t> powerOnDeviceIds;
+    std::vector<uint32_t> powerOffDeviceIds;
+    //other devices keep their state on activity change
 
     std::vector<UnknownElement> unknownProperties;
 

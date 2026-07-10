@@ -89,6 +89,7 @@ template class Enum<ActionType>;
 template class Enum<Operation>;
 template class Enum<Modifier>;
 template class Enum<ActivityType>;
+template class Enum<DeviceRole>;
 template class Enum<ActivityStartPage>;
 template class Enum<ChannelButtonBehaviour>;
 template class Enum<GuideButtonMode>;

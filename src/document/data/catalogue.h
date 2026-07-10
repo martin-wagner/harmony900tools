@@ -206,6 +206,20 @@ class CmdCatalogue : public QObject
     bool setActivityActionSequenceStateValue(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceMod(const Enum<Modifier> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionUnknownParam(const data::item::UnknownElement& v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    //activity roles
+    bool setActivityRoleCommand(uint32_t activityPos, item::Role &role, int rolePos = -1, bool overwrite = false);
+    bool removeActivityRoleCommand(uint32_t activityPos, uint32_t rolePos);
+    bool removeActivityRoleCommandById(uint32_t activityPos, uint32_t deviceId);
+    //activity power on devices
+    bool addActivityPowerOnDevicesCommand(uint32_t activityPos, uint32_t id, int devicePos = -1);
+    bool removeActivityPowerOnDevicesCommand(uint32_t activityPos, uint32_t devicePos);
+    bool removeActivityPowerOnDevicesCommandById(uint32_t activityPos, uint32_t deviceId);
+    bool addActivityPowerOffDevicesCommand(uint32_t activityPos, uint32_t id, int devicePos = -1);
+    bool removeActivityPowerOffDevicesCommand(uint32_t activityPos, uint32_t devicePos);
+    bool removeActivityPowerOffDevicesCommandById(uint32_t activityPos, uint32_t deviceId);
+
+
+
 
     //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
     bool setIrProtoLib(const binary::irProto::File &file);

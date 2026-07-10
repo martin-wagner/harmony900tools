@@ -31,6 +31,10 @@
 #include "cmd/removeChannel.h"
 #include "cmd/addActivityAction.h"
 #include "cmd/removeActivityAction.h"
+#include "cmd/setRole.h"
+#include "cmd/removeRole.h"
+#include "cmd/addPowerOnDevice.h"
+#include "cmd/removePowerOnDevice.h"
 #include "cmd/setUnknownProperty.h"
 
 using namespace std;
@@ -2085,6 +2089,162 @@ bool CmdCatalogue::setActivityActionUnknownParam(
   connectCommand(cmd);
   undo.push(cmd);
   return true;
+}
+
+bool CmdCatalogue::setActivityRoleCommand(uint32_t activityPos,
+    item::Role &role, int rolePos, bool overwrite)
+{
+  auto *cmd = new SetRoleCommand(c, activityPos, role, rolePos, overwrite);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: set role in activity %1 failed, dropped").arg(activityPos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeActivityRoleCommand(uint32_t activityPos,
+    uint32_t rolePos)
+{
+  auto *cmd = new RemoveRoleCommand(c, activityPos, rolePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: remove role from activity %1 failed, dropped").arg(
+            activityPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeActivityRoleCommandById(uint32_t activityPos,
+    uint32_t deviceId)
+{
+  auto *cmd = RemoveRoleCommand::fromId(c, activityPos, deviceId);
+  if (cmd != nullptr) {
+    if (cmd->valid() == true) {
+      connectCommand(cmd);
+      undo.push(cmd);
+      return true;
+    }
+    delete cmd;
+  }
+  emit writeLog(LogLevel::Warning,
+      tr("modify: remove role from activity %1 failed, dropped").arg(
+          activityPos), ContentType::PlainText);
+  return false;
+}
+
+bool CmdCatalogue::addActivityPowerOnDevicesCommand(uint32_t activityPos,
+    uint32_t id, int devicePos)
+{
+  auto *cmd = new AddPowerOnDevice(c, activityPos, id, devicePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: add power on to activity %1 failed, dropped").arg(
+            activityPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeActivityPowerOnDevicesCommand(uint32_t activityPos,
+    uint32_t devicePos)
+{
+  auto *cmd = new RemovePowerOnDevice(c, activityPos, devicePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: remove power on from activity %1 failed, dropped").arg(
+            activityPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeActivityPowerOnDevicesCommandById(uint32_t activityPos,
+    uint32_t deviceId)
+{
+  auto *cmd = RemovePowerOnDevice::fromId(c, activityPos, deviceId);
+  if (cmd != nullptr) {
+    if (cmd->valid() == true) {
+      connectCommand(cmd);
+      undo.push(cmd);
+      return true;
+    }
+    delete cmd;
+  }
+  emit writeLog(LogLevel::Warning,
+      tr("modify: remove power on from activity %1 failed, dropped").arg(
+          activityPos), ContentType::PlainText);
+  return false;
+}
+
+bool CmdCatalogue::addActivityPowerOffDevicesCommand(uint32_t activityPos,
+    uint32_t id, int devicePos)
+{
+  auto *cmd = new AddPowerOffDevice(c, activityPos, id, devicePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: add power off to activity %1 failed, dropped").arg(
+            activityPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
+bool CmdCatalogue::removeActivityPowerOffDevicesCommand(uint32_t activityPos,
+    uint32_t devicePos)
+{
+  auto *cmd = new RemovePowerOffDevice(c, activityPos, devicePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: remove power off from activity %1 failed, dropped").arg(
+            activityPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
+bool CmdCatalogue::removeActivityPowerOffDevicesCommandById(
+    uint32_t activityPos, uint32_t deviceId)
+{
+  auto *cmd = RemovePowerOffDevice::fromId(c, activityPos, deviceId);
+  if (cmd != nullptr) {
+    if (cmd->valid() == true) {
+      connectCommand(cmd);
+      undo.push(cmd);
+      return true;
+    }
+    delete cmd;
+  }
+  emit writeLog(LogLevel::Warning,
+      tr("modify: remove power off from activity %1 failed, dropped").arg(
+          activityPos), ContentType::PlainText);
+  return false;
 }
 
 bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)

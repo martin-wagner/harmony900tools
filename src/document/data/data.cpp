@@ -120,6 +120,16 @@ item::Device* ConfigData::getDevice(uint32_t idx, uint32_t *pos)
   return nullptr;
 }
 
+const vector<uint32_t> ConfigData::getDeviceIds() const
+{
+  vector<uint32_t> ids;
+
+  for (const auto &device : devices) {
+    ids.push_back(device.getId());
+  }
+  return ids;
+}
+
 bool ConfigData::isIgnoreDeviceLimit() const
 {
   return ignoreDeviceLimit;

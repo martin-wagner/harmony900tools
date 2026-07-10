@@ -1249,9 +1249,9 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
   if (leave) {
     ret &= readActivityAction(leave, item::ActivityAction::Leave);
   }
-
-//  auto commands = activity.child("Commands");
-//  ret &= readIrList(commands); todo
+  ret &= readActivityRoles(activity);
+  auto power = activity.child("Power");
+  ret &= readActivityPowerStateDevices(power);
   return ret;
 }
 
@@ -1462,6 +1462,59 @@ bool ConfigH900::readActivityActionSequenceData(pugi::xml_node &sequence,
     }
   }
   return true;
+}
+
+bool ConfigH900::readActivityRoles(pugi::xml_node &activity)
+{
+  auto ret = true;
+  for (pugi::xml_node prop : activity.children("Role")) {
+    ret &= readActivityRole(prop);
+  }
+  return ret;
+}
+
+bool ConfigH900::readActivityRole(pugi::xml_node &role)
+{
+  item::Role tmpRole;
+  auto activityPos = c->getActivities().size() - 1;
+
+  auto pres = role.child("Presentation").text().as_string("");
+  if (!string(pres).empty()) {
+    emit writeLog(LogLevel::Warning,
+        tr("xml: Role/Presentation non-empty (is %1). This is not supported").arg(
+            QString(pres)), ContentType::PlainText);
+    return false;
+  }
+
+  auto deviceId = role.child("DeviceId").text().as_uint();
+  tmpRole.deviceId.set(deviceId);
+  auto name = role.child("Name").text().as_string();
+  tmpRole.role = Enum<DeviceRole>(name);
+
+  worker->setActivityRoleCommand(activityPos, tmpRole, -1);
+  return true;
+}
+
+bool ConfigH900::readActivityPowerStateDevices(pugi::xml_node &power)
+{
+  auto ret = true;
+  auto activityPos = c->getActivities().size() - 1;
+
+  for (pugi::xml_node id : power.children("On")) {
+    auto deviceId = id.text().as_int();
+    if (deviceId == 0) {
+      return false;
+    }
+    ret &= worker->addActivityPowerOnDevicesCommand(activityPos, deviceId, -1);
+  }
+  for (pugi::xml_node id : power.children("Off")) {
+    auto deviceId = id.text().as_int();
+    if (deviceId == 0) {
+      return false;
+    }
+    ret &= worker->addActivityPowerOffDevicesCommand(activityPos, deviceId, -1);
+  }
+  return ret;
 }
 
 bool ConfigH900::readProtocols(pugi::xml_node &root)
@@ -2022,16 +2075,11 @@ bool ConfigH900::writeActivity(pugi::xml_node &activity,
     auto leaveAction = activity.append_child("LeaveActions");
     ret &= writeActivityActions(leaveAction, data.getLeaveActions());
   }
-
-
-//  auto states = activity.append_child("States");
-//  ret &= writeStatemachines(states, data.getId(), data.getStateMachines());
-//  if (data.getNumpad().has_value()) {
-//    auto numeric = activity.append_child("Numeric");
-//    ret &= writeNumeric(numeric, data.getId(), data.getNumpad().value());
-//  }
-//  auto commands = activity.append_child("Commands");
-//  ret &= writeIrList(commands, data.getIrCommands());
+  if (!data.getRoles().empty()) {
+    ret &= writeActivityRoles(activity, data.getRoles());
+  }
+  auto power = activity.append_child("Power");
+  ret &= writeActivityPowerStateDevices(power, data);
 // @formatter:on
   return ret;
 }
@@ -2122,6 +2170,39 @@ bool ConfigH900::writeActivityAction(pugi::xml_node &actionType,
     for (const auto &prop : s.getUnknownParams()) {
       writeUnknownElement(operation, prop);
     }
+  }
+  return true;
+}
+
+bool ConfigH900::writeActivityRoles(pugi::xml_node &activity,
+    const std::vector<item::Role> &data)
+{
+  bool ret = true;
+
+  for (const auto &item : data) {
+    ret &= writeActivityRole(activity, item);
+  }
+  return ret;
+}
+
+bool ConfigH900::writeActivityRole(pugi::xml_node &activity,
+    const item::Role &data)
+{
+  auto role = activity.append_child("Role");
+  role.append_child("Name").text().set(data.role.getString());
+  role.append_child("DeviceId").text().set(data.deviceId.get());
+  role.append_child("Presentation"); //empty
+  return true;
+}
+
+bool ConfigH900::writeActivityPowerStateDevices(pugi::xml_node &power,
+    const item::Activity &data)
+{
+  for (const auto &onDeviceId : data.getPowerOnDevices()) {
+    power.append_child("On").text().set(onDeviceId);
+  }
+  for (const auto &offDeviceId : data.getPowerOffDevices()) {
+    power.append_child("Off").text().set(offDeviceId);
   }
   return true;
 }
