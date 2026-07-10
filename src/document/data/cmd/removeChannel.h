@@ -13,7 +13,7 @@ class RemoveActivityChannelCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    RemoveActivityChannelCommand(ConfigData &c, uint32_t devicePos, uint32_t channelPos, QUndoCommand *parent = nullptr);
+    RemoveActivityChannelCommand(ConfigData &c, uint32_t activityPos, uint32_t channelPos, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -24,7 +24,7 @@ class RemoveActivityChannelCommand: public BaseCommand
     bool isValid = false;
 
     ConfigData &c;
-    uint32_t devicePos;
+    uint32_t activityPos;
     uint32_t channelPos;
     item::Channel channel;
 };
