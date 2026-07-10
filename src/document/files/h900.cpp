@@ -1999,7 +1999,8 @@ bool ConfigH900::writeActivities(pugi::xml_node &root)
 {
   bool ret = true;
 
-  //todo activity -1 power off
+  auto powerOffActivity = root.append_child("Activity");
+  ret &= writePowerOffActivity(powerOffActivity);
 
   const auto &activities = c->getActivities();
   for (const auto &data : activities) {
@@ -2007,6 +2008,52 @@ bool ConfigH900::writeActivities(pugi::xml_node &root)
     ret &= writeActivity(activity, data);
   }
   return ret;
+}
+
+bool ConfigH900::writePowerOffActivity(pugi::xml_node &activity)
+{
+  activity.append_child("Id").text().set(-1); //magic for power off
+  activity.append_child("Type").text().set(
+      Enum<ActivityType>(ActivityType::PowerOff).getString());
+  auto presentation = activity.append_child("Presentation");
+  presentation.append_child("Label").text().set("PowerOff");
+
+  auto enterAction = activity.append_child("EnterActions");
+  for (const auto &device : c->getDevices()) {
+    if ((device.manualPower.get() == true) || (device.alwaysOn.get() == true)) {
+      //don't power off
+      continue;
+    }
+    for (const auto &stateMachine : device.getStateMachines()) {
+      if (stateMachine.smType.get().getValue() == StateMachineType::Power) {
+        auto sequence = enterAction.append_child("Action");
+        sequence.append_child("Target").text().set("Device"); //static value
+        auto operation = sequence.append_child("Operation");
+        operation.append_child("Name").text().set(
+            Enum<Operation>(Operation::SetValue).getString());
+        auto property = operation.append_child("Parameter");
+        property.append_attribute("name").set_value("DeviceId");
+        property.text().set(device.getId());
+        property = operation.append_child("Parameter");
+        property.append_attribute("name").set_value("State");
+        property.text().set(
+            Enum<StateMachineType>(StateMachineType::Power).getString());
+        property = operation.append_child("Parameter");
+        property.append_attribute("name").set_value("Value");
+        property.text().set("Off");
+
+        //found
+        break;
+      }
+    }
+  }
+
+  //all, ignoring "manual power" / "always on"
+  auto power = activity.append_child("Power");
+  for (const auto &offDeviceId : c->getDeviceIds()) {
+    power.append_child("Off").text().set(offDeviceId);
+  }
+  return true;
 }
 
 bool ConfigH900::writeActivity(pugi::xml_node &activity,

@@ -117,6 +117,7 @@ class ConfigH900 : public QObject
     bool writeIr(pugi::xml_node &command, const data::item::RawCommand &data);
     bool writeIr(pugi::xml_node &command, const data::item::ProtoCommand &data);
     bool writeActivities(pugi::xml_node &root);
+    bool writePowerOffActivity(pugi::xml_node &activity);
     bool writeActivity(pugi::xml_node &activity, const data::item::Activity &data);
     bool writeActivityChannels(pugi::xml_node &channels, const std::vector<data::item::Channel> &data);
     bool writeActivityChannel(pugi::xml_node &channel, const data::item::Channel &data);
