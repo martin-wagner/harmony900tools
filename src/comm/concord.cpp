@@ -426,6 +426,14 @@ bool Concord::isInitialised()
   return connectionIsOpen;
 }
 
+bool Concord::isConnected()
+{
+  if (isInitialised()) {
+    return worker->isConnected();
+  }
+  return false;
+}
+
 bool Concord::isBusy()
 {
   if (isInitialised()) {

@@ -26,6 +26,8 @@ class Concord: public QWidget
     /** check state */
     bool isInitialised();
     /** check state */
+    bool isConnected();
+    /** check state */
     bool isBusy();
 
     /** get manufacturer string */

@@ -489,7 +489,7 @@ void ConcordConnection::updateActionStates(bool setToBusy)
 {
   bool state;
 
-  auto connected = concord.isInitialised();
+  auto connected = concord.isConnected();
   if (setToBusy) {
     state = false;
   } else {
