@@ -218,14 +218,37 @@ void ConcordConnection::onDisconnected(int time_s)
     return; // already shown
   }
 
+  //libconcord cannot do a disconnect -- already hangs in blocking read when
+  //we arrive here, We can't clean it up with onCloseConnection(), when we
+  //do that we end up with a pending connection that will trigger a segfault
+  //on the next connection attempt.
   disconnectMsg = new QMessageBox(QMessageBox::Warning, tr("Disconnected"),
       tr("Connection to your Harmony is lost. Reconnect "
-          "your remote, wait 10s and click \"OK\"\n\n"
-          "If you didn't disconnect your remote, disconnect it now, remove\n"
-          "and reinsert the battery, wait for the main "
-          "screen to show, reconnect it and then click \"OK\""),
-      QMessageBox::Ok);
+          "your remote, wait 10s and click \"Reconnect\"\n\n"
+          "If you didn't disconnect your remote, you need to reboot it:\n"
+          "- disconnect it now\n"
+          "- remove and reinsert the battery\n"
+          "- wait for the main screen to show\n"
+          "- reconnect it, wait 10s\n"
+          "- click \"Reconnect\""), QMessageBox::NoButton, this);
+
   disconnectMsg->setAttribute(Qt::WA_DeleteOnClose);
+
+  QPushButton *reconnect = disconnectMsg->addButton(tr("Reconnect"),
+      QMessageBox::AcceptRole);
+
+  QPushButton *quit = disconnectMsg->addButton(tr("Save and Quit"),
+      QMessageBox::RejectRole);
+
+  connect(disconnectMsg, &QMessageBox::finished, this,
+      [this, reconnect, quit](int) {
+        if (disconnectMsg == nullptr) {
+          return;
+        }
+        if (disconnectMsg->clickedButton() == quit) {
+          emit requestQuit();
+        }
+      });
 
   connect(disconnectMsg, &QObject::destroyed, this, [this]() {
     disconnectMsg = nullptr;

@@ -23,6 +23,7 @@ class ConcordConnection: public QWidget
     void writeMsg(const QString &message);
 
     void doImport(const std::vector<uint8_t> &data);
+    void requestQuit();
 
   protected slots:
     void onOpenConnection();

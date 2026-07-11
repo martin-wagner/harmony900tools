@@ -49,6 +49,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
   }
 }
 
+void MainWindow::onRequestQuit()
+{
+  close();
+}
+
 void MainWindow::newFile()
 {
   if (maybeSave()) {
@@ -410,6 +415,8 @@ void MainWindow::createActions()
       &LogViewer::addMessage);
   connect(concordConnection, &ConcordConnection::doImport, this,
       &MainWindow::onDoImport);
+  connect(concordConnection, &ConcordConnection::requestQuit, this,
+      &MainWindow::onRequestQuit);
 
   connect(deviceEditor, &editors::DeviceEditor::writeLog, log,
       &LogViewer::addEntry);

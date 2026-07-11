@@ -37,6 +37,9 @@ class MainWindow: public QMainWindow
   protected:
     void closeEvent(QCloseEvent *event) override;
 
+  public slots:
+    void onRequestQuit();
+
   private slots:
     void newFile();
     void open();
