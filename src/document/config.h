@@ -95,6 +95,7 @@ class Config : public QObject
   protected:
       QString workPath;
       QString importPath;
+      QString exportPath;
       std::unique_ptr<QTemporaryDir> tempDir;
 
 };

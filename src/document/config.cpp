@@ -178,9 +178,12 @@ bool Config::reset()
     return false;
   }
   tempDir->setAutoRemove(true);
+  dir.mkpath(tempDir->path());
   importPath = tempDir->path() + "/import";
+  exportPath = tempDir->path() + "/export";
   workPath = tempDir->path() + "/project";
   dir.mkpath(importPath);
+  dir.mkpath(exportPath);
   dir.mkpath(workPath);
 
   // @formatter:off
@@ -259,7 +262,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
 
   switch (t) {
     case Type::H900: {
-      auto parser = files::ConfigH900(importPath);
+      auto parser = files::ConfigH900(exportPath);
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
       ret = parser.dump(configData.get());
@@ -296,7 +299,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
     return false;
   }
 
-  auto ok = lib::zipDirectory(zf, importPath);
+  auto ok = lib::zipDirectory(zf, exportPath);
   if (!ok) {
     zipClose(zf, nullptr);
     return false;
