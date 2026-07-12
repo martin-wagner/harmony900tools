@@ -24,7 +24,7 @@ namespace data
 {
 //use enum values exactly as in UserConfiguration.xml!
 //all enums _must_ have "Unknown" as last item!.
-enum class Locale { enu, deu, Unknown };
+enum class Locale { dan, deu, enu, esp, fin, fra, ita, nid, nor, plk, ptg, rus, sve, Unknown };
 enum class TimeFormat { Military, Unknown };
 enum class PvrType { Generic, Unknown };
 enum class TunerInput { Tuner, Unknown };
@@ -77,6 +77,28 @@ class Enum
     T value;
     std::string src;
 };
+
+/** convert locale to native string */
+inline const std::string getNativeString(Locale v)
+{
+    switch (v) {
+        case Locale::dan: return "Dansk";
+        case Locale::deu: return "Deutsch";
+        case Locale::enu: return "English";
+        case Locale::esp: return "Español";
+        case Locale::fin: return "Suomi";
+        case Locale::fra: return "Français";
+        case Locale::ita: return "Italiano";
+        case Locale::nid: return "Nederlands";
+        case Locale::nor: return "Norsk";
+        case Locale::plk: return "Polski";
+        case Locale::ptg: return "Português";
+        case Locale::rus: return "Русский";
+        case Locale::sve: return "Svenska";
+        case Locale::Unknown: return "Unknown";
+    }
+    return "Unknown";
+}
 
 //limit magic_enum to cpp file -> must provide template types here.
 template class Enum<Locale>;
