@@ -78,9 +78,7 @@ class Worker: public QObject
         return;
       }
 
-      while (!QThread::currentThread()->isInterruptionRequested()) {
-        loop.processEvents(QEventLoop::AllEvents);
-      }
+      loop.exec();
     }
 
     void setTime()
