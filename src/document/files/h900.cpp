@@ -512,9 +512,11 @@ bool ConfigH900::readStatemachines(pugi::xml_node &states)
 
 bool ConfigH900::readStatemachine(pugi::xml_node &state)
 {
+  bool ret = true;
+
   auto devicePos = c->getDevices().size() - 1;
 
-  auto ret = worker->addDeviceStatemachineCommand(devicePos, -1); //append
+  ret &= worker->addDeviceStatemachineCommand(devicePos, -1); //append
   if (!ret) {
     return false;
   }
@@ -529,6 +531,8 @@ bool ConfigH900::readStatemachine(pugi::xml_node &state)
         smPos);
   }
 
+  ret &= readStartAction(state);
+  ret &= readFinishAction(state);
   auto discreteActions = state.child("DiscreteActions");
   auto relativeActions = state.child("RelativeActions");
   if (!discreteActions.empty() && !relativeActions.empty()) {
@@ -539,9 +543,42 @@ bool ConfigH900::readStatemachine(pugi::xml_node &state)
         ContentType::PlainText);
     return false;
   }
-  ret = readDiscreteActions(discreteActions);
+  ret &= readDiscreteActions(discreteActions);
   ret &= readRelativeActions(state);
   return ret;
+}
+
+bool ConfigH900::readStartAction(pugi::xml_node &state)
+{
+  auto action = state.child("StartAction");
+  if (action.empty()) {
+    return true;
+  }
+  return readGeneralAction(action, item::StateTransitionAction::Start);
+}
+
+bool ConfigH900::readFinishAction(pugi::xml_node &state)
+{
+  auto action = state.child("FinishAction");
+  if (action.empty()) {
+    return true;
+  }
+  return readGeneralAction(action, item::StateTransitionAction::Finish);
+}
+
+bool ConfigH900::readGeneralAction(pugi::xml_node &action,
+    item::StateTransitionAction t)
+{
+  auto devicePos = c->getDevices().size() - 1;
+  auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
+  auto type = Enum<ActionType>(action.name());
+
+  auto ret = worker->addDeviceSmActionCommand(devicePos, smPos, t);
+  if (!ret) {
+    return false;
+  }
+  worker->setDeviceSmActionType(type, devicePos, smPos, t, 0);
+  return readRelativeActionSequences(action, t);
 }
 
 bool ConfigH900::readDiscreteActions(pugi::xml_node &actions)
@@ -693,6 +730,16 @@ bool ConfigH900::readRelativeActionSequence(pugi::xml_node &sequence,
 
   worker->addDeviceStateActionSequenceCommand(devicePos, smPos, 0, t, -1); //append
   switch (t) {
+    case item::StateTransitionAction::Start:
+      seqPos =
+          c->getDevices()[devicePos].getStateMachines()[smPos].startAction->sequence.size()
+              - 1;
+      break;
+    case item::StateTransitionAction::Finish:
+      seqPos =
+          c->getDevices()[devicePos].getStateMachines()[smPos].finishAction->sequence.size()
+              - 1;
+      break;
     case item::StateTransitionAction::Relative_Reset:
       seqPos =
           c->getDevices()[devicePos].getStateMachines()[smPos].relative.resetAction->sequence.size()
@@ -1822,6 +1869,18 @@ bool ConfigH900::writeStatemachine(pugi::xml_node &state, uint32_t deviceId,
     state.append_child("Delay").text().set(data.delayMs.get());
   }
 
+  if (data.startAction.has_value()) {
+    auto actionType = state.append_child(
+        data.startAction->actionType.get().getString());
+    ret &= writeDeviceAction(actionType, deviceId, *data.startAction,
+        item::StateTransitionType::Unknown);
+  }
+  if (data.finishAction.has_value()) {
+    auto actionType = state.append_child(
+        data.finishAction->actionType.get().getString());
+    ret &= writeDeviceAction(actionType, deviceId, *data.finishAction,
+        item::StateTransitionType::Unknown);
+  }
   if (!data.discrete.empty()) {
     auto discreteAction = state.append_child("DiscreteActions");
     ret &= writeDiscreteActions(discreteAction, deviceId, data.discrete);

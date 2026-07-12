@@ -49,6 +49,8 @@ enum class StateTransitionType {
 
 enum class StateTransitionAction {
     Unknown,
+    Start,
+    Finish,
     Discrete_Enter,
     Relative_Reset,
     Relative_Next,
@@ -65,6 +67,9 @@ class StateMachine
   public:
     PropertyEnum<StateMachineType> smType{StateMachineType::Power, Include::ALWAYS};
     PropertyU32 delayMs{100, Include::CHECK};
+
+    std::optional<DeviceAction> startAction = std::nullopt;
+    std::optional<DeviceAction> finishAction = std::nullopt;
 
     DiscreteActions discrete;
     RelativeActions relative;

@@ -36,6 +36,7 @@ class AddActionCommand: public BaseCommand
 {
   Q_OBJECT
   public:
+    //for state machine actions "start", "finish" that are applicable for all states
     //for relative state machine, actions are indipendent of states, therefore must be added seperately
     AddActionCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,  QUndoCommand *parent = nullptr);
 

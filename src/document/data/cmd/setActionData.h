@@ -16,6 +16,16 @@ inline item::DeviceAction* getActionFromSmRef(ConfigData &c, uint32_t devicePos,
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
 
     switch (t) {
+      case item::StateTransitionAction::Start:
+        if (sm.startAction.has_value()) {
+          return &sm.startAction.value();
+        }
+        break;
+      case item::StateTransitionAction::Finish:
+        if (sm.finishAction.has_value()) {
+          return &sm.finishAction.value();
+        }
+        break;
       case item::StateTransitionAction::Discrete_Enter:
         return &sm.discrete.enterStateAction.at(actPos);
       case item::StateTransitionAction::Relative_Reset:

@@ -138,6 +138,12 @@ RemoveActionCommand::RemoveActionCommand(ConfigData &c, uint32_t devicePos,
   try {
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
     switch (t) {
+      case item::StateTransitionAction::Start:
+        action = *sm.startAction;
+        break;
+      case item::StateTransitionAction::Finish:
+        action = *sm.finishAction;
+        break;
       case item::StateTransitionAction::Relative_Reset:
         action = *sm.relative.resetAction;
         break;
@@ -183,6 +189,12 @@ void RemoveActionCommand::redo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
+    case item::StateTransitionAction::Start:
+      sm.startAction = nullopt;
+      break;
+    case item::StateTransitionAction::Finish:
+      sm.finishAction = nullopt;
+      break;
     case item::StateTransitionAction::Relative_Reset:
       sm.relative.resetAction = nullopt;
       break;
@@ -206,6 +218,16 @@ void RemoveActionCommand::undo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
+    case item::StateTransitionAction::Start: {
+      auto &action = sm.startAction;
+      action = this->action;
+      break;
+    }
+    case item::StateTransitionAction::Finish: {
+      auto &action = sm.finishAction;
+      action = this->action;
+      break;
+    }
     case item::StateTransitionAction::Relative_Reset: {
       auto &action = sm.relative.resetAction;
       action = this->action;

@@ -118,6 +118,8 @@ AddActionCommand::AddActionCommand(ConfigData &c, uint32_t devicePos,
         parent), c(c), devicePos(devicePos), smPos(smPos), t(t)
 {
   switch (t) {
+    case item::StateTransitionAction::Start:
+    case item::StateTransitionAction::Finish:
     case item::StateTransitionAction::Relative_Reset:
     case item::StateTransitionAction::Relative_Next:
     case item::StateTransitionAction::Relative_Prev:
@@ -143,6 +145,16 @@ void AddActionCommand::redo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
+    case item::StateTransitionAction::Start: {
+      auto &action = sm.startAction;
+      action = item::DeviceAction();
+      break;
+    }
+    case item::StateTransitionAction::Finish: {
+      auto &action = sm.finishAction;
+      action = item::DeviceAction();
+      break;
+    }
     case item::StateTransitionAction::Relative_Reset: {
       auto &action = sm.relative.resetAction;
       action = item::DeviceAction();
@@ -172,6 +184,12 @@ void AddActionCommand::undo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
+    case item::StateTransitionAction::Start:
+      sm.startAction = nullopt;
+      break;
+    case item::StateTransitionAction::Finish:
+      sm.finishAction = nullopt;
+      break;
     case item::StateTransitionAction::Relative_Reset:
       sm.relative.resetAction = nullopt;
       break;

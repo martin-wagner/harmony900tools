@@ -58,6 +58,9 @@ class ConfigH900 : public QObject
     bool readDeviceButton(pugi::xml_node &button, enum data::item::ButtonType t);
     bool readStatemachines(pugi::xml_node &states);
     bool readStatemachine(pugi::xml_node &state);
+    bool readStartAction(pugi::xml_node &state);
+    bool readFinishAction(pugi::xml_node &state);
+    bool readGeneralAction(pugi::xml_node &action, data::item::StateTransitionAction t);
     bool readDiscreteActions(pugi::xml_node &actions);
     bool readDiscreteAction(pugi::xml_node &action);
     bool readDiscreteActionSequences(pugi::xml_node &action);
