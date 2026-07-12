@@ -64,6 +64,7 @@ bool ConfigH900::dump(const ConfigData *c)
   emit writeLog(LogLevel::Info, tr("Exporting data..."),
       ContentType::PlainText);
 
+  QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
   try {
     ret &= writeIrProto(); //side effect: creates hash for xml files
     ret &= writeIrStream();
@@ -1659,7 +1660,6 @@ bool ConfigH900::dumpUserConfigXml()
     return ret;
   }
 
-  QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
 #ifdef _WIN32
   ret = xml.save_file(QString(wp + "/" + userConfigPath).toStdWString().c_str(),
       PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
@@ -2392,7 +2392,6 @@ bool ConfigH900::dumpActionListXml()
     return false;
   }
 
-  QDir().mkpath(wp + "/" + QFileInfo(actionListPath).path());
 #ifdef _WIN32
   ret = xml.save_file(QString(wp + "/" + actionListPath).toStdWString().c_str(),
       PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
@@ -2463,7 +2462,7 @@ bool ConfigH900::writeIrProto()
       QString(wp + "/" + irProtoPath).toStdString(), &crc);
   if (status != binary::irProto::Status::OK) {
     emit writeLog(LogLevel::Error,
-        tr("write ir protocols parser error: %d").arg((int) status),
+        tr("write ir protocols parser error: %1").arg((int) status),
         ContentType::PlainText);
     return false;
   }
@@ -2481,7 +2480,7 @@ bool ConfigH900::writeIrStream()
       QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
     emit writeLog(LogLevel::Error,
-        tr("write ir stream parser error: %d").arg((int) status),
+        tr("write ir stream parser error: %1").arg((int) status),
         ContentType::PlainText);
     return false;
   }
