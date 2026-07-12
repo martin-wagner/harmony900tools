@@ -41,6 +41,10 @@ class RelativeActions
     const bool empty() const { return states.empty(); };
 };
 
+//fixme: usr/local/share/lua/5.1/ethanol/objects/State.lua
+//line 64 -- somehow also supports MinValue and MaxValue as alternative to Value. Don't have an example how that looks...
+//line 80 -- InitialValue -- same as first "Value"?
+
 enum class StateTransitionType {
     Unknown,
     Discrete,
@@ -61,6 +65,8 @@ enum class StateTransitionAction {
  *
  * can be power, input, ... so essentially everything on a device that has
  * multiple states.
+ *
+ * some parsing in usr/local/share/lua/5.1/ethanol/objects/State.lua
  */
 class StateMachine
 {

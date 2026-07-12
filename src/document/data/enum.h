@@ -33,7 +33,7 @@ enum class DeviceType { Amplifier, AudioVideoSwitch, Cd, ClimateControl, Compute
     SetTopBox, Television, Vcr, Unknown };
 enum class StateMachineType { Power, Input, Screen, TVInput, AntennaOutput, Unknown };
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
-enum class Operation { ForceValue, SendCommand, SendDelay, SetValue, Unknown };
+enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };
 enum class ActivityType { PowerOff, VirtualCdMulti, VirtualDvd, VirtualGameConsole,
     VirtualGeneric, VirtualMusicServer, VirtualPvr, VirtualRadioSimple,

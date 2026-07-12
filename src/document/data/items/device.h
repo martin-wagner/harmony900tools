@@ -24,6 +24,8 @@ namespace item
 {
 
 /** stores one single device info struct from UserConfiguration.xml
+ *
+ * some parsing in usr/local/share/lua/5.1/ethanol/objects/Device.lua
  */
 class Device
 {

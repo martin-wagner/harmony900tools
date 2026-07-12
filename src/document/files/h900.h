@@ -16,6 +16,7 @@ namespace pugi
   class xml_attribute;
   class xml_text;
 }
+//h900 uses LXP / LuaExpat 1.1.0
 
 namespace document
 {

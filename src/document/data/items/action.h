@@ -15,7 +15,9 @@ namespace data
 namespace item
 {
 
-/** a action can require multiple "steps" to complete */
+/** a action can require multiple "steps" to complete
+ * dispatcher: usr/local/share/lua/5.1/ethanol/ethanol line 113 handleAction
+ * */
 class SequenceItem {
   public:
     PropertyEnum<Operation> opcode{Operation::SendCommand, Include::ALWAYS};

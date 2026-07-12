@@ -31,6 +31,8 @@ enum class ActivityAction {
 };
 
 /** stores one single activity info struct from UserConfiguration.xml
+ *
+ * some parsing in usr/local/share/lua/5.1/ethanol/objects/Activity.lua
  */
 class Activity
 {
