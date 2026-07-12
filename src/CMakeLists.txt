@@ -75,6 +75,7 @@ set(sources
   document/data/cmd/setUnknownProperty.cpp
   document/data/cmd/setUserData.cpp
   document/data/items/button.cpp
+  document/files/create.cpp
   document/files/h900.cpp
   document/files/storage.cpp
   models/deviceListModel.cpp

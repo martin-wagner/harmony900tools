@@ -8,6 +8,7 @@
 #include "lib/uid.h"
 #include "config.h"
 #include "files/h900.h"
+#include "files/create.h"
 #include "files/storage.h"
 
 using namespace std;
@@ -27,10 +28,15 @@ Config::Config(Context &ctx, bool init, QObject *parent) :
 
 bool document::Config::create()
 {
+  stack.beginMacro(tr("Create new Harmony 900 Config"));
+
   reset();
 
-  //todo
-
+  auto creator = files::Create(*(configData.get()));
+  connect(&creator, &files::Create::writeLog, this, &Config::writeLog);
+  connect(&creator, &files::Create::writeMsg, this, &Config::writeMsg);
+  creator.write(worker);
+  stack.endMacro();
   return true;
 }
 
