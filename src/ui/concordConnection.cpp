@@ -77,6 +77,11 @@ void ConcordConnection::onOpenConnection()
   if (ret) {
     updateActionStates();
     labelConnection->setText(tr("connected"));
+  } else {
+    progressBar->setRange(0, 100);
+    progressBar->setFormat(tr("Error opening connection"));
+    emit writeMsg(tr("Error opening connection"));
+    labelConnection->setText(tr("Error opening connection"));
   }
 }
 
