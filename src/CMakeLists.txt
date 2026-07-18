@@ -118,6 +118,11 @@ target_link_libraries(${programName} PRIVATE
     magic_enum::magic_enum
 )
 
+if(WIN32)
+  target_compile_definitions(${programName} PRIVATE SECURITY_WIN32=1)
+  target_link_libraries(${programName} PRIVATE secur32)
+endif()
+
 # Resources:
 set(resourcePath "../res/")
 set(iconPath "${resourcePath}icons/BreezeConverted/64x64/")
