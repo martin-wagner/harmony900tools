@@ -41,3 +41,6 @@ target_compile_definitions(test_strEnum PRIVATE
 # add to test suite
 # ---------------------------------------------------------------------------
 gtest_discover_tests(test_strEnum)
+
+
+add_subdirectory(items)

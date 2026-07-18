@@ -39,7 +39,14 @@ void toJson(ordered_json &out, const item::UserInfo &user)
 
 void fromJson(const ordered_json &in, item::UserInfo &user)
 {
-  uint32_t id = in.value("Id", uint32_t(item::UserInfo::DEFAULT_USERID));
+  uint32_t id;
+
+  auto it = in.find("Id");
+  if (it != in.end()) {
+    id = it->get<uint32_t>();
+  } else {
+    id = item::UserInfo::DEFAULT_USERID;
+  }
   user.setId(id);
   lib::UidGenerator::getInstance().markUsed(id);
 
@@ -75,7 +82,14 @@ void toJson(ordered_json &out, const item::ControllerInfo &controller)
 
 void fromJson(const ordered_json &in, item::ControllerInfo &controller)
 {
-  uint32_t id = in.value("Id", uint32_t(item::ControllerInfo::DEFAULT_ID));
+  uint32_t id;
+
+  auto it = in.find("Id");
+  if (it != in.end()) {
+    id = it->get<uint32_t>();
+  } else {
+    id = item::ControllerInfo::DEFAULT_ID;
+  }
   controller.setId(id);
   lib::UidGenerator::getInstance().markUsed(id);
 

@@ -58,7 +58,7 @@ void toJson(ordered_json &out, const item::Activity &activity)
   out["Id"] = activity.getId();
 
   toJsonVec(out, "Channels", activity.getChannels());
-  toJsonVec(out, "buttons", activity.getButtons());
+  toJsonVec(out, "Buttons", activity.getButtons());
   toJsonVec(out, "EnterActions", activity.getEnterActions());
   toJsonVec(out, "LeaveActions", activity.getLeaveActions());
   toJsonVec(out, "Roles", activity.getRoles());
