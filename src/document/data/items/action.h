@@ -20,13 +20,13 @@ namespace item
  * */
 class SequenceItem {
   public:
-    PropertyEnum<Operation> opcode{Operation::SendCommand, Include::ALWAYS};
-    PropertyString cmd{"", Include::CHECK};
-    PropertyU32 deviceId{0, Include::CHECK}; //device -- not needed (id of parent, redundant); activity -- referenced device
-    PropertyU32 delayMs{1000, Include::CHECK};
-    PropertyEnum<StateMachineDeviceType> stateName{StateMachineDeviceType::Unknown, Include::CHECK};
-    PropertyString stateValue{"", Include::CHECK};
-    PropertyEnum<Modifier> mod{Modifier::Press, Include::CHECK};
+    PropertyEnum<Operation> opcode{Operation::SendCommand, Used::YES};
+    PropertyString cmd{"", Used::NO};
+    PropertyU32 deviceId{0, Used::NO}; //device -- not needed (id of parent, redundant); activity -- referenced device
+    PropertyU32 delayMs{1000, Used::NO};
+    PropertyEnum<StateMachineDeviceType> stateName{StateMachineDeviceType::Unknown, Used::NO};
+    PropertyString stateValue{"", Used::NO};
+    PropertyEnum<Modifier> mod{Modifier::Press, Used::NO};
 
     const std::vector<UnknownElement> &getUnknownParams() const
     {
@@ -46,8 +46,8 @@ class SequenceItem {
 class DeviceAction
 {
   public:
-    PropertyEnum<ActionType> actionType{ActionType::None, Include::CHECK};
-    PropertyBool repeatWillNotHarm{false, Include::ALWAYS};
+    PropertyEnum<ActionType> actionType{ActionType::None, Used::NO};
+    PropertyBool repeatWillNotHarm{false, Used::YES};
 
     std::vector<SequenceItem> sequence;
 };

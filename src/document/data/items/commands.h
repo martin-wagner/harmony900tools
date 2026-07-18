@@ -30,9 +30,9 @@ class ProtoCommand
 {
   public:
     //command creator. false = read from xml
-    PropertyBool usesParentInfo { false, Include::CHECK };
-    PropertyU32 field3 {0, Include::CHECK};
-    PropertyU32 field4 {0, Include::CHECK};
+    PropertyBool usesParentInfo { false, Used::NO };
+    PropertyU32 field3 {0, Used::NO};
+    PropertyU32 field4 {0, Used::NO};
 
     //for serialise
     PropertyString name { "Unknown" };
@@ -84,17 +84,17 @@ class Commands
       return false;
     }
 
-    PropertyU32 pressPreSilenceMs {0, Include::ALWAYS};
-    PropertyU32 pressInterKeyMs {0, Include::ALWAYS};
-    PropertyU32 holdPreSilenceMs {0, Include::ALWAYS};
-    PropertyU32 holdInterKeyMs {0, Include::ALWAYS};
+    PropertyU32 pressPreSilenceMs {0, Used::YES};
+    PropertyU32 pressInterKeyMs {0, Used::YES};
+    PropertyU32 holdPreSilenceMs {0, Used::YES};
+    PropertyU32 holdInterKeyMs {0, Used::YES};
 
     /** Info for building IR commands. IR commands seem to use max two static
      * params + command. We have space for three params. */
-    PropertyEnum<CodeType> codeType { CodeType::None, Include::CHECK} ;
-    PropertyU32 field0 {0, Include::CHECK};
-    PropertyU32 field1 {0, Include::CHECK};
-    PropertyU32 field2 {0, Include::CHECK};
+    PropertyEnum<CodeType> codeType { CodeType::None, Used::NO} ;
+    PropertyU32 field0 {0, Used::NO};
+    PropertyU32 field1 {0, Used::NO};
+    PropertyU32 field2 {0, Used::NO};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

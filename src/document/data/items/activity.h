@@ -140,34 +140,34 @@ class Activity
     PropertyString label{"My C64"};
 
     //general
-    PropertyEnum<ActivityStartPage> pvrType{ActivityStartPage::Transport, Include::ALWAYS};
-    PropertyBool controlGroup_HardButtons{true, Include::ALWAYS};
-    PropertyBool powerOffUnusedDevices{true, Include::ALWAYS};
-    PropertyBool trainingWheels{true, Include::ALWAYS};
-    PropertyBool unusedDevicesHelp{false, Include::ALWAYS};
+    PropertyEnum<ActivityStartPage> pvrType{ActivityStartPage::Transport, Used::YES};
+    PropertyBool controlGroup_HardButtons{true, Used::YES};
+    PropertyBool powerOffUnusedDevices{true, Used::YES};
+    PropertyBool trainingWheels{true, Used::YES};
+    PropertyBool unusedDevicesHelp{false, Used::YES};
 
     //other
-    PropertyEnum<ChannelButtonBehaviour> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Include::CHECK};
-    PropertyBool controlGroup_SoftButtons{true, Include::CHECK};
-    PropertyBool enableSmartMenu{true, Include::CHECK};
-    PropertyBool enableSmartZoom{true, Include::CHECK};
-    PropertyEnum<GuideButtonMode> guideButtonMode{GuideButtonMode::TunerProgramGuide, Include::CHECK};
-    PropertyBool hideModeControl{false, Include::CHECK};
-    PropertyBool hideModeListen{false, Include::CHECK};
-    PropertyBool hideModeNavigate{false, Include::CHECK};
-    PropertyBool hideModePlay{false, Include::CHECK};
-    PropertyBool hideModePlayMode{false, Include::CHECK};
-    PropertyBool hideSurfAllChannels{false, Include::CHECK};
-    PropertyBool hideSurfAllShows{false, Include::CHECK};
-    PropertyBool hideSurfFavoriteChannels{false, Include::CHECK};
-    PropertyBool hideSurfFavoriteShows{false, Include::CHECK};
-    PropertyI32 maxTvContentDays{0, Include::CHECK};
-    PropertyEnum<MediaButtonMode> mediaButtonMode{MediaButtonMode::ShowMedia, Include::CHECK};
-    PropertyBool playOnEnter{true, Include::CHECK};
-    PropertyBool retainStop{false, Include::CHECK};
-    PropertyBool scrollChannelsByPage{true, Include::CHECK};
-    PropertyBool scrollShowsByPage{true, Include::CHECK};
-    PropertyBool stopOnExit{false, Include::CHECK};
+    PropertyEnum<ChannelButtonBehaviour> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Used::NO};
+    PropertyBool controlGroup_SoftButtons{true, Used::NO};
+    PropertyBool enableSmartMenu{true, Used::NO};
+    PropertyBool enableSmartZoom{true, Used::NO};
+    PropertyEnum<GuideButtonMode> guideButtonMode{GuideButtonMode::TunerProgramGuide, Used::NO};
+    PropertyBool hideModeControl{false, Used::NO};
+    PropertyBool hideModeListen{false, Used::NO};
+    PropertyBool hideModeNavigate{false, Used::NO};
+    PropertyBool hideModePlay{false, Used::NO};
+    PropertyBool hideModePlayMode{false, Used::NO};
+    PropertyBool hideSurfAllChannels{false, Used::NO};
+    PropertyBool hideSurfAllShows{false, Used::NO};
+    PropertyBool hideSurfFavoriteChannels{false, Used::NO};
+    PropertyBool hideSurfFavoriteShows{false, Used::NO};
+    PropertyI32 maxTvContentDays{0, Used::NO};
+    PropertyEnum<MediaButtonMode> mediaButtonMode{MediaButtonMode::ShowMedia, Used::NO};
+    PropertyBool playOnEnter{true, Used::NO};
+    PropertyBool retainStop{false, Used::NO};
+    PropertyBool scrollChannelsByPage{true, Used::NO};
+    PropertyBool scrollShowsByPage{true, Used::NO};
+    PropertyBool stopOnExit{false, Used::NO};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

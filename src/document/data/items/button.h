@@ -61,11 +61,11 @@ class Button
     /** command that will be sent on press. Device -- name, Activity -- ID_name */
     PropertyString action{"act"};
     /** hard button: name, soft button: label */
-    PropertyString name{"Generic", Include::CHECK};
+    PropertyString name{"Generic", Used::NO};
     /** only soft button: channel icon */
-    PropertyString file{"0.png", Include::CHECK};
+    PropertyString file{"0.png", Used::NO};
     /** only soft button: position on lcd, starting at 0. 6 devices per page, so 7 -> pos 0 on second page */
-    PropertyI32 position{0, Include::CHECK};
+    PropertyI32 position{0, Used::NO};
 
   protected:
     ButtonType type;

@@ -112,27 +112,27 @@ class Device
     PropertyString label{"My C64"};
 
     //power related
-    PropertyBool manualPower{false, Include::ALWAYS};
-    PropertyBool alwaysOn{false, Include::CHECK};
-    PropertyBool autoPower{false, Include::CHECK};
+    PropertyBool manualPower{false, Used::YES};
+    PropertyBool alwaysOn{false, Used::NO};
+    PropertyBool autoPower{false, Used::NO};
     //other
-    PropertyBool audioSwitch{false, Include::CHECK};
-    PropertyBool dimmer{false, Include::CHECK};
-    PropertyBool hasBands{true, Include::CHECK};
-    PropertyBool hasPresets{true, Include::CHECK};
-    PropertyBool isNewDevice{true, Include::CHECK};
-    PropertyBool isDisplayDevice{true, Include::CHECK};
-    PropertyBool menuOnDevice{false, Include::CHECK};
-    PropertyI32 numDiscs{1, Include::CHECK};
-    PropertyI32 numLights{1, Include::CHECK};
-    PropertyBool onScreenGuide{false, Include::CHECK};
-    PropertyEnum<PvrType> pvrType{PvrType::Generic, Include::CHECK};
-    PropertyBool recordMediaFixedDisc{true, Include::CHECK};
-    PropertyBool recordMediaRemovableVideotape{true, Include::CHECK};
-    PropertyBool revertInput{true, Include::CHECK};
-    PropertyBool scart{true, Include::CHECK};
-    PropertyEnum<TunerInput> tunerInput{TunerInput::Tuner, Include::CHECK};
-    PropertyBool videoSwitch{true, Include::CHECK};
+    PropertyBool audioSwitch{false, Used::NO};
+    PropertyBool dimmer{false, Used::NO};
+    PropertyBool hasBands{true, Used::NO};
+    PropertyBool hasPresets{true, Used::NO};
+    PropertyBool isNewDevice{true, Used::NO};
+    PropertyBool isDisplayDevice{true, Used::NO};
+    PropertyBool menuOnDevice{false, Used::NO};
+    PropertyI32 numDiscs{1, Used::NO};
+    PropertyI32 numLights{1, Used::NO};
+    PropertyBool onScreenGuide{false, Used::NO};
+    PropertyEnum<PvrType> pvrType{PvrType::Generic, Used::NO};
+    PropertyBool recordMediaFixedDisc{true, Used::NO};
+    PropertyBool recordMediaRemovableVideotape{true, Used::NO};
+    PropertyBool revertInput{true, Used::NO};
+    PropertyBool scart{true, Used::NO};
+    PropertyEnum<TunerInput> tunerInput{TunerInput::Tuner, Used::NO};
+    PropertyBool videoSwitch{true, Used::NO};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

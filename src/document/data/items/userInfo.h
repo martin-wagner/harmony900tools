@@ -41,10 +41,10 @@ class UserInfo
     PropertyString fileCreationDate{""};
     PropertyString fileModificationDate{""};
 
-    PropertyBool newDeviceFound{false, Include::CHECK};
-    PropertyBool trainingWheels{false, Include::ALWAYS};
-    PropertyEnum<Locale> locale{{Locale::enu}, Include::ALWAYS};
-    PropertyEnum<TimeFormat> timeFormat{{TimeFormat::Military}, Include::ALWAYS};
+    PropertyBool newDeviceFound{false, Used::NO};
+    PropertyBool trainingWheels{false, Used::YES};
+    PropertyEnum<Locale> locale{{Locale::enu}, Used::YES};
+    PropertyEnum<TimeFormat> timeFormat{{TimeFormat::Military}, Used::YES};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

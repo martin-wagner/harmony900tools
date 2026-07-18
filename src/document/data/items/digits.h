@@ -32,7 +32,7 @@ enum class DigitSection {
 /** class for storing how a number is sent by the remote. for more see the docs */
 class Numpad {
   public:
-    PropertyU32 fixedDigits{0, Include::CHECK};
+    PropertyU32 fixedDigits{0, Used::NO};
 
     std::optional<Digits> first;
     std::optional<Digits> middle;

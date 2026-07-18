@@ -11,10 +11,10 @@ namespace document
 namespace data
 {
 
-/** dump to export file */
-enum class Include
+/** value is in use / can be ignored on save / export */
+enum class Used
 {
-  ALWAYS, CHECK
+  YES, NO
 };
 
 /**
@@ -26,17 +26,17 @@ template<typename T>
 class Property
 {
   public:
-    Property(const T &v, Include defaultIncluded = Include::ALWAYS) :
+    Property(const T &v, Used defaultIncluded = Used::YES) :
         include(defaultIncluded), value(v)
     {
     }
 
-    void setIncluded(Include i)
+    void setIncluded(Used i)
     {
       include = i;
     }
 
-    Include isIncluded() const
+    Used isIncluded() const
     {
       return include;
     }
@@ -53,7 +53,7 @@ class Property
     }
 
   protected:
-    Include include;
+    Used include;
     T value;
 };
 

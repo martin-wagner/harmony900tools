@@ -26,7 +26,7 @@ template<typename T>
 void writeProperty(pugi::xml_node &parent, const char *name,
     const Property<T> &prop, string childName = "Property")
 {
-  if (prop.isIncluded() != Include::ALWAYS) {
+  if (prop.isIncluded() != Used::YES) {
     return;
   }
   auto property = parent.append_child(childName);
@@ -39,7 +39,7 @@ template<typename T>
 void writeProperty(pugi::xml_node &parent, const char *name,
     const Property<Enum<T>> &prop, string childName = "Property")
 {
-  if (prop.isIncluded() != Include::ALWAYS) {
+  if (prop.isIncluded() != Used::YES) {
     return;
   }
   auto property = parent.append_child(childName);
@@ -1861,10 +1861,10 @@ bool ConfigH900::writeDeviceButton(pugi::xml_node &button, uint32_t deviceId,
   } else {
     button.append_child("Label"); //empty
   }
-  if (data.file.isIncluded() == Include::ALWAYS) {
+  if (data.file.isIncluded() == Used::YES) {
     button.append_child("Icon").text().set(data.file.get());
   }
-  if (data.position.isIncluded() == Include::ALWAYS) {
+  if (data.position.isIncluded() == Used::YES) {
     button.append_child("Position").text().set(data.position.get());
   }
   button.append_child("ActionId").text().set(data.getActionId(deviceId));
@@ -1899,7 +1899,7 @@ bool ConfigH900::writeStatemachine(pugi::xml_node &state, uint32_t deviceId,
       state.append_child("Value").text().set(d);
     }
   }
-  if (data.delayMs.isIncluded() == Include::ALWAYS) {
+  if (data.delayMs.isIncluded() == Used::YES) {
     state.append_child("Delay").text().set(data.delayMs.get());
   }
 
@@ -1987,7 +1987,7 @@ bool ConfigH900::writeDeviceAction(pugi::xml_node &actionType,
       //fixme we have exactly one sample for this. no idea if this is correct.
       writeProperty(operation, "StateName", s.stateName, "Parameter");
     }
-    if (s.stateValue.isIncluded() == Include::ALWAYS) {
+    if (s.stateValue.isIncluded() == Used::YES) {
       writeProperty(operation, "Value", s.stateValue, "Parameter");
     }
     for (const auto &prop : s.getUnknownParams()) {
@@ -2002,7 +2002,7 @@ bool ConfigH900::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
 {
   bool ret = true;
 
-  if (data.fixedDigits.isIncluded() == Include::ALWAYS) {
+  if (data.fixedDigits.isIncluded() == Used::YES) {
     numeric.append_child("FixedDigits").text().set(data.fixedDigits.get());
   }
   if (data.finish.has_value()) {
@@ -2272,10 +2272,10 @@ bool ConfigH900::writeActivityButton(pugi::xml_node &button,
   } else {
     button.append_child("Label"); //empty
   }
-  if (data.file.isIncluded() == Include::ALWAYS) {
+  if (data.file.isIncluded() == Used::YES) {
     button.append_child("Icon").text().set(data.file.get());
   }
-  if (data.position.isIncluded() == Include::ALWAYS) {
+  if (data.position.isIncluded() == Used::YES) {
     button.append_child("Position").text().set(data.position.get());
   }
   button.append_child("ActionId").text().set(data.getActionId());

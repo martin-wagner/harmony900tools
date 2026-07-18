@@ -64,7 +64,7 @@ bool CmdCatalogue::setUserFirstName(const QString &v)
         tr("set user first name"),
         [this]() {return c.getUser().firstName.get();},
         [this](
-            const string &v) {c.getUser().firstName.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getUser().firstName.set(v).setIncluded(Used::YES);},
         v.toStdString() };
   return setProperty<string>(access);
 }
@@ -76,7 +76,7 @@ bool CmdCatalogue::setUserLastName(const QString &v)
         tr("set user last name"),
         [this]() {return c.getUser().lastName.get();},
         [this](
-            const string &v) {c.getUser().lastName.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getUser().lastName.set(v).setIncluded(Used::YES);},
         v.toStdString() };
   return setProperty<string>(access);
 }
@@ -106,7 +106,7 @@ bool CmdCatalogue::setUserNewDeviceFound(bool f)
         tr("set new device found"),
         [this]() {return c.getUser().newDeviceFound.get();},
         [this](
-            const bool &v) {c.getUser().newDeviceFound.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getUser().newDeviceFound.set(v).setIncluded(Used::YES);},
         f };
   return setProperty<bool>(access);
 }
@@ -118,7 +118,7 @@ bool CmdCatalogue::setUserTrainingWheels(bool w)
         tr("set training wheels"),
         [this]() {return c.getUser().trainingWheels.get();},
         [this](
-            const bool &v) {c.getUser().trainingWheels.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getUser().trainingWheels.set(v).setIncluded(Used::YES);},
         w };
   return setProperty<bool>(access);
 }
@@ -130,7 +130,7 @@ bool CmdCatalogue::setUserLocale(const Enum<Locale> &l)
         tr("set locale"),
         [this]() {return c.getUser().locale.get();},
         [this](
-            const Enum<Locale> &v) {c.getUser().locale.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Locale> &v) {c.getUser().locale.set(v).setIncluded(Used::YES);},
         l };
   return setProperty<Enum<Locale>>(access);
 }
@@ -142,7 +142,7 @@ bool CmdCatalogue::setUserTimeFormat(const Enum<TimeFormat> &f)
         tr("set time format"),
         [this]() {return c.getUser().timeFormat.get();},
         [this](
-            const Enum<TimeFormat> &v) {c.getUser().timeFormat.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<TimeFormat> &v) {c.getUser().timeFormat.set(v).setIncluded(Used::YES);},
         f };
   return setProperty<Enum<TimeFormat>>(access);
 }
@@ -232,7 +232,7 @@ bool CmdCatalogue::setDeviceType(const Enum<DeviceType> &v, uint32_t pos)
         tr("set device type"),
         [this, pos]() {return c.getDevices()[pos].type.get();},
         [this, pos](
-            const Enum<DeviceType> &v) {c.getDevices()[pos].type.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<DeviceType> &v) {c.getDevices()[pos].type.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<DeviceType>>(access);
 }
@@ -244,7 +244,7 @@ bool CmdCatalogue::setDeviceMnf(const QString &v, uint32_t pos)
         tr("set manufacturer"),
         [this, pos]() {return c.getDevices()[pos].mnf.get();},
         [this, pos](
-            const string &v) {c.getDevices()[pos].mnf.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getDevices()[pos].mnf.set(v).setIncluded(Used::YES);},
         v.toStdString() };
   return setProperty<string>(access);
 }
@@ -256,7 +256,7 @@ bool CmdCatalogue::setDeviceModel(const QString &v, uint32_t pos)
         tr("set model"),
         [this, pos]() {return c.getDevices()[pos].model.get();},
         [this, pos](
-            const string &v) {c.getDevices()[pos].model.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getDevices()[pos].model.set(v).setIncluded(Used::YES);},
         v.toStdString() };
   return setProperty<string>(access);
 }
@@ -268,7 +268,7 @@ bool CmdCatalogue::setDeviceLabel(const QString &v, uint32_t pos)
         tr("set label"),
         [this, pos]() {return c.getDevices()[pos].label.get();},
         [this, pos](
-            const string &v) {c.getDevices()[pos].label.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getDevices()[pos].label.set(v).setIncluded(Used::YES);},
         v.toStdString() };
   return setProperty<string>(access);
 }
@@ -280,7 +280,7 @@ bool CmdCatalogue::setDeviceManualPower(bool v, uint32_t pos)
         tr("set manual power"),
         [this, pos]() {return c.getDevices()[pos].manualPower.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].manualPower.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].manualPower.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -292,7 +292,7 @@ bool CmdCatalogue::setDeviceAlwaysOn(bool v, uint32_t pos)
         tr("set always on"),
         [this, pos]() {return c.getDevices()[pos].alwaysOn.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].alwaysOn.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].alwaysOn.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -304,7 +304,7 @@ bool CmdCatalogue::setDeviceAutoPower(bool v, uint32_t pos)
         tr("set auto power"),
         [this, pos]() {return c.getDevices()[pos].autoPower.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].autoPower.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].autoPower.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -316,7 +316,7 @@ bool CmdCatalogue::setDeviceAudioSwitch(bool v, uint32_t pos)
         tr("set audio switch"),
         [this, pos]() {return c.getDevices()[pos].audioSwitch.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].audioSwitch.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].audioSwitch.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -328,7 +328,7 @@ bool CmdCatalogue::setDeviceDimmer(bool v, uint32_t pos)
         tr("set dimmer"),
         [this, pos]() {return c.getDevices()[pos].dimmer.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].dimmer.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].dimmer.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -340,7 +340,7 @@ bool CmdCatalogue::setDeviceHasBands(bool v, uint32_t pos)
         tr("set has bands"),
         [this, pos]() {return c.getDevices()[pos].hasBands.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].hasBands.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].hasBands.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -352,7 +352,7 @@ bool CmdCatalogue::setDeviceHasPresets(bool v, uint32_t pos)
         tr("set has presets"),
         [this, pos]() {return c.getDevices()[pos].hasPresets.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].hasPresets.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].hasPresets.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -364,7 +364,7 @@ bool CmdCatalogue::setDeviceIsNewDevice(bool v, uint32_t pos)
         tr("set is new device"),
         [this, pos]() {return c.getDevices()[pos].isNewDevice.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].isNewDevice.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].isNewDevice.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -376,7 +376,7 @@ bool CmdCatalogue::setDeviceIsDisplayDevice(bool v, uint32_t pos)
         tr("set is display device"),
         [this, pos]() {return c.getDevices()[pos].isDisplayDevice.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].isDisplayDevice.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].isDisplayDevice.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -388,7 +388,7 @@ bool CmdCatalogue::setDeviceMenuOnDevice(bool v, uint32_t pos)
         tr("set menu on device"),
         [this, pos]() {return c.getDevices()[pos].menuOnDevice.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].menuOnDevice.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].menuOnDevice.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -400,7 +400,7 @@ bool CmdCatalogue::setDeviceOnScreenGuide(bool v, uint32_t pos)
         tr("set on screen guide"),
         [this, pos]() {return c.getDevices()[pos].onScreenGuide.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].onScreenGuide.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].onScreenGuide.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -412,7 +412,7 @@ bool CmdCatalogue::setDeviceRecordMediaFixedDisc(bool v, uint32_t pos)
         tr("set record media fixed disc"),
         [this, pos]() {return c.getDevices()[pos].recordMediaFixedDisc.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].recordMediaFixedDisc.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].recordMediaFixedDisc.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -424,7 +424,7 @@ bool CmdCatalogue::setDeviceRecordMediaRemovableVideotape(bool v, uint32_t pos)
         tr("set record media removable videotape"),
         [this, pos]() {return c.getDevices()[pos].recordMediaRemovableVideotape.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].recordMediaRemovableVideotape.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].recordMediaRemovableVideotape.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -436,7 +436,7 @@ bool CmdCatalogue::setDeviceRevertInput(bool v, uint32_t pos)
         tr("set revert input"),
         [this, pos]() {return c.getDevices()[pos].revertInput.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].revertInput.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].revertInput.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -448,7 +448,7 @@ bool CmdCatalogue::setDeviceScart(bool v, uint32_t pos)
         tr("set scart"),
         [this, pos]() {return c.getDevices()[pos].scart.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].scart.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].scart.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -460,7 +460,7 @@ bool CmdCatalogue::setDeviceVideoSwitch(bool v, uint32_t pos)
         tr("set video switch"),
         [this, pos]() {return c.getDevices()[pos].videoSwitch.get();},
         [this, pos](
-            const bool &v) {c.getDevices()[pos].videoSwitch.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {c.getDevices()[pos].videoSwitch.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -472,7 +472,7 @@ bool CmdCatalogue::setDeviceNumDiscs(int32_t v, uint32_t pos)
         tr("set number of discs"),
         [this, pos]() {return c.getDevices()[pos].numDiscs.get();},
         [this, pos](
-            const int32_t &v) {c.getDevices()[pos].numDiscs.set(v).setIncluded(Include::ALWAYS);},
+            const int32_t &v) {c.getDevices()[pos].numDiscs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<int32_t>(access);
 }
@@ -484,7 +484,7 @@ bool CmdCatalogue::setDeviceNumLights(int32_t v, uint32_t pos)
         tr("set number of lights"),
         [this, pos]() {return c.getDevices()[pos].numLights.get();},
         [this, pos](
-            const int32_t &v) {c.getDevices()[pos].numLights.set(v).setIncluded(Include::ALWAYS);},
+            const int32_t &v) {c.getDevices()[pos].numLights.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<int32_t>(access);
 }
@@ -496,7 +496,7 @@ bool CmdCatalogue::setDevicePvrType(const Enum<PvrType> &v, uint32_t pos)
         tr("set pvr type"),
         [this, pos]() {return c.getDevices()[pos].pvrType.get();},
         [this, pos](
-            const Enum<PvrType> &v) {c.getDevices()[pos].pvrType.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<PvrType> &v) {c.getDevices()[pos].pvrType.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<PvrType>>(access);
 }
@@ -508,7 +508,7 @@ bool CmdCatalogue::setDeviceTunerInput(const Enum<TunerInput> &v, uint32_t pos)
         tr("set tuner input"),
         [this, pos]() {return c.getDevices()[pos].tunerInput.get();},
         [this, pos](
-            const Enum<TunerInput> &v) {c.getDevices()[pos].tunerInput.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<TunerInput> &v) {c.getDevices()[pos].tunerInput.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<TunerInput>>(access);
 }
@@ -563,7 +563,7 @@ bool CmdCatalogue::setDeviceButtonAction(const string &v, uint32_t devicePos,
         tr("set button device action"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].action.get();},
         [this, devicePos, buttonPos](
-            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].action.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].action.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -576,7 +576,7 @@ bool CmdCatalogue::setDeviceButtonName(const string &v, uint32_t devicePos,
         tr("set button device name"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].name.get();},
         [this, devicePos, buttonPos](
-            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].name.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].name.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -589,7 +589,7 @@ bool CmdCatalogue::setDeviceButtonFile(const string &v, uint32_t devicePos,
         tr("set button device file"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].file.get();},
         [this, devicePos, buttonPos](
-            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].file.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].file.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -602,7 +602,7 @@ bool CmdCatalogue::setDeviceButtonPosition(const int32_t &v, uint32_t devicePos,
         tr("set button device position"),
         [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].position.get();},
         [this, devicePos, buttonPos](
-            const int32_t &v) {c.getDevices()[devicePos].getButtons()[buttonPos].position.set(v).setIncluded(Include::ALWAYS);},
+            const int32_t &v) {c.getDevices()[devicePos].getButtons()[buttonPos].position.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<int32_t>(access);
 }
@@ -648,7 +648,7 @@ bool CmdCatalogue::setDeviceStatemachineType(
         tr("set state machine type"),
         [this, devicePos, smPos]() {return c.getDevices()[devicePos].getStateMachines()[smPos].smType.get();},
         [this, devicePos, smPos](
-            const Enum<StateMachineDeviceType> &v) {c.getDevices()[devicePos].getStateMachines()[smPos].smType.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {c.getDevices()[devicePos].getStateMachines()[smPos].smType.set(v).setIncluded(Used::YES);},
         type };
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
@@ -661,7 +661,7 @@ bool CmdCatalogue::setDeviceStatemachineDelay(uint32_t delayMs,
         tr("set state machine delay"),
         [this, devicePos, smPos]() {return c.getDevices()[devicePos].getStateMachines()[smPos].delayMs.get();},
         [this, devicePos, smPos](
-            const uint32_t &v) {c.getDevices()[devicePos].getStateMachines()[smPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+            const uint32_t &v) {c.getDevices()[devicePos].getStateMachines()[smPos].delayMs.set(v).setIncluded(Used::YES);},
         delayMs };
   return setProperty<uint32_t>(access);
 }
@@ -743,7 +743,7 @@ bool CmdCatalogue::setDeviceSmActionType(const Enum<ActionType> &v,
         tr("set device action type"),
         [this, devicePos, smPos, t, actPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->actionType.get();},
         [this, devicePos, smPos, t, actPos](
-            const Enum<ActionType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->actionType.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<ActionType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->actionType.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<ActionType>>(access);
 }
@@ -757,7 +757,7 @@ bool CmdCatalogue::setDeviceSmActionRepeatWillNotHarm(bool v,
         tr("set device action repeat will not harm"),
         [this, devicePos, smPos, t, actPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->repeatWillNotHarm.get();},
         [this, devicePos, smPos, t, actPos](
-            const bool &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->repeatWillNotHarm.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->repeatWillNotHarm.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -810,7 +810,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceOp(const Enum<Operation> &v,
         tr("set device action sequence opcode"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].opcode.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const Enum<Operation> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].opcode.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Operation> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].opcode.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<Operation>>(access);
 }
@@ -824,7 +824,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceCmd(const string &v,
         tr("set device action sequence cmd"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].cmd.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const string &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].cmd.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].cmd.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -838,7 +838,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceDelayMs(uint32_t v,
         tr("set device action sequence delay ms"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].delayMs.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const uint32_t &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+            const uint32_t &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].delayMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -852,7 +852,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceStateName(
         tr("set device action sequence state name"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const Enum<StateMachineDeviceType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
@@ -866,7 +866,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceStateValue(const string &v,
         tr("set device action sequence state v"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateValue.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const string &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateValue.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateValue.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -880,7 +880,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceMod(const Enum<Modifier> &v,
         tr("set device action sequence modifier"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].mod.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const Enum<Modifier> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].mod.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Modifier> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].mod.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<Modifier>>(access);
 }
@@ -969,7 +969,7 @@ bool CmdCatalogue::setDeviceNumpadFixedDigits(uint32_t v, uint32_t devicePos)
         tr("set numpad fixed digits"),
         [this, devicePos]() {return c.getDevices()[devicePos].getNumpad()->fixedDigits.get();},
         [this, devicePos](
-            const uint32_t &v) {c.getDevices()[devicePos].getNumpad()->fixedDigits.set(v).setIncluded(Include::ALWAYS);},
+            const uint32_t &v) {c.getDevices()[devicePos].getNumpad()->fixedDigits.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -982,7 +982,7 @@ bool CmdCatalogue::setDeviceNumpadActionRepeatWillNotHarm(bool v,
         tr("set device action repeat will not harm"),
         [this, devicePos, s, digit]() {return getActionFromNumpadRef(c, devicePos, s, digit)->repeatWillNotHarm.get();},
         [this, devicePos, s, digit](
-            const bool &v) {getActionFromNumpadRef(c, devicePos, s, digit)->repeatWillNotHarm.set(v).setIncluded(Include::ALWAYS);},
+            const bool &v) {getActionFromNumpadRef(c, devicePos, s, digit)->repeatWillNotHarm.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<bool>(access);
 }
@@ -1032,7 +1032,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceOp(const Enum<Operation> &v,
         tr("set device action sequence opcode"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].opcode.get();},
         [this, devicePos, s, digit, seqPos](
-            const Enum<Operation> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].opcode.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Operation> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].opcode.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<Operation>>(access);
 }
@@ -1045,7 +1045,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceCmd(const std::string &v,
         tr("set device action sequence cmd"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].cmd.get();},
         [this, devicePos, s, digit, seqPos](
-            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].cmd.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].cmd.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1058,7 +1058,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceDelayMs(uint32_t v,
         tr("set device action sequence delay ms"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].delayMs.get();},
         [this, devicePos, s, digit, seqPos](
-            const uint32_t &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+            const uint32_t &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].delayMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1072,7 +1072,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceStateName(
         tr("set device action sequence state name"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.get();},
         [this, devicePos, s, digit, seqPos](
-            const Enum<StateMachineDeviceType> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
@@ -1085,7 +1085,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceStateValue(const std::string &v,
         tr("set device action sequence state value"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.get();},
         [this, devicePos, s, digit, seqPos](
-            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1098,7 +1098,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceMod(const Enum<Modifier> &v,
         tr("set device action sequence modifier"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].mod.get();},
         [this, devicePos, s, digit, seqPos](
-            const Enum<Modifier> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].mod.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Modifier> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].mod.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<Modifier>>(access);
 }
@@ -1121,7 +1121,7 @@ bool CmdCatalogue::setIrPressPreSilenceMs(uint32_t v, uint32_t devicePos)
         tr("set ir press pre silence ms"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().pressPreSilenceMs.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().pressPreSilenceMs.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().pressPreSilenceMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1133,7 +1133,7 @@ bool CmdCatalogue::setIrPressInterKeyMs(uint32_t v, uint32_t devicePos)
         tr("set ir press inter key ms"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().pressInterKeyMs.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().pressInterKeyMs.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().pressInterKeyMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1145,7 +1145,7 @@ bool CmdCatalogue::setIrHoldPreSilenceMs(uint32_t v, uint32_t devicePos)
         tr("set ir hold pre silence key ms"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().holdPreSilenceMs.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().holdPreSilenceMs.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().holdPreSilenceMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1157,7 +1157,7 @@ bool CmdCatalogue::setIrHoldInterKeyMs(uint32_t v, uint32_t devicePos)
         tr("set ir hold inter key ms"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().holdInterKeyMs.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().holdInterKeyMs.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().holdInterKeyMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1169,7 +1169,7 @@ bool CmdCatalogue::setIrCodeType(const Enum<CodeType> &v, uint32_t devicePos)
         tr("set ir command code type"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().codeType.get();},
         [this, devicePos](
-            const Enum<CodeType> &v) {c.getDevices()[devicePos].getIrCommands().codeType.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<CodeType> &v) {c.getDevices()[devicePos].getIrCommands().codeType.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<CodeType>>(access);
 }
@@ -1181,7 +1181,7 @@ bool CmdCatalogue::setIrCodeField0(uint32_t v, uint32_t devicePos)
         tr("set ir f0"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().field0.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field0.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field0.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1193,7 +1193,7 @@ bool CmdCatalogue::setIrCodeField1(uint32_t v, uint32_t devicePos)
         tr("set ir f1"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().field1.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field1.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field1.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1205,7 +1205,7 @@ bool CmdCatalogue::setIrCodeField2(uint32_t v, uint32_t devicePos)
         tr("set ir f2"),
         [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().field2.get();},
         [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field2.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field2.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1335,7 +1335,7 @@ bool CmdCatalogue::setActivityType(const Enum<ActivityType> &v, uint32_t pos)
         tr("set device type"),
         [this, pos]() {return c.getActivities()[pos].type.get();},
         [this, pos](
-            const Enum<ActivityType> &v) {c.getActivities()[pos].type.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<ActivityType> &v) {c.getActivities()[pos].type.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<ActivityType>>(access);
 }
@@ -1347,7 +1347,7 @@ bool CmdCatalogue::setActivityLabel(const QString &v, uint32_t pos)
         tr("set label"),
         [this, pos]() {return c.getActivities()[pos].label.get();},
         [this, pos](
-            const string &v) {c.getActivities()[pos].label.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getActivities()[pos].label.set(v).setIncluded(Used::YES);},
         v.toStdString() };
   return setProperty<string>(access);
 }
@@ -1358,7 +1358,7 @@ bool CmdCatalogue::setActivityPvrType(const Enum<ActivityStartPage> &v,
   PropertyAccess<Enum<ActivityStartPage>> access = { tr("set pvr type"), [this,
       pos]() {return c.getActivities()[pos].pvrType.get();}, [this, pos](
       const Enum<ActivityStartPage> &v) {
-        c.getActivities()[pos].pvrType.set(v).setIncluded(Include::ALWAYS);
+        c.getActivities()[pos].pvrType.set(v).setIncluded(Used::YES);
       }, v };
 
   return setProperty<Enum<ActivityStartPage>>(access);
@@ -1372,7 +1372,7 @@ bool CmdCatalogue::setActivityControlGroupHardButtons(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].controlGroup_HardButtons.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].controlGroup_HardButtons.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].controlGroup_HardButtons.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1387,7 +1387,7 @@ bool CmdCatalogue::setActivityPowerOffUnusedDevices(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].powerOffUnusedDevices.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].powerOffUnusedDevices.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].powerOffUnusedDevices.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1400,7 +1400,7 @@ bool CmdCatalogue::setActivityTrainingWheels(bool v, uint32_t pos)
     tr("set training wheels"),
     [this, pos]() {return c.getActivities()[pos].trainingWheels.get();},
     [this, pos](const bool &v) {
-      c.getActivities()[pos].trainingWheels.set(v).setIncluded(Include::ALWAYS);
+      c.getActivities()[pos].trainingWheels.set(v).setIncluded(Used::YES);
     },
     v };
 
@@ -1415,7 +1415,7 @@ bool CmdCatalogue::setActivityUnusedDevicesHelp(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].unusedDevicesHelp.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].unusedDevicesHelp.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].unusedDevicesHelp.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1431,7 +1431,7 @@ bool CmdCatalogue::setActivityChannelButtonBehaviour(
         [this, pos]() {return c.getActivities()[pos].channelButtonBehaviour.get();},
         [this, pos](
             const Enum<ChannelButtonBehaviour> &v) {
-              c.getActivities()[pos].channelButtonBehaviour.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].channelButtonBehaviour.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1446,7 +1446,7 @@ bool CmdCatalogue::setActivityControlGroupSoftButtons(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].controlGroup_SoftButtons.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].controlGroup_SoftButtons.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].controlGroup_SoftButtons.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1461,7 +1461,7 @@ bool CmdCatalogue::setActivityEnableSmartMenu(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].enableSmartMenu.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].enableSmartMenu.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].enableSmartMenu.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1476,7 +1476,7 @@ bool CmdCatalogue::setActivityEnableSmartZoom(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].enableSmartZoom.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].enableSmartZoom.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].enableSmartZoom.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1492,7 +1492,7 @@ bool CmdCatalogue::setActivityGuideButtonMode(const Enum<GuideButtonMode> &v,
         [this, pos]() {return c.getActivities()[pos].guideButtonMode.get();},
         [this, pos](
             const Enum<GuideButtonMode> &v) {
-              c.getActivities()[pos].guideButtonMode.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].guideButtonMode.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1507,7 +1507,7 @@ bool CmdCatalogue::setActivityHideModeControl(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideModeControl.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideModeControl.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideModeControl.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1520,7 +1520,7 @@ bool CmdCatalogue::setActivityHideModeListen(bool v, uint32_t pos)
     tr("set hide mode listen"),
     [this, pos]() {return c.getActivities()[pos].hideModeListen.get();},
     [this, pos](const bool &v) {
-      c.getActivities()[pos].hideModeListen.set(v).setIncluded(Include::ALWAYS);
+      c.getActivities()[pos].hideModeListen.set(v).setIncluded(Used::YES);
     },
     v };
 
@@ -1535,7 +1535,7 @@ bool CmdCatalogue::setActivityHideModeNavigate(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideModeNavigate.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideModeNavigate.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideModeNavigate.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1548,7 +1548,7 @@ bool CmdCatalogue::setActivityHideModePlay(bool v, uint32_t pos)
     tr("set hide mode play"),
     [this, pos]() {return c.getActivities()[pos].hideModePlay.get();},
     [this, pos](const bool &v) {
-      c.getActivities()[pos].hideModePlay.set(v).setIncluded(Include::ALWAYS);
+      c.getActivities()[pos].hideModePlay.set(v).setIncluded(Used::YES);
     },
     v };
 
@@ -1563,7 +1563,7 @@ bool CmdCatalogue::setActivityHideModePlayMode(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideModePlayMode.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideModePlayMode.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideModePlayMode.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1578,7 +1578,7 @@ bool CmdCatalogue::setActivityHideSurfAllChannels(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideSurfAllChannels.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideSurfAllChannels.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideSurfAllChannels.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1593,7 +1593,7 @@ bool CmdCatalogue::setActivityHideSurfAllShows(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideSurfAllShows.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideSurfAllShows.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideSurfAllShows.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1608,7 +1608,7 @@ bool CmdCatalogue::setActivityHideSurfFavoriteChannels(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideSurfFavoriteChannels.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideSurfFavoriteChannels.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideSurfFavoriteChannels.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1623,7 +1623,7 @@ bool CmdCatalogue::setActivityHideSurfFavoriteShows(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].hideSurfFavoriteShows.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].hideSurfFavoriteShows.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].hideSurfFavoriteShows.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1638,7 +1638,7 @@ bool CmdCatalogue::setActivityMaxTvContentDays(int32_t v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].maxTvContentDays.get();},
         [this, pos](
             const int32_t &v) {
-              c.getActivities()[pos].maxTvContentDays.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].maxTvContentDays.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1654,7 +1654,7 @@ bool CmdCatalogue::setActivityMediaButtonMode(const Enum<MediaButtonMode> &v,
         [this, pos]() {return c.getActivities()[pos].mediaButtonMode.get();},
         [this, pos](
             const Enum<MediaButtonMode> &v) {
-              c.getActivities()[pos].mediaButtonMode.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].mediaButtonMode.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1667,7 +1667,7 @@ bool CmdCatalogue::setActivityPlayOnEnter(bool v, uint32_t pos)
     tr("set play on enter"),
     [this, pos]() {return c.getActivities()[pos].playOnEnter.get();},
     [this, pos](const bool &v) {
-      c.getActivities()[pos].playOnEnter.set(v).setIncluded(Include::ALWAYS);
+      c.getActivities()[pos].playOnEnter.set(v).setIncluded(Used::YES);
     },
     v };
 
@@ -1680,7 +1680,7 @@ bool CmdCatalogue::setActivityRetainStop(bool v, uint32_t pos)
     tr("set retain stop"),
     [this, pos]() {return c.getActivities()[pos].retainStop.get();},
     [this, pos](const bool &v) {
-      c.getActivities()[pos].retainStop.set(v).setIncluded(Include::ALWAYS);
+      c.getActivities()[pos].retainStop.set(v).setIncluded(Used::YES);
     },
     v };
 
@@ -1695,7 +1695,7 @@ bool CmdCatalogue::setActivityScrollChannelsByPage(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].scrollChannelsByPage.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].scrollChannelsByPage.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].scrollChannelsByPage.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1710,7 +1710,7 @@ bool CmdCatalogue::setActivityScrollShowsByPage(bool v, uint32_t pos)
         [this, pos]() {return c.getActivities()[pos].scrollShowsByPage.get();},
         [this, pos](
             const bool &v) {
-              c.getActivities()[pos].scrollShowsByPage.set(v).setIncluded(Include::ALWAYS);
+              c.getActivities()[pos].scrollShowsByPage.set(v).setIncluded(Used::YES);
             },
         v };
 
@@ -1723,7 +1723,7 @@ bool CmdCatalogue::setActivityStopOnExit(bool v, uint32_t pos)
     tr("set stop on exit"),
     [this, pos]() {return c.getActivities()[pos].stopOnExit.get();},
     [this, pos](const bool &v) {
-      c.getActivities()[pos].stopOnExit.set(v).setIncluded(Include::ALWAYS);
+      c.getActivities()[pos].stopOnExit.set(v).setIncluded(Used::YES);
     },
     v };
 
@@ -1780,7 +1780,7 @@ bool CmdCatalogue::setActivityChannelStation(const std::string &v,
         tr("set button activity station name"),
         [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].station.get();},
         [this, activityPos, chPos](
-            const string &v) {c.getActivities()[activityPos].getChannels()[chPos].station.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getActivities()[activityPos].getChannels()[chPos].station.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1793,7 +1793,7 @@ bool CmdCatalogue::setActivityChannelNumber(const uint32_t v,
         tr("set button activity channel number"),
         [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].channel.get();},
         [this, activityPos, chPos](
-            uint32_t v) {c.getActivities()[activityPos].getChannels()[chPos].channel.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getActivities()[activityPos].getChannels()[chPos].channel.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1806,7 +1806,7 @@ bool CmdCatalogue::setActivityChannelPosition(const uint32_t v,
         tr("set button activity channel button position"),
         [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].position.get();},
         [this, activityPos, chPos](
-            uint32_t v) {c.getActivities()[activityPos].getChannels()[chPos].position.set(v).setIncluded(Include::ALWAYS);},
+            uint32_t v) {c.getActivities()[activityPos].getChannels()[chPos].position.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -1819,7 +1819,7 @@ bool CmdCatalogue::setActivityChannelImage(const std::string &v,
         tr("set button activity channel button image"),
         [this, activityPos, chPos]() {return c.getActivities()[activityPos].getChannels()[chPos].img.get();},
         [this, activityPos, chPos](
-            const string &v) {c.getActivities()[activityPos].getChannels()[chPos].img.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getActivities()[activityPos].getChannels()[chPos].img.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1866,7 +1866,7 @@ bool CmdCatalogue::setActivityButtonAction(const string &v,
         tr("set button activity action"),
         [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].action.get();},
         [this, activityPos, buttonPos](
-            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].action.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].action.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1879,7 +1879,7 @@ bool CmdCatalogue::setActivityButtonName(const string &v, uint32_t activityPos,
         tr("set button activity name"),
         [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].name.get();},
         [this, activityPos, buttonPos](
-            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].name.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].name.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1892,7 +1892,7 @@ bool CmdCatalogue::setActivityButtonFile(const string &v, uint32_t activityPos,
         tr("set button activity file"),
         [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].file.get();},
         [this, activityPos, buttonPos](
-            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].file.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].file.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -1905,7 +1905,7 @@ bool CmdCatalogue::setActivityButtonPosition(const int32_t &v,
         tr("set button activity position"),
         [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].position.get();},
         [this, activityPos, buttonPos](
-            const int32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].position.set(v).setIncluded(Include::ALWAYS);},
+            const int32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].position.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<int32_t>(access);
 }
@@ -1991,7 +1991,7 @@ bool CmdCatalogue::setActivityActionSequenceOp(const Enum<Operation> &v,
         tr("set activity action sequence opcode"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const Enum<Operation> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Operation> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<Operation>>(access);
 }
@@ -2005,7 +2005,7 @@ bool CmdCatalogue::setActivityActionSequenceCmd(const std::string &v,
         tr("set activity action cmd"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -2019,7 +2019,7 @@ bool CmdCatalogue::setActivityActionSequenceDeviceId(uint32_t v,
         tr("set activity action controlled device id"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.set(v).setIncluded(Include::ALWAYS);},
+            const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -2033,7 +2033,7 @@ bool CmdCatalogue::setActivityActionSequenceDelayMs(uint32_t v,
         tr("set activity action delay"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.set(v).setIncluded(Include::ALWAYS);},
+            const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<uint32_t>(access);
 }
@@ -2047,7 +2047,7 @@ bool CmdCatalogue::setActivityActionSequenceStateName(
         tr("set activity action state name"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const Enum<StateMachineDeviceType> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
@@ -2061,7 +2061,7 @@ bool CmdCatalogue::setActivityActionSequenceStateValue(const std::string &v,
         tr("set activity action state value"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.set(v).setIncluded(Include::ALWAYS);},
+            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<string>(access);
 }
@@ -2075,7 +2075,7 @@ bool CmdCatalogue::setActivityActionSequenceMod(const Enum<Modifier> &v,
         tr("set activity action state modifier"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const Enum<Modifier> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<Modifier> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.set(v).setIncluded(Used::YES);},
         v };
   return setProperty<Enum<Modifier>>(access);
 }
