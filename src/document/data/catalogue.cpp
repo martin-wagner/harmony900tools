@@ -640,17 +640,17 @@ bool CmdCatalogue::removeDeviceStatemachineCommand(uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setDeviceStatemachineType(const Enum<StateMachineType> &type,
-    uint32_t devicePos, int smPos)
+bool CmdCatalogue::setDeviceStatemachineType(
+    const Enum<StateMachineDeviceType> &type, uint32_t devicePos, int smPos)
 {
-  PropertyAccess<Enum<StateMachineType>> access =
+  PropertyAccess<Enum<StateMachineDeviceType>> access =
       {
         tr("set state machine type"),
         [this, devicePos, smPos]() {return c.getDevices()[devicePos].getStateMachines()[smPos].smType.get();},
         [this, devicePos, smPos](
-            const Enum<StateMachineType> &v) {c.getDevices()[devicePos].getStateMachines()[smPos].smType.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {c.getDevices()[devicePos].getStateMachines()[smPos].smType.set(v).setIncluded(Include::ALWAYS);},
         type };
-  return setProperty<Enum<StateMachineType>>(access);
+  return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
 bool CmdCatalogue::setDeviceStatemachineDelay(uint32_t delayMs,
@@ -667,7 +667,7 @@ bool CmdCatalogue::setDeviceStatemachineDelay(uint32_t delayMs,
 }
 
 bool CmdCatalogue::addDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos,
-    item::StateTransitionType t, const QString &name, int actPos)
+    item::StateMachineType t, const QString &name, int actPos)
 {
   auto *cmd = new AddStateCommand(c, devicePos, smPos, name, t, actPos);
   auto ret = cmd->valid();
@@ -684,7 +684,7 @@ bool CmdCatalogue::addDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos,
 }
 
 bool CmdCatalogue::addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos,
-    item::StateTransitionAction t)
+    item::StateMachineAction t)
 {
   auto *cmd = new AddActionCommand(c, devicePos, smPos, t);
   auto ret = cmd->valid();
@@ -701,7 +701,7 @@ bool CmdCatalogue::addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos,
 }
 
 bool CmdCatalogue::removeDeviceSmStateCommand(uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionType t, int actPos)
+    uint32_t smPos, item::StateMachineType t, int actPos)
 {
   auto *cmd = new RemoveStateCommand(c, devicePos, smPos, t, actPos);
   auto ret = cmd->valid();
@@ -718,7 +718,7 @@ bool CmdCatalogue::removeDeviceSmStateCommand(uint32_t devicePos,
 }
 
 bool CmdCatalogue::removeDeviceSmActionCommand(uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t)
+    uint32_t smPos, item::StateMachineAction t)
 {
   auto *cmd = new RemoveActionCommand(c, devicePos, smPos, t);
   auto ret = cmd->valid();
@@ -735,7 +735,7 @@ bool CmdCatalogue::removeDeviceSmActionCommand(uint32_t devicePos,
 }
 
 bool CmdCatalogue::setDeviceSmActionType(const Enum<ActionType> &v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos)
 {
   PropertyAccess<Enum<ActionType>> access =
@@ -749,7 +749,7 @@ bool CmdCatalogue::setDeviceSmActionType(const Enum<ActionType> &v,
 }
 
 bool CmdCatalogue::setDeviceSmActionRepeatWillNotHarm(bool v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos)
 {
   PropertyAccess<bool> access =
@@ -763,7 +763,7 @@ bool CmdCatalogue::setDeviceSmActionRepeatWillNotHarm(bool v,
 }
 
 bool CmdCatalogue::addDeviceStateActionSequenceCommand(uint32_t devicePos,
-    uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos)
+    uint32_t smPos, uint32_t actPos, item::StateMachineAction t, int seqPos)
 {
   auto *cmd = new AddActionSequenceCommand(c, devicePos, smPos, actPos, t,
       seqPos);
@@ -782,7 +782,7 @@ bool CmdCatalogue::addDeviceStateActionSequenceCommand(uint32_t devicePos,
 }
 
 bool CmdCatalogue::removeDeviceStateActionSequenceCommand(uint32_t devicePos,
-    uint32_t smPos, uint32_t actPos, item::StateTransitionAction t,
+    uint32_t smPos, uint32_t actPos, item::StateMachineAction t,
     uint32_t seqPos)
 {
   auto *cmd = new RemoveDeviceActionSequenceCommand(c, devicePos, smPos, actPos,
@@ -802,7 +802,7 @@ bool CmdCatalogue::removeDeviceStateActionSequenceCommand(uint32_t devicePos,
 }
 
 bool CmdCatalogue::setDeviceStateActionSequenceOp(const Enum<Operation> &v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos, uint32_t seqPos)
 {
   PropertyAccess<Enum<Operation>> access =
@@ -816,7 +816,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceOp(const Enum<Operation> &v,
 }
 
 bool CmdCatalogue::setDeviceStateActionSequenceCmd(const string &v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos, uint32_t seqPos)
 {
   PropertyAccess<string> access =
@@ -830,7 +830,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceCmd(const string &v,
 }
 
 bool CmdCatalogue::setDeviceStateActionSequenceDelayMs(uint32_t v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos, uint32_t seqPos)
 {
   PropertyAccess<uint32_t> access =
@@ -844,21 +844,21 @@ bool CmdCatalogue::setDeviceStateActionSequenceDelayMs(uint32_t v,
 }
 
 bool CmdCatalogue::setDeviceStateActionSequenceStateName(
-    const Enum<StateMachineType> &v, uint32_t devicePos, uint32_t smPos,
-    item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
+    const Enum<StateMachineDeviceType> &v, uint32_t devicePos, uint32_t smPos,
+    item::StateMachineAction t, uint32_t actPos, uint32_t seqPos)
 {
-  PropertyAccess<Enum<StateMachineType>> access =
+  PropertyAccess<Enum<StateMachineDeviceType>> access =
       {
         tr("set device action sequence state name"),
         [this, devicePos, smPos, t, actPos, seqPos]() {return getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.get();},
         [this, devicePos, smPos, t, actPos, seqPos](
-            const Enum<StateMachineType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {getActionFromSmRef(c, devicePos, smPos, t, actPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
         v };
-  return setProperty<Enum<StateMachineType>>(access);
+  return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
 bool CmdCatalogue::setDeviceStateActionSequenceStateValue(const string &v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos, uint32_t seqPos)
 {
   PropertyAccess<string> access =
@@ -872,7 +872,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceStateValue(const string &v,
 }
 
 bool CmdCatalogue::setDeviceStateActionSequenceMod(const Enum<Modifier> &v,
-    uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos, uint32_t seqPos)
 {
   PropertyAccess<Enum<Modifier>> access =
@@ -887,7 +887,7 @@ bool CmdCatalogue::setDeviceStateActionSequenceMod(const Enum<Modifier> &v,
 
 bool CmdCatalogue::setDeviceStateActionUnknownParam(
     const data::item::UnknownElement &v, uint32_t devicePos, uint32_t smPos,
-    item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos)
+    item::StateMachineAction t, uint32_t actPos, uint32_t seqPos)
 {
   auto *cmd = new SetDeviceStateActionUnknownParamCommand(c, v, devicePos,
       smPos, actPos, t, seqPos);
@@ -1064,17 +1064,17 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceDelayMs(uint32_t v,
 }
 
 bool CmdCatalogue::setDeviceNumpadActionSequenceStateName(
-    const Enum<StateMachineType> &v, uint32_t devicePos, item::DigitSection s,
-    uint32_t digit, uint32_t seqPos)
+    const Enum<StateMachineDeviceType> &v, uint32_t devicePos,
+    item::DigitSection s, uint32_t digit, uint32_t seqPos)
 {
-  PropertyAccess<Enum<StateMachineType>> access =
+  PropertyAccess<Enum<StateMachineDeviceType>> access =
       {
         tr("set device action sequence state name"),
         [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.get();},
         [this, devicePos, s, digit, seqPos](
-            const Enum<StateMachineType> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
         v };
-  return setProperty<Enum<StateMachineType>>(access);
+  return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
 bool CmdCatalogue::setDeviceNumpadActionSequenceStateValue(const std::string &v,
@@ -2039,17 +2039,17 @@ bool CmdCatalogue::setActivityActionSequenceDelayMs(uint32_t v,
 }
 
 bool CmdCatalogue::setActivityActionSequenceStateName(
-    const Enum<StateMachineType> &v, uint32_t activityPos,
+    const Enum<StateMachineDeviceType> &v, uint32_t activityPos,
     item::ActivityAction t, int actionPos, uint32_t seqPos)
 {
-  PropertyAccess<Enum<StateMachineType>> access =
+  PropertyAccess<Enum<StateMachineDeviceType>> access =
       {
         tr("set activity action state name"),
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const Enum<StateMachineType> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
+            const Enum<StateMachineDeviceType> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.set(v).setIncluded(Include::ALWAYS);},
         v };
-  return setProperty<Enum<StateMachineType>>(access);
+  return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
 bool CmdCatalogue::setActivityActionSequenceStateValue(const std::string &v,

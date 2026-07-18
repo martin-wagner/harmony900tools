@@ -61,16 +61,16 @@ class ConfigH900 : public QObject
     bool readStatemachine(pugi::xml_node &state);
     bool readStartAction(pugi::xml_node &state);
     bool readFinishAction(pugi::xml_node &state);
-    bool readGeneralAction(pugi::xml_node &action, data::item::StateTransitionAction t);
+    bool readGeneralAction(pugi::xml_node &action, data::item::StateMachineAction t);
     bool readDiscreteActions(pugi::xml_node &actions);
     bool readDiscreteAction(pugi::xml_node &action);
     bool readDiscreteActionSequences(pugi::xml_node &action);
     bool readDiscreteActionSequence(pugi::xml_node &sequence);
     bool readRelativeActions(pugi::xml_node &state);
     bool readRelativeAction(pugi::xml_node &action);
-    bool readRelativeActionSequences(pugi::xml_node &action, data::item::StateTransitionAction t);
-    bool readRelativeActionSequence(pugi::xml_node &sequence, data::item::StateTransitionAction t);
-    bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, uint32_t smPos, uint32_t actPos, data::item::StateTransitionAction t, uint32_t seqPos);
+    bool readRelativeActionSequences(pugi::xml_node &action, data::item::StateMachineAction t);
+    bool readRelativeActionSequence(pugi::xml_node &sequence, data::item::StateMachineAction t);
+    bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, uint32_t smPos, uint32_t actPos, data::item::StateMachineAction t, uint32_t seqPos);
     bool readNumeric(pugi::xml_node &numeric);
     bool readNumericActions(pugi::xml_node &actions, data::item::DigitSection s);
     bool readNumericActionSequences(pugi::xml_node &action, uint32_t devicePos, data::item::DigitSection s, uint32_t digit);
@@ -92,9 +92,6 @@ class ConfigH900 : public QObject
     bool readActivityRole(pugi::xml_node &role);
     bool readActivityPowerStateDevices(pugi::xml_node &power);
 
-    bool readProtocols(pugi::xml_node &root);
-    bool readProtocol(pugi::xml_node &protocol);
-
     data::item::UnknownElement toUnknownElement(const pugi::xml_node& node);
     void addId(uint32_t id);
 
@@ -114,7 +111,7 @@ class ConfigH900 : public QObject
     bool writeStatemachine(pugi::xml_node &state, uint32_t deviceId, const data::item::StateMachine &data);
     bool writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId, const data::item::DiscreteActions &data);
     bool writeRelativeActions(pugi::xml_node &action, uint32_t deviceId, const data::item::RelativeActions &data);
-    bool writeDeviceAction(pugi::xml_node &actionType, uint32_t deviceId, const data::item::DeviceAction &data, data::item::StateTransitionType t);
+    bool writeDeviceAction(pugi::xml_node &actionType, uint32_t deviceId, const data::item::DeviceAction &data, data::item::StateMachineType t);
     bool writeNumeric(pugi::xml_node &numeric, uint32_t deviceId, const data::item::Numpad &data);
     bool writeNumericActions(pugi::xml_node &action, uint32_t deviceId, const data::item::Digits &data);
     bool writeIrList(pugi::xml_node &commands, const data::item::Commands &data);

@@ -24,7 +24,7 @@ class SequenceItem {
     PropertyString cmd{"", Include::CHECK};
     PropertyU32 deviceId{0, Include::CHECK}; //device -- not needed (id of parent, redundant); activity -- referenced device
     PropertyU32 delayMs{1000, Include::CHECK};
-    PropertyEnum<StateMachineType> stateName{StateMachineType::Unknown, Include::CHECK};
+    PropertyEnum<StateMachineDeviceType> stateName{StateMachineDeviceType::Unknown, Include::CHECK};
     PropertyString stateValue{"", Include::CHECK};
     PropertyEnum<Modifier> mod{Modifier::Press, Include::CHECK};
 

@@ -31,7 +31,7 @@ enum class TunerInput { Tuner, Unknown };
 enum class DeviceType { Amplifier, AudioVideoSwitch, Cd, ClimateControl, Computer, DvdCd,
     DvdCdGame, DvdCdRadio, GameConsole, Light, MediaCenterPC, Projector, Pvr, Receiver,
     SetTopBox, Television, Vcr, Unknown };
-enum class StateMachineType { Power, Input, Screen, TVInput, AntennaOutput, Unknown };
+enum class StateMachineDeviceType { Power, Input, Screen, TVInput, AntennaOutput, Unknown };
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };
@@ -106,7 +106,7 @@ template class Enum<TimeFormat>;
 template class Enum<PvrType>;
 template class Enum<TunerInput>;
 template class Enum<DeviceType>;
-template class Enum<StateMachineType>;
+template class Enum<StateMachineDeviceType>;
 template class Enum<ActionType>;
 template class Enum<Operation>;
 template class Enum<Modifier>;

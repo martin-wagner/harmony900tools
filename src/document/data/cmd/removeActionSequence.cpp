@@ -12,7 +12,7 @@ namespace data
 
 RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
     ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos,
-    item::StateTransitionAction t, uint32_t seqPos, QUndoCommand *parent) :
+    item::StateMachineAction t, uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Remove Sequence from Action/SM (device: %1)").arg(
             devicePos), parent)

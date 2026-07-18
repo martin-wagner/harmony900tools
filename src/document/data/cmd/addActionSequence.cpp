@@ -12,7 +12,7 @@ namespace data
 
 AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
     uint32_t devicePos, uint32_t smPos, uint32_t actPos,
-    item::StateTransitionAction t, int seqPos, QUndoCommand *parent) :
+    item::StateMachineAction t, int seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Add Sequence to Action/SM (to device: %1)").arg(devicePos),
         parent)

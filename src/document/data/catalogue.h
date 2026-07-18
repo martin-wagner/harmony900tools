@@ -94,25 +94,25 @@ class CmdCatalogue : public QObject
     //state machines
     bool addDeviceStatemachineCommand(uint32_t devicePos, int smPos);
     bool removeDeviceStatemachineCommand(uint32_t devicePos, int smPos);
-    bool setDeviceStatemachineType(const Enum<StateMachineType> &type,  uint32_t devicePos, int smPos);
+    bool setDeviceStatemachineType(const Enum<StateMachineDeviceType> &type,  uint32_t devicePos, int smPos);
     bool setDeviceStatemachineDelay(uint32_t delayMs, uint32_t devicePos, int smPos);
     //state machine states/actions
-    bool addDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos, item::StateTransitionType t, const QString &name, int actPos);
-    bool addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t);
-    bool removeDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos, item::StateTransitionType t, int actPos);
-    bool removeDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t);
-    bool setDeviceSmActionType(const Enum<ActionType> &v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos);
-    bool setDeviceSmActionRepeatWillNotHarm(bool v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos);
+    bool addDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineType t, const QString &name, int actPos);
+    bool addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineAction t);
+    bool removeDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineType t, int actPos);
+    bool removeDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineAction t);
+    bool setDeviceSmActionType(const Enum<ActionType> &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos);
+    bool setDeviceSmActionRepeatWillNotHarm(bool v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos);
     //state machine action list items
-    bool addDeviceStateActionSequenceCommand(uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos); //only discrete actions can add/remove
-    bool removeDeviceStateActionSequenceCommand(uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, uint32_t seqPos); //only discrete actions can add/remove
-    bool setDeviceStateActionSequenceOp(const Enum<Operation> &v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionSequenceCmd(const std::string &v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionSequenceDelayMs(uint32_t v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionSequenceStateName(const Enum<StateMachineType> &v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionSequenceStateValue(const std::string &v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionSequenceMod(const Enum<Modifier> &v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
-    bool setDeviceStateActionUnknownParam(const data::item::UnknownElement& v, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t, uint32_t actPos, uint32_t seqPos);
+    bool addDeviceStateActionSequenceCommand(uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateMachineAction t, int seqPos); //only discrete actions can add/remove
+    bool removeDeviceStateActionSequenceCommand(uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateMachineAction t, uint32_t seqPos); //only discrete actions can add/remove
+    bool setDeviceStateActionSequenceOp(const Enum<Operation> &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionSequenceCmd(const std::string &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionSequenceDelayMs(uint32_t v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionSequenceStateValue(const std::string &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionSequenceMod(const Enum<Modifier> &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
+    bool setDeviceStateActionUnknownParam(const data::item::UnknownElement& v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, uint32_t seqPos);
     //numpad
     bool addDeviceNumpadCommand(uint32_t devicePos);
     bool removeDeviceNumpadCommand(uint32_t devicePos);
@@ -127,7 +127,7 @@ class CmdCatalogue : public QObject
     bool setDeviceNumpadActionSequenceOp(const Enum<Operation> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceCmd(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceDelayMs(uint32_t v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceStateName(const Enum<StateMachineType> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceStateValue(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceMod(const Enum<Modifier> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
@@ -202,7 +202,7 @@ class CmdCatalogue : public QObject
     bool setActivityActionSequenceCmd(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceDeviceId(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceDelayMs(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceStateName(const Enum<StateMachineType> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceStateValue(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceMod(const Enum<Modifier> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionUnknownParam(const data::item::UnknownElement& v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);

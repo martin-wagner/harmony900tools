@@ -17,7 +17,7 @@ class RemoveDeviceActionSequenceCommand: public BaseCommand
   public:
     //remove item from sm action
     //device -- discrete action
-    RemoveDeviceActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, uint32_t seqPos, QUndoCommand *parent = nullptr);
+    RemoveDeviceActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateMachineAction t, uint32_t seqPos, QUndoCommand *parent = nullptr);
 
     //remove item from num action
     RemoveDeviceActionSequenceCommand(ConfigData &c, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos, QUndoCommand *parent = nullptr);

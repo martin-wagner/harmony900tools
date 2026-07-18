@@ -10,35 +10,35 @@ namespace data
 {
 
 inline item::DeviceAction* getActionFromSmRef(ConfigData &c, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t, uint32_t actPos)
+    uint32_t smPos, item::StateMachineAction t, uint32_t actPos)
 {
   try {
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
 
     switch (t) {
-      case item::StateTransitionAction::Start:
+      case item::StateMachineAction::Start:
         if (sm.startAction.has_value()) {
           return &sm.startAction.value();
         }
         break;
-      case item::StateTransitionAction::Finish:
+      case item::StateMachineAction::Finish:
         if (sm.finishAction.has_value()) {
           return &sm.finishAction.value();
         }
         break;
-      case item::StateTransitionAction::Discrete_Enter:
+      case item::StateMachineAction::Discrete_Enter:
         return &sm.discrete.enterStateAction.at(actPos);
-      case item::StateTransitionAction::Relative_Reset:
+      case item::StateMachineAction::Relative_Reset:
         if (sm.relative.resetAction.has_value()) {
           return &sm.relative.resetAction.value();
         }
         break;
-      case item::StateTransitionAction::Relative_Next:
+      case item::StateMachineAction::Relative_Next:
         if (sm.relative.nextStateAction.has_value()) {
           return &sm.relative.nextStateAction.value();
         }
         break;
-      case item::StateTransitionAction::Relative_Prev:
+      case item::StateMachineAction::Relative_Prev:
         if (sm.relative.prevStateAction.has_value()) {
           return &sm.relative.prevStateAction.value();
         }

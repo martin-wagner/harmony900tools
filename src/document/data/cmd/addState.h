@@ -14,7 +14,7 @@ class AddStateCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    AddStateCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, const QString &name, item::StateTransitionType t, int actPos = -1, QUndoCommand *parent = nullptr);
+    AddStateCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, const QString &name, item::StateMachineType t, int actPos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -27,7 +27,7 @@ class AddStateCommand: public BaseCommand
     ConfigData &c;
     uint32_t devicePos;
     uint32_t smPos;
-    item::StateTransitionType t;
+    item::StateMachineType t;
     int actPos;
     std::string name = "";
 };
@@ -38,7 +38,7 @@ class AddActionCommand: public BaseCommand
   public:
     //for state machine actions "start", "finish" that are applicable for all states
     //for relative state machine, actions are indipendent of states, therefore must be added seperately
-    AddActionCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,  QUndoCommand *parent = nullptr);
+    AddActionCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,  QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -51,7 +51,7 @@ class AddActionCommand: public BaseCommand
     ConfigData &c;
     uint32_t devicePos;
     uint32_t smPos;
-    item::StateTransitionAction t;
+    item::StateMachineAction t;
 };
 
 }

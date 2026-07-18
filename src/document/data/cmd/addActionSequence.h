@@ -19,7 +19,7 @@ class AddActionSequenceCommand: public BaseCommand
     //add item to sm action
     //pos -1 = append
     //device -- discrete action
-    AddActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateTransitionAction t, int seqPos = -1, QUndoCommand *parent = nullptr);
+    AddActionSequenceCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, uint32_t actPos, item::StateMachineAction t, int seqPos = -1, QUndoCommand *parent = nullptr);
 
     //add item to num action
     AddActionSequenceCommand(ConfigData &c, uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos = -1, QUndoCommand *parent = nullptr);

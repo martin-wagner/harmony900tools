@@ -26,7 +26,7 @@ void RemoveActionFromActivityCommand::undo()
 }
 
 RemoveStateCommand::RemoveStateCommand(ConfigData &c, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionType t, uint32_t actPos, QUndoCommand *parent) :
+    uint32_t smPos, item::StateMachineType t, uint32_t actPos, QUndoCommand *parent) :
     BaseCommand(QObject::tr("Remove DeviceState (Pos: %1)").arg(devicePos),
         parent), c(c), devicePos(devicePos), smPos(smPos), t(t), actPos(actPos)
 {
@@ -35,11 +35,11 @@ RemoveStateCommand::RemoveStateCommand(ConfigData &c, uint32_t devicePos,
   try {
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
     switch (t) {
-      case item::StateTransitionType::Discrete:
+      case item::StateMachineType::Discrete:
         action = sm.discrete.enterStateAction.at(actPos);
         name = sm.discrete.states.at(actPos);
         break;
-      case item::StateTransitionType::Relative:
+      case item::StateMachineType::Relative:
         name = sm.relative.states.at(actPos);
         break;
       default:
@@ -79,13 +79,13 @@ void RemoveStateCommand::redo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
-    case item::StateTransitionType::Discrete: {
+    case item::StateMachineType::Discrete: {
       auto &actions = sm.discrete;
       actions.states.erase(actions.states.begin() + actPos);
       actions.enterStateAction.erase(actions.enterStateAction.begin() + actPos);
       break;
     }
-    case item::StateTransitionType::Relative: {
+    case item::StateMachineType::Relative: {
       auto &states = sm.relative.states;
       states.erase(states.begin() + actPos);
       break;
@@ -104,14 +104,14 @@ void RemoveStateCommand::undo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
-    case item::StateTransitionType::Discrete: {
+    case item::StateMachineType::Discrete: {
       auto &actions = sm.discrete;
       actions.states.insert(actions.states.begin() + actPos, name);
       actions.enterStateAction.insert(actions.enterStateAction.begin() + actPos,
           action);
       break;
     }
-    case item::StateTransitionType::Relative: {
+    case item::StateMachineType::Relative: {
       auto &states = sm.relative.states;
       states.insert(states.begin() + actPos, name);
       break;
@@ -129,7 +129,7 @@ bool RemoveStateCommand::valid() const
 }
 
 RemoveActionCommand::RemoveActionCommand(ConfigData &c, uint32_t devicePos,
-    uint32_t smPos, item::StateTransitionAction t, QUndoCommand *parent) :
+    uint32_t smPos, item::StateMachineAction t, QUndoCommand *parent) :
     BaseCommand(QObject::tr("Remove DeviceAction (Pos: %1)").arg(devicePos),
         parent), c(c), devicePos(devicePos), smPos(smPos), t(t)
 {
@@ -138,19 +138,19 @@ RemoveActionCommand::RemoveActionCommand(ConfigData &c, uint32_t devicePos,
   try {
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
     switch (t) {
-      case item::StateTransitionAction::Start:
+      case item::StateMachineAction::Start:
         action = *sm.startAction;
         break;
-      case item::StateTransitionAction::Finish:
+      case item::StateMachineAction::Finish:
         action = *sm.finishAction;
         break;
-      case item::StateTransitionAction::Relative_Reset:
+      case item::StateMachineAction::Relative_Reset:
         action = *sm.relative.resetAction;
         break;
-      case item::StateTransitionAction::Relative_Next:
+      case item::StateMachineAction::Relative_Next:
         action = *sm.relative.nextStateAction;
         break;
-      case item::StateTransitionAction::Relative_Prev:
+      case item::StateMachineAction::Relative_Prev:
         action = *sm.relative.prevStateAction;
         break;
       default:
@@ -189,19 +189,19 @@ void RemoveActionCommand::redo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
-    case item::StateTransitionAction::Start:
+    case item::StateMachineAction::Start:
       sm.startAction = nullopt;
       break;
-    case item::StateTransitionAction::Finish:
+    case item::StateMachineAction::Finish:
       sm.finishAction = nullopt;
       break;
-    case item::StateTransitionAction::Relative_Reset:
+    case item::StateMachineAction::Relative_Reset:
       sm.relative.resetAction = nullopt;
       break;
-    case item::StateTransitionAction::Relative_Next:
+    case item::StateMachineAction::Relative_Next:
       sm.relative.nextStateAction = nullopt;
       break;
-    case item::StateTransitionAction::Relative_Prev:
+    case item::StateMachineAction::Relative_Prev:
       sm.relative.prevStateAction = nullopt;
       break;
     default:
@@ -218,27 +218,27 @@ void RemoveActionCommand::undo()
 
   auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
   switch (t) {
-    case item::StateTransitionAction::Start: {
+    case item::StateMachineAction::Start: {
       auto &action = sm.startAction;
       action = this->action;
       break;
     }
-    case item::StateTransitionAction::Finish: {
+    case item::StateMachineAction::Finish: {
       auto &action = sm.finishAction;
       action = this->action;
       break;
     }
-    case item::StateTransitionAction::Relative_Reset: {
+    case item::StateMachineAction::Relative_Reset: {
       auto &action = sm.relative.resetAction;
       action = this->action;
       break;
     }
-    case item::StateTransitionAction::Relative_Next: {
+    case item::StateMachineAction::Relative_Next: {
       auto &action = sm.relative.nextStateAction;
       action = this->action;
       break;
     }
-    case item::StateTransitionAction::Relative_Prev: {
+    case item::StateMachineAction::Relative_Prev: {
       auto &action = sm.relative.prevStateAction;
       action = this->action;
       break;

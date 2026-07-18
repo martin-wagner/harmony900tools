@@ -45,13 +45,13 @@ class RelativeActions
 //line 64 -- somehow also supports MinValue and MaxValue as alternative to Value. Don't have an example how that looks...
 //line 80 -- InitialValue -- same as first "Value"?
 
-enum class StateTransitionType {
+enum class StateMachineType {
     Unknown,
     Discrete,
     Relative
 };
 
-enum class StateTransitionAction {
+enum class StateMachineAction {
     Unknown,
     Start,
     Finish,
@@ -71,7 +71,7 @@ enum class StateTransitionAction {
 class StateMachine
 {
   public:
-    PropertyEnum<StateMachineType> smType{StateMachineType::Power, Include::ALWAYS};
+    PropertyEnum<StateMachineDeviceType> smType{StateMachineDeviceType::Power, Include::ALWAYS};
     PropertyU32 delayMs{100, Include::CHECK};
 
     std::optional<DeviceAction> startAction = std::nullopt;

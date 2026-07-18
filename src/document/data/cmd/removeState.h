@@ -24,7 +24,7 @@ class RemoveStateCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    RemoveStateCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateTransitionType t, uint32_t actPos, QUndoCommand *parent = nullptr);
+    RemoveStateCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateMachineType t, uint32_t actPos, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -37,7 +37,7 @@ class RemoveStateCommand: public BaseCommand
     ConfigData &c;
     uint32_t devicePos;
     uint32_t smPos;
-    item::StateTransitionType t;
+    item::StateMachineType t;
     uint32_t actPos;
     item::DeviceAction action;
     std::string name;
@@ -48,7 +48,7 @@ class RemoveActionCommand: public BaseCommand
   Q_OBJECT
   public:
     //for relative state machine, actions are indipendent of states, therefore must be removed seperately
-    RemoveActionCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateTransitionAction t,  QUndoCommand *parent = nullptr);
+    RemoveActionCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,  QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -61,7 +61,7 @@ class RemoveActionCommand: public BaseCommand
     ConfigData &c;
     uint32_t devicePos;
     uint32_t smPos;
-    item::StateTransitionAction t;
+    item::StateMachineAction t;
     item::DeviceAction action;
 };
 
