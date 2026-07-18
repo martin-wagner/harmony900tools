@@ -35,7 +35,9 @@ class ConfigH900 : public QObject
   public:
     ConfigH900(const QString &workPath);
 
+    /** write files to disk at _workPath_ */
     bool dump(const data::ConfigData *c);
+    /** read files fom disk at _workPath_, use cmd (undo) catalogue for additional data verification */
     bool read(const data::ConfigData *c, data::CmdCatalogue *worker);
 
   public:

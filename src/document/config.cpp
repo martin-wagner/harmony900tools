@@ -103,9 +103,10 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
       auto parser = files::ConfigH900(importPath);
       connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
       connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
-      stack.beginMacro(tr("Import Harmony 900 Config"));
+      stack.beginMacro(tr("Import Harmony 900 Config")); //macro -> speedup
       ret = parser.read(configData.get(), worker);
       stack.endMacro();
+      stack.clear(); // no undo for this!
       break;
     }
     default:
@@ -150,10 +151,9 @@ bool Config::read(const QString &file)
   auto storage = files::ConfigStorage(workPath);
   connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
   connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
-  stack.beginMacro(tr("Read Config"));
-  ret = storage.read(*configData, worker);
-  stack.endMacro();
-  dirty = true;
+  ret = storage.read(*configData);
+  stack.clear(); // no undo for this!
+  emit dirtyChanged(true);
   return ret;
 }
 
@@ -227,6 +227,7 @@ bool Config::saveAs(const QString &file)
   auto storage = files::ConfigStorage(workPath);
   connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
   connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
+  configData->getUser().fileModificationDate.set(lib::writeTime()); //update save date, no undo stack!
   auto ret = storage.write(*configData);
   if (ret == true) {
     dirty = false;

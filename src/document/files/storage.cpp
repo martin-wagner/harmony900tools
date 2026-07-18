@@ -3,12 +3,15 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include "lib/uid.h"
 #include "document/data/data.h"
-#include "document/data/catalogue.h"
 #include "storage.h"
+#include "document/data/items/commonJson.h"
+#include "document/data/items/deviceJson.h"
+#include "document/data/items/activityJson.h"
 
 using namespace std;
-using json = nlohmann::json;
+using namespace nlohmann;
 
 namespace document
 {
@@ -37,12 +40,12 @@ bool ConfigStorage::write(const data::ConfigData &c)
   return ret;
 }
 
-bool ConfigStorage::read(data::ConfigData &c, data::CmdCatalogue *worker)
+bool ConfigStorage::read(data::ConfigData &c)
 {
   bool ret = true;
 
   try {
-    ret &= readUserConfigJson(c, worker);
+    ret &= readUserConfigJson(c);
 
 //  pugi::xml_document actionList;
 //  pugi::xml_document userConfiguration;
@@ -55,12 +58,13 @@ bool ConfigStorage::read(data::ConfigData &c, data::CmdCatalogue *worker)
         ContentType::PlainText);
   }
 
+
   return ret;
 }
 
-bool ConfigStorage::readUserConfigJson(data::ConfigData &c,
-    data::CmdCatalogue *worker)
+bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
 {
+  int i;
   json j;
 
 #ifdef _WIN32
@@ -97,50 +101,39 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c,
 
   }
 
-  //general stuff todo
-  //user //todo
-  //controller //todo
-
-  //devices
-  for (int i = 0; i < j["Devices"].size(); i++) {
-    auto &jd = j["Devices"][i];
-
-    auto id = jd["Id"].get<uint32_t>();
-    auto ret = worker->addDeviceCommand(-1, id);
-    if (!ret) {
-      continue;
-    }
-
-    //todo all the other stuff...
+  data::serialiser::fromJson(j["User"], c.getUser());
+  data::serialiser::fromJson(j["Controller"], c.getController());
+  for (i = 0; i < j["Devices"].size(); i++) {
+    auto id = j["Devices"][i]["Id"].get<uint32_t>();
+    lib::UidGenerator::getInstance().markUsed(id);
+    data::item::Device d(id);
+    data::serialiser::fromJson(j["Devices"][i], d);
+    c.getDevices().push_back(d);
   }
-
-
-
-  //activities //todo
-
-  //protocols //todo
-
+  for (i = 0; i < j["Activities"].size(); i++) {
+    auto id = j["Activities"][i]["Id"].get<uint32_t>();
+    lib::UidGenerator::getInstance().markUsed(id);
+    data::item::Activity a(id);
+    data::serialiser::fromJson(j["Activities"][i], a);
+    c.getActivities().push_back(a);
+  }
   return true;
 }
 
 bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
 {
-  bool ret = true;
-  json j;
+  uint32_t i;
+  ordered_json j; //top level -> insertion order
 
   j["Version"] = jsonVersion;
-  j["User"]["FirstName"] = c.getUser().firstName.get();
-  j["User"]["LastName"] = c.getUser().lastName.get();
-  j["User"]["Login"] = c.getUser().osUserName.get();
-  j["User"]["Created"] = c.getUser().fileCreationDate.get();
-  j["User"]["Modified"] = c.getUser().fileModificationDate.get();
 
-  for (int i = 0; i < c.getDevices().size(); i++) {
-    auto &jd = j["Devices"][i];
-    auto &d = c.getDevices()[i];
-    jd["Id"] = d.getId();
-    jd["Test"] = 42;
-
+  data::serialiser::toJson(j["User"], c.getUser());
+  data::serialiser::toJson(j["Controller"], c.getController());
+  for (i = 0; i < c.getDevices().size(); i++) {
+    data::serialiser::toJson(j["Devices"][i], c.getDevices()[i]);
+  }
+  for (i = 0; i < c.getActivities().size(); i++) {
+    data::serialiser::toJson(j["Activities"][i], c.getActivities()[i]);
   }
 
 #ifdef _WIN32
@@ -163,7 +156,7 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
     return false;
   }
 
-  return ret;
+  return true;
 }
 
 }

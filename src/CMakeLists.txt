@@ -75,6 +75,9 @@ set(sources
   document/data/cmd/setUnknownProperty.cpp
   document/data/cmd/setUserData.cpp
   document/data/items/button.cpp
+  document/data/items/commonJson.cpp
+  document/data/items/deviceJson.cpp
+  document/data/items/activityJson.cpp
   document/files/create.cpp
   document/files/h900.cpp
   document/files/storage.cpp

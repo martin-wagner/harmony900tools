@@ -23,8 +23,11 @@ class ConfigStorage : public QObject
   public:
     ConfigStorage(const QString &workPath);
 
+    /** write config to disk at _workPath_ */
     bool write(const data::ConfigData &c);
-    bool read(data::ConfigData &c, data::CmdCatalogue *worker);
+    /** read files fom disk at _workPath_. be aware that this does not use the undo layer,
+     * therefore you need to clean the stack afterwards */
+    bool read(data::ConfigData &c);
 
   public:
     const QString jsonPath = "userconfig.json";
@@ -35,7 +38,7 @@ class ConfigStorage : public QObject
     void writeMsg(const QString &message);
 
   protected:
-    bool readUserConfigJson(data::ConfigData &c, data::CmdCatalogue *worker);
+    bool readUserConfigJson(data::ConfigData &c);
 
   protected:
     bool writeUserConfigJson(const data::ConfigData &c);
