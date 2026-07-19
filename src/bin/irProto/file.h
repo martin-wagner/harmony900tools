@@ -179,6 +179,8 @@ class IrProto
     IrProto();
     /** add a protocol block from IrProto.bin*/
     IrProto(const std::vector<uint8_t> &data, int offset);
+    /** create a protocol */
+    IrProto(uint16_t clockPeriod_ns, const std::vector<TimingSection> &sections);
 
     /** read section count */
     int getSectionCount() const { return sections.size(); };
@@ -188,6 +190,8 @@ class IrProto
     const TimingSection &accessSection(int index) const;
     /** get carrier clock */
     double getClock() const { return 1.0 / static_cast<double>(clockPeriod) * 1000000000.0; };
+    /** raw clock period in ns */
+    uint16_t getClockPeriod() const { return clockPeriod; }
 
     /** serialise for writing to disk */
     std::vector<uint8_t> serialise(int offset) const;

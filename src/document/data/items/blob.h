@@ -18,14 +18,27 @@ namespace item
 
 using Permissions = std::array<uint8_t, 3>;
 
-/** stores raw files
- */
+/** stores raw files */
 class Blob
 {
   public:
-    Blob(const std::string &file, const std::vector<uint8_t> &data, const Permissions &p = {6,6,6}) :
-      file(file), p(p), data(data)
+    Blob(const std::string &file, const std::vector<uint8_t> &data,
+        const Permissions &p = { 6, 6, 6 }) :
+        file(file), p(p), data(data)
     {
+    }
+
+    const std::string& getFile() const
+    {
+      return file;
+    }
+    const Permissions& getPermissions() const
+    {
+      return p;
+    }
+    const std::vector<uint8_t>& getData() const
+    {
+      return data;
     }
 
   protected:
@@ -37,6 +50,3 @@ class Blob
 }
 }
 }
-
-
-

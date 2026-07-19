@@ -47,6 +47,10 @@ class SerialStreamIr
     const TimingStream &accessStream() const { return stream; };
     double getClock() const { return 1.0 / static_cast<double>(clockPeriod) * 1000000000.0; };
 
+    /** raw clock period in ns */
+    uint16_t getClockPeriod() const { return clockPeriod; }
+    void setClockPeriod(uint16_t period) { clockPeriod = period; }
+
     std::vector<uint16_t> serialise() const;
 };
 
@@ -86,6 +90,11 @@ class File
      * @param index [out] position where stream was added
      */
     void appendStream(TimingStream &stream, double clock, int &index);
+
+    /** add a ready-to-use, fully-built stream
+     * @param index [out] position where stream was added
+     */
+    void appendStream(const SerialStreamIr &stream, int &index);
 
     /** insert a stream
      *

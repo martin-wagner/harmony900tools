@@ -419,6 +419,12 @@ IrProto::IrProto(const vector<uint8_t> &data, int offset)
   }
 }
 
+IrProto::IrProto(uint16_t clockPeriod_ns,
+    const std::vector<TimingSection> &sections) :
+    clockPeriod(clockPeriod_ns), sections(sections)
+{
+}
+
 const TimingSection& IrProto::accessSection(int index) const
 {
   static const TimingSection s;

@@ -66,9 +66,11 @@ class Code
 
     /** irProto protocol index */
     int getIndex() const { return index; };
+    void setIndex(uint16_t v) { index = v; }
 
     /** payload type selection byte */
     uint8_t getControl() const { return static_cast<uint8_t>(ctrl); };
+    void setControl(uint8_t v) { ctrl = static_cast<Ctrl>(v); }
 
     /** payload type selection byte */
     std::string getControlStr() const
@@ -85,6 +87,7 @@ class Code
 
     /** irProto protocol ticks */
     int getTicks() const { return ticks; };
+    void setTicks(uint16_t v) { ticks = v; }
 
     /** get carrier clock */
     double getClock() const { return (SYSCLOCK / ticks); };
@@ -97,10 +100,21 @@ class Code
       return "Repeats: " + std::to_string(dataFrameTxCount);
     }
 
+    uint8_t getDataSectionCount() const { return dataSectionCount; }
+    void setDataSectionCount(uint8_t v) { dataSectionCount = v; }
+
+    uint8_t getRepeatFrame() const { return haveRepeatFrame; }
+    void setRepeatFrame(uint8_t v) { haveRepeatFrame = v; }
+
+    uint8_t getDataFrameTxCount() const { return dataFrameTxCount; }
+    void setDataFrameTxCount(uint8_t v) { dataFrameTxCount = v; }
+
+    const std::vector<Section> &accessSections() const { return sections; }
+    void setSections(const std::vector<Section> &s) { sections = s; }
+
     /** create data item for coding with irProto data */
     const IrProto::Data getData() const;
 };
 
 }
 }
-

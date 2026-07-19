@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 /*
- * Unit tests for document::data::serial (de)serialization of item::UserInfo
+ * Unit tests for document::data::serialiser (de)serialization of item::UserInfo
  * and item::ControllerInfo.
  */
 
@@ -12,6 +12,40 @@
 
 using namespace document::data;
 using namespace document::data::item;
+
+// ---------------------------------------------------------------------------
+// Blob
+// ---------------------------------------------------------------------------
+
+TEST(BlobJson, RoundTripPreservesFileNameAndPermissions)
+{
+  item::Blob blob("icon.png", {0x01, 0x02, 0x03}, {7, 4, 4});
+
+  serialiser::ordered_json j;
+  serialiser::toJson(j, blob);
+
+  EXPECT_EQ(j["File"], "icon.png");
+
+  auto blob2 = serialiser::fromJson(j);
+
+  EXPECT_EQ(blob2.getFile(), "icon.png");
+  EXPECT_EQ(blob2.getPermissions(), (item::Permissions{7, 4, 4}));
+}
+
+TEST(BlobJson, BinaryDataRoundTripsViaBase64)
+{
+  std::vector<uint8_t> data = {0x00, 0xFF, 0x7E, 0x80, 0x10};
+  item::Blob blob("file.bin", data);
+
+  serialiser::ordered_json j;
+  serialiser::toJson(j, blob);
+
+  ASSERT_TRUE(j["Data"].is_string());
+
+  auto blob2 = serialiser::fromJson(j);
+
+  EXPECT_EQ(blob2.getData(), data);
+}
 
 // ---------------------------------------------------------------------------
 // UserInfo: id handling

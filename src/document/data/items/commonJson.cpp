@@ -101,6 +101,44 @@ void fromJson(const ordered_json &in, item::ControllerInfo &controller)
   fromJson(in, "UnknownProperties", controller.getUnknownProperties());
 }
 
+//---------------------------------------------------------------------------
+// items/blob.h
+//---------------------------------------------------------------------------
+
+void toJson(ordered_json &out, const item::Blob &blob)
+{
+  out["File"] = blob.getFile();
+  out["Permissions"] = blob.getPermissions();
+
+  //genuinely binary payload (e.g. embedded image) -- base64 is the
+  //appropriate exception here, unlike the readable structured fields
+  //elsewhere in this file.
+  QByteArray bytes(reinterpret_cast<const char*>(blob.getData().data()), int(blob.getData().size()));
+  out["Data"] = bytes.toBase64().toStdString();
+}
+
+item::Blob fromJson(const ordered_json &in)
+{
+  std::string file = in.value("File", std::string());
+
+  item::Permissions permissions{6, 6, 6};
+  auto permIt = in.find("Permissions");
+  if (permIt != in.end() && permIt->is_array() && permIt->size() == permissions.size()) {
+    for (size_t i = 0; i < permissions.size(); i++) {
+      permissions[i] = (*permIt)[i].get<uint8_t>();
+    }
+  }
+
+  std::vector<uint8_t> data;
+  auto dataIt = in.find("Data");
+  if (dataIt != in.end()) {
+    QByteArray decoded = QByteArray::fromBase64(QByteArray::fromStdString(dataIt->get<std::string>()));
+    data.assign(decoded.begin(), decoded.end());
+  }
+
+  return item::Blob(file, data, permissions);
+}
+
 }
 }
 }

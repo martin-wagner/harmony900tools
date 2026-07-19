@@ -6,9 +6,12 @@
 #include "lib/uid.h"
 #include "document/data/data.h"
 #include "storage.h"
+#include "document/data/items/activityJson.h"
+#include "document/data/items/codeJson.h"
 #include "document/data/items/commonJson.h"
 #include "document/data/items/deviceJson.h"
-#include "document/data/items/activityJson.h"
+#include "document/data/items/irProtoJson.h"
+#include "document/data/items/ssIrJson.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -65,6 +68,7 @@ bool ConfigStorage::read(data::ConfigData &c)
 bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
 {
   int i;
+  int dummy;
   json j;
 
 #ifdef _WIN32
@@ -117,6 +121,26 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
     data::serialiser::fromJson(j["Activities"][i], a);
     c.getActivities().push_back(a);
   }
+  for (i = 0; i < j["Blobs"].size(); i++) {
+    auto b = data::serialiser::fromJson(j["Blobs"][i]);
+    c.getBlobs().push_back(b);
+  }
+  for (i = 0; i < j["IrStreams"].size(); i++) {
+    binary::ssIr::SerialStreamIr stream;
+    data::serialiser::fromJson(j["IrStreams"][i], stream);
+    c.getStreamLib().appendStream(stream, dummy);
+  }
+  for (i = 0; i < j["Commands"].size(); i++) {
+    binary::irProto::Code cmd;
+    data::serialiser::fromJson(j["Commands"][i], cmd);
+    c.getCommands().push_back(cmd);
+  }
+  for (i = 0; i < j["IrProtocols"].size(); i++) {
+    binary::irProto::IrProto prot;
+    data::serialiser::fromJson(j["IrProtocols"][i], prot);
+    c.getProtocolLib().appendProtocol(prot);
+  }
+
   return true;
 }
 
@@ -134,6 +158,19 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
   }
   for (i = 0; i < c.getActivities().size(); i++) {
     data::serialiser::toJson(j["Activities"][i], c.getActivities()[i]);
+  }
+  for (i = 0; i < c.getBlobs().size(); i++) {
+    data::serialiser::toJson(j["Blobs"][i], c.getBlobs()[i]);
+  }
+
+  for (i = 0; i < c.getStreamLib().getStreamCount(); i++) {
+    data::serialiser::toJson(j["IrStreams"][i], c.getStreamLib().accessStream(i));
+  }
+  for (i = 0; i < c.getCommands().size(); i++) {
+    data::serialiser::toJson(j["Commands"][i], c.getCommands()[i]);
+  }
+  for (i = 0; i < c.getProtocolLib().getProtocolCount(); i++) {
+    data::serialiser::toJson(j["IrProtocols"][i], c.getProtocolLib().accessProtocol(i));
   }
 
 #ifdef _WIN32

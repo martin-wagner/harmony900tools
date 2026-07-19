@@ -37,4 +37,4 @@ target_link_libraries(test_settings
 # ---------------------------------------------------------------------------
 # add to test suite
 # ---------------------------------------------------------------------------
-gtest_discover_tests(test_settings)
+gtest_discover_tests(test_settings DISCOVERY_MODE PRE_TEST) #add DISCOVERY_MODE PRE_TEST to at least one test to force cmake to scan for newly added tests. bug?

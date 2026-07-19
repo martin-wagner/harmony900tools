@@ -206,6 +206,12 @@ void File::appendStream(TimingStream &stream, double clock, int &index)
   streams.push_back(move(s));
 }
 
+void File::appendStream(const SerialStreamIr &stream, int &index)
+{
+  index = streams.size();
+  streams.push_back(stream);
+}
+
 bool File::insertStream(TimingStream &stream, double clock, int index)
 {
   if ((index < 0) || (index > static_cast<int>(streams.size()))) {
