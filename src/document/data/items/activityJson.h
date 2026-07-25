@@ -5,7 +5,6 @@
 #include <nlohmann/json.hpp>
 
 #include "activity.h"
-#include "deviceJson.h"
 
 namespace document
 {

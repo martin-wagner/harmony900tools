@@ -107,12 +107,28 @@ TEST(ButtonJson, RoundTripHardButton)
 
     nlohmann::ordered_json j;
     serialiser::toJson(j, b);
-    EXPECT_EQ(j["Type"], "Hard");
     EXPECT_EQ(j["Action"], "Power");
 
     Button b2(ButtonType::Hard);
     serialiser::fromJson(j, b2);
     EXPECT_EQ(b2.action.get(), "Power");
+}
+
+TEST(ButtonJson, RoundTripSoftButton)
+{
+    Button b(ButtonType::Soft);
+    b.action.set("Power");
+    b.name.set("Test").setIncluded(Used::YES);
+
+    nlohmann::ordered_json j;
+    serialiser::toJson(j, b);
+    EXPECT_EQ(j["Action"], "Power");
+    EXPECT_EQ(j["Name"], "Test");
+
+    Button b2(ButtonType::Hard);
+    serialiser::fromJson(j, b2);
+    EXPECT_EQ(b2.action.get(), "Power");
+    EXPECT_EQ(b2.name.get(), "Test");
 }
 
 TEST(ButtonJson, RoundTripSoftButtonReconstructsTypeFromDevice)

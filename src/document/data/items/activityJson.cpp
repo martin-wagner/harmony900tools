@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include "deviceJson.h"
 #include "activityJson.h"
 
 #include "jsonSerialise.h"
@@ -55,10 +56,32 @@ void fromJson(const ordered_json &in, item::Role &role)
 
 void toJson(ordered_json &out, const item::Activity &activity)
 {
+  ordered_json softButtonsArr = ordered_json::array();
+  ordered_json hardButtonsArr = ordered_json::array();
+  ordered_json buttonsObj;
+
   out["Id"] = activity.getId();
 
   toJsonVec(out, "Channels", activity.getChannels());
-  toJsonVec(out, "Buttons", activity.getButtons());
+  for (const auto &button : activity.getButtons()) {
+    ordered_json buttonJson;
+    toJson(buttonJson, button);
+
+    if (button.getButtonType() == item::ButtonType::Soft) {
+      softButtonsArr.push_back(buttonJson);
+    } else {
+      hardButtonsArr.push_back(buttonJson);
+    }
+  }
+  if (!softButtonsArr.empty()) {
+    buttonsObj["Soft"] = softButtonsArr;
+  }
+  if (!hardButtonsArr.empty()) {
+    buttonsObj["Hard"] = hardButtonsArr;
+  }
+  if (!buttonsObj.empty()) {
+    out["Buttons"] = buttonsObj;
+  }
   toJsonVec(out, "EnterActions", activity.getEnterActions());
   toJsonVec(out, "LeaveActions", activity.getLeaveActions());
   toJsonVec(out, "Roles", activity.getRoles());
@@ -106,6 +129,14 @@ void toJson(ordered_json &out, const item::Activity &activity)
 
 void fromJson(const ordered_json &in, item::Activity &activity)
 {
+  auto readButtons = [&activity](const ordered_json &in,
+      item::ButtonType type) {
+        for (const auto &buttonJson : in) {
+          item::Button button(type);
+          fromJson(buttonJson, button);
+          activity.getButtons().push_back(button);
+        }
+      };
 
   fromJson(in, "Type", activity.type);
   fromJson(in, "Label", activity.label);
@@ -144,28 +175,26 @@ void fromJson(const ordered_json &in, item::Activity &activity)
   //no default constructor / setter), so it is not read back here.
 
   fromJsonVec(in, "Channels", activity.getChannels());
-
-  activity.getButtons().clear();
   auto buttonsIt = in.find("Buttons");
   if (buttonsIt != in.end()) {
-    for (const auto &buttonJson : *buttonsIt) {
-      auto typeIt = buttonJson.find("Type");
-      item::ButtonType type = (typeIt != buttonJson.end())
-          ? buttonTypeFromString(typeIt->get<std::string>())
-          : item::ButtonType::Hard;
+    auto softIt = buttonsIt->find("Soft");
+    if (softIt != buttonsIt->end()) {
+      readButtons(*softIt, item::ButtonType::Soft);
+    }
 
-      item::Button button(type);
-      fromJson(buttonJson, button);
-      activity.getButtons().push_back(button);
+    auto hardIt = buttonsIt->find("Hard");
+    if (hardIt != buttonsIt->end()) {
+      readButtons(*hardIt, item::ButtonType::Hard);
     }
   }
-
   fromJsonVec(in, "EnterActions", activity.getEnterActions());
   fromJsonVec(in, "LeaveActions", activity.getLeaveActions());
   fromJsonVec(in, "Roles", activity.getRoles());
 
-  activity.getPowerOnDevices() = in.value("PowerOnDeviceIds", std::vector<uint32_t>());
-  activity.getPowerOffDevices() = in.value("PowerOffDeviceIds", std::vector<uint32_t>());
+  activity.getPowerOnDevices() = in.value("PowerOnDeviceIds",
+      std::vector<uint32_t>());
+  activity.getPowerOffDevices() = in.value("PowerOffDeviceIds",
+      std::vector<uint32_t>());
 }
 
 }

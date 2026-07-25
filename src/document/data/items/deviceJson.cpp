@@ -20,8 +20,10 @@ namespace serialiser
 std::string buttonTypeToString(item::ButtonType t)
 {
   switch (t) {
-    case item::ButtonType::Soft: return "Soft";
-    case item::ButtonType::Hard: return "Hard";
+    case item::ButtonType::Soft:
+      return "Soft";
+    case item::ButtonType::Hard:
+      return "Hard";
   }
   return "Soft";
 }
@@ -36,8 +38,6 @@ item::ButtonType buttonTypeFromString(const std::string &s)
 
 void toJson(ordered_json &out, const item::Button &button)
 {
-  out["Type"] = buttonTypeToString(button.getButtonType());
-
   toJson(out, "Action", button.action);
   toJson(out, "Name", button.name);
   toJson(out, "File", button.file);
@@ -243,17 +243,17 @@ void fromJson(const ordered_json &in, item::Numpad &numpad)
 {
   fromJson(in, "FixedDigits", numpad.fixedDigits);
 
-  auto readDigits = [&in](const char *key, std::optional<item::Digits> &target)
-  {
-    auto it = in.find(key);
-    if (it == in.end()) {
-      target.reset();
-      return;
-    }
-    item::Digits digits{};
-    fromJson(*it, digits);
-    target = digits;
-  };
+  auto readDigits = [&in](const char *key,
+      std::optional<item::Digits> &target) {
+        auto it = in.find(key);
+        if (it == in.end()) {
+          target.reset();
+          return;
+        }
+        item::Digits digits {};
+        fromJson(*it, digits);
+        target = digits;
+      };
 
   readDigits("First", numpad.first);
   readDigits("Middle", numpad.middle);
@@ -353,6 +353,10 @@ void fromJson(const ordered_json &in, item::Commands &commands)
 
 void toJson(ordered_json &out, const item::Device &device)
 {
+  ordered_json softButtonsArr = ordered_json::array();
+  ordered_json hardButtonsArr = ordered_json::array();
+  ordered_json buttonsObj;
+
   out["Id"] = device.getId();
 
   toJson(out, "Type", device.type);
@@ -376,7 +380,8 @@ void toJson(ordered_json &out, const item::Device &device)
   toJson(out, "OnScreenGuide", device.onScreenGuide);
   toJson(out, "PvrType", device.pvrType);
   toJson(out, "RecordMediaFixedDisc", device.recordMediaFixedDisc);
-  toJson(out, "RecordMediaRemovableVideotape", device.recordMediaRemovableVideotape);
+  toJson(out, "RecordMediaRemovableVideotape",
+      device.recordMediaRemovableVideotape);
   toJson(out, "RevertInput", device.revertInput);
   toJson(out, "Scart", device.scart);
   toJson(out, "TunerInput", device.tunerInput);
@@ -384,16 +389,25 @@ void toJson(ordered_json &out, const item::Device &device)
 
   toJson(out, "UnknownProperties", device.getUnknownProperties());
 
-  ordered_json buttonsArr = ordered_json::array();
   for (const auto &button : device.getButtons()) {
     ordered_json buttonJson;
     toJson(buttonJson, button);
-    buttonsArr.push_back(buttonJson);
-  }
-  if (!buttonsArr.empty()) {
-    out["Buttons"] = buttonsArr;
-  }
 
+    if (button.getButtonType() == item::ButtonType::Soft) {
+      softButtonsArr.push_back(buttonJson);
+    } else {
+      hardButtonsArr.push_back(buttonJson);
+    }
+  }
+  if (!softButtonsArr.empty()) {
+    buttonsObj["Soft"] = softButtonsArr;
+  }
+  if (!hardButtonsArr.empty()) {
+    buttonsObj["Hard"] = hardButtonsArr;
+  }
+  if (!buttonsObj.empty()) {
+    out["Buttons"] = buttonsObj;
+  }
   toJsonVec(out, "StateMachines", device.getStateMachines());
 
   if (device.getNumpad().has_value()) {
@@ -409,6 +423,14 @@ void toJson(ordered_json &out, const item::Device &device)
 
 void fromJson(const ordered_json &in, item::Device &device)
 {
+  auto readButtons = [&device](const ordered_json &in,
+      item::ButtonType type) {
+        for (const auto &buttonJson : in) {
+          item::Button button(type);
+          fromJson(buttonJson, button);
+          device.getButtons().push_back(button);
+        }
+      };
 
   fromJson(in, "Type", device.type);
   fromJson(in, "Mnf", device.mnf);
@@ -431,7 +453,8 @@ void fromJson(const ordered_json &in, item::Device &device)
   fromJson(in, "OnScreenGuide", device.onScreenGuide);
   fromJson(in, "PvrType", device.pvrType);
   fromJson(in, "RecordMediaFixedDisc", device.recordMediaFixedDisc);
-  fromJson(in, "RecordMediaRemovableVideotape", device.recordMediaRemovableVideotape);
+  fromJson(in, "RecordMediaRemovableVideotape",
+      device.recordMediaRemovableVideotape);
   fromJson(in, "RevertInput", device.revertInput);
   fromJson(in, "Scart", device.scart);
   fromJson(in, "TunerInput", device.tunerInput);
@@ -442,18 +465,16 @@ void fromJson(const ordered_json &in, item::Device &device)
   //note: device.id is set at construction time by the caller (Device has no
   //default constructor / setter), so it is not read back here.
 
-  device.getButtons().clear();
   auto buttonsIt = in.find("Buttons");
   if (buttonsIt != in.end()) {
-    for (const auto &buttonJson : *buttonsIt) {
-      auto typeIt = buttonJson.find("Type");
-      item::ButtonType type = (typeIt != buttonJson.end())
-          ? buttonTypeFromString(typeIt->get<std::string>())
-          : item::ButtonType::Soft;
+    auto softIt = buttonsIt->find("Soft");
+    if (softIt != buttonsIt->end()) {
+      readButtons(*softIt, item::ButtonType::Soft);
+    }
 
-      item::Button button(type);
-      fromJson(buttonJson, button);
-      device.getButtons().push_back(button);
+    auto hardIt = buttonsIt->find("Hard");
+    if (hardIt != buttonsIt->end()) {
+      readButtons(*hardIt, item::ButtonType::Hard);
     }
   }
 
