@@ -75,6 +75,7 @@ class ActivityEditor: public QWidget
     void updateActions();
 
     int getCurrentRow() const;
+    int getCurrentColumn() const;
 };
 
 } // namespace views

@@ -109,10 +109,15 @@ void ActivityEditor::onMoveUp()
     return;
   }
   const int row = getCurrentRow();
+  const int column = getCurrentColumn();
   if (row <= 0) {
     return;
   }
-  model->moveRows(QModelIndex(), row, 1, QModelIndex(), row - 1);
+  auto ret = model->moveRows(QModelIndex(), row, 1, QModelIndex(), row - 1);
+  if (ret == true) {
+    auto newIndex = model->index(row - 1, column);
+    treeView->setCurrentIndex(newIndex);
+  }
 }
 
 void ActivityEditor::onMoveDown()
@@ -121,10 +126,15 @@ void ActivityEditor::onMoveDown()
     return;
   }
   const int row = getCurrentRow();
+  const int column = getCurrentColumn();
   if (row < 0 || row >= model->rowCount() - 1) {
     return;
   }
-  model->moveRows(QModelIndex(), row, 1, QModelIndex(), row + 2);
+  auto ret = model->moveRows(QModelIndex(), row, 1, QModelIndex(), row + 1);
+  if (ret == true) {
+    auto newIndex = model->index(row + 1, column);
+    treeView->setCurrentIndex(newIndex);
+  }
 }
 
 void ActivityEditor::onModelRowCountChanged()
@@ -187,7 +197,8 @@ void ActivityEditor::setupToolbar()
   actionMoveDown = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/go-down.png",
           "go-down"), tr("Move Down"));
-  actionMoveDown->setToolTip(tr("Move the selected activity one position down"));
+  actionMoveDown->setToolTip(
+      tr("Move the selected activity one position down"));
 }
 
 void ActivityEditor::setupTreeView()
@@ -221,13 +232,23 @@ int ActivityEditor::getCurrentRow() const
   return selected.first().row();
 }
 
+int ActivityEditor::getCurrentColumn() const
+{
+  const QModelIndexList selected = treeView->selectionModel()->selectedRows();
+  if (selected.isEmpty()) {
+    return -1;
+  }
+  return selected.first().column();
+}
+
 void ActivityEditor::createActions()
 {
   connect(actionAdd, &QAction::triggered, this, &ActivityEditor::onAddActivity);
   connect(actionRemove, &QAction::triggered, this,
       &ActivityEditor::onRemoveActivity);
   connect(actionMoveUp, &QAction::triggered, this, &ActivityEditor::onMoveUp);
-  connect(actionMoveDown, &QAction::triggered, this, &ActivityEditor::onMoveDown);
+  connect(actionMoveDown, &QAction::triggered, this,
+      &ActivityEditor::onMoveDown);
 
   connect(&ctx.userLevel(), &lib::UserLevel::levelChanged, this,
       &ActivityEditor::onUserLevelChanged);

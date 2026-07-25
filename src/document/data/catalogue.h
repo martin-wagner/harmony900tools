@@ -143,6 +143,7 @@ class CmdCatalogue : public QObject
     //activity
     bool addActivityCommand(int pos, uint32_t id); //existing id
     bool addActivityCommand(int pos, uint32_t *id = nullptr); //assign id
+    bool moveActivityCommand(uint32_t currentPos, uint32_t newPos);
     bool removeActivityCommand(int pos);
     bool setActivityType(const Enum<ActivityType> &v, uint32_t pos);
     bool setActivityLabel(const QString &v, uint32_t pos);

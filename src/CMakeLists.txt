@@ -52,6 +52,7 @@ set(sources
   document/data/cmd/addPowerOnDevice.cpp
   document/data/cmd/addState.cpp
   document/data/cmd/addStatemachine.cpp
+  document/data/cmd/moveActivity.cpp
   document/data/cmd/setIr.cpp
   document/data/cmd/setIrProto.cpp
   document/data/cmd/setIrStream.cpp

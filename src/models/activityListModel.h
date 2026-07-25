@@ -59,6 +59,7 @@ class ActivityModel: public QAbstractItemModel
     bool removeColumns(int position, int columns, const QModelIndex &parent = { }) override;
     bool insertRows(int position, int rows, const QModelIndex &parent = { }) override;
     bool removeRows(int position, int rows, const QModelIndex &parent = { }) override;
+    bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild);
 
   private:
     document::Config &config;

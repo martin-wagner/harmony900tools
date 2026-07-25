@@ -201,11 +201,6 @@ void DeviceEditor::createActions()
 
 void DeviceEditor::updateActions()
 {
-  int rowCount = 0;
-  if (model != nullptr) {
-    rowCount = model->rowCount();
-  }
-
   const int row = getCurrentRow();
   const bool hasSelection = (model != nullptr) && (row >= 0);
 

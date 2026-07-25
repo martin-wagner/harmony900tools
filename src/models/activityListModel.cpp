@@ -225,6 +225,24 @@ bool ActivityModel::removeRows(int position, int rows,
   return success;
 }
 
+bool ActivityModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
+    int count, const QModelIndex &destinationParent, int destinationChild)
+{
+  if (sourceParent.isValid() || destinationParent.isValid()) {
+    return false;
+  }
+  if (count != 1) {
+    //not implemented
+    return false;
+  }
+  auto &activities = config.data().getActivities();
+  if ((sourceRow > activities.size()) || (destinationChild > activities.size())) {
+    return false;
+  }
+  auto &worker = config.modify();
+  return worker.moveActivityCommand(sourceRow, destinationChild);
+}
+
 void models::ActivityModel::createActions()
 {
   connect(&config, &document::Config::itemChanged, this,

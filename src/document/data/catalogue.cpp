@@ -22,6 +22,7 @@
 #include "cmd/setIr.h"
 #include "cmd/removeIr.h"
 #include "cmd/addActivity.h"
+#include "cmd/moveActivity.h"
 #include "cmd/removeActivity.h"
 #include "cmd/setIrProto.h"
 #include "cmd/removeIrProto.h"
@@ -1408,6 +1409,22 @@ bool CmdCatalogue::addActivityCommand(int pos, uint32_t *id)
   return true;
 }
 
+bool CmdCatalogue::moveActivityCommand(uint32_t currentPos, uint32_t newPos)
+{
+  auto *cmd = new MoveActivityCommand(c, currentPos, newPos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: activity move from/beyond end, dropped"),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return true;
+}
+
 bool CmdCatalogue::removeActivityCommand(int pos)
 {
   auto *cmd = new RemoveActivityCommand(c, pos);
@@ -2120,7 +2137,9 @@ bool CmdCatalogue::setActivityActionSequenceOp(const Enum<Operation> &v,
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.get();},
         [this, activityPos, t, actionPos, seqPos](
             const Enum<Operation> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].opcode.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<Enum<Operation>>(access);
 }
 
@@ -2134,7 +2153,9 @@ bool CmdCatalogue::setActivityActionSequenceCmd(const std::string &v,
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.get();},
         [this, activityPos, t, actionPos, seqPos](
             const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].cmd.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos  };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<string>(access);
 }
 
@@ -2148,7 +2169,9 @@ bool CmdCatalogue::setActivityActionSequenceDeviceId(uint32_t v,
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.get();},
         [this, activityPos, t, actionPos, seqPos](
             const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].deviceId.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos  };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<uint32_t>(access);
 }
 
@@ -2162,7 +2185,9 @@ bool CmdCatalogue::setActivityActionSequenceDelayMs(uint32_t v,
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.get();},
         [this, activityPos, t, actionPos, seqPos](
             const uint32_t &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].delayMs.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos  };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<uint32_t>(access);
 }
 
@@ -2176,7 +2201,9 @@ bool CmdCatalogue::setActivityActionSequenceStateName(
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.get();},
         [this, activityPos, t, actionPos, seqPos](
             const Enum<StateMachineDeviceType> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateName.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos  };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
@@ -2190,7 +2217,9 @@ bool CmdCatalogue::setActivityActionSequenceStateValue(const std::string &v,
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.get();},
         [this, activityPos, t, actionPos, seqPos](
             const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos  };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<string>(access);
 }
 
@@ -2204,7 +2233,9 @@ bool CmdCatalogue::setActivityActionSequenceMod(const Enum<Modifier> &v,
         [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.get();},
         [this, activityPos, t, actionPos, seqPos](
             const Enum<Modifier> &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].mod.set(v).setIncluded(Used::YES);},
-        v, Item::ACTIVITY_ACTION, activityPos  };
+        v,
+        Item::ACTIVITY_ACTION,
+        activityPos };
   return setProperty<Enum<Modifier>>(access);
 }
 
