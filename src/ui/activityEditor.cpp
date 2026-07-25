@@ -8,8 +8,8 @@
 #include <QVBoxLayout>
 
 #include "lib/icon.h"
-#include "deviceEditor.h"
-#include "models/deviceListModel.h"
+#include "activityEditor.h"
+#include "models/activityListModel.h"
 #include "delegates/combobox.h"
 
 using namespace std;
@@ -17,7 +17,7 @@ using namespace std;
 namespace editors
 {
 
-DeviceEditor::DeviceEditor(Context &ctx, models::DeviceModel *model,
+ActivityEditor::ActivityEditor(Context &ctx, models::ActivityModel *model,
     QWidget *parent) :
     ctx(ctx)
 {
@@ -26,21 +26,21 @@ DeviceEditor::DeviceEditor(Context &ctx, models::DeviceModel *model,
   setModel(model);
 }
 
-DeviceEditor::~DeviceEditor() = default;
+ActivityEditor::~ActivityEditor() = default;
 
-void DeviceEditor::setModel(models::DeviceModel *model)
+void ActivityEditor::setModel(models::ActivityModel *model)
 {
   if (model != nullptr) {
     disconnect(model, &QAbstractItemModel::rowsInserted, this,
-        &DeviceEditor::onModelRowCountChanged);
+        &ActivityEditor::onModelRowCountChanged);
     disconnect(model, &QAbstractItemModel::rowsRemoved, this,
-        &DeviceEditor::onModelRowCountChanged);
+        &ActivityEditor::onModelRowCountChanged);
   }
 
   if (treeView->selectionModel() != nullptr) {
     disconnect(treeView->selectionModel(),
         &QItemSelectionModel::selectionChanged, this,
-        &DeviceEditor::onViewSelectionChanged);
+        &ActivityEditor::onViewSelectionChanged);
   }
 
   this->model = model;
@@ -48,14 +48,14 @@ void DeviceEditor::setModel(models::DeviceModel *model)
 
   if (model != nullptr) {
     connect(model, &QAbstractItemModel::rowsInserted, this,
-        &DeviceEditor::onModelRowCountChanged);
+        &ActivityEditor::onModelRowCountChanged);
     connect(model, &QAbstractItemModel::rowsRemoved, this,
-        &DeviceEditor::onModelRowCountChanged);
+        &ActivityEditor::onModelRowCountChanged);
   }
 
   if (treeView->selectionModel() != nullptr) {
     connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
-        this, &DeviceEditor::onViewSelectionChanged);
+        this, &ActivityEditor::onViewSelectionChanged);
   }
 
   updateActions();
@@ -64,7 +64,7 @@ void DeviceEditor::setModel(models::DeviceModel *model)
   emit selectionChanged(-1, 0);
 }
 
-void DeviceEditor::onViewSelectionChanged(const QItemSelection &selected,
+void ActivityEditor::onViewSelectionChanged(const QItemSelection &selected,
     const QItemSelection &deselected)
 {
   Q_UNUSED(deselected)
@@ -77,13 +77,13 @@ void DeviceEditor::onViewSelectionChanged(const QItemSelection &selected,
   }
 
   auto row = selected.indexes().first().row();
-  auto idIndex = model->index(row, models::DeviceModel::Column::ID);
-  auto deviceId = model->data(idIndex, Qt::DisplayRole).toUInt();
+  auto idIndex = model->index(row, models::ActivityModel::Column::ID);
+  auto activityId = model->data(idIndex, Qt::DisplayRole).toUInt();
 
-  emit selectionChanged(row, deviceId);
+  emit selectionChanged(row, activityId);
 }
 
-void DeviceEditor::onAddDevice()
+void ActivityEditor::onAddActivity()
 {
   if (model == nullptr) {
     return;
@@ -91,7 +91,7 @@ void DeviceEditor::onAddDevice()
   model->insertRows(treeView->model()->rowCount(), 1);
 }
 
-void DeviceEditor::onRemoveDevice()
+void ActivityEditor::onRemoveActivity()
 {
   if (model == nullptr) {
     return;
@@ -103,25 +103,49 @@ void DeviceEditor::onRemoveDevice()
   model->removeRows(row, 1);
 }
 
-void DeviceEditor::onModelRowCountChanged()
+void ActivityEditor::onMoveUp()
+{
+  if (model == nullptr) {
+    return;
+  }
+  const int row = getCurrentRow();
+  if (row <= 0) {
+    return;
+  }
+  model->moveRows(QModelIndex(), row, 1, QModelIndex(), row - 1);
+}
+
+void ActivityEditor::onMoveDown()
+{
+  if (model == nullptr) {
+    return;
+  }
+  const int row = getCurrentRow();
+  if (row < 0 || row >= model->rowCount() - 1) {
+    return;
+  }
+  model->moveRows(QModelIndex(), row, 1, QModelIndex(), row + 2);
+}
+
+void ActivityEditor::onModelRowCountChanged()
 {
   updateActions();
 }
 
-void DeviceEditor::onUserLevelChanged(lib::UserLevel::Level l)
+void ActivityEditor::onUserLevelChanged(lib::UserLevel::Level l)
 {
   if (lib::UserLevel::validate(l, lib::UserLevel::Level::Developer)) {
-    treeView->showColumn(models::DeviceModel::Column::ID);
+    treeView->showColumn(models::ActivityModel::Column::ID);
   } else {
-    treeView->hideColumn(models::DeviceModel::Column::ID);
+    treeView->hideColumn(models::ActivityModel::Column::ID);
   }
 }
 
-void DeviceEditor::onSettingsChanged()
+void ActivityEditor::onSettingsChanged()
 {
 }
 
-void DeviceEditor::createView()
+void ActivityEditor::createView()
 {
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -134,7 +158,7 @@ void DeviceEditor::createView()
   layout->addWidget(treeView);
 }
 
-void DeviceEditor::setupToolbar()
+void ActivityEditor::setupToolbar()
 {
   toolbar = new QToolBar(this);
   //toolbar->setIconSize(QSize(16, 16));
@@ -144,19 +168,29 @@ void DeviceEditor::setupToolbar()
   actionAdd = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
           "list-add"), tr("Add"));
-  actionAdd->setToolTip(tr("Add a new device"));
+  actionAdd->setToolTip(tr("Add a new activity"));
 
   actionRemove = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
           "edit-delete"), tr("Remove"));
-  actionRemove->setToolTip(tr("Remove the selected device"));
+  actionRemove->setToolTip(tr("Remove the selected activity"));
   actionRemove->setShortcut(QKeySequence::Delete);
   actionRemove->setShortcutContext(Qt::WidgetShortcut);
 
   toolbar->addSeparator();
+
+  actionMoveUp = toolbar->addAction(
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/go-up.png",
+          "go-up"), tr("Move Up"));
+  actionMoveUp->setToolTip(tr("Move the selected activity one position up"));
+
+  actionMoveDown = toolbar->addAction(
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/go-down.png",
+          "go-down"), tr("Move Down"));
+  actionMoveDown->setToolTip(tr("Move the selected activity one position down"));
 }
 
-void DeviceEditor::setupTreeView()
+void ActivityEditor::setupTreeView()
 {
   treeView = new QTreeView(this);
 
@@ -171,14 +205,14 @@ void DeviceEditor::setupTreeView()
   treeView->addAction(actionRemove); //for delete shortcut
 
   auto *comboBoxDelegate = new delegates::ComboBox(this);
-  treeView->setItemDelegateForColumn(models::DeviceModel::Column::DEVTYPE,
+  treeView->setItemDelegateForColumn(models::ActivityModel::Column::ACTTYPE,
       comboBoxDelegate);
 
   treeView->setEditTriggers(
       QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
 }
 
-int DeviceEditor::getCurrentRow() const
+int ActivityEditor::getCurrentRow() const
 {
   const QModelIndexList selected = treeView->selectionModel()->selectedRows();
   if (selected.isEmpty()) {
@@ -187,19 +221,21 @@ int DeviceEditor::getCurrentRow() const
   return selected.first().row();
 }
 
-void DeviceEditor::createActions()
+void ActivityEditor::createActions()
 {
-  connect(actionAdd, &QAction::triggered, this, &DeviceEditor::onAddDevice);
+  connect(actionAdd, &QAction::triggered, this, &ActivityEditor::onAddActivity);
   connect(actionRemove, &QAction::triggered, this,
-      &DeviceEditor::onRemoveDevice);
+      &ActivityEditor::onRemoveActivity);
+  connect(actionMoveUp, &QAction::triggered, this, &ActivityEditor::onMoveUp);
+  connect(actionMoveDown, &QAction::triggered, this, &ActivityEditor::onMoveDown);
 
   connect(&ctx.userLevel(), &lib::UserLevel::levelChanged, this,
-      &DeviceEditor::onUserLevelChanged);
+      &ActivityEditor::onUserLevelChanged);
   connect(&ctx.settings(), &Settings::settingsAccepted, this,
-      &DeviceEditor::onSettingsChanged);
+      &ActivityEditor::onSettingsChanged);
 }
 
-void DeviceEditor::updateActions()
+void ActivityEditor::updateActions()
 {
   int rowCount = 0;
   if (model != nullptr) {
@@ -210,6 +246,8 @@ void DeviceEditor::updateActions()
   const bool hasSelection = (model != nullptr) && (row >= 0);
 
   actionRemove->setEnabled(hasSelection);
+  actionMoveUp->setEnabled(hasSelection && row > 0);
+  actionMoveDown->setEnabled(hasSelection && row < rowCount - 1);
 }
 
 } // namespace views

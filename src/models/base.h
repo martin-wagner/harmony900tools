@@ -14,7 +14,12 @@ enum UserDataRole {
   SelectionItemsRole,
 };
 
-
-
+struct Setup {
+  QString name;
+  QString context;
+  QString dataType;
+  bool isConst;
+  QVariantList selection;
+};
 
 }

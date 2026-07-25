@@ -201,6 +201,13 @@ void MainWindow::createWidgets()
   dockManager->addDockWidget(ads::LeftDockWidgetArea, dockDeviceEditor);
   dockMenu->addAction(dockDeviceEditor->toggleViewAction());
 
+  activityEditor = new editors::ActivityEditor(*ctx.get(), nullptr, this);
+  ads::CDockWidget *dockActivityEditor = new ads::CDockWidget(dockManager,
+      tr("Edit Activities"));
+  dockActivityEditor->setWidget(activityEditor);
+  dockManager->addDockWidget(ads::LeftDockWidgetArea, dockActivityEditor);
+  dockMenu->addAction(dockActivityEditor->toggleViewAction());
+
   QUndoView *undoView = new QUndoView(undo.getStack());
   undoView->setCleanIcon(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-clear.png",
@@ -422,6 +429,11 @@ void MainWindow::createActions()
       &LogViewer::addEntry);
   connect(deviceEditor, &editors::DeviceEditor::writeMsg, log,
       &LogViewer::addMessage);
+
+  connect(activityEditor, &editors::ActivityEditor::writeLog, log,
+      &LogViewer::addEntry);
+  connect(activityEditor, &editors::ActivityEditor::writeMsg, log,
+      &LogViewer::addMessage);
 }
 
 void MainWindow::readSettings()
@@ -603,6 +615,12 @@ void MainWindow::updateModelView()
   }
   deviceModel = new models::DeviceModel(*config, this);
   deviceEditor->setModel(deviceModel);
+
+  if (activityModel != nullptr) {
+    activityModel->deleteLater();
+  }
+  activityModel = new models::ActivityModel(*config, this);
+  activityEditor->setModel(activityModel);
 }
 
 void MainWindow::showSettings()

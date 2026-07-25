@@ -10,11 +10,13 @@
 #include "ui/settings.h"
 #include "ui/concordConnection.h"
 #include "ui/deviceEditor.h"
+#include "ui/activityEditor.h"
 #include "lib/users.h"
 #include "lib/undo.h"
 #include "context.h"
 #include "document/config.h"
 #include "models/deviceListModel.h"
+#include "models/activityListModel.h"
 
 class QAction;
 class QMenu;
@@ -97,7 +99,9 @@ class MainWindow: public QMainWindow
     QString curFile;
 
     editors::DeviceEditor *deviceEditor = nullptr;
+    editors::ActivityEditor *activityEditor = nullptr;
     models::DeviceModel *deviceModel = nullptr;
+    models::ActivityModel *activityModel = nullptr;
 
     ConcordConnection *concordConnection;
 };

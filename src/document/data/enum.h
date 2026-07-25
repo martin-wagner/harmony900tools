@@ -35,7 +35,7 @@ enum class StateMachineDeviceType { Power, Input, Screen, TVInput, AntennaOutput
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };
-enum class ActivityType { PowerOff, VirtualCdMulti, VirtualDvd, VirtualGameConsole,
+enum class ActivityType { VirtualCdMulti, VirtualDvd, VirtualGameConsole,
     VirtualGeneric, VirtualMusicServer, VirtualPvr, VirtualRadioSimple,
     VirtualSatelliteMusic, VirtualTelevisionN, VirtualVcr, Unknown};
 enum class DeviceRole { DEFAULT, DISPLAY, VOLUME, LIGHTCONTROL, LIGHTCONTROL2, LIGHTCONTROL3, LIGHTCONTROL4,

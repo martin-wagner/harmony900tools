@@ -15,27 +15,27 @@ class QTreeView;
 
 namespace models
 {
-class DeviceModel;
+class ActivityModel;
 }
 
 namespace editors
 {
 
 /**
- * @brief Flat device list editor with a toolbar for CRUD and reorder operations.
+ * @brief Flat activity list editor with a toolbar for CRUD and reorder operations.
  *
- * Wraps a DeviceModel in a QTreeView (single-level, alternating colors).
+ * Wraps a ActivityModel in a QTreeView (single-level, alternating colors).
  */
-class DeviceEditor: public QWidget
+class ActivityEditor: public QWidget
 {
   Q_OBJECT
 
   public:
-    explicit DeviceEditor(Context &ctx, models::DeviceModel *model, QWidget *parent = nullptr);
-    ~DeviceEditor() override;
+    explicit ActivityEditor(Context &ctx, models::ActivityModel *model, QWidget *parent = nullptr);
+    ~ActivityEditor() override;
 
     /** set new model. nullptr = remove */
-    void setModel(models::DeviceModel *model);
+    void setModel(models::ActivityModel *model);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
@@ -43,12 +43,14 @@ class DeviceEditor: public QWidget
 
     /** Emitted whenever the selection changes. row == -1
       * when nothing is selected.*/
-    void selectionChanged(int row, uint32_t deviceId);
+    void selectionChanged(int row, uint32_t activityId);
 
   private slots:
     void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void onAddDevice();
-    void onRemoveDevice();
+    void onAddActivity();
+    void onRemoveActivity();
+    void onMoveUp();
+    void onMoveDown();
     void onModelRowCountChanged();
     void onUserLevelChanged(lib::UserLevel::Level l);
     void onSettingsChanged();
@@ -57,12 +59,14 @@ class DeviceEditor: public QWidget
     Context &ctx;
 
   private:
-    models::DeviceModel *model = nullptr;
+    models::ActivityModel *model = nullptr;
 
     QTreeView *treeView = nullptr;
     QToolBar *toolbar = nullptr;
     QAction *actionAdd = nullptr;
     QAction *actionRemove = nullptr;
+    QAction *actionMoveUp = nullptr;
+    QAction *actionMoveDown = nullptr;
 
     void createView();
     void setupToolbar();

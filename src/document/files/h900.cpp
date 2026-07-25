@@ -2105,8 +2105,7 @@ bool ConfigH900::writeActivities(pugi::xml_node &root)
 bool ConfigH900::writePowerOffActivity(pugi::xml_node &activity)
 {
   activity.append_child("Id").text().set(-1); //magic for power off
-  activity.append_child("Type").text().set(
-      Enum<ActivityType>(ActivityType::PowerOff).getString());
+  activity.append_child("Type").text().set("PowerOff");
   auto presentation = activity.append_child("Presentation");
   presentation.append_child("Label").text().set("PowerOff");
 

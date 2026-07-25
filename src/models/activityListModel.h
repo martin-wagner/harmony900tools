@@ -11,7 +11,7 @@ namespace document
   namespace data {
     class ConfigData;
     namespace item {
-      class Device;
+      class Activity;
     }
   }
 }
@@ -19,30 +19,28 @@ namespace document
 namespace models
 {
 
-//Model for devices
-class DeviceModel: public QAbstractItemModel
+//Model for Activitys
+class ActivityModel: public QAbstractItemModel
 {
   Q_OBJECT
   public:
     enum Column {
       ID,
-      DEVTYPE,
-      MANUFACTURER,
-      MODEL,
+      ACTTYPE,
+      LABEL,
 
       COUNT
     };
 
     const std::map<Column, Setup> columnSetup = {
         { Column::ID,            { "ID", "id", "int", true,  {}, } },
-        { Column::DEVTYPE,       { "Type", "What kind of device you have", "Enum", false, {}, } },
-        { Column::MANUFACTURER,  { "Manufacturer", "Device manufacturer", "QString", false, {}, } },
-        { Column::MODEL,         { "Model", "Device model", "QString", false, {}, } }
+        { Column::ACTTYPE,       { "Type", "What kind of Activity you have", "Enum", false, {}, } },
+        { Column::LABEL,         { "Name", "Activity Name (displayed on \"My Activities\" screen)", "QString", false, {}, } },
     };
 
   public:
-    DeviceModel(document::Config &config, QObject *parent = nullptr);
-    ~DeviceModel() override;
+    ActivityModel(document::Config &config, QObject *parent = nullptr);
+    ~ActivityModel() override;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

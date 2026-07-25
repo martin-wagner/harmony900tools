@@ -85,11 +85,13 @@ set(sources
   document/files/h900.cpp
   document/files/storage.cpp
   models/deviceListModel.cpp
+  models/activityListModel.cpp
   ui/delegates/combobox.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   ui/concordConnection.cpp
   ui/deviceEditor.cpp
+  ui/activityEditor.cpp
   wrappers/concordWrapper.cpp
 )
 
