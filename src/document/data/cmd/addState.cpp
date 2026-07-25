@@ -79,6 +79,7 @@ void AddStateCommand::redo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -104,6 +105,7 @@ void AddStateCommand::undo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -173,6 +175,7 @@ void AddActionCommand::redo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -202,6 +205,7 @@ void AddActionCommand::undo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 

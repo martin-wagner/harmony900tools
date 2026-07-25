@@ -30,6 +30,7 @@ void SetControllerMetadataCommand::redo()
   c.getController().mnf.set(mnf);
   c.getController().model.set(model);
   c.getController().label.set(label);
+  emit itemChanged(Item::CONTROLLER, 0);
   emit dirtyChanged(true);
 }
 
@@ -39,6 +40,7 @@ void SetControllerMetadataCommand::undo()
   c.getController().mnf.set(prevMnf);
   c.getController().model.set(prevModel);
   c.getController().label.set(prevLabel);
+  emit itemChanged(Item::CONTROLLER, 0);
   emit dirtyChanged(true);
 }
 

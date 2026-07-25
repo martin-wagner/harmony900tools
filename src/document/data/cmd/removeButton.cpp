@@ -68,10 +68,12 @@ void RemoveDeviceButtonCommand::redo()
   if (!isValid) {
     return;
   }
-  QUndoCommand::redo();
 
+  emit itemAboutToBeRemoved(Item::DEVICE_BUTTON, buttonPos);
+  QUndoCommand::redo();
   auto &buttons = c.getDevices()[devicePos].getButtons();
   buttons.erase(buttons.begin() + buttonPos);
+  emit itemRemoved(Item::DEVICE_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
@@ -81,9 +83,11 @@ void RemoveDeviceButtonCommand::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::DEVICE_BUTTON, buttonPos);
   auto &buttons = c.getDevices()[devicePos].getButtons();
   buttons.insert(buttons.begin() + buttonPos, button);
   QUndoCommand::undo();
+  emit itemAdded(Item::DEVICE_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
@@ -119,10 +123,12 @@ void RemoveActivityButtonCommand::redo()
   if (!isValid) {
     return;
   }
-  QUndoCommand::redo();
 
+  emit itemAboutToBeRemoved(Item::ACTIVITY_BUTTON, buttonPos);
+  QUndoCommand::redo();
   auto &buttons = c.getActivities()[activityPos].getButtons();
   buttons.erase(buttons.begin() + buttonPos);
+  emit itemRemoved(Item::ACTIVITY_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
@@ -132,9 +138,11 @@ void RemoveActivityButtonCommand::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY_BUTTON, buttonPos);
   auto &buttons = c.getActivities()[activityPos].getButtons();
   buttons.insert(buttons.begin() + buttonPos, button);
   QUndoCommand::undo();
+  emit itemAdded(Item::ACTIVITY_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 

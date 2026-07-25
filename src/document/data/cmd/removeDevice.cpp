@@ -66,12 +66,11 @@ void RemoveDeviceCommand::redo()
     return;
   }
 
-  emit deviceAboutToBeRemoved(pos);
+  emit itemAboutToBeRemoved(Item::DEVICE, pos);
   QUndoCommand::redo();
-
   auto &devices = c.getDevices();
   devices.erase(devices.begin() + pos);
-  emit deviceRemoved(pos);
+  emit itemRemoved(Item::DEVICE, pos);
   emit dirtyChanged(true);
 }
 
@@ -81,10 +80,11 @@ void RemoveDeviceCommand::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::DEVICE, pos);
   auto &devices = c.getDevices();
   devices.insert(devices.begin() + pos, device);
   QUndoCommand::undo();
-  emit deviceAdded(pos);
+  emit itemAdded(Item::DEVICE, pos);
   emit dirtyChanged(true);
 }
 

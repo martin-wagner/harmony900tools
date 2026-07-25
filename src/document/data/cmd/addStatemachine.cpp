@@ -36,8 +36,11 @@ void AddStatemachineCommand::redo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeAdded(Item::DEVICE_STATEMACHINE, smPos);
   auto &sms = c.getDevices()[devicePos].getStateMachines();
   sms.insert(sms.begin() + smPos, item::StateMachine());
+  emit itemAdded(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -46,8 +49,11 @@ void AddStatemachineCommand::undo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeRemoved(Item::DEVICE_STATEMACHINE, smPos);
   auto &sms = c.getDevices()[devicePos].getStateMachines();
   sms.erase(sms.begin() + smPos);
+  emit itemRemoved(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 

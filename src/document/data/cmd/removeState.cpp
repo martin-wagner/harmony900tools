@@ -93,6 +93,7 @@ void RemoveStateCommand::redo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -120,6 +121,7 @@ void RemoveStateCommand::undo()
       return;
   }
   QUndoCommand::undo();
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -207,6 +209,7 @@ void RemoveActionCommand::redo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 
@@ -247,6 +250,7 @@ void RemoveActionCommand::undo()
       return;
   }
   QUndoCommand::undo();
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
   emit dirtyChanged(true);
 }
 

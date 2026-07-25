@@ -31,7 +31,10 @@ void RemoveNumpadCommand::redo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeRemoved(Item::DEVICE_NUMPAD, 0);
   c.getDevices()[devicePos].getNumpad() = nullopt;
+  emit itemRemoved(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 
@@ -40,7 +43,10 @@ void RemoveNumpadCommand::undo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeAdded(Item::DEVICE_NUMPAD, 0);
   c.getDevices()[devicePos].getNumpad() = pad;
+  emit itemAdded(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 
@@ -100,6 +106,7 @@ void RemoveDigitsCommand::redo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 
@@ -125,6 +132,7 @@ void RemoveDigitsCommand::undo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 

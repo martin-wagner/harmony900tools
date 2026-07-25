@@ -38,9 +38,10 @@ void AddActivityCommand::redo()
   if (!isValid) {
     return;
   }
-  emit activityAboutToBeAdded(pos);
+
+  emit itemAboutToBeAdded(Item::ACTIVITY, pos);
   c.getActivities().insert(c.getActivities().begin() + pos, item::Activity(id));
-  emit activityAdded(pos);
+  emit itemAdded(Item::ACTIVITY, pos);
   emit dirtyChanged(true);
 }
 
@@ -50,9 +51,9 @@ void AddActivityCommand::undo()
     return;
   }
 
-  emit activityAboutToBeRemoved(pos);
+  emit itemAboutToBeRemoved(Item::ACTIVITY, pos);
   c.getActivities().erase(c.getActivities().begin() + pos);
-  emit activityRemoved(pos);
+  emit itemRemoved(Item::ACTIVITY, pos);
   emit dirtyChanged(true);
 }
 

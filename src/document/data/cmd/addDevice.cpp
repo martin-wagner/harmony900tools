@@ -41,9 +41,9 @@ void AddDeviceCommand::redo()
 
   //todo newdevicefound property
 
-  emit deviceAboutToBeAdded(pos);
+  emit itemAboutToBeAdded(Item::DEVICE, pos);
   c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
-  emit deviceAdded(pos);
+  emit itemAdded(Item::DEVICE, pos);
   emit dirtyChanged(true);
 }
 
@@ -53,9 +53,9 @@ void AddDeviceCommand::undo()
     return;
   }
 
-  emit deviceAboutToBeRemoved(pos);
+  emit itemAboutToBeRemoved(Item::DEVICE, pos);
   c.getDevices().erase(c.getDevices().begin() + pos);
-  emit deviceRemoved(pos);
+  emit itemRemoved(Item::DEVICE, pos);
   emit dirtyChanged(true);
 }
 

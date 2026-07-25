@@ -15,6 +15,26 @@ namespace document
 namespace data
 {
 
+enum class Item
+{
+  UNKNOWN,
+  USER,
+  CONTROLLER,
+  DEVICE,
+  DEVICE_BUTTON,
+  DEVICE_STATEMACHINE,
+  DEVICE_NUMPAD,
+  DEVICE_IR,
+  DEVICE_IR_DATA,
+  ACTIVITY,
+  ACTIVITY_CHANNEL,
+  ACTIVITY_BUTTON,
+  ACTIVITY_ACTION,
+  ACTIVITY_POWER,
+
+  IR,
+};
+
 class BaseCommand: public QObject, public QUndoCommand
 {
   Q_OBJECT
@@ -26,17 +46,15 @@ class BaseCommand: public QObject, public QUndoCommand
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    //...aboutToBe... must be closed using the corresponding function!!
-    void deviceChanged(uint32_t pos);
-    void deviceAboutToBeAdded(uint32_t pos);
-    void deviceAdded(uint32_t pos);
-    void deviceAboutToBeRemoved(uint32_t pos);
-    void deviceRemoved(uint32_t pos);
-    void activityChanged(uint32_t pos);
-    void activityAboutToBeAdded(uint32_t pos);
-    void activityAdded(uint32_t pos);
-    void activityAboutToBeRemoved(uint32_t pos);
-    void activityRemoved(uint32_t pos);
+    //we hand over the info about item type and item position (if available, normally row).
+    //We assume that only visible data can be changed, so parent info is not needed
+    //The worst that can happen is the ui updates data that wasn't modified
+    //...aboutToBe... must always be closed using the corresponding function!!
+    void itemChanged(Item item, uint32_t pos);
+    void itemAboutToBeAdded(Item item, uint32_t pos);
+    void itemAdded(Item item, uint32_t pos);
+    void itemAboutToBeRemoved(Item item, uint32_t pos);
+    void itemRemoved(Item item, uint32_t pos);
     void dirtyChanged(bool dirty);
 };
 
@@ -54,15 +72,27 @@ class SetPropertyBaseCommand: public BaseCommand
     {
     }
 
+    void setChangedSignal(Item item, uint32_t pos)
+    {
+      changedItem = item;
+      changedPos = pos;
+    }
+
     void redo() override
     {
       set(value);
+      if (changedItem != Item::UNKNOWN) {
+        emit itemChanged(changedItem, changedPos);
+      }
       emit dirtyChanged(true);
     }
 
     void undo() override
     {
       set(prevValue);
+      if (changedItem != Item::UNKNOWN) {
+        emit itemChanged(changedItem, changedPos);
+      }
       emit dirtyChanged(true);
     }
 
@@ -72,6 +102,9 @@ class SetPropertyBaseCommand: public BaseCommand
     }
 
   protected:
+    bool emitItemChangedSignal = false;
+    uint32_t changedPos = 0;
+    Item changedItem = Item::UNKNOWN;
     T value;
     T prevValue;
     Getter get;

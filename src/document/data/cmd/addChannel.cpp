@@ -36,8 +36,11 @@ void AddActivityChannelCommand::redo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeAdded(Item::ACTIVITY_CHANNEL, channelPos);
   auto &channels = c.getActivities()[activityPos].getChannels();
   channels.insert(channels.begin() + channelPos, item::Channel());
+  emit itemAdded(Item::ACTIVITY_CHANNEL, channelPos);
   emit dirtyChanged(true);
 }
 
@@ -46,8 +49,11 @@ void AddActivityChannelCommand::undo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeRemoved(Item::ACTIVITY_CHANNEL, channelPos);
   auto &channels = c.getActivities()[activityPos].getChannels();
   channels.erase(channels.begin() + channelPos);
+  emit itemRemoved(Item::ACTIVITY_CHANNEL, channelPos);
   emit dirtyChanged(true);
 }
 

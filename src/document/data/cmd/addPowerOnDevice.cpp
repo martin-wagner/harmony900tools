@@ -46,9 +46,10 @@ void AddPowerOnDevice::redo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY_POWER, devicePos);
   auto &roles = c.getActivities()[activityPos].getPowerOnDevices();
   roles.insert(roles.begin() + devicePos, id);
-
+  emit itemAdded(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 
@@ -58,9 +59,10 @@ void AddPowerOnDevice::undo()
     return;
   }
 
+  emit itemAboutToBeRemoved(Item::ACTIVITY_POWER, devicePos);
   auto &roles = c.getActivities()[activityPos].getPowerOnDevices();
   roles.erase(roles.begin() + devicePos);
-
+  emit itemRemoved(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 
@@ -106,9 +108,10 @@ void AddPowerOffDevice::redo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY_POWER, devicePos);
   auto &roles = c.getActivities()[activityPos].getPowerOffDevices();
   roles.insert(roles.begin() + devicePos, id);
-
+  emit itemAdded(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 
@@ -118,9 +121,10 @@ void AddPowerOffDevice::undo()
     return;
   }
 
+  emit itemAboutToBeRemoved(Item::ACTIVITY_POWER, devicePos);
   auto &roles = c.getActivities()[activityPos].getPowerOffDevices();
   roles.erase(roles.begin() + devicePos);
-
+  emit itemRemoved(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 

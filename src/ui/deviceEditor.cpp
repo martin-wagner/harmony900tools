@@ -10,6 +10,7 @@
 #include "lib/icon.h"
 #include "deviceEditor.h"
 #include "models/deviceListModel.h"
+#include "delegates/combobox.h"
 
 using namespace std;
 
@@ -87,7 +88,7 @@ void DeviceEditor::onAddDevice()
   if (model == nullptr) {
     return;
   }
-  model->insertRows(getCurrentRow() + 1, 1);
+  model->insertRows(treeView->model()->rowCount(), 1);
 }
 
 void DeviceEditor::onRemoveDevice()
@@ -173,6 +174,8 @@ void DeviceEditor::setupToolbar()
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
           "edit-delete"), tr("Remove"));
   actionRemove->setToolTip(tr("Remove the selected device"));
+  actionRemove->setShortcut(QKeySequence::Delete);
+  actionRemove->setShortcutContext(Qt::WidgetShortcut);
 
   toolbar->addSeparator();
 
@@ -199,6 +202,11 @@ void DeviceEditor::setupTreeView()
   treeView->setDragDropMode(QAbstractItemView::NoDragDrop);
   treeView->header()->setStretchLastSection(true);
   treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+  treeView->addAction(actionRemove); //for delete shortcut
+
+  auto *comboBoxDelegate = new delegates::ComboBox(this);
+  treeView->setItemDelegateForColumn(models::DeviceModel::Column::DEVTYPE,
+      comboBoxDelegate);
 
   treeView->setEditTriggers(
       QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);

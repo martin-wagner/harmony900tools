@@ -27,16 +27,11 @@ class CmdCatalogue : public QObject
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    void deviceChanged(uint32_t pos);
-    void deviceAboutToBeAdded(uint32_t pos);
-    void deviceAdded(uint32_t pos);
-    void deviceAboutToBeRemoved(uint32_t pos);
-    void deviceRemoved(uint32_t pos);
-    void activityChanged(uint32_t pos);
-    void activityAboutToBeAdded(uint32_t pos);
-    void activityAdded(uint32_t pos);
-    void activityAboutToBeRemoved(uint32_t pos);
-    void activityRemoved(uint32_t pos);
+    void itemChanged(Item item, uint32_t pos);
+    void itemAboutToBeAdded(Item item, uint32_t pos);
+    void itemAdded(Item item, uint32_t pos);
+    void itemAboutToBeRemoved(Item item, uint32_t pos);
+    void itemRemoved(Item item, uint32_t pos);
     void dirtyChanged(bool dirty);
 
   public:
@@ -240,6 +235,8 @@ class CmdCatalogue : public QObject
         std::function<T()> getter;
         std::function<void(const T&)> setter;
         T value;
+        Item changedItem = Item::UNKNOWN;
+        uint32_t changedPos = 0;
     };
     template<typename T>
     bool setProperty(const PropertyAccess<T> &access)
@@ -248,6 +245,7 @@ class CmdCatalogue : public QObject
           access.getter, access.setter, access.value);
       auto ret = cmd->valid();
       if (ret == true) {
+        cmd->setChangedSignal(access.changedItem, access.changedPos);
         connectCommand(cmd);
         undo.push(cmd);
       } else {

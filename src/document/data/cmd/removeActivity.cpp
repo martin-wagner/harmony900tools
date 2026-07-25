@@ -30,12 +30,11 @@ void RemoveActivityCommand::redo()
     return;
   }
 
-  emit activityAboutToBeRemoved(pos);
+  emit itemAboutToBeRemoved(Item::ACTIVITY, pos);
   QUndoCommand::redo();
-
   auto &activities = c.getActivities();
   activities.erase(activities.begin() + pos);
-  emit activityRemoved(pos);
+  emit itemRemoved(Item::ACTIVITY, pos);
   emit dirtyChanged(true);
 }
 
@@ -45,10 +44,11 @@ void RemoveActivityCommand::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY, pos);
   auto &activities = c.getActivities();
   activities.insert(activities.begin() + pos, activity);
   QUndoCommand::undo();
-  emit activityAdded(pos);
+  emit itemAdded(Item::ACTIVITY, pos);
   emit dirtyChanged(true);
 }
 

@@ -67,10 +67,12 @@ void RemoveIrProtoCommand::redo()
   if (!isValid) {
     return;
   }
-  QUndoCommand::redo();
 
+  emit itemAboutToBeRemoved(Item::DEVICE_IR_DATA, cmdPos);
+  QUndoCommand::redo();
   auto &pcmds = c.getDevices()[devicePos].getIrCommands().getProtoCommands();
   pcmds.erase(pcmds.begin() + cmdPos);
+  emit itemRemoved(Item::DEVICE_IR_DATA, cmdPos);
   emit dirtyChanged(true);
 }
 
@@ -80,10 +82,11 @@ void RemoveIrProtoCommand::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::DEVICE_IR_DATA, cmdPos);
   auto &pcmds = c.getDevices()[devicePos].getIrCommands().getProtoCommands();
   pcmds.insert(pcmds.begin() + cmdPos, proto);
-
   QUndoCommand::undo();
+  emit itemAdded(Item::DEVICE_IR_DATA, cmdPos);
   emit dirtyChanged(true);
 }
 
@@ -134,10 +137,12 @@ void RemoveIrRawCommand::redo()
   if (!isValid) {
     return;
   }
-  QUndoCommand::redo();
 
+  emit itemAboutToBeRemoved(Item::DEVICE_IR_DATA, cmdPos);
+  QUndoCommand::redo();
   auto &rcmds = c.getDevices()[devicePos].getIrCommands().getRawCommands();
   rcmds.erase(rcmds.begin() + cmdPos);
+  emit itemRemoved(Item::DEVICE_IR_DATA, cmdPos);
   emit dirtyChanged(true);
 }
 
@@ -147,10 +152,11 @@ void RemoveIrRawCommand::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::DEVICE_IR_DATA, cmdPos);
   auto &rcmds = c.getDevices()[devicePos].getIrCommands().getRawCommands();
   rcmds.insert(rcmds.begin() + cmdPos, raw);
-
   QUndoCommand::undo();
+  emit itemAdded(Item::DEVICE_IR_DATA, cmdPos);
   emit dirtyChanged(true);
 }
 

@@ -26,7 +26,9 @@ void AddNumpadCommand::redo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::DEVICE_NUMPAD, 0);
   c.getDevices()[devicePos].getNumpad() = item::Numpad();
+  emit itemAdded(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 
@@ -35,7 +37,10 @@ void AddNumpadCommand::undo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeRemoved(Item::DEVICE_NUMPAD, 0);
   c.getDevices()[devicePos].getNumpad() = nullopt;
+  emit itemRemoved(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 
@@ -78,6 +83,7 @@ void AddDigitsCommand::redo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 
@@ -103,6 +109,7 @@ void AddDigitsCommand::undo()
     default:
       return;
   }
+  emit itemChanged(Item::DEVICE_NUMPAD, 0);
   emit dirtyChanged(true);
 }
 

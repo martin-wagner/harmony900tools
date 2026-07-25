@@ -51,6 +51,7 @@ void AddActivityActionCommand::redo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY_ACTION, actionPos);
   auto &activity = c.getActivities()[activityPos];
   switch (t) {
     case item::ActivityAction::Enter: {
@@ -64,8 +65,9 @@ void AddActivityActionCommand::redo()
       break;
     }
     default:
-      return;
+      break;
   }
+  emit itemAdded(Item::ACTIVITY_ACTION, actionPos);
   emit dirtyChanged(true);
 }
 
@@ -75,6 +77,7 @@ void AddActivityActionCommand::undo()
     return;
   }
 
+  emit itemAboutToBeRemoved(Item::ACTIVITY_ACTION, actionPos);
   auto &activity = c.getActivities()[activityPos];
   switch (t) {
     case item::ActivityAction::Enter: {
@@ -88,8 +91,9 @@ void AddActivityActionCommand::undo()
       break;
     }
     default:
-      return;
+      break;
   }
+  emit itemRemoved(Item::ACTIVITY_ACTION, actionPos);
   emit dirtyChanged(true);
 }
 

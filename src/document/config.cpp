@@ -189,16 +189,11 @@ bool Config::reset()
   // @formatter:off
   connect(worker, &data::CmdCatalogue::writeLog, this, &Config::writeLog);
   connect(worker, &data::CmdCatalogue::writeMsg, this, &Config::writeMsg);
-  connect(worker, &data::CmdCatalogue::deviceChanged, this, &Config::deviceChanged);
-  connect(worker, &data::CmdCatalogue::deviceAboutToBeAdded, this, &Config::deviceAboutToBeAdded);
-  connect(worker, &data::CmdCatalogue::deviceAdded, this, &Config::deviceAdded);
-  connect(worker, &data::CmdCatalogue::deviceAboutToBeRemoved, this, &Config::deviceAboutToBeRemoved);
-  connect(worker, &data::CmdCatalogue::deviceRemoved, this, &Config::deviceRemoved);
-  connect(worker, &data::CmdCatalogue::activityChanged, this, &Config::activityChanged);
-  connect(worker, &data::CmdCatalogue::activityAboutToBeAdded, this, &Config::activityAboutToBeAdded);
-  connect(worker, &data::CmdCatalogue::activityAdded, this, &Config::activityAdded);
-  connect(worker, &data::CmdCatalogue::activityAboutToBeRemoved, this, &Config::activityAboutToBeRemoved);
-  connect(worker, &data::CmdCatalogue::activityRemoved, this, &Config::activityRemoved);
+  connect(worker, &data::CmdCatalogue::itemChanged, this, &Config::itemChanged);
+  connect(worker, &data::CmdCatalogue::itemAboutToBeAdded, this, &Config::itemAboutToBeAdded);
+  connect(worker, &data::CmdCatalogue::itemAdded, this, &Config::itemAdded);
+  connect(worker, &data::CmdCatalogue::itemAboutToBeRemoved, this, &Config::itemAboutToBeRemoved);
+  connect(worker, &data::CmdCatalogue::itemRemoved, this, &Config::itemRemoved);
   connect(worker, &data::CmdCatalogue::dirtyChanged, this, [this](bool dirty) {
     this->dirty = dirty;
     emit dirtyChanged(dirty);

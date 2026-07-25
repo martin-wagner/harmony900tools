@@ -94,6 +94,10 @@ void SetIrCommand::redo()
     return;
   }
 
+  if (!overwrite) {
+    emit itemAboutToBeAdded(Item::DEVICE_IR_DATA, cmdPos);
+  }
+
   if (proto.has_value()) {
     auto &cmds = c.getDevices()[devicePos].getIrCommands().getProtoCommands();
     if (overwrite) {
@@ -110,6 +114,11 @@ void SetIrCommand::redo()
     }
   }
 
+  if (overwrite) {
+    emit itemChanged(Item::DEVICE_IR_DATA, cmdPos);
+  } else {
+    emit itemAdded(Item::DEVICE_IR_DATA, cmdPos);
+  }
   emit dirtyChanged(true);
 }
 
@@ -117,6 +126,10 @@ void SetIrCommand::undo()
 {
   if (!isValid) {
     return;
+  }
+
+  if (!overwrite) {
+    emit itemAboutToBeRemoved(Item::DEVICE_IR_DATA, cmdPos);
   }
 
   if (proto.has_value()) {
@@ -135,6 +148,11 @@ void SetIrCommand::undo()
     }
   }
 
+  if (overwrite) {
+    emit itemChanged(Item::DEVICE_IR_DATA, cmdPos);
+  } else {
+    emit itemRemoved(Item::DEVICE_IR_DATA, cmdPos);
+  }
   emit dirtyChanged(true);
 }
 

@@ -35,6 +35,8 @@ class RemoveDeviceActionSequenceCommand: public BaseCommand
     uint32_t seqPos;
     item::SequenceItem sequenceItem;
     std::function<std::vector<item::SequenceItem>&()> getSeq;
+    Item item;
+    uint32_t itemPos;
 };
 
 }

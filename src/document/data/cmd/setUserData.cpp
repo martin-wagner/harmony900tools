@@ -42,6 +42,7 @@ void SetUserMetadataCommand::redo()
   c.getUser().osUserName.set(user);
   c.getUser().fileCreationDate.set(creation);
   c.getUser().fileModificationDate.set(modification);
+  emit itemChanged(Item::USER, 0);
   emit dirtyChanged(true);
 }
 
@@ -50,6 +51,7 @@ void SetUserMetadataCommand::undo()
   c.getUser().osUserName.set(prevUser);
   c.getUser().fileCreationDate.set(prevCreation);
   c.getUser().fileModificationDate.set(prevModification);
+  emit itemChanged(Item::USER, 0);
   emit dirtyChanged(true);
 }
 

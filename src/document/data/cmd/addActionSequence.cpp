@@ -15,7 +15,7 @@ AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
     item::StateMachineAction t, int seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Add Sequence to Action/SM (to device: %1)").arg(devicePos),
-        parent)
+        parent), item(Item::DEVICE_STATEMACHINE), itemPos(smPos)
 {
   uint32_t seqCount;
 
@@ -43,7 +43,7 @@ AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
     QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Add Sequence to Action/NUM (to device: %1)").arg(
-            devicePos), parent)
+            devicePos), parent), item(Item::DEVICE_NUMPAD), itemPos(0)
 {
   uint32_t seqCount;
 
@@ -71,7 +71,7 @@ AddActionSequenceCommand::AddActionSequenceCommand(ConfigData &c,
     int seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Add Sequence to Action (to activity: %1)").arg(
-            activityPos), parent)
+            activityPos), parent), item(Item::ACTIVITY_ACTION), itemPos(activityPos)
 {
   uint32_t seqCount;
 
@@ -102,6 +102,7 @@ void AddActionSequenceCommand::redo()
 
   auto &seq = getSeq();
   seq.insert(seq.begin() + seqPos, item::SequenceItem());
+  emit itemChanged(item, itemPos);
   emit dirtyChanged(true);
 }
 
@@ -113,6 +114,7 @@ void AddActionSequenceCommand::undo()
 
   auto &seq = getSeq();
   seq.erase(seq.begin() + seqPos);
+  emit itemChanged(item, itemPos);
   emit dirtyChanged(true);
 }
 

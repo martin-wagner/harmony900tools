@@ -119,21 +119,32 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
   if (!columnSetup.contains(column)) {
     return false;
   }
-  if (columnSetup.at(column).isConst) { //should use flags() method!
+  if (columnSetup.at(column).isConst) { //caller should have used flags() method!
     return false;
   }
-  if (row >= config.data().getDevices().size()) {
+  if (row >= rowCount()) {
     return false;
   }
+  auto currentValue = data(index, role);
+  if (currentValue.isValid() && (currentValue == value)) {
+    return true;
+  }
 
-  //auto &worker = config.modify();
+  auto &worker = config.modify();
+  switch (index.column()) {
+    case Column::DEVTYPE:
+      return worker.setDeviceType(
+          document::data::Enum<document::data::DeviceType>(value.toString()),
+          row);
+    case Column::MANUFACTURER:
+      return worker.setDeviceMnf(value.toString(), row);
+    case Column::MODEL:
+      return worker.setDeviceModel(value.toString(), row);
+    default:
+      return false;
+  }
 
-  //todo auto ret = worker-setData(value);
-  //if ret
-  //todo we don't know what was changed here! use observers.
-//    emit dataChanged(index, index, { Qt::DisplayRole, Qt::EditRole });
-//  }
-//  return result;
+  //don't emit dataChanged event, is done inside observers anyway
   return true;
 }
 
@@ -215,28 +226,16 @@ bool DeviceModel::removeRows(int position, int rows, const QModelIndex &parent)
 
 void models::DeviceModel::createActions()
 {
-  //connect observers
-  connect(&config, &document::Config::deviceChanged, this,
-      [this](
-          int pos) {
-            emit dataChanged(index(pos, 0), index(pos, columnCount()), {Qt::DisplayRole, Qt::EditRole});
-          });
-  connect(&config, &document::Config::deviceAboutToBeAdded, this,
-      [this](int pos) {
-        emit beginInsertRows(QModelIndex(), pos, pos);
-      });
-  connect(&config, &document::Config::deviceAdded, this, [this](int pos) {
-    emit endInsertRows();
-  });
-  connect(&config, &document::Config::deviceAboutToBeRemoved, this,
-      [this](int pos) {
-        emit beginRemoveRows(QModelIndex(), pos, pos);
-      });
-  connect(&config, &document::Config::deviceRemoved, this, [this](int pos) {
-    emit endRemoveRows();
-  });
-
-  //don't need activities -- devices don't have dependendies to those.
+  connect(&config, &document::Config::itemChanged, this,
+      &DeviceModel::itemChangedObserver);
+  connect(&config, &document::Config::itemAboutToBeAdded, this,
+      &DeviceModel::itemAboutToBeAddedObserver);
+  connect(&config, &document::Config::itemAdded, this,
+      &DeviceModel::itemAddedObserver);
+  connect(&config, &document::Config::itemAboutToBeRemoved, this,
+      &DeviceModel::itemAboutToBeRemovedObserver);
+  connect(&config, &document::Config::itemRemoved, this,
+      &DeviceModel::itemRemovedObserver);
 }
 
 QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
@@ -268,7 +267,7 @@ QVariant DeviceModel::getEditData(const QModelIndex &index) const
       case Column::ID:
         return device.getId();
       case Column::DEVTYPE:
-        return static_cast<int>(device.type.get().getValue());
+        return device.type.get().getQString();
       case Column::MANUFACTURER:
         return QString::fromStdString(device.mnf.get());
       case Column::MODEL:
@@ -313,6 +312,50 @@ QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+void DeviceModel::itemChangedObserver(document::data::Item item, int pos)
+{
+  if (item != document::data::Item::DEVICE) {
+    return;
+  }
+  //we don't know the column!
+  emit dataChanged(index(pos, 0), index(pos, columnCount()), {
+    Qt::DisplayRole,
+    Qt::EditRole });
+}
+
+void DeviceModel::itemAboutToBeAddedObserver(document::data::Item item, int pos)
+{
+  if (item != document::data::Item::DEVICE) {
+    return;
+  }
+  emit beginInsertRows(QModelIndex(), pos, pos);
+}
+
+void DeviceModel::itemAddedObserver(document::data::Item item, int pos)
+{
+  if (item != document::data::Item::DEVICE) {
+    return;
+  }
+  emit endInsertRows();
+}
+
+void DeviceModel::itemAboutToBeRemovedObserver(document::data::Item item,
+    int pos)
+{
+  if (item != document::data::Item::DEVICE) {
+    return;
+  }
+  emit beginRemoveRows(QModelIndex(), pos, pos);
+}
+
+void DeviceModel::itemRemovedObserver(document::data::Item item, int pos)
+{
+  if (item != document::data::Item::DEVICE) {
+    return;
+  }
+  emit endRemoveRows();
 }
 
 }

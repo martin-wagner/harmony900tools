@@ -50,8 +50,10 @@ void RemovePowerOnDevice::redo()
     return;
   }
 
+  emit itemAboutToBeRemoved(Item::ACTIVITY_POWER, devicePos);
   auto &devices = c.getActivities()[activityPos].getPowerOnDevices();
   devices.erase(devices.begin() + devicePos);
+  emit itemRemoved(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 
@@ -61,9 +63,10 @@ void RemovePowerOnDevice::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY_POWER, devicePos);
   auto &devices = c.getActivities()[activityPos].getPowerOnDevices();
   devices.insert(devices.begin() + devicePos, id);
-
+  emit itemAdded(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 
@@ -113,8 +116,10 @@ void RemovePowerOffDevice::redo()
     return;
   }
 
+  emit itemAboutToBeRemoved(Item::ACTIVITY_POWER, devicePos);
   auto &devices = c.getActivities()[activityPos].getPowerOffDevices();
   devices.erase(devices.begin() + devicePos);
+  emit itemRemoved(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 
@@ -124,9 +129,10 @@ void RemovePowerOffDevice::undo()
     return;
   }
 
+  emit itemAboutToBeAdded(Item::ACTIVITY_POWER, devicePos);
   auto &devices = c.getActivities()[activityPos].getPowerOffDevices();
   devices.insert(devices.begin() + devicePos, id);
-
+  emit itemAdded(Item::ACTIVITY_POWER, devicePos);
   emit dirtyChanged(true);
 }
 

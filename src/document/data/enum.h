@@ -60,6 +60,8 @@ class Enum
 
   public:
     Enum(const std::string &s);
+    Enum(const QString &s) : Enum(s.toStdString()) {};
+    Enum(const char *s) : Enum(std::string(s)) {}
     Enum(T v);
 
     static bool isEnumValue(std::string s);

@@ -71,16 +71,11 @@ class Config : public QObject
     void writeMsg(const QString &message) const;
 
     //model observers
-    void deviceChanged(uint32_t pos);
-    void deviceAboutToBeAdded(uint32_t pos);
-    void deviceAdded(uint32_t pos);
-    void deviceAboutToBeRemoved(uint32_t pos);
-    void deviceRemoved(uint32_t pos);
-    void activityChanged(uint32_t pos);
-    void activityAboutToBeAdded(uint32_t pos);
-    void activityAdded(uint32_t pos);
-    void activityAboutToBeRemoved(uint32_t pos);
-    void activityRemoved(uint32_t pos);
+    void itemChanged(data::Item item, uint32_t pos);
+    void itemAboutToBeAdded(data::Item item, uint32_t pos);
+    void itemAdded(data::Item item, uint32_t pos);
+    void itemAboutToBeRemoved(data::Item item, uint32_t pos);
+    void itemRemoved(data::Item item, uint32_t pos);
     void dirtyChanged(bool dirty);
 
   protected:

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "document/data/catalogue.h"
 #include "base.h"
 
 namespace document
@@ -82,6 +83,12 @@ class DeviceModel: public QAbstractItemModel
     QVariant getForegroundData(const QModelIndex &index) const;
     QVariant getSelectionItemsData(const QModelIndex &index) const;
 
+  private slots:
+    void itemChangedObserver(document::data::Item item, int pos);
+    void itemAboutToBeAddedObserver(document::data::Item item, int pos);
+    void itemAddedObserver(document::data::Item item, int pos);
+    void itemAboutToBeRemovedObserver(document::data::Item item, int pos);
+    void itemRemovedObserver(document::data::Item item, int pos);
 };
 
 }

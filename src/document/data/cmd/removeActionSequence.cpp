@@ -15,7 +15,7 @@ RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
     item::StateMachineAction t, uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Remove Sequence from Action/SM (device: %1)").arg(
-            devicePos), parent)
+            devicePos), parent), item(Item::DEVICE_STATEMACHINE), itemPos(smPos)
 {
   auto *act = getActionFromSmRef(c, devicePos, smPos, t, actPos);
   if (act == nullptr) {
@@ -38,7 +38,7 @@ RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCommand(
     uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Remove Sequence from Action/NUM (device: %1)").arg(
-            devicePos), parent)
+            devicePos), parent), item(Item::DEVICE_NUMPAD), itemPos(0)
 {
   auto *act = getActionFromNumpadRef(c, devicePos, s, digit);
   if (act == nullptr) {
@@ -61,7 +61,8 @@ document::data::RemoveDeviceActionSequenceCommand::RemoveDeviceActionSequenceCom
     uint32_t actionPos, uint32_t seqPos, QUndoCommand *parent) :
     BaseCommand(
         QObject::tr("Remove Sequence from Action (activity:  %1)").arg(
-            activityPos), parent)
+            activityPos), parent), item(Item::ACTIVITY_ACTION), itemPos(
+        activityPos)
 {
   auto *action = getActionFromActivity(c, activityPos, t, actionPos);
   if (action == nullptr) {
@@ -87,6 +88,7 @@ void RemoveDeviceActionSequenceCommand::redo()
 
   auto &seq = getSeq();
   seq.erase(seq.begin() + seqPos);
+  emit itemChanged(item, itemPos);
   emit dirtyChanged(true);
 }
 
@@ -98,6 +100,7 @@ void RemoveDeviceActionSequenceCommand::undo()
 
   auto &seq = getSeq();
   seq.insert(seq.begin() + seqPos, sequenceItem);
+  emit itemChanged(item, itemPos);
   emit dirtyChanged(true);
 }
 

@@ -36,6 +36,8 @@ class AddActionSequenceCommand: public BaseCommand
     bool isValid = false;
     int seqPos;
     std::function<std::vector<item::SequenceItem>&()> getSeq;
+    Item item;
+    uint32_t itemPos;
 };
 
 

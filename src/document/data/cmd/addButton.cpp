@@ -36,8 +36,11 @@ void AddDeviceButtonCommand::redo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeAdded(Item::DEVICE_BUTTON, buttonPos);
   auto &buttons = c.getDevices()[devicePos].getButtons();
   buttons.insert(buttons.begin() + buttonPos, item::Button(type));
+  emit itemAdded(Item::DEVICE_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
@@ -46,8 +49,11 @@ void AddDeviceButtonCommand::undo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeRemoved(Item::DEVICE_BUTTON, buttonPos);
   auto &buttons = c.getDevices()[devicePos].getButtons();
   buttons.erase(buttons.begin() + buttonPos);
+  emit itemRemoved(Item::DEVICE_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
@@ -83,8 +89,11 @@ void AddActivityButtonCommand::redo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeAdded(Item::ACTIVITY_BUTTON, buttonPos);
   auto &buttons = c.getActivities()[activityPos].getButtons();
   buttons.insert(buttons.begin() + buttonPos, item::Button(type));
+  emit itemAdded(Item::ACTIVITY_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
@@ -93,8 +102,11 @@ void AddActivityButtonCommand::undo()
   if (!isValid) {
     return;
   }
+
+  emit itemAboutToBeRemoved(Item::ACTIVITY_BUTTON, buttonPos);
   auto &buttons = c.getActivities()[activityPos].getButtons();
   buttons.erase(buttons.begin() + buttonPos);
+  emit itemRemoved(Item::ACTIVITY_BUTTON, buttonPos);
   emit dirtyChanged(true);
 }
 
