@@ -2,6 +2,7 @@
 *.x
 build/*
 src_external/*
+out/*
 
 # Prerequisites
 *.d

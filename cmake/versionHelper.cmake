@@ -92,5 +92,6 @@ endif()
 # ---------- generate files ----------
 configure_file(${HEADER_TEMPLATE} ${HEADER_OUTPUT} @ONLY)
 configure_file(${CMAKE_TEMPLATE}  ${CMAKE_OUTPUT}  @ONLY)
+configure_file(${ENV_TEMPLATE}    ${ENV_OUTPUT}    @ONLY)
 
 message(STATUS "Version: ${VERSION_FULL}  dirty=${GIT_DIRTY}  os=${HOST_OS}  user=${BUILD_USER}")
