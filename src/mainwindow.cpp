@@ -469,6 +469,16 @@ void MainWindow::readSettings()
     restoreGeometry(geometry);
     restoreState(qsettings.value("window").toByteArray());
   }
+
+  //todo add setting for this. windows default skin is still windows95 style
+#ifdef _WIN32
+  auto availableStyles = QStyleFactory::keys();
+  if (availableStyles.contains("windows11", Qt::CaseInsensitive)) {
+      QApplication::setStyle("windows11");
+  } else if (availableStyles.contains("fusion", Qt::CaseInsensitive)) {
+      QApplication::setStyle("fusion");
+  }
+#endif
 }
 
 void MainWindow::writeSettings()

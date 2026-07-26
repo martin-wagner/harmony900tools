@@ -99,7 +99,8 @@
 			</target>
 			<target name="_cmake" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
-				<buildArguments>-DCMAKE_BUILD_TYPE=Release ../../..</buildArguments>
+				<buildArguments>-DCMAKE_BUILD_TYPE=Release ../../.. -DCMAKE_INSTALL_PREFIX=./install</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -132,9 +133,9 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="h900tool" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="h900edit" path="build/release/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments>h900tool -j16</buildArguments>
+				<buildArguments>h900edit -j16</buildArguments>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -170,7 +171,8 @@
 			</target>
 			<target name="_cmake" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
-				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..</buildArguments>
+				<buildArguments>-DCMAKE_BUILD_TYPE=Debug ../../..  -DCMAKE_INSTALL_PREFIX=./install</buildArguments>
+				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -203,16 +205,16 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="h900tool_singlecore" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="h900edit_singlecore" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments>h900tool</buildArguments>
+				<buildArguments>h900edit</buildArguments>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="h900tool" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="h900edit" path="build/debug/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments>h900tool -j16</buildArguments>
+				<buildArguments>h900edit -j16</buildArguments>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
@@ -242,7 +244,6 @@
 			<target name="run_tests" path="build/test/host" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
 				<buildArguments>-c "cmake -DCMAKE_BUILD_TYPE=Test ../../.. &amp;&amp; make -j16 &amp;&amp; ctest --output-on-failure"</buildArguments>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
@@ -296,9 +297,9 @@
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="h900tool" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="h900edit" path="build/release/x86-64-windows" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>sh</buildCommand>
-				<buildArguments>-c "export PATH=/opt/mxe/usr/bin:$PATH &amp;&amp; make h900tool -j16"</buildArguments>
+				<buildArguments>-c "export PATH=/opt/mxe/usr/bin:$PATH &amp;&amp; make h900edit -j16"</buildArguments>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>

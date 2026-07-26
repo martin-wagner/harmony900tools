@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(
-  harmony900
+  h900tools
   LANGUAGES CXX C
 )
 
@@ -40,7 +40,7 @@ include(nlohmann_json.cmake)
 include(pugixml.cmake)
 include(magic_enum.cmake)
 include(zlib.cmake)
-include(version.cmake)
+include(versioninfo.cmake)
 
 # add project
 if(NOT INCLUDE_UNIT_TESTING)
