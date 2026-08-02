@@ -46,23 +46,25 @@ class Button
     /** for export activity */
     const std::string getActionId() const
     {
-      return getActionId(action.get());
+      return getActionId(device.get(), action.get());
     }
-    static std::string getActionId(const std::string &action)
+    static std::string getActionId(const std::string &device, const std::string &action)
     {
-      return action + std::string(ACTION_POSTFIX);
+      return device + "_" + action + std::string(ACTION_POSTFIX);
     }
 
     /** for import */
-    static std::string getActionDevice(const std::string &aid);
+    static std::string getAction(const std::string &aid);
     /** for import */
-    static std::string getActionActivity(const std::string &aid);
+    static uint32_t getDevice(const std::string &aid);
 
     /** command that will be sent on press. Device -- name, Activity -- ID_name */
     PropertyString action{"act"};
+    /** only activity: device ID that contains command */
+    PropertyU32 device{ 0, Used::NO} ;
     /** hard button: name, soft button: label */
     PropertyString name{"Generic", Used::NO};
-    /** only soft button: channel icon */
+    /** only soft button: button icon */
     PropertyString file{"0.png", Used::NO};
     /** only soft button: position on lcd, starting at 0. 6 devices per page, so 7 -> pos 0 on second page */
     PropertyI32 position{0, Used::NO};

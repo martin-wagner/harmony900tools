@@ -185,9 +185,10 @@ class CmdCatalogue : public QObject
     bool addActivityButtonCommand(item::ButtonType t, uint32_t activityPos, int buttonPos);
     bool removeActivityButtonCommand(uint32_t activityPos, int buttonPos);
     bool setActivityButtonAction(const std::string &v, uint32_t activityPos, int buttonPos);
+    bool setActivityButtonDevice(uint32_t v, uint32_t activityPos, int buttonPos);
     bool setActivityButtonName(const std::string &v, uint32_t activityPos, int buttonPos);
     bool setActivityButtonFile(const std::string &v, uint32_t activityPos, int buttonPos);
-    bool setActivityButtonPosition(const int32_t &v, uint32_t activityPos, int buttonPos);
+    bool setActivityButtonPosition(const int32_t v, uint32_t activityPos, int buttonPos);
     //activity actions
     bool addActivityActionCommand(uint32_t activityPos, item::ActivityAction t, int actionPos);
     bool removActivityActionCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos);

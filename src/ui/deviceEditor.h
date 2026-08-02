@@ -22,7 +22,7 @@ namespace editors
 {
 
 /**
- * @brief Flat device list editor with a toolbar for CRUD and reorder operations.
+ * @brief Flat device list editor with a toolbar for CRUDs.
  *
  * Wraps a DeviceModel in a QTreeView (single-level, alternating colors).
  */

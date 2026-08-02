@@ -488,7 +488,7 @@ bool ConfigH900::readDeviceButton(pugi::xml_node &button,
   if (actionId.empty()) {
     return false;
   }
-  auto action = item::Button::getActionDevice(actionId);
+  auto action = item::Button::getAction(actionId);
   worker->setDeviceButtonAction(action, devicePos, buttonPos);
 
   //hard/soft are different
@@ -1381,8 +1381,10 @@ bool ConfigH900::readActivityButton(pugi::xml_node &button,
   if (actionId.empty()) {
     return false;
   }
-  auto action = item::Button::getActionActivity(actionId);
+  auto action = item::Button::getAction(actionId);
   worker->setActivityButtonAction(action, activityPos, buttonPos);
+  auto device = item::Button::getDevice(actionId);
+  worker->setActivityButtonDevice(device, activityPos, buttonPos);
 
   //hard/soft are different
   auto name = button.attribute("name");

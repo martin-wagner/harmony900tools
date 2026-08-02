@@ -2010,6 +2010,21 @@ bool CmdCatalogue::setActivityButtonAction(const string &v,
   return setProperty<string>(access);
 }
 
+bool CmdCatalogue::setActivityButtonDevice(const uint32_t v,
+    uint32_t activityPos, int buttonPos)
+{
+  PropertyAccess<uint32_t> access =
+      {
+        tr("set button activity device"),
+        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].device.get();},
+        [this, activityPos, buttonPos](
+            const uint32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].device.set(v).setIncluded(Used::YES);},
+        v,
+        Item::ACTIVITY_BUTTON,
+        static_cast<uint32_t>(buttonPos) };
+  return setProperty<uint32_t>(access);
+}
+
 bool CmdCatalogue::setActivityButtonName(const string &v, uint32_t activityPos,
     int buttonPos)
 {
@@ -2040,7 +2055,7 @@ bool CmdCatalogue::setActivityButtonFile(const string &v, uint32_t activityPos,
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setActivityButtonPosition(const int32_t &v,
+bool CmdCatalogue::setActivityButtonPosition(const int32_t v,
     uint32_t activityPos, int buttonPos)
 {
   PropertyAccess<int32_t> access =

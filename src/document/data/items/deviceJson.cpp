@@ -38,6 +38,7 @@ item::ButtonType buttonTypeFromString(const std::string &s)
 
 void toJson(ordered_json &out, const item::Button &button)
 {
+  toJson(out, "Device", button.device);
   toJson(out, "Action", button.action);
   toJson(out, "Name", button.name);
   toJson(out, "File", button.file);
@@ -46,6 +47,7 @@ void toJson(ordered_json &out, const item::Button &button)
 
 void fromJson(const ordered_json &in, item::Button &button)
 {
+  fromJson(in, "Device", button.device);
   fromJson(in, "Action", button.action);
   fromJson(in, "Name", button.name);
   fromJson(in, "File", button.file);
