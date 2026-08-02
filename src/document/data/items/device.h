@@ -38,9 +38,6 @@ class Device
       return id;
     }
 
-    /** get device uid + all command uids */
-    std::set<uint32_t> getAllIds() { return {}; }; //todo
-
     const std::vector<Button>& getButtons() const
     {
       return buttons;

@@ -140,6 +140,8 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
       return worker.setDeviceMnf(value.toString(), row);
     case Column::MODEL:
       return worker.setDeviceModel(value.toString(), row);
+    case Column::NAME:
+      return worker.setDeviceLabel(value.toString(), row);
     default:
       return false;
   }
@@ -251,6 +253,8 @@ QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
         return QString::fromStdString(device.mnf.get());
       case Column::MODEL:
         return QString::fromStdString(device.model.get());
+      case Column::NAME:
+        return QString::fromStdString(device.label.get());
       default:
         break;
     }
@@ -272,6 +276,8 @@ QVariant DeviceModel::getEditData(const QModelIndex &index) const
         return QString::fromStdString(device.mnf.get());
       case Column::MODEL:
         return QString::fromStdString(device.model.get());
+      case Column::NAME:
+        return QString::fromStdString(device.label.get());
       default:
         break;
     }
