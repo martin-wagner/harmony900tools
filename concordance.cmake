@@ -139,8 +139,7 @@ ExternalProject_Add(concordance_exe
         COMMAND "${EXTERNAL_SRC_DIR}/concordance/configure"
                     --prefix=${CONCORDANCE_INSTALL}
                     CFLAGS=-I${LIBCONCORD_INSTALL}/include
-                    LDFLAGS=-L${LIBCONCORD_INSTALL}/lib
-                    LDFLAGS=-L${LIBCONCORD_INSTALL}/bin
+                    LDFLAGS=-L${LIBCONCORD_INSTALL}/lib\ -L${LIBCONCORD_INSTALL}/bin
                     ${AUTOTOOLS_HOST_FLAG}
 
     BUILD_COMMAND
