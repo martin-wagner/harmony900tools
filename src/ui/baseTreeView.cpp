@@ -6,6 +6,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QEvent>
 
 #include "baseTreeView.h"
 
@@ -19,6 +20,7 @@ BaseTreeView::BaseTreeView(Context &ctx, const QString &title, QWidget *parent) 
 {
   createView(title);
   createConnections();
+  createEventFilter();
 }
 
 BaseTreeView::~BaseTreeView() = default;
@@ -32,9 +34,10 @@ void BaseTreeView::addRow()
   }
   row = getCurrentRow();
   if (row < 0) {
-    row = treeView->model()->rowCount();
+    model->insertRows(treeView->model()->rowCount(), 1);
+  } else {
+    model->insertRows(row + 1, 1);
   }
-  model->insertRows(row, 1);
 }
 
 void BaseTreeView::removeRow()
@@ -55,6 +58,20 @@ bool BaseTreeView::canRemove() const
   return (model != nullptr) && (row >= 0);
 }
 
+bool BaseTreeView::hasSelection() const
+{
+  const int row = getCurrentRow();
+  if ((model == nullptr) || (row < 0)) {
+    return false;
+  }
+  return true;
+}
+
+bool BaseTreeView::isActive() const
+{
+  return treeView->hasFocus();
+}
+
 void BaseTreeView::onViewSelectionChanged(const QItemSelection &selected,
     const QItemSelection &deselected)
 {
@@ -72,6 +89,16 @@ void BaseTreeView::onViewSelectionChanged(const QItemSelection &selected,
 void BaseTreeView::onModelRowCountChanged()
 {
   emit availabilityChanged();
+}
+
+bool BaseTreeView::eventFilter(QObject *object, QEvent *event)
+{
+  if ((event->type() == QEvent::FocusIn)
+      || (event->type() == QEvent::MouseButtonPress)) {
+    emit activated(this);
+  }
+
+  return QWidget::eventFilter(object, event);
 }
 
 void BaseTreeView::bindModel(QAbstractItemModel *model)
@@ -147,6 +174,16 @@ void BaseTreeView::setupTreeView()
   treeView->header()->setStretchLastSection(true);
   treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
 
+  // default styles often don't distinguish Active/Inactive selection, so
+  // an unfocused tree view's selected row still looks "active"; grey it
+  // out explicitly using the Disabled palette's highlight colors.
+  auto palette = treeView->palette();
+  palette.setColor(QPalette::Inactive, QPalette::Highlight,
+      palette.color(QPalette::Disabled, QPalette::Highlight));
+  palette.setColor(QPalette::Inactive, QPalette::HighlightedText,
+      palette.color(QPalette::Disabled, QPalette::HighlightedText));
+  treeView->setPalette(palette);
+
   treeView->setEditTriggers(
       QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
 }
@@ -157,6 +194,18 @@ void BaseTreeView::createConnections()
       &BaseTreeView::onUserLevelChanged);
   connect(&ctx.settings(), &Settings::settingsAccepted, this,
       &BaseTreeView::onSettingsChanged);
+
+}
+
+void BaseTreeView::createEventFilter()
+{
+  installEventFilter(this);
+
+  const QList<QWidget*> children = findChildren<QWidget*>();
+
+  for (QWidget *child : children) {
+    child->installEventFilter(this);
+  }
 }
 
 } // namespace editors

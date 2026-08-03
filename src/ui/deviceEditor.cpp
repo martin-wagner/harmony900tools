@@ -34,20 +34,18 @@ void DeviceEditor::setModel(models::DeviceModel *model)
 
 void DeviceEditor::onAddClicked()
 {
-  auto *view = getActiveView();
-  if (view == nullptr) {
+  if (lastActiveView == nullptr) {
     return;
   }
-  view->addRow();
+  lastActiveView->addRow();
 }
 
 void DeviceEditor::onRemoveClicked()
 {
-  auto *view = getActiveView();
-  if (view == nullptr) {
+  if (lastActiveView == nullptr) {
     return;
   }
-  view->removeRow();
+  lastActiveView->removeRow();
 }
 
 void DeviceEditor::onAvailabilityChanged()
@@ -60,6 +58,8 @@ void DeviceEditor::onDeviceSelectionChanged(int row)
   auto deviceId = deviceView->getCurrentDeviceId();
 
   updateHardButtonView(deviceId);
+
+  updateActions();
 
   emit selectionChanged(deviceId);
 }
@@ -81,19 +81,6 @@ void DeviceEditor::createView()
   childViews.append(hardButtonView);
 }
 
-BaseTreeView* DeviceEditor::getActiveView()
-{
-  if (deviceView->hasFocus()) {
-    return deviceView;
-  }
-  for (auto *childView : childViews) {
-    if (childView->hasFocus()) {
-      return childView;
-    }
-  }
-  return nullptr;
-}
-
 void DeviceEditor::setupToolbar()
 {
   toolbar = new QToolBar(this);
@@ -104,7 +91,8 @@ void DeviceEditor::setupToolbar()
   actionAdd = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
           "list-add"), tr("Add"));
-  actionAdd->setToolTip(tr("Add a new entry"));
+  actionAdd->setToolTip(tr("Add a new entry to the selected list. Click into\n"
+      "the empty space to select for adding the first item."));
 
   actionRemove = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
@@ -126,21 +114,30 @@ void DeviceEditor::createConnections()
       &DeviceEditor::onAvailabilityChanged);
   connect(deviceView, &DeviceTreeView::selectionChanged, this,
       &DeviceEditor::onDeviceSelectionChanged);
+  connect(deviceView, &DeviceTreeView::activated, this,
+      [this](BaseTreeView *view) {
+        lastActiveView = view;
+      });
 
   for (auto *childView : childViews) {
     connect(childView, &BaseTreeView::availabilityChanged, this,
         &DeviceEditor::onAvailabilityChanged);
+    connect(childView, &BaseTreeView::activated, this,
+        [this](BaseTreeView *view) {
+          lastActiveView = view;
+        });
   }
 }
 
 void DeviceEditor::updateActions()
 {
-  auto *view = getActiveView();
-  if (view == nullptr) {
+  if (lastActiveView == nullptr) {
+    actionAdd->setEnabled(false);
     actionRemove->setEnabled(false);
     return;
   }
-  actionRemove->setEnabled(view->canRemove());
+  actionAdd->setEnabled(true);
+  actionRemove->setEnabled(lastActiveView->canRemove());
 }
 
 void DeviceEditor::updateHardButtonView(uint32_t deviceId)

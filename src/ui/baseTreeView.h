@@ -42,6 +42,12 @@ class BaseTreeView: public QWidget
     /** whether a row is currently selected and can be removed */
     bool canRemove() const;
 
+    /** check wether an item is selected */
+    bool hasSelection() const;
+
+    /** check for the tree being active */
+    bool isActive() const;
+
   signals:
     /** Emitted whenever the selection changes. row == -1
       * when nothing is selected.*/
@@ -49,6 +55,9 @@ class BaseTreeView: public QWidget
 
     /** Emitted whenever add/remove availability may have changed. */
     void availabilityChanged();
+
+    /** Emitted when this view has a selection event */
+    void activated(BaseTreeView *view);
 
   protected slots:
     void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -59,10 +68,14 @@ class BaseTreeView: public QWidget
     virtual void onSettingsChanged() {};
 
   protected:
+      bool eventFilter(QObject *object, QEvent *event) override;
+
+  protected:
     Context &ctx;
 
     QAbstractItemModel *model = nullptr;
 
+    QLabel *header = nullptr;
     QTreeView *treeView = nullptr;
 
     /** connect to the new model's rowsInserted/rowsRemoved and the
@@ -72,11 +85,11 @@ class BaseTreeView: public QWidget
     int getCurrentRow() const;
 
   private:
-    QLabel *header = nullptr;
-
-  void createView(const QString &title);
+    void createView(const QString &title);
     void setupTreeView();
     void createConnections();
+    void createEventFilter();
+
 };
 
 } // namespace editors

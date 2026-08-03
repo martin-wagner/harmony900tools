@@ -65,6 +65,8 @@ class DeviceEditor: public QWidget
     /** all child views, in display order */
     DeviceHardButtonTreeView *hardButtonView = nullptr;
     QList<BaseTreeView *> childViews;
+    /** last active view (of device and child views) */
+    BaseTreeView *lastActiveView = nullptr;
     //models
     models::DeviceHardButtonModel *hardButtonModel = nullptr;
 
@@ -73,7 +75,6 @@ class DeviceEditor: public QWidget
     QAction *actionRemove = nullptr;
 
     void createView();
-    BaseTreeView *getActiveView();
     void setupToolbar();
     void createConnections();
     void updateActions();

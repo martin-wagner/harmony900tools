@@ -111,6 +111,8 @@ bool ButtonBaseModel::insertRows(int position, int rows,
     }
   }
 
+  //todo fill the row with data that is not plainly invalid
+
   config.endMacro();
 
   return success;
