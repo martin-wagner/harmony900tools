@@ -58,7 +58,7 @@ class ButtonBaseModel: public QAbstractItemModel
     const std::map<Column, Setup> columnSetup = {
         { Column::DEVICE,        { "Device",   "Device to use for this button", "int", false,  {}, } },
         { Column::COMMAND,       { "Command",  "The IR command you want to send", "Enum", false, {}, } },
-        { Column::BUTTON,        { "Button",   "Use this button on the remote", "Enum", false, {}, } },
+        { Column::BUTTON,        { "Button",   "Link to this button on the remote", "Enum", false, {}, } },
         { Column::NAME,          { "Name",     "Name on the screen", "QString", false, {}, } },
         { Column::ICON,          { "Icon",     "Use this icon instead of name", "Enum", false, {QVariant(icons)}, } },
         { Column::POSITION,      { "Position", "Where to place the button on the screen", "Enum", false, {}, } },

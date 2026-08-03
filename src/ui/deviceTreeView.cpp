@@ -12,7 +12,7 @@ namespace editors
 {
 
 DeviceTreeView::DeviceTreeView(Context &ctx, QWidget *parent) :
-    BaseTreeView(ctx, parent)
+    BaseTreeView(ctx, QString(), parent)
 {
   setupDelegates();
 }

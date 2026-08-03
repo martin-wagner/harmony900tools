@@ -5,6 +5,7 @@
 #include <QItemSelectionModel>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QLabel>
 
 #include "baseTreeView.h"
 
@@ -13,10 +14,10 @@ using namespace std;
 namespace editors
 {
 
-BaseTreeView::BaseTreeView(Context &ctx, QWidget *parent) :
+BaseTreeView::BaseTreeView(Context &ctx, const QString &title, QWidget *parent) :
     ctx(ctx)
 {
-  createView();
+  createView(title);
   createConnections();
 }
 
@@ -115,11 +116,19 @@ int BaseTreeView::getCurrentRow() const
   return selected.first().row();
 }
 
-void BaseTreeView::createView()
+void BaseTreeView::createView(const QString &title)
 {
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
+
+  if (!title.isEmpty()) {
+    header = new QLabel(title, this);
+    auto font = header->font();
+    font.setBold(true);
+    header->setFont(font);
+    layout->addWidget(header);
+  }
 
   setupTreeView();
   layout->addWidget(treeView);

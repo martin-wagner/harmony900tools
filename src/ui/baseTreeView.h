@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include <QString>
 #include <QWidget>
 
 #include "context.h"
 
 class QAbstractItemModel;
 class QItemSelection;
+class QLabel;
 class QTreeView;
 
 namespace editors
@@ -25,7 +27,7 @@ class BaseTreeView: public QWidget
   Q_OBJECT
 
   public:
-    explicit BaseTreeView(Context &ctx, QWidget *parent = nullptr);
+    explicit BaseTreeView(Context &ctx, const QString &title = QString(), QWidget *parent = nullptr);
     ~BaseTreeView() override;
 
     /** set the model, nullptr  */
@@ -70,7 +72,9 @@ class BaseTreeView: public QWidget
     int getCurrentRow() const;
 
   private:
-    void createView();
+    QLabel *header = nullptr;
+
+  void createView(const QString &title);
     void setupTreeView();
     void createConnections();
 };
