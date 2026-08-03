@@ -2,6 +2,7 @@
 
 #include "document/config.h"
 #include "deviceListModel.h"
+#include "lib/qtHelpers.h"
 
 using namespace std;
 
@@ -11,9 +12,6 @@ namespace models
 DeviceModel::DeviceModel(document::Config &config, QObject *parent) :
     QAbstractItemModel(parent), config(config)
 {
-  for (auto &item : columnSetup) {
-    header.push_back(item.second.name);
-  }
   createActions();
 }
 
@@ -53,7 +51,7 @@ QVariant DeviceModel::headerData(int section, Qt::Orientation orientation,
     return {};
   }
   try {
-    return header.at(section);
+    return columnSetup.at(static_cast<Column>(section)).name;
   } catch (...) {
   }
   return {};
@@ -87,7 +85,7 @@ int DeviceModel::rowCount(const QModelIndex &parent) const
 
 int DeviceModel::columnCount(const QModelIndex &parent) const
 {
-  return header.size();
+  return columnSetup.size();
 }
 
 Qt::ItemFlags DeviceModel::flags(const QModelIndex &index) const

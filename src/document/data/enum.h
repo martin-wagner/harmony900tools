@@ -44,6 +44,10 @@ enum class ActivityStartPage { Transport, Numbers, GameController, Unknown };
 enum class ChannelButtonBehaviour { BasicChannels, Unknown };
 enum class GuideButtonMode { TunerProgramGuide, Unknown };
 enum class MediaButtonMode { ShowMedia, Unknown };
+enum class HardButtons { Menu, Exit, UpArrow,  DownArrow,  Info,  Guide,  Red,  Green,  Yellow,  Blue,  VolumeUp,  VolumeDown,
+    DirectionLeft,  DirectionUp,  DirectionRight,  DirectionDown,  Select,  ChannelUp,  ChannelDown,  VolumeMute,  PrevChannel,
+    Rewind,  SkipBack,  Record,  Play,  Pause,  FastForward,  SkipForward,  Stop,  Number1,  Number2,  Number3,  Number4,
+    Number5,  Number6,  Number7,  Number8,  Number9,  NumberPlus,  Number0, NumberEnter, Unknown };
 
 //non-remote enums
 enum class CodeType { Nec, PhilipsRc5, PhilipsRc6, Sony, Panasonic, Samsung, Lg, Jvc, Sharp, Denon, Pioneer, None, Unknown };
@@ -118,6 +122,7 @@ template class Enum<ActivityStartPage>;
 template class Enum<ChannelButtonBehaviour>;
 template class Enum<GuideButtonMode>;
 template class Enum<MediaButtonMode>;
+template class Enum<HardButtons>;
 template class Enum<CodeType>;
 
 }

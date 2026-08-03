@@ -1,0 +1,153 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#include <QAbstractItemModel>
+#include <QHeaderView>
+#include <QItemSelectionModel>
+#include <QTreeView>
+#include <QVBoxLayout>
+
+#include "baseTreeView.h"
+
+using namespace std;
+
+namespace editors
+{
+
+BaseTreeView::BaseTreeView(Context &ctx, QWidget *parent) :
+    ctx(ctx)
+{
+  createView();
+  createConnections();
+}
+
+BaseTreeView::~BaseTreeView() = default;
+
+void BaseTreeView::addRow()
+{
+  int row;
+
+  if (model == nullptr) {
+    return;
+  }
+  row = getCurrentRow();
+  if (row < 0) {
+    row = treeView->model()->rowCount();
+  }
+  model->insertRows(row, 1);
+}
+
+void BaseTreeView::removeRow()
+{
+  if (model == nullptr) {
+    return;
+  }
+  const int row = getCurrentRow();
+  if (row < 0) {
+    return;
+  }
+  model->removeRows(row, 1);
+}
+
+bool BaseTreeView::canRemove() const
+{
+  const int row = getCurrentRow();
+  return (model != nullptr) && (row >= 0);
+}
+
+void BaseTreeView::onViewSelectionChanged(const QItemSelection &selected,
+    const QItemSelection &deselected)
+{
+  emit availabilityChanged();
+
+  if (selected.isEmpty()) {
+    emit selectionChanged(-1);
+    return;
+  }
+
+  auto row = selected.indexes().first().row();
+  emit selectionChanged(row);
+}
+
+void BaseTreeView::onModelRowCountChanged()
+{
+  emit availabilityChanged();
+}
+
+void BaseTreeView::bindModel(QAbstractItemModel *model)
+{
+  if (this->model != nullptr) {
+    disconnect(this->model, &QAbstractItemModel::rowsInserted, this,
+        &BaseTreeView::onModelRowCountChanged);
+    disconnect(this->model, &QAbstractItemModel::rowsRemoved, this,
+        &BaseTreeView::onModelRowCountChanged);
+  }
+  if (treeView->selectionModel() != nullptr) {
+    disconnect(treeView->selectionModel(),
+        &QItemSelectionModel::selectionChanged, this,
+        &BaseTreeView::onViewSelectionChanged);
+  }
+
+  this->model = model;
+  treeView->setModel(model);
+
+  if (model != nullptr) {
+    connect(model, &QAbstractItemModel::rowsInserted, this,
+        &BaseTreeView::onModelRowCountChanged);
+    connect(model, &QAbstractItemModel::rowsRemoved, this,
+        &BaseTreeView::onModelRowCountChanged);
+  }
+
+  if (treeView->selectionModel() != nullptr) {
+    connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
+        this, &BaseTreeView::onViewSelectionChanged);
+  }
+
+  emit availabilityChanged();
+  emit selectionChanged(-1);
+}
+
+int BaseTreeView::getCurrentRow() const
+{
+  const QModelIndexList selected = treeView->selectionModel()->selectedRows();
+  if (selected.isEmpty()) {
+    return -1;
+  }
+  return selected.first().row();
+}
+
+void BaseTreeView::createView()
+{
+  auto *layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(0);
+
+  setupTreeView();
+  layout->addWidget(treeView);
+}
+
+void BaseTreeView::setupTreeView()
+{
+  treeView = new QTreeView(this);
+
+  treeView->setRootIsDecorated(false);
+  treeView->setAlternatingRowColors(true);
+  treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+  treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  treeView->setUniformRowHeights(true);
+  treeView->setDragDropMode(QAbstractItemView::NoDragDrop);
+  treeView->header()->setStretchLastSection(true);
+  treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+
+  treeView->setEditTriggers(
+      QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+}
+
+void BaseTreeView::createConnections()
+{
+  connect(&ctx.userLevel(), &lib::UserLevel::levelChanged, this,
+      &BaseTreeView::onUserLevelChanged);
+  connect(&ctx.settings(), &Settings::settingsAccepted, this,
+      &BaseTreeView::onSettingsChanged);
+}
+
+} // namespace editors

@@ -27,8 +27,8 @@ class ConfigData
     const std::vector<item::Activity>& getActivities() const;
     std::vector<item::Activity>& getActivities();
 
-    const item::Activity* getActivity(uint32_t idx, uint32_t *pos = nullptr) const;
-    item::Activity* getActivity(uint32_t idx, uint32_t *pos = nullptr);
+    const item::Activity* getActivity(uint32_t id, uint32_t *pos = nullptr) const;
+    item::Activity* getActivity(uint32_t id, uint32_t *pos = nullptr);
 
     const std::vector<item::Blob>& getBlobs() const;
     std::vector<item::Blob>& getBlobs();
@@ -42,10 +42,11 @@ class ConfigData
     const std::vector<item::Device>& getDevices() const;
     std::vector<item::Device>& getDevices();
 
-    const item::Device* getDevice(uint32_t idx, uint32_t *pos = nullptr) const;
-    item::Device* getDevice(uint32_t idx, uint32_t *pos = nullptr);
+    const item::Device* getDevice(uint32_t id, uint32_t *pos = nullptr) const;
+    item::Device* getDevice(uint32_t id, uint32_t *pos = nullptr);
 
     const std::vector<uint32_t> getDeviceIds() const;
+    const std::vector<std::string> getDeviceLabels() const;
 
     bool isIgnoreDeviceLimit() const;
     bool& isIgnoreDeviceLimit();

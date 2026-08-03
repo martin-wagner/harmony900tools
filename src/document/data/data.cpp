@@ -27,10 +27,10 @@ std::vector<item::Activity>& ConfigData::getActivities()
   return activities;
 }
 
-const item::Activity* ConfigData::getActivity(uint32_t idx, uint32_t *pos) const
+const item::Activity* ConfigData::getActivity(uint32_t id, uint32_t *pos) const
 {
   for (int i = 0; i < activities.size(); i++) {
-    if (activities[i].getId() == idx) {
+    if (activities[i].getId() == id) {
       if (pos != nullptr) {
         *pos = i;
       }
@@ -40,10 +40,10 @@ const item::Activity* ConfigData::getActivity(uint32_t idx, uint32_t *pos) const
   return nullptr;
 }
 
-item::Activity* ConfigData::getActivity(uint32_t idx, uint32_t *pos)
+item::Activity* ConfigData::getActivity(uint32_t id, uint32_t *pos)
 {
   for (int i = 0; i < activities.size(); i++) {
-    if (activities[i].getId() == idx) {
+    if (activities[i].getId() == id) {
       if (pos != nullptr) {
         *pos = i;
       }
@@ -93,11 +93,10 @@ std::vector<item::Device>& ConfigData::getDevices()
   return devices;
 }
 
-const item::Device* ConfigData::getDevice(uint32_t idx,
-    uint32_t *pos) const
+const item::Device* ConfigData::getDevice(uint32_t id, uint32_t *pos) const
 {
   for (int i = 0; i < devices.size(); i++) {
-    if (devices[i].getId() == idx) {
+    if (devices[i].getId() == id) {
       if (pos != nullptr) {
         *pos = i;
       }
@@ -107,10 +106,10 @@ const item::Device* ConfigData::getDevice(uint32_t idx,
   return nullptr;
 }
 
-item::Device* ConfigData::getDevice(uint32_t idx, uint32_t *pos)
+item::Device* ConfigData::getDevice(uint32_t id, uint32_t *pos)
 {
   for (int i = 0; i < devices.size(); i++) {
-    if (devices[i].getId() == idx) {
+    if (devices[i].getId() == id) {
       if (pos != nullptr) {
         *pos = i;
       }
@@ -128,6 +127,16 @@ const vector<uint32_t> ConfigData::getDeviceIds() const
     ids.push_back(device.getId());
   }
   return ids;
+}
+
+const vector<string> ConfigData::getDeviceLabels() const
+{
+  vector<string> labels;
+
+  for (const auto &device : devices) {
+    labels.push_back(device.label.get());
+  }
+  return labels;
 }
 
 bool ConfigData::isIgnoreDeviceLimit() const

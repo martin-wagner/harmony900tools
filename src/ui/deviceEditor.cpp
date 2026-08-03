@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include <QAction>
-#include <QHeaderView>
-#include <QItemSelectionModel>
 #include <QToolBar>
-#include <QTreeView>
 #include <QVBoxLayout>
 
 #include "lib/icon.h"
 #include "deviceEditor.h"
+#include "deviceTreeView.h"
+#include "deviceButtonTreeView.h"
 #include "models/deviceListModel.h"
-#include "delegates/combobox.h"
+#include "models/buttonListModel.h"
 
 using namespace std;
 
@@ -22,7 +21,7 @@ DeviceEditor::DeviceEditor(Context &ctx, models::DeviceModel *model,
     ctx(ctx)
 {
   createView();
-  createActions();
+  createConnections();
   setModel(model);
 }
 
@@ -30,95 +29,39 @@ DeviceEditor::~DeviceEditor() = default;
 
 void DeviceEditor::setModel(models::DeviceModel *model)
 {
-  if (model != nullptr) {
-    disconnect(model, &QAbstractItemModel::rowsInserted, this,
-        &DeviceEditor::onModelRowCountChanged);
-    disconnect(model, &QAbstractItemModel::rowsRemoved, this,
-        &DeviceEditor::onModelRowCountChanged);
-  }
-
-  if (treeView->selectionModel() != nullptr) {
-    disconnect(treeView->selectionModel(),
-        &QItemSelectionModel::selectionChanged, this,
-        &DeviceEditor::onViewSelectionChanged);
-  }
-
-  this->model = model;
-  treeView->setModel(model);
-
-  if (model != nullptr) {
-    connect(model, &QAbstractItemModel::rowsInserted, this,
-        &DeviceEditor::onModelRowCountChanged);
-    connect(model, &QAbstractItemModel::rowsRemoved, this,
-        &DeviceEditor::onModelRowCountChanged);
-  }
-
-  if (treeView->selectionModel() != nullptr) {
-    connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
-        this, &DeviceEditor::onViewSelectionChanged);
-  }
-
-  updateActions();
-  onSettingsChanged();
-  onUserLevelChanged(ctx.userLevel().getLevel());
-  emit selectionChanged(-1, 0);
+  deviceView->setModel(model);
 }
 
-void DeviceEditor::onViewSelectionChanged(const QItemSelection &selected,
-    const QItemSelection &deselected)
+void DeviceEditor::onAddClicked()
 {
-  Q_UNUSED(deselected)
-
-  updateActions();
-
-  if (selected.isEmpty()) {
-    emit selectionChanged(-1, 0);
+  auto *view = getActiveView();
+  if (view == nullptr) {
     return;
   }
-
-  auto row = selected.indexes().first().row();
-  auto idIndex = model->index(row, models::DeviceModel::Column::ID);
-  auto deviceId = model->data(idIndex, Qt::DisplayRole).toUInt();
-
-  emit selectionChanged(row, deviceId);
+  view->addRow();
 }
 
-void DeviceEditor::onAddDevice()
+void DeviceEditor::onRemoveClicked()
 {
-  if (model == nullptr) {
+  auto *view = getActiveView();
+  if (view == nullptr) {
     return;
   }
-  model->insertRows(treeView->model()->rowCount(), 1);
+  view->removeRow();
 }
 
-void DeviceEditor::onRemoveDevice()
-{
-  if (model == nullptr) {
-    return;
-  }
-  const int row = getCurrentRow();
-  if (row < 0) {
-    return;
-  }
-  model->removeRows(row, 1);
-}
-
-void DeviceEditor::onModelRowCountChanged()
+void DeviceEditor::onAvailabilityChanged()
 {
   updateActions();
 }
 
-void DeviceEditor::onUserLevelChanged(lib::UserLevel::Level l)
+void DeviceEditor::onDeviceSelectionChanged(int row)
 {
-  if (lib::UserLevel::validate(l, lib::UserLevel::Level::Developer)) {
-    treeView->showColumn(models::DeviceModel::Column::ID);
-  } else {
-    treeView->hideColumn(models::DeviceModel::Column::ID);
-  }
-}
+  auto deviceId = deviceView->getCurrentDeviceId();
 
-void DeviceEditor::onSettingsChanged()
-{
+  updateHardButtonView(deviceId);
+
+  emit selectionChanged(deviceId);
 }
 
 void DeviceEditor::createView()
@@ -130,8 +73,25 @@ void DeviceEditor::createView()
   setupToolbar();
   layout->addWidget(toolbar);
 
-  setupTreeView();
-  layout->addWidget(treeView);
+  deviceView = new DeviceTreeView(ctx, this);
+  layout->addWidget(deviceView);
+
+  hardButtonView = new DeviceHardButtonTreeView(ctx, this);
+  layout->addWidget(hardButtonView);
+  childViews.append(hardButtonView);
+}
+
+BaseTreeView* DeviceEditor::getActiveView()
+{
+  if (deviceView->hasFocus()) {
+    return deviceView;
+  }
+  for (auto *childView : childViews) {
+    if (childView->hasFocus()) {
+      return childView;
+    }
+  }
+  return nullptr;
 }
 
 void DeviceEditor::setupToolbar()
@@ -144,67 +104,57 @@ void DeviceEditor::setupToolbar()
   actionAdd = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
           "list-add"), tr("Add"));
-  actionAdd->setToolTip(tr("Add a new device"));
+  actionAdd->setToolTip(tr("Add a new entry"));
 
   actionRemove = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
           "edit-delete"), tr("Remove"));
-  actionRemove->setToolTip(tr("Remove the selected device"));
+  actionRemove->setToolTip(tr("Remove the selected entry"));
   actionRemove->setShortcut(QKeySequence::Delete);
-  actionRemove->setShortcutContext(Qt::WidgetShortcut);
+  actionRemove->setShortcutContext(Qt::ApplicationShortcut);
 
   toolbar->addSeparator();
 }
 
-void DeviceEditor::setupTreeView()
+void DeviceEditor::createConnections()
 {
-  treeView = new QTreeView(this);
-
-  treeView->setRootIsDecorated(false);
-  treeView->setAlternatingRowColors(true);
-  treeView->setSelectionMode(QAbstractItemView::SingleSelection);
-  treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-  treeView->setUniformRowHeights(true);
-  treeView->setDragDropMode(QAbstractItemView::NoDragDrop);
-  treeView->header()->setStretchLastSection(true);
-  treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
-  treeView->addAction(actionRemove); //for delete shortcut
-
-  auto *comboBoxDelegate = new delegates::ComboBox(this);
-  treeView->setItemDelegateForColumn(models::DeviceModel::Column::DEVTYPE,
-      comboBoxDelegate);
-
-  treeView->setEditTriggers(
-      QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
-}
-
-int DeviceEditor::getCurrentRow() const
-{
-  const QModelIndexList selected = treeView->selectionModel()->selectedRows();
-  if (selected.isEmpty()) {
-    return -1;
-  }
-  return selected.first().row();
-}
-
-void DeviceEditor::createActions()
-{
-  connect(actionAdd, &QAction::triggered, this, &DeviceEditor::onAddDevice);
+  connect(actionAdd, &QAction::triggered, this, &DeviceEditor::onAddClicked);
   connect(actionRemove, &QAction::triggered, this,
-      &DeviceEditor::onRemoveDevice);
+      &DeviceEditor::onRemoveClicked);
 
-  connect(&ctx.userLevel(), &lib::UserLevel::levelChanged, this,
-      &DeviceEditor::onUserLevelChanged);
-  connect(&ctx.settings(), &Settings::settingsAccepted, this,
-      &DeviceEditor::onSettingsChanged);
+  connect(deviceView, &DeviceTreeView::availabilityChanged, this,
+      &DeviceEditor::onAvailabilityChanged);
+  connect(deviceView, &DeviceTreeView::selectionChanged, this,
+      &DeviceEditor::onDeviceSelectionChanged);
+
+  for (auto *childView : childViews) {
+    connect(childView, &BaseTreeView::availabilityChanged, this,
+        &DeviceEditor::onAvailabilityChanged);
+  }
 }
 
 void DeviceEditor::updateActions()
 {
-  const int row = getCurrentRow();
-  const bool hasSelection = (model != nullptr) && (row >= 0);
-
-  actionRemove->setEnabled(hasSelection);
+  auto *view = getActiveView();
+  if (view == nullptr) {
+    actionRemove->setEnabled(false);
+    return;
+  }
+  actionRemove->setEnabled(view->canRemove());
 }
 
-} // namespace views
+void DeviceEditor::updateHardButtonView(uint32_t deviceId)
+{
+  hardButtonView->setModel(nullptr);
+  if (hardButtonModel != nullptr) {
+    hardButtonModel->deleteLater();
+    hardButtonModel = nullptr;
+  }
+  if (deviceId > 0) {
+    hardButtonModel = new models::DeviceHardButtonModel(*ctx.config(), deviceId,
+        this);
+    hardButtonView->setModel(hardButtonModel);
+  }
+}
+
+} // namespace editors

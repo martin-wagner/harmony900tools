@@ -63,7 +63,6 @@ class ActivityModel: public QAbstractItemModel
 
   private:
     document::Config &config;
-    QStringList header;
 
     void createActions();
 

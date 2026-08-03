@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#pragma once
+
+#include <QWidget>
+#include <QString>
+
+#include "context.h"
+#include "logViewer.h"
+
+class QAction;
+class QItemSelection;
+class QToolBar;
+class QTreeView;
+
+namespace models
+{
+class DeviceHardButtonModel;
+}
+
+namespace editors
+{
+
+/**
+ * @brief Flat button list editor with a toolbar for CRUD and reorder operations.
+ *
+ * Wraps a DeviceModel in a QTreeView (single-level, alternating colors).
+ */
+class DeviceHardButtonEditor: public QWidget
+{
+  Q_OBJECT
+
+  public:
+    explicit DeviceHardButtonEditor(Context &ctx, uint32_t deviceId, models::DeviceHardButtonModel *model, QWidget *parent = nullptr);
+    ~DeviceHardButtonEditor() override;
+
+    /** set new model. nullptr = remove */
+    void setModel(models::DeviceHardButtonModel *model);
+
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
+    /** Emitted whenever the selection changes. row == -1
+      * when nothing is selected.*/
+    void selectionChanged(int row, uint32_t deviceId);
+
+  private slots:
+    void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void onAddButton();
+    void onRemoveButton();
+    void onModelRowCountChanged();
+    void onUserLevelChanged(lib::UserLevel::Level l);
+    void onSettingsChanged();
+
+  private:
+    Context &ctx;
+    uint32_t deviceId;
+
+  private:
+    models::DeviceHardButtonModel *model = nullptr;
+
+    QTreeView *treeView = nullptr;
+    QToolBar *toolbar = nullptr;
+    QAction *actionAdd = nullptr;
+    QAction *actionRemove = nullptr;
+
+    void createView();
+    void setupToolbar();
+    void setupTreeView();
+    void createActions();
+    void updateActions();
+
+    int getCurrentRow() const;
+};
+
+} // namespace views

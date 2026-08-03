@@ -35,6 +35,7 @@ class Context {
     const lib::UserLevel& userLevel() { return userLevel_; }
     lib::UndoStack &undoStack() { return undo_; }
     const Concord* concord() const { return concord_; }
+    document::Config* config() { return config_; }
     const document::Config* config() const { return config_; }
 
   protected:

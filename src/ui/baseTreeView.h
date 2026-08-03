@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#pragma once
+
+#include <QWidget>
+
+#include "context.h"
+
+class QAbstractItemModel;
+class QItemSelection;
+class QTreeView;
+
+namespace editors
+{
+
+/**
+ * @brief Abstract base for flat, per-device/activity child tree views
+ *
+ * Wraps a QTreeView (single-level, alternating colors) for a model that
+ * belongs to one selected device/activity. Assumes owner supplies a toolbar;
+ * add/remove are driven through addRow()/removeRow()/canRemove().
+ */
+class BaseTreeView: public QWidget
+{
+  Q_OBJECT
+
+  public:
+    explicit BaseTreeView(Context &ctx, QWidget *parent = nullptr);
+    ~BaseTreeView() override;
+
+    /** set the model, nullptr  */
+    virtual void setModel(QAbstractItemModel *model) = 0;
+
+    /** insert a new row after the current selection (or at the end) */
+    void addRow();
+
+    /** remove the currently selected row, if any */
+    void removeRow();
+
+    /** whether a row is currently selected and can be removed */
+    bool canRemove() const;
+
+  signals:
+    /** Emitted whenever the selection changes. row == -1
+      * when nothing is selected.*/
+    void selectionChanged(int row);
+
+    /** Emitted whenever add/remove availability may have changed. */
+    void availabilityChanged();
+
+  protected slots:
+    void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void onModelRowCountChanged();
+
+  private slots:
+    virtual void onUserLevelChanged(lib::UserLevel::Level l) {};
+    virtual void onSettingsChanged() {};
+
+  protected:
+    Context &ctx;
+
+    QAbstractItemModel *model = nullptr;
+
+    QTreeView *treeView = nullptr;
+
+    /** connect to the new model's rowsInserted/rowsRemoved and the
+      * treeView's selectionModel. Call from the derived setModel(). */
+    void bindModel(QAbstractItemModel *model);
+
+    int getCurrentRow() const;
+
+  private:
+    void createView();
+    void setupTreeView();
+    void createConnections();
+};
+
+} // namespace editors

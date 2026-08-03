@@ -67,7 +67,7 @@ class Button
     /** only soft button: button icon */
     PropertyString file{"0.png", Used::NO};
     /** only soft button: position on lcd, starting at 0. 6 devices per page, so 7 -> pos 0 on second page */
-    PropertyI32 position{0, Used::NO};
+    PropertyI32 position{-1, Used::NO};
 
   protected:
     ButtonType type;

@@ -11,9 +11,6 @@ namespace models
 ActivityModel::ActivityModel(document::Config &config, QObject *parent) :
     QAbstractItemModel(parent), config(config)
 {
-  for (auto &item : columnSetup) {
-    header.push_back(item.second.name);
-  }
   createActions();
 }
 
@@ -53,7 +50,7 @@ QVariant ActivityModel::headerData(int section, Qt::Orientation orientation,
     return {};
   }
   try {
-    return header.at(section);
+    return columnSetup.at(static_cast<Column>(section)).name;
   } catch (...) {
   }
   return {};
@@ -88,7 +85,7 @@ int ActivityModel::rowCount(const QModelIndex &parent) const
 
 int ActivityModel::columnCount(const QModelIndex &parent) const
 {
-  return header.size();
+  return columnSetup.size();
 }
 
 Qt::ItemFlags ActivityModel::flags(const QModelIndex &index) const

@@ -67,8 +67,6 @@ void ActivityEditor::setModel(models::ActivityModel *model)
 void ActivityEditor::onViewSelectionChanged(const QItemSelection &selected,
     const QItemSelection &deselected)
 {
-  Q_UNUSED(deselected)
-
   updateActions();
 
   if (selected.isEmpty()) {

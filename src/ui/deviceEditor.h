@@ -2,29 +2,34 @@
 
 #pragma once
 
-#include <QWidget>
+#include <QList>
 #include <QString>
+#include <QWidget>
 
 #include "context.h"
 #include "logViewer.h"
 
 class QAction;
-class QItemSelection;
 class QToolBar;
-class QTreeView;
 
 namespace models
 {
 class DeviceModel;
+class DeviceHardButtonModel;
 }
 
 namespace editors
 {
 
+class DeviceTreeView;
+class BaseTreeView;
+class DeviceHardButtonTreeView;
+
 /**
- * @brief Flat device list editor with a toolbar for CRUDs.
+ * @brief Device editor: one toolbar shared by a all members.
  *
- * Wraps a DeviceModel in a QTreeView (single-level, alternating colors).
+ * The toolbar's actions apply to whichever child view currently
+ * has focus.
  */
 class DeviceEditor: public QWidget
 {
@@ -34,43 +39,47 @@ class DeviceEditor: public QWidget
     explicit DeviceEditor(Context &ctx, models::DeviceModel *model, QWidget *parent = nullptr);
     ~DeviceEditor() override;
 
-    /** set new model. nullptr = remove */
+    /** set new device model. nullptr = remove */
     void setModel(models::DeviceModel *model);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    /** Emitted whenever the selection changes. row == -1
+    /** Emitted whenever the device selection changes. row == -1
       * when nothing is selected.*/
-    void selectionChanged(int row, uint32_t deviceId);
+    void selectionChanged(uint32_t deviceId);
 
   private slots:
-    void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void onAddDevice();
-    void onRemoveDevice();
-    void onModelRowCountChanged();
-    void onUserLevelChanged(lib::UserLevel::Level l);
-    void onSettingsChanged();
+    void onAddClicked();
+    void onRemoveClicked();
+    void onAvailabilityChanged();
+    void onDeviceSelectionChanged(int row);
 
   private:
     Context &ctx;
 
   private:
-    models::DeviceModel *model = nullptr;
+    //views
+    DeviceTreeView *deviceView = nullptr;
+    /** all child views, in display order */
+    DeviceHardButtonTreeView *hardButtonView = nullptr;
+    QList<BaseTreeView *> childViews;
+    //models
+    models::DeviceHardButtonModel *hardButtonModel = nullptr;
 
-    QTreeView *treeView = nullptr;
     QToolBar *toolbar = nullptr;
     QAction *actionAdd = nullptr;
     QAction *actionRemove = nullptr;
 
     void createView();
+    BaseTreeView *getActiveView();
     void setupToolbar();
-    void setupTreeView();
-    void createActions();
+    void createConnections();
     void updateActions();
 
-    int getCurrentRow() const;
+    //create model for deviceId
+    void updateHardButtonView(uint32_t deviceId);
 };
 
-} // namespace views
+} // namespace editors
