@@ -209,7 +209,7 @@ void ButtonBaseModel::itemRemovedObserver(document::data::Item item, int pos)
 
 DeviceHardButtonModel::DeviceHardButtonModel(document::Config &config,
     uint32_t deviceId, QObject *parent) :
-    ButtonBaseModel(config, document::data::Item::DEVICE_BUTTON)
+    ButtonBaseModel(config, document::data::Item::DEVICE_HARD_BUTTON)
 {
   device = config.data().getDevice(deviceId, &devicePos);
 }
@@ -268,10 +268,10 @@ bool DeviceHardButtonModel::setData(const QModelIndex &index,
   switch (static_cast<Column>(index.column())) {
     case Column::COMMAND:
       return config.modify().setDeviceButtonAction(
-          value.toString().toStdString(), devicePos, row);
+          value.toString().toStdString(), devicePos, type, row);
     case Column::BUTTON:
       return config.modify().setDeviceButtonName(value.toString().toStdString(),
-          devicePos, row);
+          devicePos, type, row);
     default:
       return false;
   }
@@ -306,18 +306,17 @@ int DeviceHardButtonModel::columnCount(const QModelIndex &parent) const
 
 const vector<document::data::item::Button>& DeviceHardButtonModel::getButtons() const
 {
-  return device->getButtons();
+  return device->getHardButtons();
 }
 
 bool DeviceHardButtonModel::addButton(int row)
 {
-  return config.modify().addDeviceButtonCommand(
-      document::data::item::ButtonType::Hard, devicePos, row);
+  return config.modify().addDeviceButtonCommand(devicePos, type, row);
 }
 
 bool DeviceHardButtonModel::removeButton(int row)
 {
-  return config.modify().removeDeviceButtonCommand(devicePos, row);
+  return config.modify().removeDeviceButtonCommand(devicePos, type, row);
 }
 
 QVariant DeviceHardButtonModel::getDisplayData(const QModelIndex &index) const

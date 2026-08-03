@@ -63,21 +63,21 @@ void toJson(ordered_json &out, const item::Activity &activity)
   out["Id"] = activity.getId();
 
   toJsonVec(out, "Channels", activity.getChannels());
-  for (const auto &button : activity.getButtons()) {
+  for (const auto &button : activity.getHardButtons()) {
     ordered_json buttonJson;
     toJson(buttonJson, button);
-
-    if (button.getButtonType() == item::ButtonType::Soft) {
-      softButtonsArr.push_back(buttonJson);
-    } else {
-      hardButtonsArr.push_back(buttonJson);
-    }
-  }
-  if (!softButtonsArr.empty()) {
-    buttonsObj["Soft"] = softButtonsArr;
+    hardButtonsArr.push_back(buttonJson);
   }
   if (!hardButtonsArr.empty()) {
     buttonsObj["Hard"] = hardButtonsArr;
+  }
+  for (const auto &button : activity.getSoftButtons()) {
+    ordered_json buttonJson;
+    toJson(buttonJson, button);
+    softButtonsArr.push_back(buttonJson);
+  }
+  if (!softButtonsArr.empty()) {
+    buttonsObj["Soft"] = softButtonsArr;
   }
   if (!buttonsObj.empty()) {
     out["Buttons"] = buttonsObj;
@@ -129,15 +129,6 @@ void toJson(ordered_json &out, const item::Activity &activity)
 
 void fromJson(const ordered_json &in, item::Activity &activity)
 {
-  auto readButtons = [&activity](const ordered_json &in,
-      item::ButtonType type) {
-        for (const auto &buttonJson : in) {
-          item::Button button(type);
-          fromJson(buttonJson, button);
-          activity.getButtons().push_back(button);
-        }
-      };
-
   fromJson(in, "Type", activity.type);
   fromJson(in, "Label", activity.label);
 
@@ -179,12 +170,20 @@ void fromJson(const ordered_json &in, item::Activity &activity)
   if (buttonsIt != in.end()) {
     auto softIt = buttonsIt->find("Soft");
     if (softIt != buttonsIt->end()) {
-      readButtons(*softIt, item::ButtonType::Soft);
+      for (const auto &buttonJson : *softIt) {
+        item::Button button;
+        fromJson(buttonJson, button);
+        activity.getSoftButtons().push_back(button);
+      }
     }
 
     auto hardIt = buttonsIt->find("Hard");
     if (hardIt != buttonsIt->end()) {
-      readButtons(*hardIt, item::ButtonType::Hard);
+      for (const auto &buttonJson : *hardIt) {
+        item::Button button;
+        fromJson(buttonJson, button);
+        activity.getHardButtons().push_back(button);
+      }
     }
   }
   fromJsonVec(in, "EnterActions", activity.getEnterActions());

@@ -9,58 +9,28 @@ namespace document
 namespace data
 {
 
-RemoveButtonFromActivityCommand::RemoveButtonFromActivityCommand(
-    const std::set<std::string> &actionIds, uint32_t pos, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Remove button from activity"), parent)
+RemoveDeviceButtonCommand::RemoveDeviceButtonCommand(ConfigData &c,
+    uint32_t devicePos, item::ButtonType t, uint32_t buttonPos,
+    QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Remove Button (from device: %1)").arg(devicePos),
+        parent), c(c), type(t), devicePos(devicePos), buttonPos(buttonPos)
 {
-  // todo implement this!
-}
+  try {
+    // copy Button for undo
+    switch (type) {
+      case item::ButtonType::Hard:
+        button = c.getDevices().at(devicePos).getHardButtons().at(buttonPos);
+        break;
+      case item::ButtonType::Soft:
+        button = c.getDevices().at(devicePos).getSoftButtons().at(buttonPos);
+        break;
+      default:
+        return;
+    }
+    isValid = true;
 
-void RemoveButtonFromActivityCommand::redo()
-{
-}
-
-void RemoveButtonFromActivityCommand::undo()
-{
-}
-
-RemoveDeviceButtonCommand::RemoveDeviceButtonCommand(ConfigData &c, uint32_t devicePos,
-    uint32_t buttonPos, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Remove Button (from device: %1)").arg(devicePos), parent), c(
-        c), devicePos(devicePos), buttonPos(buttonPos), button(
-        item::ButtonType::Hard)
-{
-  uint32_t buttonCount;
-
-  if (devicePos >= c.getDevices().size()) {
-    //beyond end
-    return;
+  } catch (std::out_of_range&) {
   }
-  buttonCount = c.getDevices()[devicePos].getButtons().size();
-  if (buttonPos >= buttonCount) {
-    return;
-  }
-
-  // copy Button for undo
-  button = c.getDevices()[devicePos].getButtons()[buttonPos];
-  // add activities for undo
-  for (auto &a : c.getActivities()) {
-//    auto *cmd = new RemoveButtonFromActivityCommand(ids, a, this);
-//
-//    connect(cmd, &RemoveButtonFromActivityCommand::writeLog, this,
-//        &RemoveButtonCommand::writeLog);
-//    connect(cmd, &RemoveButtonFromActivityCommand::writeMsg, this,
-//        &RemoveButtonCommand::writeMsg);
-//    connect(cmd, &RemoveButtonFromActivityCommand::activityAboutToBeAdded, this,
-//        &RemoveButtonCommand::activityAboutToBeAdded);
-//    connect(cmd, &RemoveButtonFromActivityCommand::activityAdded, this,
-//        &RemoveButtonCommand::activityAdded);
-//    connect(cmd, &RemoveButtonFromActivityCommand::activityAboutToBeRemoved,
-//        this, &RemoveButtonCommand::activityAboutToBeRemoved);
-//    connect(cmd, &RemoveButtonFromActivityCommand::activityRemoved, this,
-//        &RemoveButtonCommand::activityRemoved); todo
-  }
-  isValid = true;
 }
 
 void RemoveDeviceButtonCommand::redo()
@@ -69,11 +39,24 @@ void RemoveDeviceButtonCommand::redo()
     return;
   }
 
-  emit itemAboutToBeRemoved(Item::DEVICE_BUTTON, buttonPos);
-  QUndoCommand::redo();
-  auto &buttons = c.getDevices()[devicePos].getButtons();
-  buttons.erase(buttons.begin() + buttonPos);
-  emit itemRemoved(Item::DEVICE_BUTTON, buttonPos);
+  switch (type) {
+    case item::ButtonType::Hard: {
+      emit itemAboutToBeAdded(Item::DEVICE_HARD_BUTTON, buttonPos);
+      auto &buttons = c.getDevices()[devicePos].getHardButtons();
+      buttons.erase(buttons.begin() + buttonPos);
+      emit itemAdded(Item::DEVICE_HARD_BUTTON, buttonPos);
+      break;
+    }
+    case item::ButtonType::Soft: {
+      emit itemAboutToBeAdded(Item::DEVICE_SOFT_BUTTON, buttonPos);
+      auto &buttons = c.getDevices()[devicePos].getSoftButtons();
+      buttons.erase(buttons.begin() + buttonPos);
+      emit itemAdded(Item::DEVICE_SOFT_BUTTON, buttonPos);
+      break;
+    }
+    default:
+      break;
+  }
   emit dirtyChanged(true);
 }
 
@@ -83,11 +66,24 @@ void RemoveDeviceButtonCommand::undo()
     return;
   }
 
-  emit itemAboutToBeAdded(Item::DEVICE_BUTTON, buttonPos);
-  auto &buttons = c.getDevices()[devicePos].getButtons();
-  buttons.insert(buttons.begin() + buttonPos, button);
-  QUndoCommand::undo();
-  emit itemAdded(Item::DEVICE_BUTTON, buttonPos);
+  switch (type) {
+    case item::ButtonType::Hard: {
+      emit itemAboutToBeAdded(Item::DEVICE_HARD_BUTTON, buttonPos);
+      auto &buttons = c.getDevices()[devicePos].getHardButtons();
+      buttons.insert(buttons.begin() + buttonPos, button);
+      emit itemAdded(Item::DEVICE_HARD_BUTTON, buttonPos);
+      break;
+    }
+    case item::ButtonType::Soft: {
+      emit itemAboutToBeAdded(Item::DEVICE_SOFT_BUTTON, buttonPos);
+      auto &buttons = c.getDevices()[devicePos].getSoftButtons();
+      buttons.insert(buttons.begin() + buttonPos, button);
+      emit itemAdded(Item::DEVICE_SOFT_BUTTON, buttonPos);
+      break;
+    }
+    default:
+      break;
+  }
   emit dirtyChanged(true);
 }
 
@@ -96,26 +92,31 @@ bool RemoveDeviceButtonCommand::valid() const
   return isValid;
 }
 
-RemoveActivityButtonCommand::RemoveActivityButtonCommand(ConfigData &c, uint32_t activityPos,
-    uint32_t buttonPos, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Remove Button (from activity: %1)").arg(activityPos), parent), c(
-        c), activityPos(activityPos), buttonPos(buttonPos), button(
-        item::ButtonType::Hard)
+RemoveActivityButtonCommand::RemoveActivityButtonCommand(ConfigData &c,
+    uint32_t activityPos, item::ButtonType t, uint32_t buttonPos,
+    QUndoCommand *parent) :
+    BaseCommand(
+        QObject::tr("Remove Button (from activity: %1)").arg(activityPos),
+        parent), c(c), type(t), activityPos(activityPos), buttonPos(buttonPos)
 {
-  uint32_t buttonCount;
+  try {
+    // copy Button for undo
+    switch (type) {
+      case item::ButtonType::Hard:
+        button = c.getActivities().at(activityPos).getHardButtons().at(
+            buttonPos);
+        break;
+      case item::ButtonType::Soft:
+        button = c.getActivities().at(activityPos).getSoftButtons().at(
+            buttonPos);
+        break;
+      default:
+        return;
+    }
+    isValid = true;
 
-  if (activityPos >= c.getActivities().size()) {
-    //beyond end
-    return;
+  } catch (std::out_of_range&) {
   }
-  buttonCount = c.getActivities()[activityPos].getButtons().size();
-  if (buttonPos >= buttonCount) {
-    return;
-  }
-
-  // copy Button for undo
-  button = c.getActivities()[activityPos].getButtons()[buttonPos];
-  isValid = true;
 }
 
 void RemoveActivityButtonCommand::redo()
@@ -124,11 +125,24 @@ void RemoveActivityButtonCommand::redo()
     return;
   }
 
-  emit itemAboutToBeRemoved(Item::ACTIVITY_BUTTON, buttonPos);
-  QUndoCommand::redo();
-  auto &buttons = c.getActivities()[activityPos].getButtons();
-  buttons.erase(buttons.begin() + buttonPos);
-  emit itemRemoved(Item::ACTIVITY_BUTTON, buttonPos);
+  switch (type) {
+    case item::ButtonType::Hard: {
+      emit itemAboutToBeAdded(Item::ACTIVITY_HARD_BUTTON, buttonPos);
+      auto &buttons = c.getActivities()[activityPos].getHardButtons();
+      buttons.erase(buttons.begin() + buttonPos);
+      emit itemAdded(Item::ACTIVITY_HARD_BUTTON, buttonPos);
+      break;
+    }
+    case item::ButtonType::Soft: {
+      emit itemAboutToBeAdded(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
+      auto &buttons = c.getActivities()[activityPos].getSoftButtons();
+      buttons.erase(buttons.begin() + buttonPos);
+      emit itemAdded(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
+      break;
+    }
+    default:
+      break;
+  }
   emit dirtyChanged(true);
 }
 
@@ -138,11 +152,24 @@ void RemoveActivityButtonCommand::undo()
     return;
   }
 
-  emit itemAboutToBeAdded(Item::ACTIVITY_BUTTON, buttonPos);
-  auto &buttons = c.getActivities()[activityPos].getButtons();
-  buttons.insert(buttons.begin() + buttonPos, button);
-  QUndoCommand::undo();
-  emit itemAdded(Item::ACTIVITY_BUTTON, buttonPos);
+  switch (type) {
+    case item::ButtonType::Hard: {
+      emit itemAboutToBeAdded(Item::ACTIVITY_HARD_BUTTON, buttonPos);
+      auto &buttons = c.getActivities()[activityPos].getHardButtons();
+      buttons.insert(buttons.begin() + buttonPos, button);
+      emit itemAdded(Item::ACTIVITY_HARD_BUTTON, buttonPos);
+      break;
+    }
+    case item::ButtonType::Soft: {
+      emit itemAboutToBeAdded(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
+      auto &buttons = c.getActivities()[activityPos].getSoftButtons();
+      buttons.insert(buttons.begin() + buttonPos, button);
+      emit itemAdded(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
+      break;
+    }
+    default:
+      break;
+  }
   emit dirtyChanged(true);
 }
 

@@ -17,6 +17,7 @@
 #include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
 #include "cmd/setActionData.h"
+#include "cmd/setButtonData.h"
 #include "cmd/addNumpad.h"
 #include "cmd/removeNumpad.h"
 #include "cmd/setIr.h"
@@ -575,95 +576,96 @@ bool CmdCatalogue::setDeviceUnknownProperty(
   return true;
 }
 
-bool CmdCatalogue::addDeviceButtonCommand(item::ButtonType t,
-    uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::addDeviceButtonCommand(uint32_t devicePos,
+    item::ButtonType t, int buttonPos)
 {
-  auto *cmd = new AddDeviceButtonCommand(c, t, devicePos, buttonPos);
+  auto *cmd = new AddDeviceButtonCommand(c, devicePos, t, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: button device pos %1/%2 already exists, dropped").arg(
-            devicePos).arg(buttonPos), ContentType::PlainText);
+        tr("modify: button in device %1 already exists, dropped").arg(
+            devicePos), ContentType::PlainText);
     delete cmd;
   }
   return true;
 }
 
-bool CmdCatalogue::removeDeviceButtonCommand(uint32_t devicePos, int buttonPos)
+bool CmdCatalogue::removeDeviceButtonCommand(uint32_t devicePos,
+    item::ButtonType t, int buttonPos)
 {
-  auto *cmd = new RemoveDeviceButtonCommand(c, devicePos, buttonPos);
+  auto *cmd = new RemoveDeviceButtonCommand(c, devicePos, t, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: button device pos %1/%2 doesn't exist, dropped").arg(
-            devicePos).arg(buttonPos), ContentType::PlainText);
+        tr("modify: button in device %1 doesn't exist, dropped").arg(devicePos),
+        ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::setDeviceButtonAction(const string &v, uint32_t devicePos,
-    int buttonPos)
+bool CmdCatalogue::setDeviceButtonAction(const std::string &v,
+    uint32_t devicePos, item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button device action"),
-        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].action.get();},
-        [this, devicePos, buttonPos](
-            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].action.set(v).setIncluded(Used::YES);},
+        [this, devicePos, t, buttonPos]() {return getDeviceButton(c, devicePos, t, buttonPos)->action.get();},
+        [this, devicePos, t, buttonPos](
+            const string &v) {getDeviceButton(c, devicePos, t, buttonPos)->action.set(v).setIncluded(Used::YES);},
         v,
-        Item::DEVICE_BUTTON,
+        toDeviceItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonName(const string &v, uint32_t devicePos,
-    int buttonPos)
+bool CmdCatalogue::setDeviceButtonName(const std::string &v, uint32_t devicePos,
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button device name"),
-        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].name.get();},
-        [this, devicePos, buttonPos](
-            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].name.set(v).setIncluded(Used::YES);},
+        [this, devicePos, t, buttonPos]() {return getDeviceButton(c, devicePos, t, buttonPos)->name.get();},
+        [this, devicePos, t, buttonPos](
+            const string &v) {getDeviceButton(c, devicePos, t, buttonPos)->name.set(v).setIncluded(Used::YES);},
         v,
-        Item::DEVICE_BUTTON,
+        toDeviceItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonFile(const string &v, uint32_t devicePos,
-    int buttonPos)
+bool CmdCatalogue::setDeviceButtonFile(const std::string &v, uint32_t devicePos,
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button device file"),
-        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].file.get();},
-        [this, devicePos, buttonPos](
-            const string &v) {c.getDevices()[devicePos].getButtons()[buttonPos].file.set(v).setIncluded(Used::YES);},
+        [this, devicePos, t, buttonPos]() {return getDeviceButton(c, devicePos, t, buttonPos)->file.get();},
+        [this, devicePos, t, buttonPos](
+            const string &v) {getDeviceButton(c, devicePos, t, buttonPos)->file.set(v).setIncluded(Used::YES);},
         v,
-        Item::DEVICE_BUTTON,
+        toDeviceItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<string>(access);
 }
 
 bool CmdCatalogue::setDeviceButtonPosition(const int32_t &v, uint32_t devicePos,
-    int buttonPos)
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<int32_t> access =
       {
         tr("set button device position"),
-        [this, devicePos, buttonPos]() {return c.getDevices()[devicePos].getButtons()[buttonPos].position.get();},
-        [this, devicePos, buttonPos](
-            const int32_t &v) {c.getDevices()[devicePos].getButtons()[buttonPos].position.set(v).setIncluded(Used::YES);},
+        [this, devicePos, t, buttonPos]() {return getDeviceButton(c, devicePos, t, buttonPos)->position.get();},
+        [this, devicePos, t, buttonPos](
+            const int32_t &v) {getDeviceButton(c, devicePos, t, buttonPos)->position.set(v).setIncluded(Used::YES);},
         v,
-        Item::DEVICE_BUTTON,
+        toDeviceItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<int32_t>(access);
 }
@@ -1961,111 +1963,111 @@ bool CmdCatalogue::setActivityChannelImage(const std::string &v,
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::addActivityButtonCommand(item::ButtonType t,
-    uint32_t activityPos, int buttonPos)
+bool CmdCatalogue::addActivityButtonCommand(uint32_t activityPos,
+    item::ButtonType t, int buttonPos)
 {
-  auto *cmd = new AddActivityButtonCommand(c, t, activityPos, buttonPos);
+  auto *cmd = new AddActivityButtonCommand(c, activityPos, t, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: button activity pos %1/%2 already exists, dropped").arg(
-            activityPos).arg(buttonPos), ContentType::PlainText);
+        tr("modify: button in activity  %1 already exists, dropped").arg(
+            activityPos), ContentType::PlainText);
     delete cmd;
   }
   return true;
 }
 
 bool CmdCatalogue::removeActivityButtonCommand(uint32_t activityPos,
-    int buttonPos)
+    item::ButtonType t, int buttonPos)
 {
-  auto *cmd = new RemoveActivityButtonCommand(c, activityPos, buttonPos);
+  auto *cmd = new RemoveActivityButtonCommand(c, activityPos, t, buttonPos);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: button activity pos %1/%2 doesn't exist, dropped").arg(
-            activityPos).arg(buttonPos), ContentType::PlainText);
+        tr("modify: button in activity %1 doesn't exist, dropped").arg(
+            activityPos), ContentType::PlainText);
     delete cmd;
   }
   return ret;
 }
 
-bool CmdCatalogue::setActivityButtonAction(const string &v,
-    uint32_t activityPos, int buttonPos)
+bool CmdCatalogue::setActivityButtonAction(const std::string &v,
+    uint32_t activityPos, item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button activity action"),
-        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].action.get();},
-        [this, activityPos, buttonPos](
-            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].action.set(v).setIncluded(Used::YES);},
+        [this, activityPos, t, buttonPos]() {return getActivitiesButton(c, activityPos, t, buttonPos)->action.get();},
+        [this, activityPos, t, buttonPos](
+            const string &v) {getActivitiesButton(c, activityPos, t, buttonPos)->action.set(v).setIncluded(Used::YES);},
         v,
-        Item::ACTIVITY_BUTTON,
+        toActivityItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setActivityButtonDevice(const uint32_t v,
-    uint32_t activityPos, int buttonPos)
+bool CmdCatalogue::setActivityButtonDevice(uint32_t v, uint32_t activityPos,
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<uint32_t> access =
       {
         tr("set button activity device"),
-        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].device.get();},
-        [this, activityPos, buttonPos](
-            const uint32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].device.set(v).setIncluded(Used::YES);},
+        [this, activityPos, t, buttonPos]() {return getActivitiesButton(c, activityPos, t, buttonPos)->device.get();},
+        [this, activityPos, t, buttonPos](
+            const uint32_t &v) {getActivitiesButton(c, activityPos, t, buttonPos)->device.set(v).setIncluded(Used::YES);},
         v,
-        Item::ACTIVITY_BUTTON,
+        toActivityItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::setActivityButtonName(const string &v, uint32_t activityPos,
-    int buttonPos)
+bool CmdCatalogue::setActivityButtonName(const std::string &v,
+    uint32_t activityPos, item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button activity name"),
-        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].name.get();},
-        [this, activityPos, buttonPos](
-            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].name.set(v).setIncluded(Used::YES);},
+        [this, activityPos, t, buttonPos]() { return getActivitiesButton(c, activityPos, t, buttonPos)->name.get();},
+        [this, activityPos, t, buttonPos](
+            const string &v) {getActivitiesButton(c, activityPos, t, buttonPos)->name.set(v).setIncluded(Used::YES);},
         v,
-        Item::ACTIVITY_BUTTON,
+        toActivityItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setActivityButtonFile(const string &v, uint32_t activityPos,
-    int buttonPos)
+bool CmdCatalogue::setActivityButtonFile(const std::string &v,
+    uint32_t activityPos, item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
         tr("set button activity file"),
-        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].file.get();},
-        [this, activityPos, buttonPos](
-            const string &v) {c.getActivities()[activityPos].getButtons()[buttonPos].file.set(v).setIncluded(Used::YES);},
+        [this, activityPos, t, buttonPos]() {return getActivitiesButton(c, activityPos, t, buttonPos)->file.get();},
+        [this, activityPos, t, buttonPos](
+            const string &v) {getActivitiesButton(c, activityPos, t, buttonPos)->file.set(v).setIncluded(Used::YES);},
         v,
-        Item::ACTIVITY_BUTTON,
+        toActivityItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<string>(access);
 }
 
 bool CmdCatalogue::setActivityButtonPosition(const int32_t v,
-    uint32_t activityPos, int buttonPos)
+    uint32_t activityPos, item::ButtonType t, int buttonPos)
 {
   PropertyAccess<int32_t> access =
       {
         tr("set button activity position"),
-        [this, activityPos, buttonPos]() {return c.getActivities()[activityPos].getButtons()[buttonPos].position.get();},
-        [this, activityPos, buttonPos](
-            const int32_t &v) {c.getActivities()[activityPos].getButtons()[buttonPos].position.set(v).setIncluded(Used::YES);},
+        [this, activityPos, t, buttonPos]() {return getActivitiesButton(c, activityPos, t, buttonPos)->position.get();},
+        [this, activityPos, t, buttonPos](
+            const int32_t &v) {getActivitiesButton(c, activityPos, t, buttonPos)->position.set(v).setIncluded(Used::YES);},
         v,
-        Item::ACTIVITY_BUTTON,
+        toActivityItem(t),
         static_cast<uint32_t>(buttonPos) };
   return setProperty<int32_t>(access);
 }

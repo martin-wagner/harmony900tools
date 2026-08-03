@@ -80,12 +80,12 @@ class CmdCatalogue : public QObject
     bool setDeviceTunerInput(const Enum<TunerInput> &v, uint32_t pos);
     bool setDeviceUnknownProperty(const data::item::UnknownElement& value, uint32_t pos);
     //buttons
-    bool addDeviceButtonCommand(item::ButtonType t, uint32_t devicePos, int buttonPos);
-    bool removeDeviceButtonCommand(uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonAction(const std::string &v, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonName(const std::string &v, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonFile(const std::string &v, uint32_t devicePos, int buttonPos);
-    bool setDeviceButtonPosition(const int32_t &v, uint32_t devicePos, int buttonPos);
+    bool addDeviceButtonCommand(uint32_t devicePos, item::ButtonType t, int buttonPos);
+    bool removeDeviceButtonCommand(uint32_t devicePos, item::ButtonType t, int buttonPos);
+    bool setDeviceButtonAction(const std::string &v, uint32_t devicePos, item::ButtonType t, int buttonPos);
+    bool setDeviceButtonName(const std::string &v, uint32_t devicePos, item::ButtonType t, int buttonPos);
+    bool setDeviceButtonFile(const std::string &v, uint32_t devicePos, item::ButtonType t, int buttonPos);
+    bool setDeviceButtonPosition(const int32_t &v, uint32_t devicePos, item::ButtonType t, int buttonPos);
     //state machines
     bool addDeviceStatemachineCommand(uint32_t devicePos, int smPos);
     bool removeDeviceStatemachineCommand(uint32_t devicePos, int smPos);
@@ -182,13 +182,13 @@ class CmdCatalogue : public QObject
     bool setActivityChannelPosition(const uint32_t v, uint32_t activityPos, uint32_t chPos);
     bool setActivityChannelImage(const std::string &v, uint32_t activityPos, uint32_t chPos);
     //buttons
-    bool addActivityButtonCommand(item::ButtonType t, uint32_t activityPos, int buttonPos);
-    bool removeActivityButtonCommand(uint32_t activityPos, int buttonPos);
-    bool setActivityButtonAction(const std::string &v, uint32_t activityPos, int buttonPos);
-    bool setActivityButtonDevice(uint32_t v, uint32_t activityPos, int buttonPos);
-    bool setActivityButtonName(const std::string &v, uint32_t activityPos, int buttonPos);
-    bool setActivityButtonFile(const std::string &v, uint32_t activityPos, int buttonPos);
-    bool setActivityButtonPosition(const int32_t v, uint32_t activityPos, int buttonPos);
+    bool addActivityButtonCommand(uint32_t activityPos, item::ButtonType t, int buttonPos);
+    bool removeActivityButtonCommand(uint32_t activityPos, item::ButtonType t, int buttonPos);
+    bool setActivityButtonAction(const std::string &v, uint32_t activityPos, item::ButtonType t, int buttonPos);
+    bool setActivityButtonDevice(uint32_t v, uint32_t activityPos, item::ButtonType t, int buttonPos);
+    bool setActivityButtonName(const std::string &v, uint32_t activityPos, item::ButtonType t, int buttonPos);
+    bool setActivityButtonFile(const std::string &v, uint32_t activityPos, item::ButtonType t, int buttonPos);
+    bool setActivityButtonPosition(const int32_t v, uint32_t activityPos, item::ButtonType t, int buttonPos);
     //activity actions
     bool addActivityActionCommand(uint32_t activityPos, item::ActivityAction t, int actionPos);
     bool removActivityActionCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos);

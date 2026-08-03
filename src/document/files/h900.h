@@ -108,7 +108,7 @@ class ConfigH900 : public QObject
     bool writeDevices(pugi::xml_node &root);
     bool writeDevice(pugi::xml_node &device, const data::item::Device &data);
     bool writeDeviceButtons(pugi::xml_node &buttons, uint32_t deviceId, const std::vector<data::item::Button> &data, enum data::item::ButtonType t);
-    bool writeDeviceButton(pugi::xml_node &button, uint32_t deviceId, const data::item::Button &data);
+    bool writeDeviceButton(pugi::xml_node &button, uint32_t deviceId, const data::item::Button &data, enum data::item::ButtonType t);
     bool writeStatemachines(pugi::xml_node &states, uint32_t deviceId, const std::vector<data::item::StateMachine> &data);
     bool writeStatemachine(pugi::xml_node &state, uint32_t deviceId, const data::item::StateMachine &data);
     bool writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId, const data::item::DiscreteActions &data);
@@ -125,7 +125,7 @@ class ConfigH900 : public QObject
     bool writeActivityChannels(pugi::xml_node &channels, const std::vector<data::item::Channel> &data);
     bool writeActivityChannel(pugi::xml_node &channel, const data::item::Channel &data);
     bool writeActivityButtons(pugi::xml_node &buttons, const std::vector<data::item::Button> &data, enum data::item::ButtonType t);
-    bool writeActivityButton(pugi::xml_node &button, const data::item::Button &data);
+    bool writeActivityButton(pugi::xml_node &button, const data::item::Button &data, enum data::item::ButtonType t);
     bool writeActivityActions(pugi::xml_node &action, const std::vector<data::item::DeviceAction> &data);
     bool writeActivityAction(pugi::xml_node &actionType, const data::item::DeviceAction &data);
     bool writeActivityRoles(pugi::xml_node &activity, const std::vector<data::item::Role> &data);

@@ -56,34 +56,24 @@ class Activity
       return channels;
     }
 
-    const std::vector<Button>& getButtons() const
+    const std::vector<Button>& getSoftButtons() const
     {
-      return buttons;
+      return softButtons;
     }
 
-    std::vector<Button>& getButtons()
+    std::vector<Button>& getSoftButtons()
     {
-      return buttons;
+      return softButtons;
     }
 
-    bool hasSoftButtons() const
+    const std::vector<Button>& getHardButtons() const
     {
-      for (const auto &b : buttons) {
-        if (b.getButtonType() == ButtonType::Soft) {
-          return true;
-        }
-      }
-      return false;
+      return hardButtons;
     }
 
-    bool hasHardButtons() const
+    std::vector<Button>& getHardButtons()
     {
-      for (const auto &b : buttons) {
-        if (b.getButtonType() == ButtonType::Hard) {
-          return true;
-        }
-      }
-      return false;
+      return hardButtons;
     }
 
     const std::vector<DeviceAction>& getEnterActions() const
@@ -182,7 +172,8 @@ class Activity
   protected:
     uint32_t id;
     std::vector<Channel> channels;
-    std::vector<Button> buttons;
+    std::vector<Button> softButtons;
+    std::vector<Button> hardButtons;
     std::vector<DeviceAction> enterActions;
     std::vector<DeviceAction> leaveActions;
     std::vector<Role> roles;

@@ -391,21 +391,21 @@ void toJson(ordered_json &out, const item::Device &device)
 
   toJson(out, "UnknownProperties", device.getUnknownProperties());
 
-  for (const auto &button : device.getButtons()) {
+  for (const auto &button : device.getHardButtons()) {
     ordered_json buttonJson;
     toJson(buttonJson, button);
-
-    if (button.getButtonType() == item::ButtonType::Soft) {
-      softButtonsArr.push_back(buttonJson);
-    } else {
-      hardButtonsArr.push_back(buttonJson);
-    }
-  }
-  if (!softButtonsArr.empty()) {
-    buttonsObj["Soft"] = softButtonsArr;
+    hardButtonsArr.push_back(buttonJson);
   }
   if (!hardButtonsArr.empty()) {
     buttonsObj["Hard"] = hardButtonsArr;
+  }
+  for (const auto &button : device.getSoftButtons()) {
+    ordered_json buttonJson;
+    toJson(buttonJson, button);
+    softButtonsArr.push_back(buttonJson);
+  }
+  if (!softButtonsArr.empty()) {
+    buttonsObj["Soft"] = softButtonsArr;
   }
   if (!buttonsObj.empty()) {
     out["Buttons"] = buttonsObj;
@@ -425,15 +425,6 @@ void toJson(ordered_json &out, const item::Device &device)
 
 void fromJson(const ordered_json &in, item::Device &device)
 {
-  auto readButtons = [&device](const ordered_json &in,
-      item::ButtonType type) {
-        for (const auto &buttonJson : in) {
-          item::Button button(type);
-          fromJson(buttonJson, button);
-          device.getButtons().push_back(button);
-        }
-      };
-
   fromJson(in, "Type", device.type);
   fromJson(in, "Mnf", device.mnf);
   fromJson(in, "Model", device.model);
@@ -471,12 +462,20 @@ void fromJson(const ordered_json &in, item::Device &device)
   if (buttonsIt != in.end()) {
     auto softIt = buttonsIt->find("Soft");
     if (softIt != buttonsIt->end()) {
-      readButtons(*softIt, item::ButtonType::Soft);
+      for (const auto &buttonJson : *softIt) {
+        item::Button button;
+        fromJson(buttonJson, button);
+        device.getSoftButtons().push_back(button);
+      }
     }
 
     auto hardIt = buttonsIt->find("Hard");
     if (hardIt != buttonsIt->end()) {
-      readButtons(*hardIt, item::ButtonType::Hard);
+      for (const auto &buttonJson : *hardIt) {
+        item::Button button;
+        fromJson(buttonJson, button);
+        device.getHardButtons().push_back(button);
+      }
     }
   }
 

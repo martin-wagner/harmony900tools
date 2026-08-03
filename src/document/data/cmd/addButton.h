@@ -15,7 +15,7 @@ class AddDeviceButtonCommand: public BaseCommand
   Q_OBJECT
   public:
     //pos -1 = append
-    AddDeviceButtonCommand(ConfigData &c, item::ButtonType t, uint32_t devicePos, int buttonPos = -1, QUndoCommand *parent = nullptr);
+    AddDeviceButtonCommand(ConfigData &c, uint32_t devicePos, item::ButtonType t, int buttonPos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -36,7 +36,7 @@ class AddActivityButtonCommand: public BaseCommand
   Q_OBJECT
   public:
     //pos -1 = append
-    AddActivityButtonCommand(ConfigData &c, item::ButtonType t, uint32_t activityPos, int buttonPos = -1, QUndoCommand *parent = nullptr);
+    AddActivityButtonCommand(ConfigData &c, uint32_t activityPos, item::ButtonType t, int buttonPos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;

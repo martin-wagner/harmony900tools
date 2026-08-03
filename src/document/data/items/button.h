@@ -25,15 +25,6 @@ class Button
   public:
     static constexpr std::string_view ACTION_POSTFIX = "_Hold";
 
-    Button(ButtonType t) : type(t)
-    {
-    }
-
-    ButtonType getButtonType() const
-    {
-      return type;
-    }
-
     /** for export device */
     const std::string getActionId(uint32_t id) const
     {
@@ -68,9 +59,6 @@ class Button
     PropertyString file{"0.png", Used::NO};
     /** only soft button: position on lcd, starting at 0. 6 devices per page, so 7 -> pos 0 on second page */
     PropertyI32 position{-1, Used::NO};
-
-  protected:
-    ButtonType type;
 };
 
 /** stores meta info for a channel button (activities)

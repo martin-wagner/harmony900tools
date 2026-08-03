@@ -57,11 +57,11 @@ class ButtonBaseModel: public QAbstractItemModel
 
     const std::map<Column, Setup> columnSetup = {
         { Column::DEVICE,        { "Device",   "Device to use for this button", "int", false,  {}, } },
-        { Column::COMMAND,       { "Command",  "The command from the device you want to send", "Enum", false, {}, } },
-        { Column::BUTTON,        { "Button",   "Map command to this button", "Enum", false, {}, } },
-        { Column::NAME,          { "Name",     "Name on the display", "QString", false, {}, } },
+        { Column::COMMAND,       { "Command",  "The IR command you want to send", "Enum", false, {}, } },
+        { Column::BUTTON,        { "Button",   "Use this button on the remote", "Enum", false, {}, } },
+        { Column::NAME,          { "Name",     "Name on the screen", "QString", false, {}, } },
         { Column::ICON,          { "Icon",     "Use this icon instead of name", "Enum", false, {QVariant(icons)}, } },
-        { Column::POSITION,      { "Position", "Where to place the button on the display", "Enum", false, {}, } },
+        { Column::POSITION,      { "Position", "Where to place the button on the screen", "Enum", false, {}, } },
     };
 
     inline static const int SOFTBUTTONS_PER_PAGE = 6;
@@ -135,6 +135,7 @@ class DeviceHardButtonModel: public ButtonBaseModel
   protected:
     const document::data::item::Device *device;
     uint32_t devicePos;
+    const document::data::item::ButtonType type = document::data::item::ButtonType::Hard;
 
   protected:
     QVariant getDisplayData(const QModelIndex &index) const;
