@@ -9,6 +9,7 @@
 #include <QEvent>
 
 #include "baseTreeView.h"
+#include "defaults.h"
 
 using namespace std;
 
@@ -89,6 +90,18 @@ void BaseTreeView::onViewSelectionChanged(const QItemSelection &selected,
 void BaseTreeView::onModelRowCountChanged()
 {
   emit availabilityChanged();
+}
+
+void BaseTreeView::onSettingsChanged()
+{
+  bool ok;
+
+  auto factor = ctx.settings().value(defaults::columWithFactor().key).toDouble(
+      &ok);
+  if (ok) {
+    treeView->header()->setDefaultSectionSize(
+        factor * defaults::DEFAULT_COLUMN_WIDTH);
+  }
 }
 
 bool BaseTreeView::eventFilter(QObject *object, QEvent *event)

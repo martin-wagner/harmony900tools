@@ -458,6 +458,8 @@ void MainWindow::readSettings()
     curFile = qsettings.value("file").toString();
   }
 
+  settings->addSetting(defaults::columWithFactor());
+
   const QByteArray geometry =
       qsettings.value("geometry", QByteArray()).toByteArray();
   if (geometry.isEmpty()) {

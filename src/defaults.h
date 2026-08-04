@@ -84,6 +84,24 @@ inline const SettingDef loadLastUsed()
   return s;
 };
 
+static constexpr int DEFAULT_COLUMN_WIDTH = 150;
+inline const SettingDef columWithFactor()
+{
+  QList<QPair<QString, QVariant>> options;
+  SettingDef s;
+
+  s.key = "columnWidthFactor";
+  s.label = QObject::tr("Column Width");
+  s.helpText = QObject::tr("Makes the table columns more or less wide. 1 = default, >1 => wider, <1 => narrower");
+  s.type = SettingType::Double;
+  s.defaultValue = 1.0;
+  s.tab = "";
+  s.minValue = QVariant { 0.5 };
+  s.maxValue = QVariant { 5.0 };
+
+  return s;
+};
+
 inline const SettingDef learnStreamTimeout()
 {
   QList<QPair<QString, QVariant>> options;

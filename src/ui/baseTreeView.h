@@ -62,10 +62,8 @@ class BaseTreeView: public QWidget
   protected slots:
     void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onModelRowCountChanged();
-
-  private slots:
     virtual void onUserLevelChanged(lib::UserLevel::Level l) {};
-    virtual void onSettingsChanged() {};
+    virtual void onSettingsChanged();
 
   protected:
       bool eventFilter(QObject *object, QEvent *event) override;

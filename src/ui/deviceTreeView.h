@@ -32,7 +32,7 @@ class DeviceTreeView: public BaseTreeView
   protected:
     uint32_t deviceIdForRow(int row) const;
 
-  private slots:
+  protected slots:
     virtual void onUserLevelChanged(lib::UserLevel::Level l) override;
     virtual void onSettingsChanged() override;
 

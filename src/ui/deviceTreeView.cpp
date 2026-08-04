@@ -45,6 +45,8 @@ uint32_t DeviceTreeView::deviceIdForRow(int row) const
 
 void DeviceTreeView::onUserLevelChanged(lib::UserLevel::Level l)
 {
+  BaseTreeView::onUserLevelChanged(l);
+
   if (lib::UserLevel::validate(l, lib::UserLevel::Level::Developer)) {
     treeView->showColumn(models::DeviceModel::Column::ID);
   } else {
@@ -54,6 +56,7 @@ void DeviceTreeView::onUserLevelChanged(lib::UserLevel::Level l)
 
 void DeviceTreeView::onSettingsChanged()
 {
+  BaseTreeView::onSettingsChanged();
 }
 
 void DeviceTreeView::setupDelegates()
