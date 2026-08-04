@@ -61,7 +61,7 @@ class ButtonBaseModel: public QAbstractItemModel
         { Column::BUTTON,        { "Button",   "Link to this button on the remote", "Enum", false, {}, } },
         { Column::NAME,          { "Name",     "Name on the screen", "QString", false, {}, } },
         { Column::ICON,          { "Icon",     "Use this icon instead of name", "Enum", false, {QVariant(icons)}, } },
-        { Column::POSITION,      { "Position", "Where to place the button on the screen", "Enum", false, {}, } },
+        { Column::POSITION,      { "Position", "Where to place the button on the screen", "Enum", true, {}, } },
     };
 
     inline static const int SOFTBUTTONS_PER_PAGE = 6;
@@ -93,7 +93,7 @@ class ButtonBaseModel: public QAbstractItemModel
   protected:
     //accessors
     virtual const std::vector<document::data::item::Button> &getButtons() const = 0;
-    virtual bool addButton(int row, bool setDefaults = true) = 0;
+    virtual bool addButton(int row) = 0;
     virtual bool removeButton(int row) = 0;
     virtual QVariant getDisplayData(const QModelIndex &index) const = 0;
     virtual QVariant getEditData(const QModelIndex &index) const = 0;
@@ -111,8 +111,6 @@ class ButtonBaseModel: public QAbstractItemModel
   protected:
     QStringList getUnusedButtons(const document::data::item::Button &button) const;
     QStringList getUnusedButtons() const;
-    QStringList getUnusedPositions(const document::data::item::Button &button) const;
-    QStringList getUnusedPositions() const;
     QString toPositionString(int pos) const;
     int fromPositionString(const QString &pos) const;
     QStringList getAvailableCommands(const document::data::item::Device *device) const;
@@ -148,7 +146,7 @@ class DeviceHardButtonModel: public ButtonBaseModel
   protected:
     //implement
     const std::vector<document::data::item::Button> &getButtons() const override;
-    bool addButton(int row, bool setDefaults = true) override;
+    bool addButton(int row) override;
     bool removeButton(int row) override;
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
@@ -187,7 +185,7 @@ class DeviceSoftButtonModel: public ButtonBaseModel
   protected:
     //implement
     const std::vector<document::data::item::Button> &getButtons() const override;
-    bool addButton(int row, bool setDefaults = true) override;
+    bool addButton(int row) override;
     bool removeButton(int row) override;
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;

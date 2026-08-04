@@ -215,53 +215,9 @@ QStringList ButtonBaseModel::getUnusedButtons(
   return list;
 }
 
-QStringList ButtonBaseModel::getUnusedPositions() const
-{
-  //only allow each position once. always add a new, empty
-  //page once a page has at least one button on it.
-  int i;
-  set<int> positions;
-  QStringList list;
-  int buttonCount = SOFTBUTTONS_PER_PAGE; //min one page
-
-  //get all positions
-  for (const auto &button : getButtons()) {
-    auto pos = button.position.get();
-    if (pos >= 0) {
-      positions.insert(pos);
-    }
-  }
-  //find the button with the highest index
-  if (!positions.empty()) {
-    auto last = *positions.rbegin();
-    auto pages = (last + SOFTBUTTONS_PER_PAGE - 1) / SOFTBUTTONS_PER_PAGE + 1;
-    buttonCount = (pages + 1) * SOFTBUTTONS_PER_PAGE; //add one empty page
-  }
-  //create entries for all others (and current entry)
-  for (i = 0; i < buttonCount; i++) {
-    if (positions.contains(i)) {
-      continue;
-    }
-    list.push_back(toPositionString(i));
-  }
-  return list;
-}
-
-QStringList ButtonBaseModel::getUnusedPositions(
-    const document::data::item::Button &button) const
-{
-  auto list = getUnusedPositions();
-  auto current = toPositionString(button.position.get());
-
-  if (!list.contains(current)) {
-    list.prepend(current);
-  }
-  return list;
-}
-
 QString models::ButtonBaseModel::toPositionString(int pos) const
 {
-  return tr("Position: %1 (Page %2, Button %3)").arg(pos).arg(
+  return tr("Id: %1 (Page %2, Button %3)").arg(pos).arg(
       pos / SOFTBUTTONS_PER_PAGE + 1).arg(pos % SOFTBUTTONS_PER_PAGE + 1);
 }
 
@@ -405,7 +361,7 @@ const vector<document::data::item::Button>& DeviceHardButtonModel::getButtons() 
   return device->getHardButtons();
 }
 
-bool DeviceHardButtonModel::addButton(int row, bool setDefaults)
+bool DeviceHardButtonModel::addButton(int row)
 {
   QString commandToUse;
   auto commands = getAvailableCommands(device);
@@ -610,7 +566,7 @@ const vector<document::data::item::Button>& DeviceSoftButtonModel::getButtons() 
   return device->getSoftButtons();
 }
 
-bool DeviceSoftButtonModel::addButton(int row, bool setDefaults)
+bool DeviceSoftButtonModel::addButton(int row)
 {
   auto commands = getAvailableCommands(device);
   if (commands.size() == 0) {
@@ -619,6 +575,9 @@ bool DeviceSoftButtonModel::addButton(int row, bool setDefaults)
     return false;
   }
 
+  //only append to the end
+  row = rowCount();
+
   auto ret = config.modify().addDeviceButtonCommand(devicePos, type, row);
   if (ret != true) {
     return ret;
@@ -626,20 +585,24 @@ bool DeviceSoftButtonModel::addButton(int row, bool setDefaults)
   //for default -- first unused command.
   auto unusedCommands = getUnusedCommands(device);
   if (unusedCommands.size() == 0) {
-    unusedCommands = commands;
+    config.modify().setDeviceButtonAction(
+        string(document::data::item::Button::UNUSED), devicePos, type, row);
+    config.modify().setDeviceButtonName("", devicePos, type, row);
+  } else {
+    config.modify().setDeviceButtonAction(unusedCommands[0].toStdString(),
+        devicePos, type, row);
+    config.modify().setDeviceButtonName(unusedCommands[0].toStdString(),
+        devicePos, type, row);
   }
-  config.modify().setDeviceButtonAction(unusedCommands[0].toStdString(),
-      devicePos, type, row);
-  config.modify().setDeviceButtonName(unusedCommands[0].toStdString(),
-      devicePos, type, row);
   //assume infinite touch positions for the real world
-  auto position = fromPositionString(getUnusedPositions()[0]);
-  config.modify().setDeviceButtonPosition(position, devicePos, type, row);
+  config.modify().setDeviceButtonPosition(row, devicePos, type, row);
   return true;
 }
 
 bool DeviceSoftButtonModel::removeButton(int row)
 {
+  //only remove from the end
+  row = rowCount() - 1;
   return config.modify().removeDeviceButtonCommand(devicePos, type, row);
 }
 
@@ -706,12 +669,13 @@ QVariant DeviceSoftButtonModel::getSelectionItemsData(
     const QModelIndex &index) const
 {
   try {
-    auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
-      case Column::COMMAND:
-        return getAvailableCommands(device);
-      case Column::POSITION:
-        return getUnusedPositions(button);
+      case Column::COMMAND: {
+        auto cmds = getAvailableCommands(device);
+        cmds.prepend(QString::fromUtf8(document::data::item::Button::UNUSED));
+        return cmds;
+      }
+        break;
       default:
         break;
     }

@@ -56,9 +56,6 @@ void DeviceSoftButtonTreeView::setupDelegates()
   treeView->setItemDelegateForColumn(
       static_cast<int>(models::DeviceSoftButtonModel::Column::COMMAND),
       comboBoxDelegate);
-  treeView->setItemDelegateForColumn(
-      static_cast<int>(models::DeviceSoftButtonModel::Column::POSITION),
-      comboBoxDelegate);
 }
 
 } // namespace editors

@@ -57,8 +57,11 @@ class ConfigH900 : public QObject
     bool readController(pugi::xml_node &root);
     bool readDevices(pugi::xml_node &root);
     bool readDevice(pugi::xml_node &device);
-    bool readDeviceButtons(pugi::xml_node &buttons, enum data::item::ButtonType t);
-    bool readDeviceButton(pugi::xml_node &button, enum data::item::ButtonType t);
+    bool readDeviceHardButtons(pugi::xml_node &buttons);
+    bool readDeviceHardButton(pugi::xml_node &button);
+    bool readDeviceSoftButtons(pugi::xml_node &buttons);
+    bool readDeviceSoftButton(pugi::xml_node &button, int devicePos, int uiPos);
+    bool addDummyDeviceSoftButton(int devicePos, int pos);
     bool readStatemachines(pugi::xml_node &states);
     bool readStatemachine(pugi::xml_node &state);
     bool readStartAction(pugi::xml_node &state);
@@ -84,8 +87,11 @@ class ConfigH900 : public QObject
     bool readActivitiy(pugi::xml_node &activity, uint32_t id);
     bool readActivityChannels(pugi::xml_node &channels);
     bool readActivityChannel(pugi::xml_node &channel);
-    bool readActivityButtons(pugi::xml_node &buttons, enum data::item::ButtonType t);
-    bool readActivityButton(pugi::xml_node &button, enum data::item::ButtonType t);
+    bool readActivityHardButtons(pugi::xml_node &buttons);
+    bool readActivityHardButton(pugi::xml_node &button);
+    bool readActivitySoftButtons(pugi::xml_node &buttons);
+    bool readActivitySoftButton(pugi::xml_node &button, int activityPos, int uiPos);
+    bool addDummyActivitySoftButton(int activityPos, int pos);
     bool readActivityAction(pugi::xml_node &actions, data::item::ActivityAction t);
     bool readActivityActionSequences(pugi::xml_node &action, data::item::ActivityAction t);
     bool readActivityActionSequence(pugi::xml_node &sequence, data::item::ActivityAction t);

@@ -23,6 +23,7 @@ enum class ButtonType { Soft, Hard };
 class Button
 {
   public:
+    static constexpr std::string_view UNUSED = "<<empty>>"; //don't export this node
     static constexpr std::string_view ACTION_POSTFIX = "_Hold";
 
     /** for export device */
