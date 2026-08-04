@@ -393,7 +393,8 @@ QVariant DeviceHardButtonModel::getTooltipData(const QModelIndex &index) const
             getButtons().at(index.row()).name.get());
         text = tr("<b>%1</b><br>"
             "You can find it here:<br><br>"
-            "<img src=':/res/buttons/%2.jpg'>").arg(text).arg(name);
+            "<img src=':/res/buttons/%2.jpg' width='180' height='138'>").arg(
+            text).arg(name);
 
         return text;
       }
