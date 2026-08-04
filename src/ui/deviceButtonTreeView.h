@@ -29,4 +29,22 @@ class DeviceHardButtonTreeView: public BaseTreeView
     void setupDelegates();
 };
 
+
+/**
+ * @brief Flat touch-button list tree view for the currently selected device.
+ */
+class DeviceSoftButtonTreeView: public BaseTreeView
+{
+  Q_OBJECT
+
+  public:
+    explicit DeviceSoftButtonTreeView(Context &ctx, QWidget *parent = nullptr);
+    ~DeviceSoftButtonTreeView() override;
+
+    void setModel(QAbstractItemModel *model) override;
+
+  private:
+    void setupDelegates();
+};
+
 } // namespace editors

@@ -36,4 +36,29 @@ void DeviceHardButtonTreeView::setupDelegates()
       comboBoxDelegate);
 }
 
+DeviceSoftButtonTreeView::DeviceSoftButtonTreeView(Context &ctx,
+    QWidget *parent) :
+    BaseTreeView(ctx, tr("Touch Buttons"), parent)
+{
+  setupDelegates();
+}
+
+DeviceSoftButtonTreeView::~DeviceSoftButtonTreeView() = default;
+
+void DeviceSoftButtonTreeView::setModel(QAbstractItemModel *model)
+{
+  bindModel(model);
+}
+
+void DeviceSoftButtonTreeView::setupDelegates()
+{
+  auto *comboBoxDelegate = new delegates::ComboBox(this);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::DeviceSoftButtonModel::Column::COMMAND),
+      comboBoxDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::DeviceSoftButtonModel::Column::POSITION),
+      comboBoxDelegate);
+}
+
 } // namespace editors

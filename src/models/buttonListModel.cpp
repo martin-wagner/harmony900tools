@@ -30,6 +30,33 @@ QVariant ButtonBaseModel::headerData(int section, Qt::Orientation orientation,
   return {};
 }
 
+QVariant ButtonBaseModel::data(const QModelIndex &index, int role) const
+{
+  if (!index.isValid()) {
+    return {};
+  }
+  if (index.parent().isValid()) {
+    return {};
+  }
+
+  switch (role) {
+    case Qt::DisplayRole:
+      return getDisplayData(index);
+    case Qt::EditRole:
+      return getEditData(index);
+    case Qt::ToolTipRole:
+      return getTooltipData(index);
+    case Qt::BackgroundRole:
+      return getBackgroundData(index);
+    case Qt::ForegroundRole:
+      return getForegroundData(index);
+    case UserDataRole::SelectionItemsRole:
+      return getSelectionItemsData(index);
+    default:
+      return {};
+  }
+}
+
 QModelIndex ButtonBaseModel::index(int row, int column,
     const QModelIndex &parent) const
 {
@@ -164,6 +191,100 @@ void models::ButtonBaseModel::createActions()
       &ButtonBaseModel::itemRemovedObserver);
 }
 
+QStringList ButtonBaseModel::getUnusedButtons() const
+{
+  auto list =
+      document::data::Enum<document::data::HardButtons>::toQStringList();
+  for (const auto &button : getButtons()) {
+    auto name = QString::fromStdString(button.name.get());
+    list.removeAll(name);
+  }
+  return list;
+}
+
+QStringList ButtonBaseModel::getUnusedButtons(
+    const document::data::item::Button &button) const
+{
+  auto list = getUnusedButtons();
+  auto current = QString::fromStdString(button.name.get());
+
+  if (!list.contains(current)) {
+    list.append(current);
+  }
+
+  return list;
+}
+
+QStringList ButtonBaseModel::getUnusedPositions() const
+{
+  //only allow each position once. always add a new, empty
+  //page once a page has at least one button on it.
+  int i;
+  set<int> positions;
+  QStringList list;
+  int buttonCount = SOFTBUTTONS_PER_PAGE; //min one page
+
+  //get all positions
+  for (const auto &button : getButtons()) {
+    auto pos = button.position.get();
+    if (pos >= 0) {
+      positions.insert(pos);
+    }
+  }
+  //find the button with the highest index
+  if (!positions.empty()) {
+    auto last = *positions.rbegin();
+    auto pages = (last + SOFTBUTTONS_PER_PAGE - 1) / SOFTBUTTONS_PER_PAGE + 1;
+    buttonCount = (pages + 1) * SOFTBUTTONS_PER_PAGE; //add one empty page
+  }
+  //create entries for all others (and current entry)
+  for (i = 0; i < buttonCount; i++) {
+    if (positions.contains(i)) {
+      continue;
+    }
+    list.push_back(toPositionString(i));
+  }
+  return list;
+}
+
+QStringList ButtonBaseModel::getUnusedPositions(
+    const document::data::item::Button &button) const
+{
+  auto list = getUnusedPositions();
+  auto current = toPositionString(button.position.get());
+
+  if (!list.contains(current)) {
+    list.prepend(current);
+  }
+  return list;
+}
+
+QString models::ButtonBaseModel::toPositionString(int pos) const
+{
+  return tr("Position: %1 (Page %2, Button %3)").arg(pos).arg(
+      pos / SOFTBUTTONS_PER_PAGE + 1).arg(pos % SOFTBUTTONS_PER_PAGE + 1);
+}
+
+int models::ButtonBaseModel::fromPositionString(const QString &pos) const
+{
+  return pos.section(" ", 1, 1).toInt();
+}
+
+QStringList ButtonBaseModel::getAvailableCommands(
+    const document::data::item::Device *device) const
+{
+  QStringList commands;
+
+  for (const auto &irCommand : device->getIrCommands().getRawCommands()) {
+    commands.push_back(QString::fromStdString(irCommand.name.get()));
+  }
+  for (const auto &irCommand : device->getIrCommands().getProtoCommands()) {
+    commands.push_back(QString::fromStdString(irCommand.name.get()));
+  }
+  commands.sort();
+  return commands;
+}
+
 void ButtonBaseModel::itemChangedObserver(document::data::Item item, int pos)
 {
   if (item != this->item) {
@@ -214,33 +335,6 @@ DeviceHardButtonModel::DeviceHardButtonModel(document::Config &config,
     ButtonBaseModel(config, document::data::Item::DEVICE_HARD_BUTTON)
 {
   device = config.data().getDevice(deviceId, &devicePos);
-}
-
-QVariant DeviceHardButtonModel::data(const QModelIndex &index, int role) const
-{
-  if (!index.isValid()) {
-    return {};
-  }
-  if (index.parent().isValid()) {
-    return {};
-  }
-
-  switch (role) {
-    case Qt::DisplayRole:
-      return getDisplayData(index);
-    case Qt::EditRole:
-      return getEditData(index);
-    case Qt::ToolTipRole:
-      return getTooltipData(index);
-    case Qt::BackgroundRole:
-      return getBackgroundData(index);
-    case Qt::ForegroundRole:
-      return getForegroundData(index);
-    case UserDataRole::SelectionItemsRole:
-      return getSelectionItemsData(index);
-    default:
-      return {};
-  }
 }
 
 bool DeviceHardButtonModel::setData(const QModelIndex &index,
@@ -314,7 +408,7 @@ const vector<document::data::item::Button>& DeviceHardButtonModel::getButtons() 
 bool DeviceHardButtonModel::addButton(int row, bool setDefaults)
 {
   QString commandToUse;
-  auto commands = getAvailableCommands();
+  auto commands = getAvailableCommands(device);
   auto buttons = getUnusedButtons();
 
   if (commands.size() == 0) {
@@ -395,7 +489,6 @@ QVariant DeviceHardButtonModel::getTooltipData(const QModelIndex &index) const
             "You can find it here:<br><br>"
             "<img src=':/res/buttons/%2.jpg' width='180' height='138'>").arg(
             text).arg(name);
-
         return text;
       }
       default:
@@ -425,7 +518,7 @@ QVariant DeviceHardButtonModel::getSelectionItemsData(
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
       case Column::COMMAND:
-        return getAvailableCommands();
+        return getAvailableCommands(device);
       case Column::BUTTON:
         return getUnusedButtons(button);
       default:
@@ -436,207 +529,215 @@ QVariant DeviceHardButtonModel::getSelectionItemsData(
   return {};
 }
 
-QStringList DeviceHardButtonModel::getAvailableCommands() const
+DeviceSoftButtonModel::DeviceSoftButtonModel(document::Config &config,
+    uint32_t deviceId, QObject *parent) :
+    ButtonBaseModel(config, document::data::Item::DEVICE_SOFT_BUTTON)
 {
-  QStringList commands;
-
-  for (const auto &irCommand : device->getIrCommands().getRawCommands()) {
-    commands.push_back(QString::fromStdString(irCommand.name.get()));
-  }
-  for (const auto &irCommand : device->getIrCommands().getProtoCommands()) {
-    commands.push_back(QString::fromStdString(irCommand.name.get()));
-  }
-  commands.sort();
-  return commands;
+  device = config.data().getDevice(deviceId, &devicePos);
 }
 
-QStringList DeviceHardButtonModel::getUnusedButtons(
-    const document::data::item::Button &button) const
+bool DeviceSoftButtonModel::setData(const QModelIndex &index,
+    const QVariant &value, int role)
 {
-  //find all unused buttons + the current one
-  auto current = QString::fromStdString(button.name.get());
-  auto list =
-      document::data::Enum<document::data::HardButtons>(current).getQStringList();
-  for (const auto &button : getButtons()) {
-    auto name = QString::fromStdString(button.name.get());
-    if (name == current) {
-      continue;
+  if (index.parent().isValid() || (role != Qt::EditRole)) {
+    return false;
+  }
+  auto row = index.row();
+  auto baseColumn = mapColumn(index.column());
+
+  //checks
+  if (!columnSetup.contains(baseColumn)) {
+    return false;
+  }
+  if (columnSetup.at(baseColumn).isConst) { //caller should have used flags() method!
+    return false;
+  }
+  if (row >= rowCount()) {
+    return false;
+  }
+  auto currentValue = data(index, role);
+  if (currentValue.isValid() && (currentValue == value)) {
+    return true;
+  }
+
+  switch (static_cast<Column>(index.column())) {
+    case Column::COMMAND:
+      return config.modify().setDeviceButtonAction(
+          value.toString().toStdString(), devicePos, type, row);
+    case Column::NAME:
+      return config.modify().setDeviceButtonName(value.toString().toStdString(),
+          devicePos, type, row);
+    case Column::POSITION: {
+      auto pos = fromPositionString(value.toString());
+      return config.modify().setDeviceButtonPosition(pos, devicePos, type, row);
     }
-    list.removeAll(name);
+    default:
+      return false;
   }
-  return list;
+
+  //don't emit dataChanged event, is done inside observers anyway
+  return true;
 }
 
-QStringList DeviceHardButtonModel::getUnusedButtons() const
+ButtonBaseModel::Column models::DeviceSoftButtonModel::mapColumn(
+    int viewColumn) const
 {
-  auto list =
-      document::data::Enum<document::data::HardButtons>::toQStringList();
-  for (const auto &button : getButtons()) {
-    auto name = QString::fromStdString(button.name.get());
-    list.removeAll(name);
-  }
-  return list;
+  return mapColumn(static_cast<Column>(viewColumn));
 }
 
-//
-//
-//QVariant DeviceHardButtonModel::getDisplayData(const QModelIndex &index) const
-//{
-//  try {
-//    auto &button = getButtons().at(index.row());
-//    switch (index.column()) {
-//      case Column::DEVICE: {
-//        auto id = button.device.get();
-//        auto *device = config.data().getDevice(id);
-//        if (device != nullptr) {
-//          return QString::fromStdString(device->label.get());
-//        }
-//        return {};
-//      }
-//      case Column::COMMAND:
-//        return QString::fromStdString(button.action.get());
-//      case Column::BUTTON:
-//      case Column::NAME:
-//        return QString::fromStdString(button.name.get());
-//      case Column::ICON:
-//        return QString::fromStdString(button.file.get());
-//      case Column::POSITION: {
-//        auto pos = button.position.get();
-//        return tr("%1 (Page %2, Button %3)").arg(pos).arg(
-//            pos / SOFTBUTTONS_PER_PAGE).arg(pos % SOFTBUTTONS_PER_PAGE);
-//      }
-//      default:
-//        break;
-//    }
-//  } catch (const out_of_range &ex) {
-//  }
-//  return {};
-//}
-//
-//QVariant ButtonBaseModel::getEditData(const QModelIndex &index) const
-//{
-//  try {
-//    auto &button = getButtons().at(index.row());
-//    switch (index.column()) {
-//      case Column::DEVICE:
-//        return button.device.get();
-//      case Column::COMMAND:
-//        return QString::fromStdString(button.action.get());
-//      case Column::BUTTON:
-//      case Column::NAME:
-//        return QString::fromStdString(button.name.get());
-//      case Column::ICON:
-//        return QString::fromStdString(button.file.get());
-//      case Column::POSITION:
-//        return getDisplayData(index); //todo that is not editdata...
-//      default:
-//        break;
-//    }
-//  } catch (const out_of_range &ex) {
-//  }
-//  return {};
-//}
-//
-//QVariant ButtonBaseModel::getTooltipData(const QModelIndex &index) const
-//{
-//  try {
-//    return columnSetup.at(static_cast<Column>(index.column())).context;
-//  } catch (...) {
-//  }
-//  return {};
-//}
-//
-//QVariant ButtonBaseModel::getBackgroundData(const QModelIndex &index) const
-//{
-//  return {};
-//}
-//
-//QVariant ButtonBaseModel::getForegroundData(const QModelIndex &index) const
-//{
-//  return {};
-//}
-//
-//QVariant ButtonBaseModel::getSelectionItemsData(const QModelIndex &index) const
-//{
-//  try {
-//    auto &button = getButtons().at(index.row());
-//    switch (index.column()) {
-//      case Column::DEVICE: {
-//        auto list = config.data().getDeviceLabels();
-//        return lib::toQStringList(list);
-//      }
-//      case Column::COMMAND:
-//
-//        //todo
-//
-//        break;
-//      case Column::BUTTON:
-//        return getSelectionItemsDataButton(button);
-//      case Column::ICON:
-//        return columnSetup   ---- icons;
-//      case Column::POSITION:
-//        return getSelectionItemsDataPosition(button);
-//      default:
-//        break;
-//    }
-//  } catch (const out_of_range &ex) {
-//  }
-//  return {};
-//}
-//
-//QVariant ButtonBaseModel::getSelectionItemsDataButton(
-//    const document::data::item::Button &button) const
-//{
-//  //only allow unused buttons
-//  auto current = QString::fromStdString(button.name.get());
-//  auto list =
-//      document::data::Enum<document::data::HardButtons>(current).getQStringList();
-//  for (const auto button : getButtons()) {
-//    auto name = QString::fromStdString(button.name.get());
-//    if (name == current) {
-//      continue;
-//    }
-//    list.removeAll(name);
-//  }
-//  return list;
-//}
-//
-//QVariant ButtonBaseModel::getSelectionItemsDataPosition(
-//    const document::data::item::Button &button) const
-//{
-////only allow each position once. always add a new, empty
-////page once a page has at least one button on it.
-//  int i;
-//  set<int> list;
-//  QStringList positions;
-//  int buttonCount = SOFTBUTTONS_PER_PAGE; //min one page
-//
-//  auto current = button.position.get();
-//
-////get all positions
-//  for (const auto button : getButtons()) {
-//    auto pos = button.position.get();
-//    if (pos >= 0) {
-//      list.insert(pos);
-//    }
-//  }
-////find the button with the highest index
-//  if (!list.empty()) {
-//    auto last = *list.rbegin();
-//    auto pages = (last + SOFTBUTTONS_PER_PAGE - 1) % SOFTBUTTONS_PER_PAGE;
-//    buttonCount = (pages + 1) * SOFTBUTTONS_PER_PAGE; //add one empty page
-//  }
-////create entries for all others (and current entry)
-//  for (i = 0; i < buttonCount; i++) {
-//    if (list.contains(i) && (i != current)) {
-//      continue;
-//    }
-//    positions.push_back(
-//        tr("%1 (Page %2, Button %3)").arg(i).arg(i / SOFTBUTTONS_PER_PAGE).arg(
-//            i % SOFTBUTTONS_PER_PAGE));
-//  }
-//  return positions;
-//}
+ButtonBaseModel::Column models::DeviceSoftButtonModel::mapColumn(
+    Column viewColumn) const
+{
+  switch (viewColumn) {
+    case Column::COMMAND:
+      return ButtonBaseModel::Column::COMMAND;
+    case Column::NAME:
+      return ButtonBaseModel::Column::NAME;
+    case Column::POSITION:
+      return ButtonBaseModel::Column::POSITION;
+    default:
+      return ButtonBaseModel::Column::COUNT;
+  }
+}
+
+int DeviceSoftButtonModel::columnCount(const QModelIndex &parent) const
+{
+  return static_cast<int>(Column::COUNT);
+}
+
+const vector<document::data::item::Button>& DeviceSoftButtonModel::getButtons() const
+{
+  return device->getSoftButtons();
+}
+
+bool DeviceSoftButtonModel::addButton(int row, bool setDefaults)
+{
+  auto commands = getAvailableCommands(device);
+  if (commands.size() == 0) {
+    emit writeMsg(
+        tr("No IR commands available to add. Add an IR command first"));
+    return false;
+  }
+
+  auto ret = config.modify().addDeviceButtonCommand(devicePos, type, row);
+  if (ret != true) {
+    return ret;
+  }
+  //for default -- first unused command.
+  auto unusedCommands = getUnusedCommands(device);
+  if (unusedCommands.size() == 0) {
+    unusedCommands = commands;
+  }
+  config.modify().setDeviceButtonAction(unusedCommands[0].toStdString(),
+      devicePos, type, row);
+  config.modify().setDeviceButtonName(unusedCommands[0].toStdString(),
+      devicePos, type, row);
+  //assume infinite touch positions for the real world
+  auto position = fromPositionString(getUnusedPositions()[0]);
+  config.modify().setDeviceButtonPosition(position, devicePos, type, row);
+  return true;
+}
+
+bool DeviceSoftButtonModel::removeButton(int row)
+{
+  return config.modify().removeDeviceButtonCommand(devicePos, type, row);
+}
+
+QVariant DeviceSoftButtonModel::getDisplayData(const QModelIndex &index) const
+{
+  try {
+    auto &button = getButtons().at(index.row());
+    switch (static_cast<Column>(index.column())) {
+      case Column::COMMAND:
+        return QString::fromStdString(button.action.get());
+      case Column::NAME:
+        return QString::fromStdString(button.name.get());
+      case Column::POSITION:
+        return toPositionString(button.position.get());
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+QVariant DeviceSoftButtonModel::getEditData(const QModelIndex &index) const
+{
+  try {
+    auto &button = getButtons().at(index.row());
+    switch (static_cast<Column>(index.column())) {
+      case Column::COMMAND:
+        return QString::fromStdString(button.action.get());
+      case Column::NAME:
+        return QString::fromStdString(button.name.get());
+      case Column::POSITION:
+        return toPositionString(button.position.get());
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+QVariant DeviceSoftButtonModel::getTooltipData(const QModelIndex &index) const
+{
+  try {
+    return columnSetup.at(mapColumn(index.column())).context;
+  } catch (...) {
+  }
+  return {};
+}
+
+QVariant DeviceSoftButtonModel::getBackgroundData(
+    const QModelIndex &index) const
+{
+  return {};
+}
+
+QVariant DeviceSoftButtonModel::getForegroundData(
+    const QModelIndex &index) const
+{
+  return {};
+}
+
+QVariant DeviceSoftButtonModel::getSelectionItemsData(
+    const QModelIndex &index) const
+{
+  try {
+    auto &button = getButtons().at(index.row());
+    switch (static_cast<Column>(index.column())) {
+      case Column::COMMAND:
+        return getAvailableCommands(device);
+      case Column::POSITION:
+        return getUnusedPositions(button);
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+QStringList models::DeviceSoftButtonModel::getUnusedCommands(
+    const document::data::item::Device *device) const
+{
+  QStringList usedCommands;
+
+  for (const auto &button : device->getHardButtons()) {
+    usedCommands.push_back(QString::fromStdString(button.action.get()));
+  }
+  for (const auto &button : device->getSoftButtons()) {
+    usedCommands.push_back(QString::fromStdString(button.action.get()));
+  }
+  auto availableCommands = getAvailableCommands(device);
+
+  for (const auto &command : usedCommands) {
+    availableCommands.removeAll(command);
+  }
+  return availableCommands;
+}
 
 }
 

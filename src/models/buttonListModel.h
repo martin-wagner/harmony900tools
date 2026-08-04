@@ -71,6 +71,7 @@ class ButtonBaseModel: public QAbstractItemModel
     ~ButtonBaseModel() override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 
     virtual QModelIndex index(int row, int column, const QModelIndex &parent = { }) const override;
     virtual QModelIndex parent(const QModelIndex &index) const override;
@@ -94,12 +95,27 @@ class ButtonBaseModel: public QAbstractItemModel
     virtual const std::vector<document::data::item::Button> &getButtons() const = 0;
     virtual bool addButton(int row, bool setDefaults = true) = 0;
     virtual bool removeButton(int row) = 0;
+    virtual QVariant getDisplayData(const QModelIndex &index) const = 0;
+    virtual QVariant getEditData(const QModelIndex &index) const = 0;
+    virtual QVariant getTooltipData(const QModelIndex &index) const = 0;
+    virtual QVariant getBackgroundData(const QModelIndex &index) const = 0;
+    virtual QVariant getForegroundData(const QModelIndex &index) const = 0;
+    virtual QVariant getSelectionItemsData(const QModelIndex &index) const = 0;
 
   protected:
     document::Config &config;
     document::data::Item item;
 
     void createActions();
+
+  protected:
+    QStringList getUnusedButtons(const document::data::item::Button &button) const;
+    QStringList getUnusedButtons() const;
+    QStringList getUnusedPositions(const document::data::item::Button &button) const;
+    QStringList getUnusedPositions() const;
+    QString toPositionString(int pos) const;
+    int fromPositionString(const QString &pos) const;
+    QStringList getAvailableCommands(const document::data::item::Device *device) const;
 
   private slots:
     void itemChangedObserver(document::data::Item item, int pos);
@@ -116,7 +132,6 @@ class DeviceHardButtonModel: public ButtonBaseModel
   public:
     DeviceHardButtonModel(document::Config &config, uint32_t deviceId, QObject *parent = nullptr);
 
-    QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     enum class Column {
@@ -135,24 +150,59 @@ class DeviceHardButtonModel: public ButtonBaseModel
     const std::vector<document::data::item::Button> &getButtons() const override;
     bool addButton(int row, bool setDefaults = true) override;
     bool removeButton(int row) override;
+    QVariant getDisplayData(const QModelIndex &index) const override;
+    QVariant getEditData(const QModelIndex &index) const override;
+    QVariant getTooltipData(const QModelIndex &index) const override;
+    QVariant getBackgroundData(const QModelIndex &index) const override;
+    QVariant getForegroundData(const QModelIndex &index) const override;
+    QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
     const document::data::item::Device *device;
     uint32_t devicePos;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Hard;
+};
+
+//Model for device touch buttons
+class DeviceSoftButtonModel: public ButtonBaseModel
+{
+  Q_OBJECT
+  public:
+    DeviceSoftButtonModel(document::Config &config, uint32_t deviceId, QObject *parent = nullptr);
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+
+    enum class Column {
+      COMMAND,
+      NAME,
+      POSITION,
+
+      COUNT
+    };
+    virtual ButtonBaseModel::Column mapColumn(int viewColumn) const;
+    virtual ButtonBaseModel::Column mapColumn(Column viewColumn) const;
+
+    virtual int columnCount(const QModelIndex &parent = { }) const override;
 
   protected:
-    QVariant getDisplayData(const QModelIndex &index) const;
-    QVariant getEditData(const QModelIndex &index) const;
-    QVariant getTooltipData(const QModelIndex &index) const;
-    QVariant getBackgroundData(const QModelIndex &index) const;
-    QVariant getForegroundData(const QModelIndex &index) const;
-    QVariant getSelectionItemsData(const QModelIndex &index) const;
+    //implement
+    const std::vector<document::data::item::Button> &getButtons() const override;
+    bool addButton(int row, bool setDefaults = true) override;
+    bool removeButton(int row) override;
+    QVariant getDisplayData(const QModelIndex &index) const override;
+    QVariant getEditData(const QModelIndex &index) const override;
+    QVariant getTooltipData(const QModelIndex &index) const override;
+    QVariant getBackgroundData(const QModelIndex &index) const override;
+    QVariant getForegroundData(const QModelIndex &index) const override;
+    QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
-    QStringList getAvailableCommands() const;
-    QStringList getUnusedButtons(const document::data::item::Button &button) const;
-    QStringList getUnusedButtons() const;
+  private:
+    QStringList getUnusedCommands(const document::data::item::Device *device) const;
 
+  protected:
+    const document::data::item::Device *device;
+    uint32_t devicePos;
+    const document::data::item::ButtonType type = document::data::item::ButtonType::Soft;
 };
 
 }

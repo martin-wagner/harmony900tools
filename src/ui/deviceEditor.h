@@ -8,15 +8,11 @@
 
 #include "context.h"
 #include "logViewer.h"
+#include "models/buttonListModel.h"
+#include "models/deviceListModel.h"
 
 class QAction;
 class QToolBar;
-
-namespace models
-{
-class DeviceModel;
-class DeviceHardButtonModel;
-}
 
 namespace editors
 {
@@ -24,6 +20,7 @@ namespace editors
 class DeviceTreeView;
 class BaseTreeView;
 class DeviceHardButtonTreeView;
+class DeviceSoftButtonTreeView;
 
 /**
  * @brief Device editor: one toolbar shared by a all members.
@@ -64,11 +61,13 @@ class DeviceEditor: public QWidget
     DeviceTreeView *deviceView = nullptr;
     /** all child views, in display order */
     DeviceHardButtonTreeView *hardButtonView = nullptr;
+    DeviceSoftButtonTreeView *softButtonView = nullptr;
     QList<BaseTreeView *> childViews;
     /** last active view (of device and child views) */
     BaseTreeView *lastActiveView = nullptr;
     //models
     models::DeviceHardButtonModel *hardButtonModel = nullptr;
+    models::DeviceSoftButtonModel *softButtonModel = nullptr;
 
     QToolBar *toolbar = nullptr;
     QAction *actionAdd = nullptr;
@@ -81,6 +80,7 @@ class DeviceEditor: public QWidget
 
     //create model for deviceId
     void updateHardButtonView(uint32_t deviceId);
+    void updateSoftButtonView(uint32_t deviceId);
 };
 
 } // namespace editors

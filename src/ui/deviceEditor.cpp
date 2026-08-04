@@ -3,13 +3,14 @@
 #include <QAction>
 #include <QToolBar>
 #include <QVBoxLayout>
+#include <QSplitter>
+
+#include <DockManager.h>
 
 #include "lib/icon.h"
 #include "deviceEditor.h"
 #include "deviceTreeView.h"
 #include "deviceButtonTreeView.h"
-#include "models/deviceListModel.h"
-#include "models/buttonListModel.h"
 
 using namespace std;
 
@@ -58,6 +59,7 @@ void DeviceEditor::onDeviceSelectionChanged(int row)
   auto deviceId = deviceView->getCurrentDeviceId();
 
   updateHardButtonView(deviceId);
+  updateSoftButtonView(deviceId);
 
   updateActions();
 
@@ -66,6 +68,7 @@ void DeviceEditor::onDeviceSelectionChanged(int row)
 
 void DeviceEditor::createView()
 {
+  //fixme use ads for this
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
@@ -73,12 +76,21 @@ void DeviceEditor::createView()
   setupToolbar();
   layout->addWidget(toolbar);
 
-  deviceView = new DeviceTreeView(ctx, this);
-  layout->addWidget(deviceView);
+  auto *splitter = new QSplitter(Qt::Vertical, this);
 
+  deviceView = new DeviceTreeView(ctx, this);
+  splitter->addWidget(deviceView);
+
+  auto *buttonSplitter = new QSplitter(Qt::Horizontal, splitter);
   hardButtonView = new DeviceHardButtonTreeView(ctx, this);
-  layout->addWidget(hardButtonView);
+  buttonSplitter->addWidget(hardButtonView);
   childViews.append(hardButtonView);
+  softButtonView = new DeviceSoftButtonTreeView(ctx, this);
+  buttonSplitter->addWidget(softButtonView);
+  childViews.append(softButtonView);
+  splitter->addWidget(buttonSplitter);
+
+  layout->addWidget(splitter);
 }
 
 void DeviceEditor::setupToolbar()
@@ -155,6 +167,24 @@ void DeviceEditor::updateHardButtonView(uint32_t deviceId)
     connect(hardButtonModel, &models::DeviceHardButtonModel::writeMsg, this,
         &DeviceEditor::writeMsg);
     hardButtonView->setModel(hardButtonModel);
+  }
+}
+
+void DeviceEditor::updateSoftButtonView(uint32_t deviceId)
+{
+  softButtonView->setModel(nullptr);
+  if (softButtonModel != nullptr) {
+    softButtonModel->deleteLater();
+    softButtonModel = nullptr;
+  }
+  if (deviceId > 0) {
+    softButtonModel = new models::DeviceSoftButtonModel(*ctx.config(), deviceId,
+        this);
+    connect(softButtonModel, &models::DeviceSoftButtonModel::writeLog, this,
+        &DeviceEditor::writeLog);
+    connect(softButtonModel, &models::DeviceSoftButtonModel::writeMsg, this,
+        &DeviceEditor::writeMsg);
+    softButtonView->setModel(softButtonModel);
   }
 }
 
