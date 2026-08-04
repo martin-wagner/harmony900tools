@@ -138,6 +138,7 @@ if(WIN32)
 endif()
 
 # Resources:
+file(GLOB buttonIcons RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${resourcePath}buttons/*.jpg")
 set(iconPath "${resourcePath}icons/BreezeConverted/64x64/")
 set(${programName}_resource_files
     ${resourcePath}/splash.png
@@ -164,6 +165,7 @@ set(${programName}_resource_files
     ${iconPath}/actions/edit-download.png
     ${iconPath}/actions/media-record.png
     ${iconPath}/actions/keyframe-record.png
+    ${buttonIcons}
 )
 
 qt_add_resources(${programName} "application"

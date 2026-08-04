@@ -386,7 +386,20 @@ QVariant DeviceHardButtonModel::getEditData(const QModelIndex &index) const
 QVariant DeviceHardButtonModel::getTooltipData(const QModelIndex &index) const
 {
   try {
-    return columnSetup.at(mapColumn(index.column())).context;
+    auto text = columnSetup.at(mapColumn(index.column())).context;
+    switch (static_cast<Column>(index.column())) {
+      case Column::BUTTON: {
+        auto name = QString::fromStdString(
+            getButtons().at(index.row()).name.get());
+        text = tr("<b>%1</b><br>"
+            "You can find it here:<br><br>"
+            "<img src=':/res/buttons/%2.jpg'>").arg(text).arg(name);
+
+        return text;
+      }
+      default:
+        return text;
+    }
   } catch (...) {
   }
   return {};
