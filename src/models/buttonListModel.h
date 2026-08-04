@@ -112,7 +112,6 @@ class ButtonBaseModel: public QAbstractItemModel
     QStringList getUnusedButtons(const document::data::item::Button &button) const;
     QStringList getUnusedButtons() const;
     QString toPositionString(int pos) const;
-    int fromPositionString(const QString &pos) const;
     QStringList getAvailableCommands(const document::data::item::Device *device) const;
 
   private slots:
@@ -171,9 +170,9 @@ class DeviceSoftButtonModel: public ButtonBaseModel
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     enum class Column {
+      POSITION,
       COMMAND,
       NAME,
-      POSITION,
 
       COUNT
     };

@@ -217,13 +217,8 @@ QStringList ButtonBaseModel::getUnusedButtons(
 
 QString models::ButtonBaseModel::toPositionString(int pos) const
 {
-  return tr("Id: %1 (Page %2, Button %3)").arg(pos).arg(
-      pos / SOFTBUTTONS_PER_PAGE + 1).arg(pos % SOFTBUTTONS_PER_PAGE + 1);
-}
-
-int models::ButtonBaseModel::fromPositionString(const QString &pos) const
-{
-  return pos.section(" ", 1, 1).toInt();
+  return tr("Page %1, Button %2").arg(pos / SOFTBUTTONS_PER_PAGE + 1).arg(
+      pos % SOFTBUTTONS_PER_PAGE + 1);
 }
 
 QStringList ButtonBaseModel::getAvailableCommands(
@@ -523,10 +518,6 @@ bool DeviceSoftButtonModel::setData(const QModelIndex &index,
     case Column::NAME:
       return config.modify().setDeviceButtonName(value.toString().toStdString(),
           devicePos, type, row);
-    case Column::POSITION: {
-      auto pos = fromPositionString(value.toString());
-      return config.modify().setDeviceButtonPosition(pos, devicePos, type, row);
-    }
     default:
       return false;
   }
@@ -545,12 +536,12 @@ ButtonBaseModel::Column models::DeviceSoftButtonModel::mapColumn(
     Column viewColumn) const
 {
   switch (viewColumn) {
+    case Column::POSITION:
+      return ButtonBaseModel::Column::POSITION;
     case Column::COMMAND:
       return ButtonBaseModel::Column::COMMAND;
     case Column::NAME:
       return ButtonBaseModel::Column::NAME;
-    case Column::POSITION:
-      return ButtonBaseModel::Column::POSITION;
     default:
       return ButtonBaseModel::Column::COUNT;
   }
@@ -611,12 +602,12 @@ QVariant DeviceSoftButtonModel::getDisplayData(const QModelIndex &index) const
   try {
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
+      case Column::POSITION:
+        return toPositionString(button.position.get());
       case Column::COMMAND:
         return QString::fromStdString(button.action.get());
       case Column::NAME:
         return QString::fromStdString(button.name.get());
-      case Column::POSITION:
-        return toPositionString(button.position.get());
       default:
         break;
     }
@@ -630,12 +621,12 @@ QVariant DeviceSoftButtonModel::getEditData(const QModelIndex &index) const
   try {
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
+      case Column::POSITION:
+        return toPositionString(button.position.get());
       case Column::COMMAND:
         return QString::fromStdString(button.action.get());
       case Column::NAME:
         return QString::fromStdString(button.name.get());
-      case Column::POSITION:
-        return toPositionString(button.position.get());
       default:
         break;
     }
