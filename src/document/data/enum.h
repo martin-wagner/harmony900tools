@@ -69,8 +69,10 @@ class Enum
     Enum(T v);
 
     static bool isEnumValue(std::string s);
-    static std::string getString(T v);
-    static QString getQString(T v);
+    static std::string toString(T v);
+    static QString toQString(T v);
+    static std::vector<std::string> toStringList();
+    static QStringList toQStringList();
 
     std::vector<std::string> getStringList() const;
     QStringList getQStringList() const;

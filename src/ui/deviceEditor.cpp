@@ -150,6 +150,10 @@ void DeviceEditor::updateHardButtonView(uint32_t deviceId)
   if (deviceId > 0) {
     hardButtonModel = new models::DeviceHardButtonModel(*ctx.config(), deviceId,
         this);
+    connect(hardButtonModel, &models::DeviceHardButtonModel::writeLog, this,
+        &DeviceEditor::writeLog);
+    connect(hardButtonModel, &models::DeviceHardButtonModel::writeMsg, this,
+        &DeviceEditor::writeMsg);
     hardButtonView->setModel(hardButtonModel);
   }
 }

@@ -47,27 +47,49 @@ bool Enum<T>::isEnumValue(string s)
 }
 
 template<typename T>
-string Enum<T>::getString(T v)
+string Enum<T>::toString(T v)
 {
   return string(enum_name(v));
 }
 
 template<typename T>
-QString Enum<T>::getQString(T v)
+QString Enum<T>::toQString(T v)
 {
-  return QString::fromStdString(getString(v));
+  return QString::fromStdString(toString(v));
 }
 
 template<typename T>
-vector<string> Enum<T>::getStringList() const
+inline std::vector<std::string> document::data::Enum<T>::toStringList()
 {
   vector<string> ret;
 
   enum_for_each<T>([&ret](auto val) {
     if (val != T::Unknown) {
-      ret.push_back(getString(val));
+      ret.push_back(toString(val));
     }
   });
+
+  return ret;
+}
+
+template<typename T>
+inline QStringList document::data::Enum<T>::toQStringList()
+{
+  QStringList ret;
+
+  enum_for_each<T>([&ret](auto val) {
+    if (val != T::Unknown) {
+      ret.push_back(toQString(val));
+    }
+  });
+
+  return ret;
+}
+
+template<typename T>
+vector<string> Enum<T>::getStringList() const
+{
+  auto ret = toStringList();
 
   //we always want to have the current value available
   if (!isEnumValue(src)) {
@@ -80,13 +102,7 @@ vector<string> Enum<T>::getStringList() const
 template<typename T>
 QStringList Enum<T>::getQStringList() const
 {
-  QStringList ret;
-
-  enum_for_each<T>([&ret](auto val) {
-    if (val != T::Unknown) {
-      ret.push_back(getQString(val));
-    }
-  });
+  auto ret = toQStringList();
 
   //we always want to have the current value available
   if (!isEnumValue(src)) {

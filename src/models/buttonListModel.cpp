@@ -311,9 +311,37 @@ const vector<document::data::item::Button>& DeviceHardButtonModel::getButtons() 
   return device->getHardButtons();
 }
 
-bool DeviceHardButtonModel::addButton(int row)
+bool DeviceHardButtonModel::addButton(int row, bool setDefaults)
 {
-  return config.modify().addDeviceButtonCommand(devicePos, type, row);
+  QString commandToUse;
+  auto commands = getAvailableCommands();
+  auto buttons = getUnusedButtons();
+
+  if (commands.size() == 0) {
+    emit writeMsg(
+        tr("No IR commands available to add. Add an IR command first"));
+    return false;
+  }
+  if (buttons.size() == 0) {
+    emit writeMsg(tr("All hardware buttons are used. Can't add more"));
+    return false;
+  }
+  auto buttonToUse = buttons[0];
+
+  auto ret = config.modify().addDeviceButtonCommand(devicePos, type, row);
+  if (ret != true) {
+    return ret;
+  }
+  if (commands.contains(buttonToUse)) {
+    commandToUse = buttonToUse;
+  } else {
+    commandToUse = commands[0];
+  }
+  config.modify().setDeviceButtonAction(commandToUse.toStdString(), devicePos,
+      type, row);
+  config.modify().setDeviceButtonName(buttonToUse.toStdString(), devicePos,
+      type, row);
+  return true;
 }
 
 bool DeviceHardButtonModel::removeButton(int row)
@@ -383,9 +411,9 @@ QVariant DeviceHardButtonModel::getSelectionItemsData(
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
       case Column::COMMAND:
-        return getSelectionItemsDataCommand(button);
+        return getAvailableCommands();
       case Column::BUTTON:
-        return getSelectionItemsDataButton(button);
+        return getUnusedButtons(button);
       default:
         break;
     }
@@ -394,8 +422,7 @@ QVariant DeviceHardButtonModel::getSelectionItemsData(
   return {};
 }
 
-QVariant DeviceHardButtonModel::getSelectionItemsDataCommand(
-    const document::data::item::Button &button) const
+QStringList DeviceHardButtonModel::getAvailableCommands() const
 {
   QStringList commands;
 
@@ -409,10 +436,10 @@ QVariant DeviceHardButtonModel::getSelectionItemsDataCommand(
   return commands;
 }
 
-QVariant DeviceHardButtonModel::getSelectionItemsDataButton(
+QStringList DeviceHardButtonModel::getUnusedButtons(
     const document::data::item::Button &button) const
 {
-  //only allow unused buttons
+  //find all unused buttons + the current one
   auto current = QString::fromStdString(button.name.get());
   auto list =
       document::data::Enum<document::data::HardButtons>(current).getQStringList();
@@ -421,6 +448,17 @@ QVariant DeviceHardButtonModel::getSelectionItemsDataButton(
     if (name == current) {
       continue;
     }
+    list.removeAll(name);
+  }
+  return list;
+}
+
+QStringList DeviceHardButtonModel::getUnusedButtons() const
+{
+  auto list =
+      document::data::Enum<document::data::HardButtons>::toQStringList();
+  for (const auto &button : getButtons()) {
+    auto name = QString::fromStdString(button.name.get());
     list.removeAll(name);
   }
   return list;

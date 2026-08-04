@@ -85,10 +85,14 @@ class ButtonBaseModel: public QAbstractItemModel
     virtual bool insertRows(int position, int rows, const QModelIndex &parent = { }) override;
     virtual bool removeRows(int position, int rows, const QModelIndex &parent = { }) override;
 
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
   protected:
     //accessors
     virtual const std::vector<document::data::item::Button> &getButtons() const = 0;
-    virtual bool addButton(int row) = 0;
+    virtual bool addButton(int row, bool setDefaults = true) = 0;
     virtual bool removeButton(int row) = 0;
 
   protected:
@@ -129,7 +133,7 @@ class DeviceHardButtonModel: public ButtonBaseModel
   protected:
     //implement
     const std::vector<document::data::item::Button> &getButtons() const override;
-    bool addButton(int row) override;
+    bool addButton(int row, bool setDefaults = true) override;
     bool removeButton(int row) override;
 
   protected:
@@ -144,8 +148,10 @@ class DeviceHardButtonModel: public ButtonBaseModel
     QVariant getBackgroundData(const QModelIndex &index) const;
     QVariant getForegroundData(const QModelIndex &index) const;
     QVariant getSelectionItemsData(const QModelIndex &index) const;
-    QVariant getSelectionItemsDataCommand(const document::data::item::Button &button) const;
-    QVariant getSelectionItemsDataButton(const document::data::item::Button &button) const;
+
+    QStringList getAvailableCommands() const;
+    QStringList getUnusedButtons(const document::data::item::Button &button) const;
+    QStringList getUnusedButtons() const;
 
 };
 
