@@ -39,6 +39,12 @@ class BaseTreeView: public QWidget
     /** remove the currently selected row, if any */
     void removeRow();
 
+    /** move the currently selected row one up */
+    void moveUpRow();
+
+    /** move the currently selected row one down */
+    void moveDownRow();
+
     /** whether a row is currently selected and can be removed */
     bool canRemove() const;
 
@@ -81,6 +87,7 @@ class BaseTreeView: public QWidget
     void bindModel(QAbstractItemModel *model);
 
     int getCurrentRow() const;
+    int getCurrentColumn() const;
 
   private:
     void createView(const QString &title);

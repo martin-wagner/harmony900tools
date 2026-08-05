@@ -39,6 +39,7 @@ void BaseTreeView::addRow()
   } else {
     model->insertRows(row + 1, 1);
   }
+  //todo selection verschieben wie move...
 }
 
 void BaseTreeView::removeRow()
@@ -51,6 +52,41 @@ void BaseTreeView::removeRow()
     return;
   }
   model->removeRows(row, 1);
+  //todo selection verschieben wie move...
+}
+
+void BaseTreeView::moveUpRow()
+{
+  if (model == nullptr) {
+    return;
+  }
+  const int row = getCurrentRow();
+  const int column = getCurrentColumn();
+  if (row <= 0) {
+    return;
+  }
+  auto ret = model->moveRows(QModelIndex(), row, 1, QModelIndex(), row - 1);
+  if (ret == true) {
+    auto newIndex = model->index(row - 1, column);
+    treeView->setCurrentIndex(newIndex);
+  }
+}
+
+void BaseTreeView::moveDownRow()
+{
+  if (model == nullptr) {
+    return;
+  }
+  const int row = getCurrentRow();
+  const int column = getCurrentColumn();
+  if (row < 0 || row >= model->rowCount() - 1) {
+    return;
+  }
+  auto ret = model->moveRows(QModelIndex(), row, 1, QModelIndex(), row + 1);
+  if (ret == true) {
+    auto newIndex = model->index(row + 1, column);
+    treeView->setCurrentIndex(newIndex);
+  }
 }
 
 bool BaseTreeView::canRemove() const
@@ -154,6 +190,15 @@ int BaseTreeView::getCurrentRow() const
     return -1;
   }
   return selected.first().row();
+}
+
+int BaseTreeView::getCurrentColumn() const
+{
+  const QModelIndexList selected = treeView->selectionModel()->selectedRows();
+  if (selected.isEmpty()) {
+    return -1;
+  }
+  return selected.first().column();
 }
 
 void BaseTreeView::createView(const QString &title)
