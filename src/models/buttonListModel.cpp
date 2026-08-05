@@ -254,13 +254,17 @@ QList<QPair<uint32_t, QString>> ButtonBaseModel::getAvailableDevices() const
 
 void ButtonBaseModel::itemChangedObserver(document::data::Item item, int pos)
 {
-  if (item != this->item) {
-    return;
+  if (item == this->item) {
+    //we don't know the column!
+    emit dataChanged(index(pos, 0), index(pos, columnCount()), {
+      Qt::DisplayRole,
+      Qt::EditRole });
+  } else if (item == document::data::Item::DEVICE) {
+    //we don't know if/which buttons are affecated by the device data change
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount()), {
+      Qt::DisplayRole,
+      Qt::EditRole });
   }
-  //we don't know the column!
-  emit dataChanged(index(pos, 0), index(pos, columnCount()), {
-    Qt::DisplayRole,
-    Qt::EditRole });
 }
 
 void ButtonBaseModel::itemAboutToBeAddedObserver(document::data::Item item,
@@ -755,8 +759,7 @@ bool ActivityHardButtonModel::setData(const QModelIndex &index,
 
   switch (static_cast<Column>(index.column())) {
     case Column::DEVICE:
-      return config.modify().setActivityButtonDevice(value.toUInt(),
-          activityPos, type, row);
+      return setDeviceData(row, value);
     case Column::COMMAND:
       return config.modify().setActivityButtonAction(
           value.toString().toStdString(), activityPos, type, row);
@@ -804,34 +807,53 @@ const vector<document::data::item::Button>& ActivityHardButtonModel::getButtons(
 
 bool ActivityHardButtonModel::addButton(int row)
 {
-//  QString commandToUse;
-//  auto commands = getAvailableCommands(activity);
-//  auto buttons = getUnusedButtons();
-//
-//  if (commands.size() == 0) {
-//    emit writeMsg(
-//        tr("No IR commands available to add. Add an IR command first"));
-//    return false;
-//  }
-//  if (buttons.size() == 0) {
-//    emit writeMsg(tr("All hardware buttons are used. Can't add more"));
-//    return false;
-//  }
-//  auto buttonToUse = buttons[0]; todo
+  uint32_t deviceId;
+  QString commandToUse;
+
+  auto devices = getAvailableDevices();
+  if (devices.empty()) {
+    tr("You need to create a device first!");
+    return false;
+  }
+  try {
+    //just assume we want the same device again
+    deviceId = getButtons().at(row - 1).device.get();
+  } catch (const out_of_range &ex) {
+    deviceId = devices[0].first;
+  }
+  auto *device = config.data().getDevice(deviceId);
+  if (device == nullptr) {
+    return false;
+  }
+
+  auto commands = getAvailableCommands(device);
+  auto buttons = getUnusedButtons();
+
+  if (commands.size() == 0) {
+    emit writeMsg(tr("No IR commands available to add for this device. "
+        "Add an IR command first"));
+    return false;
+  }
+  if (buttons.size() == 0) {
+    emit writeMsg(tr("All hardware buttons are used. Can't add more"));
+    return false;
+  }
+  auto buttonToUse = buttons[0];
 
   auto ret = config.modify().addActivityButtonCommand(activityPos, type, row);
   if (ret != true) {
     return ret;
   }
-//  if (commands.contains(buttonToUse)) {
-//    commandToUse = buttonToUse;
-//  } else {
-//    commandToUse = commands[0];
-//  }
-//  config.modify().setActivityButtonAction(commandToUse.toStdString(), activityPos,
-//      type, row);
-//  config.modify().setActivityButtonName(buttonToUse.toStdString(), activityPos,
-//      type, row); todo
+  if (commands.contains(buttonToUse)) {
+    commandToUse = buttonToUse;
+  } else {
+    commandToUse = commands[0];
+  }
+  config.modify().setActivityButtonDevice(deviceId, activityPos, type, row);
+  config.modify().setActivityButtonAction(commandToUse.toStdString(),
+      activityPos, type, row);
+  config.modify().setActivityButtonName(buttonToUse.toStdString(), activityPos,
+      type, row);
   return true;
 }
 
@@ -944,6 +966,58 @@ QVariant ActivityHardButtonModel::getSelectionItemsData(
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+bool ActivityHardButtonModel::setDeviceData(int row, const QVariant &value)
+{
+  bool ok;
+
+  auto deviceId = value.toUInt(&ok);
+  if (!ok) {
+    return false;
+  }
+
+  config.beginMacro(QObject::tr("Change Device"));
+
+  auto res = config.modify().setActivityButtonDevice(value.toUInt(),
+      activityPos, type, row);
+  if (res != true) {
+    config.endMacro();
+    return false;
+  }
+
+  //check if currently set command is available for this device
+  //if not, replace it with the first available in the new device
+  auto *device = config.data().getDevice(deviceId);
+  if (device == nullptr) {
+    config.endMacro();
+    return false;
+  }
+  try {
+    auto currentCommand = QString::fromStdString(
+        getButtons().at(row).action.get());
+    auto availableCommands = getAvailableCommands(device);
+    if (availableCommands.contains(currentCommand)) {
+      //we are fine, just keep the command
+      config.endMacro();
+      return true;
+    }
+    if (availableCommands.empty()) {
+      //device has no commands!
+      emit writeMsg(tr("Device has no commands"));
+      config.modify().setActivityButtonAction("", activityPos, type, row);
+      config.endMacro();
+      return true;
+    }
+    auto ret = config.modify().setActivityButtonAction(
+        availableCommands[0].toStdString(), activityPos, type, row);
+    config.endMacro();
+    return ret;
+
+  } catch (const out_of_range &ex) {
+  }
+  config.endMacro();
+  return false;
 }
 
 /*

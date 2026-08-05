@@ -61,6 +61,10 @@ class ActivityModel: public QAbstractItemModel
     bool removeRows(int position, int rows, const QModelIndex &parent = { }) override;
     bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild);
 
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
   private:
     document::Config &config;
 
@@ -72,6 +76,8 @@ class ActivityModel: public QAbstractItemModel
     QVariant getBackgroundData(const QModelIndex &index) const;
     QVariant getForegroundData(const QModelIndex &index) const;
     QVariant getSelectionItemsData(const QModelIndex &index) const;
+
+    bool setActivityName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
 
   private slots:
     void itemChangedObserver(document::data::Item item, int pos);

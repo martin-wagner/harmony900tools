@@ -135,7 +135,7 @@ bool ActivityModel::setData(const QModelIndex &index, const QVariant &value,
           document::data::Enum<document::data::ActivityType>(value.toString()),
           row);
     case Column::LABEL:
-      return worker.setActivityLabel(value.toString(), row);
+      return setActivityName(worker, row, value);
     default:
       return false;
   }
@@ -324,6 +324,31 @@ QVariant ActivityModel::getSelectionItemsData(const QModelIndex &index) const
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+bool ActivityModel::setActivityName(document::data::CmdCatalogue &worker, int row,
+    const QVariant &value)
+{
+  QList<string> usedNames;
+
+  auto &activities = config.data().getActivities();
+  auto name = value.toString();
+  auto baseName = name;
+
+  for (const auto &activity : activities) {
+    usedNames.push_back(activity.label.get());
+  }
+
+  int suffix = 1;
+  while (usedNames.contains(name.toStdString())) {
+    name = baseName + QString::number(suffix);
+    suffix++;
+  }
+  if (suffix > 1) {
+    emit writeMsg(tr("%1 already used. Names must be unique").arg(baseName));
+  }
+
+  return worker.setActivityLabel(name, row);
 }
 
 void ActivityModel::itemChangedObserver(document::data::Item item, int pos)

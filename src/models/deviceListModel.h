@@ -64,6 +64,10 @@ class DeviceModel: public QAbstractItemModel
     bool insertRows(int position, int rows, const QModelIndex &parent = { }) override;
     bool removeRows(int position, int rows, const QModelIndex &parent = { }) override;
 
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
   private:
     document::Config &config;
 
@@ -75,6 +79,8 @@ class DeviceModel: public QAbstractItemModel
     QVariant getBackgroundData(const QModelIndex &index) const;
     QVariant getForegroundData(const QModelIndex &index) const;
     QVariant getSelectionItemsData(const QModelIndex &index) const;
+
+    bool setDeviceName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
 
   private slots:
     void itemChangedObserver(document::data::Item item, int pos);

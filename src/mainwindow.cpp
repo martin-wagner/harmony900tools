@@ -627,12 +627,20 @@ void MainWindow::updateModelView()
   }
   deviceModel = new models::DeviceModel(*config, this);
   deviceEditor->setModel(deviceModel);
+  connect(deviceModel, &models::DeviceModel::writeLog, log,
+      &LogViewer::addEntry);
+  connect(deviceModel, &models::DeviceModel::writeMsg, log,
+      &LogViewer::addMessage);
 
   if (activityModel != nullptr) {
     activityModel->deleteLater();
   }
   activityModel = new models::ActivityModel(*config, this);
   activityEditor->setModel(activityModel);
+  connect(activityModel, &models::ActivityModel::writeLog, log,
+      &LogViewer::addEntry);
+  connect(activityModel, &models::ActivityModel::writeMsg, log,
+      &LogViewer::addMessage);
 }
 
 void MainWindow::showSettings()

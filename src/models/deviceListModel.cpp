@@ -138,8 +138,8 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
       return worker.setDeviceMnf(value.toString(), row);
     case Column::MODEL:
       return worker.setDeviceModel(value.toString(), row);
-    case Column::NAME: //todo must be unique!
-      return worker.setDeviceLabel(value.toString(), row);
+    case Column::NAME:
+      return setDeviceName(worker, row, value);
     default:
       return false;
   }
@@ -316,6 +316,31 @@ QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+bool DeviceModel::setDeviceName(document::data::CmdCatalogue &worker, int row,
+    const QVariant &value)
+{
+  QList<string> usedNames;
+
+  auto &devices = config.data().getDevices();
+  auto name = value.toString();
+  auto baseName = name;
+
+  for (const auto &device : devices) {
+    usedNames.push_back(device.label.get());
+  }
+
+  int suffix = 1;
+  while (usedNames.contains(name.toStdString())) {
+    name = baseName + QString::number(suffix);
+    suffix++;
+  }
+  if (suffix > 1) {
+    emit writeMsg(tr("%1 already used. Names must be unique").arg(baseName));
+  }
+
+  return worker.setDeviceLabel(name, row);
 }
 
 void DeviceModel::itemChangedObserver(document::data::Item item, int pos)

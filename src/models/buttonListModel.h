@@ -237,6 +237,9 @@ class ActivityHardButtonModel: public ButtonBaseModel
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
+    bool setDeviceData(int row, const QVariant &value);
+
+  protected:
     const document::data::item::Activity *activity;
     uint32_t activityPos;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Hard;
