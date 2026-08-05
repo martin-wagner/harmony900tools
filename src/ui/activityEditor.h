@@ -35,10 +35,10 @@ class ActivityEditor: public BaseEditor
   private:
     /** all child views, in display order */
     ActivityHardButtonTreeView *hardButtonView = nullptr;
-    //ActivitySoftButtonTreeView *softButtonView = nullptr;
+    ActivitySoftButtonTreeView *softButtonView = nullptr;
     //models
     models::ActivityHardButtonModel *hardButtonModel = nullptr;
-    //models::ActivitySoftButtonModel *softButtonModel = nullptr;
+    models::ActivitySoftButtonModel *softButtonModel = nullptr;
 
     virtual void createView() override;
 

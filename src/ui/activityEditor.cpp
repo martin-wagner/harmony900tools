@@ -39,7 +39,7 @@ void ActivityEditor::onSelectionChanged(int row)
       reinterpret_cast<ActivityTreeView*>(mainView)->getCurrentActivityId();
 
   updateHardButtonView(activityId);
-  //updateSoftButtonView(activityId);
+  updateSoftButtonView(activityId);
 
   updateActions();
 
@@ -59,9 +59,9 @@ void ActivityEditor::createView()
   hardButtonView = new ActivityHardButtonTreeView(ctx, this);
   buttonSplitter->addWidget(hardButtonView);
   childViews.append(hardButtonView);
-//  softButtonView = new ActivitySoftButtonTreeView(ctx, this);
-//  buttonSplitter->addWidget(softButtonView);
-//  childViews.append(softButtonView);
+  softButtonView = new ActivitySoftButtonTreeView(ctx, this);
+  buttonSplitter->addWidget(softButtonView);
+  childViews.append(softButtonView);
   splitter->addWidget(buttonSplitter);
 
   layout->addWidget(splitter);
@@ -87,20 +87,20 @@ void ActivityEditor::updateHardButtonView(uint32_t activityId)
 
 void ActivityEditor::updateSoftButtonView(uint32_t activityId)
 {
-//  softButtonView->setModel(nullptr);
-//  if (softButtonModel != nullptr) {
-//    softButtonModel->deleteLater();
-//    softButtonModel = nullptr;
-//  }
-//  if (activityId > 0) {
-//    softButtonModel = new models::ActivitySoftButtonModel(*ctx.config(), activityId,
-//        this);
-//    connect(softButtonModel, &models::ActivitySoftButtonModel::writeLog, this,
-//        &ActivityEditor::writeLog);
-//    connect(softButtonModel, &models::ActivitySoftButtonModel::writeMsg, this,
-//        &ActivityEditor::writeMsg);
-//    softButtonView->setModel(softButtonModel);
-//  }
+  softButtonView->setModel(nullptr);
+  if (softButtonModel != nullptr) {
+    softButtonModel->deleteLater();
+    softButtonModel = nullptr;
+  }
+  if (activityId > 0) {
+    softButtonModel = new models::ActivitySoftButtonModel(*ctx.config(), activityId,
+        this);
+    connect(softButtonModel, &models::ActivitySoftButtonModel::writeLog, this,
+        &ActivityEditor::writeLog);
+    connect(softButtonModel, &models::ActivitySoftButtonModel::writeMsg, this,
+        &ActivityEditor::writeMsg);
+    softButtonView->setModel(softButtonModel);
+  }
 }
 
 } // namespace editors

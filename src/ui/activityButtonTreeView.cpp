@@ -58,8 +58,15 @@ void ActivitySoftButtonTreeView::setModel(QAbstractItemModel *model)
 void ActivitySoftButtonTreeView::setupDelegates()
 {
   auto *comboBoxDelegate = new delegates::ComboBox(this);
+  auto *uidComboBoxDelegate = new delegates::UidComboBox(this);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ActivitySoftButtonModel::Column::DEVICE),
+      uidComboBoxDelegate);
   treeView->setItemDelegateForColumn(
       static_cast<int>(models::ActivitySoftButtonModel::Column::COMMAND),
+      comboBoxDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ActivitySoftButtonModel::Column::ICON),
       comboBoxDelegate);
 }
 

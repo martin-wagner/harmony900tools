@@ -1024,5 +1024,335 @@ bool ActivityHardButtonModel::setDeviceData(int row, const QVariant &value)
  * Activity Soft Buttons
  */
 
+ActivitySoftButtonModel::ActivitySoftButtonModel(document::Config &config,
+    uint32_t activityId, QObject *parent) :
+    ButtonBaseModel(config, document::data::Item::ACTIVITY_SOFT_BUTTON)
+{
+  activity = config.data().getActivity(activityId, &activityPos);
+}
+
+bool ActivitySoftButtonModel::setData(const QModelIndex &index,
+    const QVariant &value, int role)
+{
+  if (index.parent().isValid() || (role != Qt::EditRole)) {
+    return false;
+  }
+  auto row = index.row();
+  auto baseColumn = mapColumn(index.column());
+
+  //checks
+  if (!columnSetup.contains(baseColumn)) {
+    return false;
+  }
+  if (columnSetup.at(baseColumn).isConst) { //caller should have used flags() method!
+    return false;
+  }
+  if (row >= rowCount()) {
+    return false;
+  }
+  auto currentValue = data(index, role);
+  if (currentValue.isValid() && (currentValue == value)) {
+    return true;
+  }
+
+  switch (static_cast<Column>(index.column())) {
+    case Column::DEVICE:
+      return setDeviceData(row, value);
+    case Column::COMMAND:
+      return setDeviceCommand(row, value);
+    case Column::NAME:
+      return config.modify().setActivityButtonName(
+          value.toString().toStdString(), activityPos, type, row);
+    case Column::ICON:
+      return config.modify().setActivityButtonFile(
+          value.toString().toStdString(), activityPos, type, row);
+    default:
+      return false;
+  }
+
+  //don't emit dataChanged event, is done inside observers anyway
+  return true;
+}
+
+ButtonBaseModel::Column models::ActivitySoftButtonModel::mapColumn(
+    int viewColumn) const
+{
+  return mapColumn(static_cast<Column>(viewColumn));
+}
+
+ButtonBaseModel::Column models::ActivitySoftButtonModel::mapColumn(
+    Column viewColumn) const
+{
+  switch (viewColumn) {
+    case Column::POSITION:
+      return ButtonBaseModel::Column::POSITION;
+    case Column::DEVICE:
+      return ButtonBaseModel::Column::DEVICE;
+    case Column::COMMAND:
+      return ButtonBaseModel::Column::COMMAND;
+    case Column::NAME:
+      return ButtonBaseModel::Column::NAME;
+    case Column::ICON:
+      return ButtonBaseModel::Column::ICON;
+    default:
+      return ButtonBaseModel::Column::COUNT;
+  }
+}
+
+int ActivitySoftButtonModel::columnCount(const QModelIndex &parent) const
+{
+  return static_cast<int>(Column::COUNT);
+}
+
+const vector<document::data::item::Button>& ActivitySoftButtonModel::getButtons() const
+{
+  return activity->getSoftButtons();
+}
+
+bool ActivitySoftButtonModel::addButton(int row)
+{
+  uint32_t deviceId;
+  QString commandToUse;
+
+  auto devices = getAvailableDevices();
+  if (devices.empty()) {
+    tr("You need to create a device first!");
+    return false;
+  }
+  try {
+    //just assume we want the same device again
+    deviceId = getButtons().at(row - 1).device.get();
+  } catch (const out_of_range &ex) {
+    deviceId = devices[0].first;
+  }
+  auto *device = config.data().getDevice(deviceId);
+  if (device == nullptr) {
+    return false;
+  }
+  auto commands = getAvailableCommands(device);
+  if (commands.size() == 0) {
+    emit writeMsg(tr("No IR commands available to add for this device. "
+        "Add an IR command first"));
+    return false;
+  }
+
+  //only append to the end
+  row = rowCount();
+
+  auto ret = config.modify().addActivityButtonCommand(activityPos, type, row);
+  if (ret != true) {
+    return ret;
+  }
+  config.modify().setActivityButtonDevice(deviceId, activityPos, type, row);
+  config.modify().setActivityButtonFile("", activityPos, type, row);
+  //for default -- first unused command.
+  auto unusedCommands = getUnusedCommands(activity, device);
+  if (unusedCommands.size() == 0) {
+    config.modify().setActivityButtonAction(
+        string(document::data::item::Button::UNUSED), activityPos, type, row);
+    config.modify().setActivityButtonName("", activityPos, type, row);
+  } else {
+    config.modify().setActivityButtonAction(unusedCommands[0].toStdString(),
+        activityPos, type, row);
+    config.modify().setActivityButtonName(unusedCommands[0].toStdString(),
+        activityPos, type, row);
+  }
+  //assume infinite touch positions for the real world
+  config.modify().setActivityButtonPosition(row, activityPos, type, row);
+  return true;
+}
+
+bool ActivitySoftButtonModel::removeButton(int row)
+{
+  //only remove from the end
+  row = rowCount() - 1;
+  return config.modify().removeActivityButtonCommand(activityPos, type, row);
+}
+
+QVariant ActivitySoftButtonModel::getDisplayData(const QModelIndex &index) const
+{
+  try {
+    auto row = index.row();
+    auto &button = getButtons().at(row);
+    switch (static_cast<Column>(index.column())) {
+      case Column::POSITION:
+        return toPositionString(button.position.get());
+      case Column::DEVICE: {
+        auto deviceId = button.device.get();
+        auto *device = config.data().getDevice(deviceId);
+        if (device == nullptr) {
+          return ""; //entriy unused
+        }
+        return QString::fromStdString(device->label.get());
+      }
+      case Column::COMMAND:
+        return QString::fromStdString(button.action.get());
+      case Column::NAME:
+        return QString::fromStdString(button.name.get());
+      case Column::ICON:
+        return QString::fromStdString(button.file.get());
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+QVariant ActivitySoftButtonModel::getEditData(const QModelIndex &index) const
+{
+  try {
+    auto &button = getButtons().at(index.row());
+    switch (static_cast<Column>(index.column())) {
+      case Column::POSITION:
+        return toPositionString(button.position.get());
+      case Column::DEVICE:
+        return button.device.get();
+      case Column::COMMAND:
+        return QString::fromStdString(button.action.get());
+      case Column::NAME:
+        return QString::fromStdString(button.name.get());
+      case Column::ICON:
+        return QString::fromStdString(button.file.get());
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+QVariant ActivitySoftButtonModel::getTooltipData(const QModelIndex &index) const
+{
+  try {
+    return columnSetup.at(mapColumn(index.column())).context;
+  } catch (...) {
+  }
+  return {};
+}
+
+QVariant ActivitySoftButtonModel::getBackgroundData(
+    const QModelIndex &index) const
+{
+  return {};
+}
+
+QVariant ActivitySoftButtonModel::getForegroundData(
+    const QModelIndex &index) const
+{
+  return {};
+}
+
+QVariant ActivitySoftButtonModel::getSelectionItemsData(
+    const QModelIndex &index) const
+{
+  try {
+    auto row = index.row();
+    auto &button = getButtons().at(row);
+    switch (static_cast<Column>(index.column())) {
+      case Column::DEVICE:
+        return QVariant::fromValue(getAvailableDevices());
+      case Column::COMMAND: {
+        auto deviceId = button.device.get();
+        auto *device = config.data().getDevice(deviceId);
+        if (device == nullptr) {
+          return {QStringList( {QString::fromUtf8(document::data::item::Button::UNUSED)})};
+        }
+        auto cmds = getAvailableCommands(device);
+        cmds.prepend(QString::fromUtf8(document::data::item::Button::UNUSED));
+        return cmds;
+      }
+      case Column::ICON:
+        return columnSetup.at(mapColumn(index.column())).selection;
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+bool ActivitySoftButtonModel::setDeviceData(int row, const QVariant &value)
+{
+  bool ok;
+
+  auto deviceId = value.toUInt(&ok);
+  if (!ok) {
+    return false;
+  }
+
+  config.beginMacro(QObject::tr("Change Device"));
+
+  auto res = config.modify().setActivityButtonDevice(value.toUInt(),
+      activityPos, type, row);
+  if (res != true) {
+    config.endMacro();
+    return false;
+  }
+
+  //check if currently set command is available for this device
+  //if not, replace it with the first available in the new device
+  auto *device = config.data().getDevice(deviceId);
+  if (device == nullptr) {
+    config.endMacro();
+    return false;
+  }
+  try {
+    auto currentCommand = QString::fromStdString(
+        getButtons().at(row).action.get());
+    auto availableCommands = getAvailableCommands(device);
+    if (availableCommands.contains(currentCommand)) {
+      //we are fine, just keep the command
+      config.endMacro();
+      return true;
+    }
+    if (availableCommands.empty()) {
+      //device has no commands!
+      emit writeMsg(tr("Device has no commands"));
+      config.modify().setActivityButtonAction("", activityPos, type, row);
+      config.endMacro();
+      return true;
+    }
+    auto ret = config.modify().setActivityButtonAction(
+        availableCommands[0].toStdString(), activityPos, type, row);
+    config.endMacro();
+    return ret;
+
+  } catch (const out_of_range &ex) {
+  }
+  config.endMacro();
+  return false;
+}
+
+bool ActivitySoftButtonModel::setDeviceCommand(int row, const QVariant &value)
+{
+  auto cmd = value.toString().toStdString();
+
+  if (cmd == string(document::data::item::Button::UNUSED)) {
+    config.modify().setActivityButtonDevice(0, activityPos, type, row);
+  }
+  return config.modify().setActivityButtonAction(cmd, activityPos, type, row);
+}
+
+QStringList models::ActivitySoftButtonModel::getUnusedCommands(
+    const document::data::item::Activity *activity,
+    const document::data::item::Device *device) const
+{
+  QStringList usedCommands;
+
+  for (const auto &button : activity->getHardButtons()) {
+    usedCommands.push_back(QString::fromStdString(button.action.get()));
+  }
+  for (const auto &button : activity->getSoftButtons()) {
+    usedCommands.push_back(QString::fromStdString(button.action.get()));
+  }
+  auto availableCommands = getAvailableCommands(device);
+
+  for (const auto &command : usedCommands) {
+    availableCommands.removeAll(command);
+  }
+  return availableCommands;
+}
+
 }
 

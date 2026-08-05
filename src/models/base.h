@@ -19,7 +19,7 @@ struct Setup {
   QString context;
   QString dataType;
   bool isConst;
-  QVariantList selection;
+  QVariant selection; //can contain a qlist<x>
 };
 
 }

@@ -21,21 +21,22 @@ namespace models
 
 //this can't use Enum<type>, as some begin with numbers!
 inline static const QStringList icons {
-    "3musicNote", "filmstrip", "pause", "replayTV", "slowMotion", "teletext_on",
-    "55_sbNowPlaying", "heart", "playList", "rewind", "slowPlay", "teletext_red_default",
-    "A", "list", "play", "sbAdd", "SoundEffect", "teletext_yellow_default",
-    "aspect", "live", "podcasts", "sbFavorites", "SoundMode", "thumbsdown_default",
-    "back", "mail", "powerOFF", "sbNowPlaying", "square", "thumbsup_default",
-    "B", "mediaCenter", "powerOnOff", "sbPodcast", "star", "tivo",
-    "Cart", "myDVR", "powerON", "sbRepeat", "start", "topMenu",
-    "cbox_circle_default", "myMusic", "PS-Circle", "sbSearch", "stop2", "triangle",
-    "cbox_square_default", "myPictures", "PS-Cross", "sbShuffle", "stop", "VOD",
-    "cbox_triangle_default", "myRadio", "PS-Square", "search", "Subtitle", "xBox_Button",
-    "circle", "myTV", "PS_Triangle", "shuffle", "switchDisplay", "X",
-    "clock", "myVideo", "purple", "skipBack", "teletext_blue_default", "Y",
-    "closedCaption", "nowplaying", "record", "skipForward", "teletext_green_default",
-    "eject", "off", "repeat", "sky", "teletext_off",
-    "fastforward", "on", "replay", "sleep", "teletext_onoff"
+  "" , "3musicNote" , "55_sbNowPlaying" , "A" , "aspect" , "back" , "B" , "Cart" ,
+  "cbox_circle_default" , "cbox_square_default" , "cbox_triangle_default" ,
+  "circle" , "clock" , "closedCaption" , "eject" , "fastforward" , "filmstrip" ,
+  "heart" , "list" , "live" , "mail" , "mediaCenter" , "myDVR" , "myMusic" ,
+  "myPictures" , "myRadio" , "myTV" , "myVideo" , "nowplaying" , "off" , "on" ,
+  "pause" , "play" , "playList" , "podcasts" , "powerOFF" , "powerON" , "powerOnOff" ,
+  "PS-Circle" , "PS-Cross" , "PS-Square" , "PS_Triangle" , "purple" , "record" ,
+  "repeat" , "replay" , "replayTV" , "rewind" , "sbAdd" , "sbFavorites" ,
+  "sbNowPlaying" , "sbPodcast" , "sbRepeat" , "sbSearch" , "sbShuffle" ,
+  "search" , "shuffle" , "skipBack" , "skipForward" , "sky" , "sleep" ,
+  "slowMotion" , "slowPlay" , "SoundEffect" , "SoundMode" , "square" ,
+  "star" , "start" , "stop" , "stop2" , "Subtitle" , "switchDisplay" ,
+  "teletext_blue_default" , "teletext_green_default" , "teletext_off" ,
+  "teletext_on" , "teletext_onoff" , "teletext_red_default" ,
+  "teletext_yellow_default" , "thumbsdown_default" , "thumbsup_default" , "tivo" ,
+  "topMenu" , "triangle" , "VOD" , "X" , "xBox_Button" , "Y"
 };
 
 //Model for buttons
@@ -60,7 +61,7 @@ class ButtonBaseModel: public QAbstractItemModel
         { Column::COMMAND,       { "Command",  "The IR command you want to send", "Enum", false, {}, } },
         { Column::BUTTON,        { "Button",   "Link to this button on the remote", "Enum", false, {}, } },
         { Column::NAME,          { "Name",     "Name on the screen", "QString", false, {}, } },
-        { Column::ICON,          { "Icon",     "Use this icon instead of name", "Enum", false, {QVariant(icons)}, } },
+        { Column::ICON,          { "Icon",     "Use this icon instead of name. \nYou can download the icons from the remote using ftp,\nuser >>root<<, pass >>ethanol<<, go to the folder \n\"/usr/local/app/assets/placeables/large\"", "Enum", false, {QVariant::fromValue(icons)}, } },
         { Column::POSITION,      { "Position", "Where to place the button on the screen", "Enum", true, {}, } },
     };
 
@@ -246,7 +247,53 @@ class ActivityHardButtonModel: public ButtonBaseModel
 };
 
 
-class ActivitySoftButtonModel: public ButtonBaseModel{};
+//Model for activity touch buttons
+class ActivitySoftButtonModel: public ButtonBaseModel
+{
+  Q_OBJECT
+  public:
+    ActivitySoftButtonModel(document::Config &config, uint32_t deviceId, QObject *parent = nullptr);
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+
+    enum class Column {
+      POSITION,
+      DEVICE,
+      COMMAND,
+      NAME,
+      ICON,
+
+      COUNT
+    };
+    virtual ButtonBaseModel::Column mapColumn(int viewColumn) const;
+    virtual ButtonBaseModel::Column mapColumn(Column viewColumn) const;
+
+    virtual int columnCount(const QModelIndex &parent = { }) const override;
+
+  protected:
+    //implement
+    const std::vector<document::data::item::Button> &getButtons() const override;
+    bool addButton(int row) override;
+    bool removeButton(int row) override;
+    QVariant getDisplayData(const QModelIndex &index) const override;
+    QVariant getEditData(const QModelIndex &index) const override;
+    QVariant getTooltipData(const QModelIndex &index) const override;
+    QVariant getBackgroundData(const QModelIndex &index) const override;
+    QVariant getForegroundData(const QModelIndex &index) const override;
+    QVariant getSelectionItemsData(const QModelIndex &index) const override;
+
+  protected:
+    bool setDeviceData(int row, const QVariant &value);
+    bool setDeviceCommand(int row, const QVariant &value);
+
+  private:
+    QStringList getUnusedCommands(const document::data::item::Activity *activity, const document::data::item::Device *device) const;
+
+  protected:
+    const document::data::item::Activity *activity;
+    uint32_t activityPos;
+    const document::data::item::ButtonType type = document::data::item::ButtonType::Soft;
+};
 
 }
 

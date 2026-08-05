@@ -55,9 +55,9 @@ class Button
     /** only activity: device ID that contains command */
     PropertyU32 device{ 0, Used::NO} ;
     /** hard button: name, soft button: label */
-    PropertyString name{"Generic", Used::NO};
+    PropertyString name{"", Used::NO};
     /** only soft button: button icon */
-    PropertyString file{"0.png", Used::NO};
+    PropertyString file{"", Used::NO};
     /** only soft button: position on lcd, starting at 0. 6 devices per page, so 7 -> pos 0 on second page */
     PropertyI32 position{-1, Used::NO};
 };
