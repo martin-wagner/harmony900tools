@@ -19,6 +19,7 @@ namespace editors
 BaseEditor::BaseEditor(Context &ctx, QWidget *parent) :
     ctx(ctx)
 {
+  //no inheritance in constructor!
 }
 
 BaseEditor::~BaseEditor() = default;
@@ -83,13 +84,13 @@ void BaseEditor::setupToolbar()
   actionAdd = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
           "list-add"), tr("Add"));
-  actionAdd->setToolTip(tr("Add a new entry to the selected list. Click into\n"
+  actionAdd->setToolTip(tr("Add a new item to the selected list. Click into\n"
       "the empty space to select for adding the first item."));
 
   actionRemove = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
           "edit-delete"), tr("Remove"));
-  actionRemove->setToolTip(tr("Remove the selected entry"));
+  actionRemove->setToolTip(tr("Remove the selected item"));
   actionRemove->setShortcut(QKeySequence::Delete);
   actionRemove->setShortcutContext(Qt::ApplicationShortcut);
 
@@ -98,13 +99,12 @@ void BaseEditor::setupToolbar()
   actionMoveUp = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/go-up.png",
           "go-up"), tr("Move Up"));
-  actionMoveUp->setToolTip(tr("Move the selected activity one position up"));
+  actionMoveUp->setToolTip(tr("Move the selected item one position up"));
 
   actionMoveDown = toolbar->addAction(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/go-down.png",
           "go-down"), tr("Move Down"));
-  actionMoveDown->setToolTip(
-      tr("Move the selected activity one position down"));
+  actionMoveDown->setToolTip(tr("Move the selected item one position down"));
 }
 
 void BaseEditor::createConnections()
@@ -136,23 +136,33 @@ void BaseEditor::updateActions()
   if (lastActiveView == nullptr) {
     actionAdd->setEnabled(false);
     actionRemove->setEnabled(false);
+    actionMoveUp->setEnabled(false);
+    actionMoveDown->setEnabled(false);
     return;
   }
   actionAdd->setEnabled(true);
   actionRemove->setEnabled(lastActiveView->canRemove());
 
-
-//  int rowCount = 0;
-//  if (model != nullptr) {
-//    rowCount = model->rowCount();
-//  }
-//
-//  const int row = getCurrentRow();
-//  const bool hasSelection = (model != nullptr) && (row >= 0);
-//
-//  actionRemove->setEnabled(hasSelection);
-//  actionMoveUp->setEnabled(hasSelection && row > 0);
-//  actionMoveDown->setEnabled(hasSelection && row < rowCount - 1);
+  auto move = lastActiveView->availableMoveOperations();
+  switch (move) {
+    case BaseTreeView::MoveOperation::None:
+      actionMoveUp->setEnabled(false);
+      actionMoveDown->setEnabled(false);
+      break;
+    case BaseTreeView::MoveOperation::Up:
+      actionMoveUp->setEnabled(true);
+      actionMoveDown->setEnabled(false);
+      break;
+    case BaseTreeView::MoveOperation::Down:
+      actionMoveUp->setEnabled(false);
+      actionMoveDown->setEnabled(true);
+      break;
+    default:
+      //no harm if enabled, lower level will just drop the request.
+      actionMoveUp->setEnabled(true);
+      actionMoveDown->setEnabled(true);
+      break;
+  }
 }
 
 } // namespace editors

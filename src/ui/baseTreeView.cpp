@@ -34,12 +34,17 @@ void BaseTreeView::addRow()
     return;
   }
   row = getCurrentRow();
+  const int column = getCurrentColumn();
   if (row < 0) {
-    model->insertRows(treeView->model()->rowCount(), 1);
+    row = treeView->model()->rowCount();
   } else {
-    model->insertRows(row + 1, 1);
+    row = row + 1;
   }
-  //todo selection verschieben wie move...
+  auto ret = model->insertRows(row, 1);
+  if (ret == true) {
+    auto newIndex = model->index(row, column);
+    treeView->setCurrentIndex(newIndex);
+  }
 }
 
 void BaseTreeView::removeRow()
@@ -48,11 +53,37 @@ void BaseTreeView::removeRow()
     return;
   }
   const int row = getCurrentRow();
+  const int column = getCurrentColumn();
   if (row < 0) {
     return;
   }
-  model->removeRows(row, 1);
-  //todo selection verschieben wie move...
+  auto ret = model->removeRows(row, 1);
+  if (ret == true) {
+    auto newIndex = model->index(row - 1, column);
+    treeView->setCurrentIndex(newIndex);
+  }
+}
+
+BaseTreeView::MoveOperation BaseTreeView::availableMoveOperations()
+{
+  int rowCount = 0;
+
+  if (!supportsMoveOperation() || (model == nullptr)) {
+    return MoveOperation::None;
+  }
+
+  auto row = getCurrentRow();
+  if (row < 0) {
+    return MoveOperation::None;
+  }
+  rowCount = model->rowCount();
+  if ((row > 0) && (row < (rowCount - 1))) {
+    return MoveOperation::Both;
+  }
+  if (row > 0) {
+    return MoveOperation::Up;
+  }
+  return MoveOperation::Down;
 }
 
 void BaseTreeView::moveUpRow()

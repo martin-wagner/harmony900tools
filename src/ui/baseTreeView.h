@@ -39,6 +39,13 @@ class BaseTreeView: public QWidget
     /** remove the currently selected row, if any */
     void removeRow();
 
+    /** check for the tree implementing move operation */
+    virtual bool supportsMoveOperation() { return false; };
+
+    /** check for available move operations */
+    enum class MoveOperation { None, Up, Down, Both };
+    MoveOperation availableMoveOperations();
+
     /** move the currently selected row one up */
     void moveUpRow();
 
@@ -72,7 +79,7 @@ class BaseTreeView: public QWidget
     virtual void onSettingsChanged();
 
   protected:
-      bool eventFilter(QObject *object, QEvent *event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
   protected:
     Context &ctx;
