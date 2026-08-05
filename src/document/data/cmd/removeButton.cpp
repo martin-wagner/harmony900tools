@@ -68,17 +68,17 @@ void RemoveDeviceButtonCommand::undo()
 
   switch (type) {
     case item::ButtonType::Hard: {
-      emit itemAboutToBeRemoved(Item::DEVICE_HARD_BUTTON, buttonPos);
+      emit itemAboutToBeAdded(Item::DEVICE_HARD_BUTTON, buttonPos);
       auto &buttons = c.getDevices()[devicePos].getHardButtons();
       buttons.insert(buttons.begin() + buttonPos, button);
-      emit itemRemoved(Item::DEVICE_HARD_BUTTON, buttonPos);
+      emit itemAdded(Item::DEVICE_HARD_BUTTON, buttonPos);
       break;
     }
     case item::ButtonType::Soft: {
-      emit itemAboutToBeRemoved(Item::DEVICE_SOFT_BUTTON, buttonPos);
+      emit itemAboutToBeAdded(Item::DEVICE_SOFT_BUTTON, buttonPos);
       auto &buttons = c.getDevices()[devicePos].getSoftButtons();
       buttons.insert(buttons.begin() + buttonPos, button);
-      emit itemRemoved(Item::DEVICE_SOFT_BUTTON, buttonPos);
+      emit itemAdded(Item::DEVICE_SOFT_BUTTON, buttonPos);
       break;
     }
     default:
@@ -154,17 +154,17 @@ void RemoveActivityButtonCommand::undo()
 
   switch (type) {
     case item::ButtonType::Hard: {
-      emit itemAboutToBeRemoved(Item::ACTIVITY_HARD_BUTTON, buttonPos);
+      emit itemAboutToBeAdded(Item::ACTIVITY_HARD_BUTTON, buttonPos);
       auto &buttons = c.getActivities()[activityPos].getHardButtons();
       buttons.insert(buttons.begin() + buttonPos, button);
-      emit itemRemoved(Item::ACTIVITY_HARD_BUTTON, buttonPos);
+      emit itemAdded(Item::ACTIVITY_HARD_BUTTON, buttonPos);
       break;
     }
     case item::ButtonType::Soft: {
-      emit itemAboutToBeRemoved(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
+      emit itemAboutToBeAdded(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
       auto &buttons = c.getActivities()[activityPos].getSoftButtons();
       buttons.insert(buttons.begin() + buttonPos, button);
-      emit itemRemoved(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
+      emit itemAdded(Item::ACTIVITY_SOFT_BUTTON, buttonPos);
       break;
     }
     default:
