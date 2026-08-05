@@ -301,6 +301,7 @@ void MainWindow::createActions()
   //edit
   QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
   QToolBar *editToolBar = addToolBar(tr("Edit"));
+  editToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
   QAction *undoAct = undo.createUndoAction(this, tr("&Undo"));
   undoAct->setShortcuts(QKeySequence::Undo);
@@ -352,6 +353,7 @@ void MainWindow::createActions()
   QMenu *connectMenu = menuBar()->addMenu(tr("&Connection"));
   concordConnection->addToMenu(connectMenu);
   QToolBar *connectToolBar = addToolBar(tr("Connection"));
+  connectToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
   concordConnection->addToToolbar(connectToolBar);
 
   //view
