@@ -2,31 +2,23 @@
 
 #pragma once
 
-#include <QWidget>
-#include <QString>
-
-#include "context.h"
-#include "logViewer.h"
-
-class QAction;
-class QItemSelection;
-class QToolBar;
-class QTreeView;
-
-namespace models
-{
-class ActivityModel;
-}
+#include "models/buttonListModel.h"
+#include "models/activityListModel.h"
+#include "baseEditor.h"
 
 namespace editors
 {
 
+class ActivityTreeView;
+class ActivityHardButtonTreeView;
+class ActivitySoftButtonTreeView;
+
 /**
- * @brief Flat activity list editor with a toolbar for CRUD and reorder operations.
+ * @brief Activity editor
  *
- * Wraps a ActivityModel in a QTreeView (single-level, alternating colors).
+ * For editing remote controls
  */
-class ActivityEditor: public QWidget
+class ActivityEditor: public BaseEditor
 {
   Q_OBJECT
 
@@ -34,48 +26,25 @@ class ActivityEditor: public QWidget
     explicit ActivityEditor(Context &ctx, models::ActivityModel *model, QWidget *parent = nullptr);
     ~ActivityEditor() override;
 
-    /** set new model. nullptr = remove */
+    /** set new activity model. nullptr = remove */
     void setModel(models::ActivityModel *model);
 
-  signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
-
-    /** Emitted whenever the selection changes. row == -1
-      * when nothing is selected.*/
-    void selectionChanged(int row, uint32_t activityId);
-
-  private slots:
-    void onViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void onAddActivity();
-    void onRemoveActivity();
-    void onMoveUp();
-    void onMoveDown();
-    void onModelRowCountChanged();
-    void onUserLevelChanged(lib::UserLevel::Level l);
-    void onSettingsChanged();
+  protected slots:
+    virtual void onSelectionChanged(int row) override;
 
   private:
-    Context &ctx;
+    /** all child views, in display order */
+    ActivityHardButtonTreeView *hardButtonView = nullptr;
+    //ActivitySoftButtonTreeView *softButtonView = nullptr;
+    //models
+    models::ActivityHardButtonModel *hardButtonModel = nullptr;
+    //models::ActivitySoftButtonModel *softButtonModel = nullptr;
 
-  private:
-    models::ActivityModel *model = nullptr;
+    virtual void createView() override;
 
-    QTreeView *treeView = nullptr;
-    QToolBar *toolbar = nullptr;
-    QAction *actionAdd = nullptr;
-    QAction *actionRemove = nullptr;
-    QAction *actionMoveUp = nullptr;
-    QAction *actionMoveDown = nullptr;
-
-    void createView();
-    void setupToolbar();
-    void setupTreeView();
-    void createActions();
-    void updateActions();
-
-    int getCurrentRow() const;
-    int getCurrentColumn() const;
+    //create model for activityId
+    void updateHardButtonView(uint32_t activityId);
+    void updateSoftButtonView(uint32_t activityId);
 };
 
-} // namespace views
+} // namespace editors

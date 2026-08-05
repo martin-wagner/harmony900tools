@@ -113,6 +113,7 @@ class ButtonBaseModel: public QAbstractItemModel
     QStringList getUnusedButtons() const;
     QString toPositionString(int pos) const;
     QStringList getAvailableCommands(const document::data::item::Device *device) const;
+    QList<QPair<uint32_t, QString>> getAvailableDevices() const;
 
   private slots:
     void itemChangedObserver(document::data::Item item, int pos);
@@ -201,6 +202,48 @@ class DeviceSoftButtonModel: public ButtonBaseModel
     uint32_t devicePos;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Soft;
 };
+
+//Model for activity hardware buttons
+class ActivityHardButtonModel: public ButtonBaseModel
+{
+  Q_OBJECT
+  public:
+    ActivityHardButtonModel(document::Config &config, uint32_t activityId, QObject *parent = nullptr);
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+
+    enum class Column {
+      DEVICE,
+      COMMAND,
+      BUTTON,
+
+      COUNT
+    };
+    virtual ButtonBaseModel::Column mapColumn(int viewColumn) const;
+    virtual ButtonBaseModel::Column mapColumn(Column viewColumn) const;
+
+    virtual int columnCount(const QModelIndex &parent = { }) const override;
+
+  protected:
+    //implement
+    const std::vector<document::data::item::Button> &getButtons() const override;
+    bool addButton(int row) override;
+    bool removeButton(int row) override;
+    QVariant getDisplayData(const QModelIndex &index) const override;
+    QVariant getEditData(const QModelIndex &index) const override;
+    QVariant getTooltipData(const QModelIndex &index) const override;
+    QVariant getBackgroundData(const QModelIndex &index) const override;
+    QVariant getForegroundData(const QModelIndex &index) const override;
+    QVariant getSelectionItemsData(const QModelIndex &index) const override;
+
+  protected:
+    const document::data::item::Activity *activity;
+    uint32_t activityPos;
+    const document::data::item::ButtonType type = document::data::item::ButtonType::Hard;
+};
+
+
+class ActivitySoftButtonModel: public ButtonBaseModel{};
 
 }
 

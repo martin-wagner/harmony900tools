@@ -138,7 +138,7 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
       return worker.setDeviceMnf(value.toString(), row);
     case Column::MODEL:
       return worker.setDeviceModel(value.toString(), row);
-    case Column::NAME:
+    case Column::NAME: //todo must be unique!
       return worker.setDeviceLabel(value.toString(), row);
     default:
       return false;

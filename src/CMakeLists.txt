@@ -89,6 +89,10 @@ set(sources ${sources}
   models/deviceListModel.cpp
   models/buttonListModel.cpp
   ui/delegates/combobox.cpp
+  ui/delegates/uidCombobox.cpp
+  ui/activityButtonTreeView.cpp
+  ui/activityEditor.cpp
+  ui/activityTreeView.cpp
   ui/activityEditor.cpp
   ui/baseEditor.cpp
   ui/baseTreeView.cpp

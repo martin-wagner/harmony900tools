@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+#include <QTreeView>
+
+#include "activityButtonTreeView.h"
+#include "models/buttonListModel.h"
+#include "delegates/combobox.h"
+#include "delegates/uidCombobox.h"
+
+using namespace std;
+
+namespace editors
+{
+
+ActivityHardButtonTreeView::ActivityHardButtonTreeView(Context &ctx,
+    QWidget *parent) :
+    BaseTreeView(ctx, tr("Hard Buttons"), parent)
+{
+  setupDelegates();
+}
+
+ActivityHardButtonTreeView::~ActivityHardButtonTreeView() = default;
+
+void ActivityHardButtonTreeView::setModel(QAbstractItemModel *model)
+{
+  bindModel(model);
+}
+
+void ActivityHardButtonTreeView::setupDelegates()
+{
+  auto *comboBoxDelegate = new delegates::ComboBox(this);
+  auto *uidComboBoxDelegate = new delegates::UidComboBox(this);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ActivityHardButtonModel::Column::DEVICE),
+      uidComboBoxDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ActivityHardButtonModel::Column::COMMAND),
+      comboBoxDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ActivityHardButtonModel::Column::BUTTON),
+      comboBoxDelegate);
+}
+
+ActivitySoftButtonTreeView::ActivitySoftButtonTreeView(Context &ctx,
+    QWidget *parent) :
+    BaseTreeView(ctx, tr("Touch Buttons"), parent)
+{
+  setupDelegates();
+}
+
+ActivitySoftButtonTreeView::~ActivitySoftButtonTreeView() = default;
+
+void ActivitySoftButtonTreeView::setModel(QAbstractItemModel *model)
+{
+  bindModel(model);
+}
+
+void ActivitySoftButtonTreeView::setupDelegates()
+{
+  auto *comboBoxDelegate = new delegates::ComboBox(this);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ActivitySoftButtonModel::Column::COMMAND),
+      comboBoxDelegate);
+}
+
+} // namespace editors
