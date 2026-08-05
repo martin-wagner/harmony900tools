@@ -91,7 +91,7 @@ TEST(EnumIsEnumValue, GarbageReturnsFalse)
 
 TEST(EnumGetStringStatic, KnownValue)
 {
-    EXPECT_EQ(Enum<Locale>::getString(Locale::enu), "enu");
+    EXPECT_EQ(Enum<Locale>::toString(Locale::enu), "enu");
 }
 
 // ---------------------------------------------------------------------------

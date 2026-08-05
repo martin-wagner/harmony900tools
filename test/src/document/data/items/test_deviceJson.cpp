@@ -100,23 +100,9 @@ TEST(DevicePropertyEnum, ReadFromString)
 // Button / ButtonType
 // ---------------------------------------------------------------------------
 
-TEST(ButtonJson, RoundTripHardButton)
+TEST(ButtonJson, RoundTripButton)
 {
-    Button b(ButtonType::Hard);
-    b.action.set("Power");
-
-    nlohmann::ordered_json j;
-    serialiser::toJson(j, b);
-    EXPECT_EQ(j["Action"], "Power");
-
-    Button b2(ButtonType::Hard);
-    serialiser::fromJson(j, b2);
-    EXPECT_EQ(b2.action.get(), "Power");
-}
-
-TEST(ButtonJson, RoundTripSoftButton)
-{
-    Button b(ButtonType::Soft);
+    Button b;
     b.action.set("Power");
     b.name.set("Test").setIncluded(Used::YES);
 
@@ -125,19 +111,19 @@ TEST(ButtonJson, RoundTripSoftButton)
     EXPECT_EQ(j["Action"], "Power");
     EXPECT_EQ(j["Name"], "Test");
 
-    Button b2(ButtonType::Hard);
+    Button b2;
     serialiser::fromJson(j, b2);
     EXPECT_EQ(b2.action.get(), "Power");
     EXPECT_EQ(b2.name.get(), "Test");
 }
 
-TEST(ButtonJson, RoundTripSoftButtonReconstructsTypeFromDevice)
+TEST(ButtonJson, RoundTripButtonReconstructsTypeFromDevice)
 {
     Device d(1);
-    Button soft(ButtonType::Soft);
+    Button soft;
     soft.name.set("Guide");
     soft.name.setIncluded(Used::YES);
-    d.getButtons().push_back(soft);
+    d.getSoftButtons().push_back(soft);
 
     nlohmann::ordered_json j;
     serialiser::toJson(j, d);
@@ -145,9 +131,8 @@ TEST(ButtonJson, RoundTripSoftButtonReconstructsTypeFromDevice)
     Device d2(1);
     serialiser::fromJson(j, d2);
 
-    ASSERT_EQ(d2.getButtons().size(), 1u);
-    EXPECT_EQ(d2.getButtons()[0].getButtonType(), ButtonType::Soft);
-    EXPECT_EQ(d2.getButtons()[0].name.get(), "Guide");
+    ASSERT_EQ(d2.getSoftButtons().size(), 1u);
+    EXPECT_EQ(d2.getSoftButtons()[0].name.get(), "Guide");
 }
 
 // ---------------------------------------------------------------------------
@@ -382,9 +367,9 @@ TEST(DeviceJson, FullRoundTripProducesIdenticalJson)
     d.mnf.setIncluded(Used::YES);
     d.type.set(Enum<DeviceType>(DeviceType::Television));
 
-    Button b(ButtonType::Hard);
+    Button b;
     b.action.set("Power");
-    d.getButtons().push_back(b);
+    d.getHardButtons().push_back(b);
 
     StateMachine sm;
     sm.smType.set(Enum<StateMachineDeviceType>(StateMachineDeviceType::Power));

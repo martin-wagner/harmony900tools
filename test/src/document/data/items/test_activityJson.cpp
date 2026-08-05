@@ -181,9 +181,9 @@ TEST(ActivityJson, RoleListRoundTrips)
 TEST(ActivityJson, ButtonListPreservesButtonType)
 {
     Activity activity(1);
-    Button softButton(ButtonType::Soft);
+    Button softButton;
     softButton.action.set("Mute");
-    activity.getButtons().push_back(softButton);
+    activity.getSoftButtons().push_back(softButton);
 
     nlohmann::ordered_json j;
     serialiser::toJson(j, activity);
@@ -191,9 +191,8 @@ TEST(ActivityJson, ButtonListPreservesButtonType)
     Activity activity2(1);
     serialiser::fromJson(j, activity2);
 
-    ASSERT_EQ(activity2.getButtons().size(), 1u);
-    EXPECT_EQ(activity2.getButtons()[0].getButtonType(), ButtonType::Soft);
-    EXPECT_EQ(activity2.getButtons()[0].action.get(), "Mute");
+    ASSERT_EQ(activity2.getSoftButtons().size(), 1u);
+    EXPECT_EQ(activity2.getSoftButtons()[0].action.get(), "Mute");
 }
 
 // ---------------------------------------------------------------------------
@@ -248,9 +247,9 @@ TEST(ActivityJson, FullRoundTripProducesIdenticalJson)
     role.role = Enum<DeviceRole>(DeviceRole::DISPLAY);
     activity.getRoles().push_back(role);
 
-    Button ab(ButtonType::Soft);
+    Button ab;
     ab.action.set("Mute");
-    activity.getButtons().push_back(ab);
+    activity.getSoftButtons().push_back(ab);
 
     activity.getPowerOnDevices().push_back(1);
     activity.getPowerOnDevices().push_back(2);
