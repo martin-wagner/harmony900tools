@@ -40,11 +40,11 @@ class BaseTreeView: public QWidget
     void removeRow();
 
     /** check for the tree implementing move operation */
-    virtual bool supportsMoveOperation() { return false; };
+    virtual bool supportsMoveOperation() const { return false; };
 
     /** check for available move operations */
     enum class MoveOperation { None, Up, Down, Both };
-    MoveOperation availableMoveOperations();
+    MoveOperation availableMoveOperations() const;
 
     /** move the currently selected row one up */
     void moveUpRow();

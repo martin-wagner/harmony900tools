@@ -64,7 +64,7 @@ void BaseTreeView::removeRow()
   }
 }
 
-BaseTreeView::MoveOperation BaseTreeView::availableMoveOperations()
+BaseTreeView::MoveOperation BaseTreeView::availableMoveOperations() const
 {
   int rowCount = 0;
 

@@ -112,6 +112,10 @@ void BaseEditor::createConnections()
   connect(actionAdd, &QAction::triggered, this, &BaseEditor::onAddClicked);
   connect(actionRemove, &QAction::triggered, this,
       &BaseEditor::onRemoveClicked);
+  connect(actionMoveUp, &QAction::triggered, this,
+      &BaseEditor::onMoveUpClicked);
+  connect(actionMoveDown, &QAction::triggered, this,
+      &BaseEditor::onMoveDownClicked);
 
   connect(mainView, &BaseTreeView::availabilityChanged, this,
       &BaseEditor::onAvailabilityChanged);

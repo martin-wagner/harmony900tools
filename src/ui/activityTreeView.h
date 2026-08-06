@@ -26,6 +26,8 @@ class ActivityTreeView: public BaseTreeView
     /** set new model. nullptr = remove */
     void setModel(QAbstractItemModel *model) override;
 
+    virtual bool supportsMoveOperation() const override { return true; };
+
     /** currently selected activity id, or 0 if nothing is selected */
     uint32_t getCurrentActivityId() const;
 
