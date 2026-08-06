@@ -288,6 +288,7 @@ void toJson(ordered_json &out, const item::ProtoCommand &cmd)
 
   toJson(out, "Name", cmd.name);
   toJson(out, "ProtocolIndex", cmd.protocolIndex);
+  toJson(out, "CommandIndex", cmd.commandIndex);
 
   //binary IR stream, base64 encoded
   if (cmd.data.isIncluded() == Used::YES) {
@@ -303,6 +304,7 @@ void fromJson(const ordered_json &in, item::ProtoCommand &cmd)
 
   fromJson(in, "Name", cmd.name);
   fromJson(in, "ProtocolIndex", cmd.protocolIndex);
+  fromJson(in, "CommandIndex", cmd.commandIndex);
 
   auto it = in.find("Data");
   if (it != in.end()) {

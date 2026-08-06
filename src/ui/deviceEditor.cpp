@@ -9,6 +9,7 @@
 
 #include "lib/icon.h"
 #include "deviceEditor.h"
+#include "commandEditorView.h"
 #include "deviceTreeView.h"
 #include "deviceButtonTreeView.h"
 
@@ -38,12 +39,13 @@ void DeviceEditor::onSelectionChanged(int row)
   auto deviceId =
       reinterpret_cast<DeviceTreeView*>(mainView)->getCurrentDeviceId();
 
+  updateCommandEditorView(deviceId);
   updateHardButtonView(deviceId);
   updateSoftButtonView(deviceId);
 
   updateActions();
 
-  emit selectionChanged(deviceId);
+  emit selectionChanged(row);
 }
 
 void DeviceEditor::createView()
@@ -54,6 +56,16 @@ void DeviceEditor::createView()
 
   mainView = new DeviceTreeView(ctx, this);
   splitter->addWidget(mainView);
+  addHLine(splitter);
+
+  commandEditorView = new CommandEditorView(ctx, this);
+  splitter->addWidget(commandEditorView);
+  protoCommandView = new ProtoCommandTreeView(ctx, this);
+  rawCommandView = new RawCommandTreeView(ctx, this);
+  commandEditorView->addTreeViews(protoCommandView, rawCommandView);
+  childViews.append(protoCommandView);
+  childViews.append(rawCommandView);
+  addHLine(splitter);
 
   auto *buttonSplitter = new QSplitter(Qt::Horizontal, splitter);
   hardButtonView = new DeviceHardButtonTreeView(ctx, this);
@@ -65,6 +77,62 @@ void DeviceEditor::createView()
   splitter->addWidget(buttonSplitter);
 
   layout->addWidget(splitter);
+}
+
+void editors::DeviceEditor::createConnections()
+{
+  BaseEditor::createConnections();
+
+  connect(commandEditorView, &CommandEditorView::writeLog, this,
+      &DeviceEditor::writeLog);
+  connect(commandEditorView, &CommandEditorView::writeMsg, this,
+      &DeviceEditor::writeMsg);
+}
+
+void editors::DeviceEditor::updateCommandEditorView(uint32_t deviceId)
+{
+  commandEditorView->setData(0, nullptr, nullptr);
+  protoCommandView->setModel(nullptr);
+  if (protoCommandModel != nullptr) {
+    protoCommandModel->deleteLater();
+    protoCommandModel = nullptr;
+  }
+  rawCommandView->setModel(nullptr);
+  if (rawCommandModel != nullptr) {
+    rawCommandModel->deleteLater();
+    rawCommandModel = nullptr;
+  }
+
+  if (deviceId > 0) {
+//    commandEditorView = new CommandEditorView(*ctx.config(), deviceId,
+//        this);
+//    connect(commandEditorView, &models::DeviceHardButtonModel::writeLog, this,
+//        &DeviceEditor::writeLog);
+//    connect(commandEditorView, &models::DeviceHardButtonModel::writeMsg, this,
+//        &DeviceEditor::writeMsg); todo
+    protoCommandModel = new QStandardItemModel(4, 4);
+    for (int row = 0; row < protoCommandModel->rowCount(); ++row) {
+      for (int column = 0; column < protoCommandModel->columnCount();
+          ++column) {
+        QStandardItem *item = new QStandardItem(
+            QString("row %0, column %1").arg(row).arg(column));
+        protoCommandModel->setItem(row, column, item);
+      }
+    }
+    protoCommandView->setModel(protoCommandModel); //todo richtiges modell eintragen
+
+    rawCommandModel = new QStandardItemModel(4, 4);
+    for (int row = 0; row < rawCommandModel->rowCount(); ++row) {
+      for (int column = 0; column < rawCommandModel->columnCount(); ++column) {
+        QStandardItem *item = new QStandardItem(
+            QString("row %0, column %1").arg(row).arg(column));
+        rawCommandModel->setItem(row, column, item);
+      }
+    }
+    rawCommandView->setModel(rawCommandModel); //todo richtiges modell eintragen
+
+    commandEditorView->setData(deviceId, protoCommandModel, rawCommandModel);
+  }
 }
 
 void DeviceEditor::updateHardButtonView(uint32_t deviceId)

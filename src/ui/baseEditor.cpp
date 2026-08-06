@@ -169,4 +169,12 @@ void BaseEditor::updateActions()
   }
 }
 
+void BaseEditor::addHLine(QSplitter *s)
+{
+  auto *separator = new QFrame(s);
+  separator->setFrameShape(QFrame::HLine);
+  separator->setFrameShadow(QFrame::Sunken);
+  s->addWidget(separator);
+}
+
 } // namespace editors

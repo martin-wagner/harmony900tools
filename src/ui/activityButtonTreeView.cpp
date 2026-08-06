@@ -14,7 +14,7 @@ namespace editors
 
 ActivityHardButtonTreeView::ActivityHardButtonTreeView(Context &ctx,
     QWidget *parent) :
-    BaseTreeView(ctx, tr("Hard Buttons"), parent)
+    BaseTreeView(ctx, tr("Hard Buttons"), true, parent)
 {
   setupDelegates();
 }
@@ -43,7 +43,7 @@ void ActivityHardButtonTreeView::setupDelegates()
 
 ActivitySoftButtonTreeView::ActivitySoftButtonTreeView(Context &ctx,
     QWidget *parent) :
-    BaseTreeView(ctx, tr("Touch Buttons"), parent)
+    BaseTreeView(ctx, tr("Touch Buttons"), true, parent)
 {
   setupDelegates();
 }

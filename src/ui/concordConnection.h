@@ -15,6 +15,11 @@ class ConcordConnection: public QWidget
     explicit ConcordConnection(Context &ctx, Concord &concord, QWidget *parent = nullptr);
     ~ConcordConnection();
 
+    enum class LearnedCommandMode {
+        IR_STREAM,
+        IR_FRAME
+    };
+
     void addToToolbar(QToolBar *bar);
     void addToMenu(QMenu *menu);
 
@@ -22,6 +27,7 @@ class ConcordConnection: public QWidget
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
+    void learnedCommand(LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
     void doImport(const std::vector<uint8_t> &data);
     void requestQuit();
 
@@ -56,6 +62,7 @@ class ConcordConnection: public QWidget
     Concord &concord;
 
     bool dataMode = false;
+    LearnedCommandMode learnMode = LearnedCommandMode::IR_STREAM;
 
   private:
     void updateActionStates(bool setToBusy = false);

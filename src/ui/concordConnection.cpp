@@ -185,6 +185,7 @@ void ConcordConnection::onLearnIrSingle()
 {
   onUpdateProgress("Learn command...", 0, 0);
 
+  learnMode = LearnedCommandMode::IR_FRAME;
   updateActionStates(true);
   concord.learnCommand();
 }
@@ -193,6 +194,7 @@ void ConcordConnection::onLearnIrStream()
 {
   onUpdateProgress("Learn command...", 0, 0);
 
+  learnMode = LearnedCommandMode::IR_STREAM;
   auto timeout =
       ctx.settings().value(defaults::learnStreamTimeout().key).toInt();
   updateActionStates(true);
@@ -313,6 +315,7 @@ void ConcordConnection::onLearnDone(const binary::TimingStream &t,
   if (t.timings().size() > 0) {
     emit writeMsg("Learned Command");
     labelConnection->setText("Learned Command");
+    emit learnedCommand(learnMode, t, carrier);
   } else {
     emit writeMsg("Learn Error");
     labelConnection->setText("Learn Error");
@@ -542,6 +545,7 @@ void ConcordConnection::updateActionStates(bool setToBusy)
 void ConcordConnection::cleanup()
 {
   dataMode = false;
+  learnMode = LearnedCommandMode::IR_STREAM;
   if (disconnectMsg != nullptr) {
     disconnectMsg->deleteLater();
     disconnectMsg = nullptr;

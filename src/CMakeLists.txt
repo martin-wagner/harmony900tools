@@ -96,6 +96,7 @@ set(sources ${sources}
   ui/activityEditor.cpp
   ui/baseEditor.cpp
   ui/baseTreeView.cpp
+  ui/commandEditorView.cpp
   ui/concordConnection.cpp
   ui/deviceButtonTreeView.cpp
   ui/deviceEditor.cpp

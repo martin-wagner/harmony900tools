@@ -16,10 +16,11 @@ using namespace std;
 namespace editors
 {
 
-BaseTreeView::BaseTreeView(Context &ctx, const QString &title, QWidget *parent) :
+BaseTreeView::BaseTreeView(Context &ctx, const QString &title, bool bold,
+    QWidget *parent) :
     ctx(ctx)
 {
-  createView(title);
+  createView(title, bold);
   createConnections();
   createEventFilter();
 }
@@ -232,7 +233,7 @@ int BaseTreeView::getCurrentColumn() const
   return selected.first().column();
 }
 
-void BaseTreeView::createView(const QString &title)
+void BaseTreeView::createView(const QString &title, bool bold)
 {
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -241,7 +242,7 @@ void BaseTreeView::createView(const QString &title)
   if (!title.isEmpty()) {
     header = new QLabel(title, this);
     auto font = header->font();
-    font.setBold(true);
+    font.setBold(bold);
     header->setFont(font);
     layout->addWidget(header);
   }
@@ -283,7 +284,6 @@ void BaseTreeView::createConnections()
       &BaseTreeView::onUserLevelChanged);
   connect(&ctx.settings(), &Settings::settingsAccepted, this,
       &BaseTreeView::onSettingsChanged);
-
 }
 
 void BaseTreeView::createEventFilter()

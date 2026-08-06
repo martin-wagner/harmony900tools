@@ -43,7 +43,7 @@ void ActivityEditor::onSelectionChanged(int row)
 
   updateActions();
 
-  emit selectionChanged(activityId);
+  emit selectionChanged(row);
 }
 
 void ActivityEditor::createView()
@@ -54,6 +54,7 @@ void ActivityEditor::createView()
 
   mainView = new ActivityTreeView(ctx, this);
   splitter->addWidget(mainView);
+  addHLine(splitter);
 
   auto *buttonSplitter = new QSplitter(Qt::Horizontal, splitter);
   hardButtonView = new ActivityHardButtonTreeView(ctx, this);

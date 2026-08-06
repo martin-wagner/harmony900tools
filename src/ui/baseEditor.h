@@ -38,7 +38,7 @@ class BaseEditor: public QWidget
 
     /** Emitted whenever the base selection changes. row == -1
       * when nothing is selected.*/
-    void selectionChanged(uint32_t id);
+    void selectionChanged(uint32_t row);
 
   protected slots:
     virtual void onAddClicked();
@@ -69,6 +69,9 @@ class BaseEditor: public QWidget
     virtual void setupToolbar();
     virtual void createConnections();
     virtual void updateActions();
+
+  protected:
+    void addHLine(QSplitter *s);
 };
 
 } // namespace editors

@@ -1106,6 +1106,7 @@ bool ConfigH900::readIrList(pugi::xml_node &commands)
       }
     }
   }
+  worker->setIrCodeType(CodeType::Proprietary, devicePos);
 
   auto ret = true;
   for (pugi::xml_node prop : commands.children("Command")) {

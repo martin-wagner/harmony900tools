@@ -27,7 +27,7 @@ class BaseTreeView: public QWidget
   Q_OBJECT
 
   public:
-    explicit BaseTreeView(Context &ctx, const QString &title = QString(), QWidget *parent = nullptr);
+    explicit BaseTreeView(Context &ctx, const QString &title = QString(), bool bold = true, QWidget *parent = nullptr);
     ~BaseTreeView() override;
 
     /** set the model, nullptr  */
@@ -97,7 +97,7 @@ class BaseTreeView: public QWidget
     int getCurrentColumn() const;
 
   private:
-    void createView(const QString &title);
+    void createView(const QString &title, bool bold);
     void setupTreeView();
     void createConnections();
     void createEventFilter();

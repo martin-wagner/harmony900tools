@@ -98,10 +98,15 @@ class Commands
       return cmds;
     }
 
-    PropertyU32 pressPreSilenceMs {0, Used::YES};
-    PropertyU32 pressInterKeyMs {0, Used::YES};
-    PropertyU32 holdPreSilenceMs {0, Used::YES};
-    PropertyU32 holdInterKeyMs {0, Used::YES};
+  public:
+    //limits for various delays between commands
+    static constexpr int SILENCE_MIN = 50;
+    static constexpr int SILENCE_MAX = 5000;
+
+    PropertyU32 pressPreSilenceMs {300, Used::YES};
+    PropertyU32 pressInterKeyMs {100, Used::YES};
+    PropertyU32 holdPreSilenceMs {50, Used::YES};
+    PropertyU32 holdInterKeyMs {100, Used::YES};
 
     /** Info for building IR commands. IR commands seem to use max two static
      * params + command. We have space for three params. */
