@@ -215,9 +215,6 @@ class CmdCatalogue : public QObject
     bool removeActivityPowerOffDevicesCommand(uint32_t activityPos, uint32_t devicePos);
     bool removeActivityPowerOffDevicesCommandById(uint32_t activityPos, uint32_t deviceId);
 
-
-
-
     //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
     bool setIrProtoLib(const binary::irProto::File &file);
     bool addIrProtoLibItem(const binary::irProto::IrProto &prot, int pos = -1);

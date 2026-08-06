@@ -29,7 +29,7 @@ class RawCommand
 class ProtoCommand
 {
   public:
-    //command creator. false = read from xml
+    //command creator. false = as read from xml
     PropertyBool usesParentInfo { false, Used::NO };
     PropertyU32 field3 {0, Used::NO};
     PropertyU32 field4 {0, Used::NO};
@@ -37,6 +37,7 @@ class ProtoCommand
     //for serialise
     PropertyString name { "Unknown" };
     PropertyU32 protocolIndex { 0 };
+    PropertyU32 commandIndex { 0 };
     Property<std::vector<uint8_t>> data {{}}; //encoded IR protocol config stream
 };
 
@@ -82,6 +83,19 @@ class Commands
       }
 
       return false;
+    }
+
+    std::vector<std::string> getAvailableCommands() const
+    {
+      std::vector<std::string> cmds;
+
+      for (const auto &cmd : rawCommands) {
+        cmds.push_back(cmd.name.get());
+      }
+      for (const auto &cmd : protoCommands) {
+        cmds.push_back(cmd.name.get());
+      }
+      return cmds;
     }
 
     PropertyU32 pressPreSilenceMs {0, Used::YES};

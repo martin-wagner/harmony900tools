@@ -76,7 +76,7 @@ class ConfigData
 
     /** ir command data */
     binary::ssIr::File streamLib; //raw timing streams
-    std::vector<binary::irProto::Code> commands; // command data todo zu den devices sortieren?
+    std::vector<binary::irProto::Code> commands; // command data
     binary::irProto::File protocolLib; // command-to-stream encoder data
 };
 

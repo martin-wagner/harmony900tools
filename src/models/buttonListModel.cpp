@@ -228,16 +228,14 @@ QString models::ButtonBaseModel::toPositionString(int pos) const
 QStringList ButtonBaseModel::getAvailableCommands(
     const document::data::item::Device *device) const
 {
-  QStringList commands;
+  QStringList list;
 
-  for (const auto &irCommand : device->getIrCommands().getRawCommands()) {
-    commands.push_back(QString::fromStdString(irCommand.name.get()));
+  auto commands = device->getIrCommands().getAvailableCommands();
+  for (const auto &command : commands) {
+    list.push_back(QString::fromStdString(command));
   }
-  for (const auto &irCommand : device->getIrCommands().getProtoCommands()) {
-    commands.push_back(QString::fromStdString(irCommand.name.get()));
-  }
-  commands.sort();
-  return commands;
+  list.sort(Qt::CaseInsensitive);
+  return list;
 }
 
 QList<QPair<uint32_t, QString>> ButtonBaseModel::getAvailableDevices() const
