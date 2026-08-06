@@ -157,8 +157,7 @@ class DeviceHardButtonModel: public ButtonBaseModel
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
-    const document::data::item::Device *device;
-    uint32_t devicePos;
+    uint32_t id;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Hard;
 };
 
@@ -199,8 +198,7 @@ class DeviceSoftButtonModel: public ButtonBaseModel
     QStringList getUnusedCommands(const document::data::item::Device *device) const;
 
   protected:
-    const document::data::item::Device *device;
-    uint32_t devicePos;
+    uint32_t id;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Soft;
 };
 
@@ -238,11 +236,10 @@ class ActivityHardButtonModel: public ButtonBaseModel
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
-    bool setDeviceData(int row, const QVariant &value);
+    bool setDeviceData(uint32_t activityPos, int row, const QVariant &value);
 
   protected:
-    const document::data::item::Activity *activity;
-    uint32_t activityPos;
+    uint32_t id;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Hard;
 };
 
@@ -283,15 +280,14 @@ class ActivitySoftButtonModel: public ButtonBaseModel
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
-    bool setDeviceData(int row, const QVariant &value);
-    bool setDeviceCommand(int row, const QVariant &value);
+    bool setDeviceData(uint32_t activityPos, int row, const QVariant &value);
+    bool setDeviceCommand(uint32_t activityPos, int row, const QVariant &value);
 
   private:
     QStringList getUnusedCommands(const document::data::item::Activity *activity, const document::data::item::Device *device) const;
 
   protected:
-    const document::data::item::Activity *activity;
-    uint32_t activityPos;
+    uint32_t id;
     const document::data::item::ButtonType type = document::data::item::ButtonType::Soft;
 };
 

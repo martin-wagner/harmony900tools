@@ -305,14 +305,16 @@ void ButtonBaseModel::itemRemovedObserver(document::data::Item item, int pos)
 
 DeviceHardButtonModel::DeviceHardButtonModel(document::Config &config,
     uint32_t deviceId, QObject *parent) :
-    ButtonBaseModel(config, document::data::Item::DEVICE_HARD_BUTTON)
+    ButtonBaseModel(config, document::data::Item::DEVICE_HARD_BUTTON), id(
+        deviceId)
 {
-  device = config.data().getDevice(deviceId, &devicePos);
 }
 
 bool DeviceHardButtonModel::setData(const QModelIndex &index,
     const QVariant &value, int role)
 {
+  uint32_t devicePos;
+
   if (index.parent().isValid() || (role != Qt::EditRole)) {
     return false;
   }
@@ -334,6 +336,7 @@ bool DeviceHardButtonModel::setData(const QModelIndex &index,
     return true;
   }
 
+  config.data().getDevice(id, &devicePos);
   switch (static_cast<Column>(index.column())) {
     case Column::COMMAND:
       return config.modify().setDeviceButtonAction(
@@ -375,12 +378,16 @@ int DeviceHardButtonModel::columnCount(const QModelIndex &parent) const
 
 const vector<document::data::item::Button>& DeviceHardButtonModel::getButtons() const
 {
-  return device->getHardButtons();
+  return config.data().getDevice(id)->getHardButtons();
 }
 
 bool DeviceHardButtonModel::addButton(int row)
 {
+  uint32_t devicePos;
   QString commandToUse;
+
+  auto *device = config.data().getDevice(id, &devicePos);
+
   auto commands = getAvailableCommands(device);
   auto buttons = getUnusedButtons();
 
@@ -413,6 +420,10 @@ bool DeviceHardButtonModel::addButton(int row)
 
 bool DeviceHardButtonModel::removeButton(int row)
 {
+  uint32_t devicePos;
+
+  config.data().getDevice(id, &devicePos);
+
   return config.modify().removeDeviceButtonCommand(devicePos, type, row);
 }
 
@@ -487,6 +498,7 @@ QVariant DeviceHardButtonModel::getForegroundData(
 QVariant DeviceHardButtonModel::getSelectionItemsData(
     const QModelIndex &index) const
 {
+  auto *device = config.data().getDevice(id);
   try {
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
@@ -508,14 +520,16 @@ QVariant DeviceHardButtonModel::getSelectionItemsData(
 
 DeviceSoftButtonModel::DeviceSoftButtonModel(document::Config &config,
     uint32_t deviceId, QObject *parent) :
-    ButtonBaseModel(config, document::data::Item::DEVICE_SOFT_BUTTON)
+    ButtonBaseModel(config, document::data::Item::DEVICE_SOFT_BUTTON), id(
+        deviceId)
 {
-  device = config.data().getDevice(deviceId, &devicePos);
 }
 
 bool DeviceSoftButtonModel::setData(const QModelIndex &index,
     const QVariant &value, int role)
 {
+  uint32_t devicePos;
+
   if (index.parent().isValid() || (role != Qt::EditRole)) {
     return false;
   }
@@ -536,6 +550,8 @@ bool DeviceSoftButtonModel::setData(const QModelIndex &index,
   if (currentValue.isValid() && (currentValue == value)) {
     return true;
   }
+
+  config.data().getDevice(id, &devicePos);
 
   switch (static_cast<Column>(index.column())) {
     case Column::COMMAND:
@@ -580,11 +596,14 @@ int DeviceSoftButtonModel::columnCount(const QModelIndex &parent) const
 
 const vector<document::data::item::Button>& DeviceSoftButtonModel::getButtons() const
 {
-  return device->getSoftButtons();
+  return config.data().getDevice(id)->getSoftButtons();
 }
 
 bool DeviceSoftButtonModel::addButton(int row)
 {
+  uint32_t devicePos;
+
+  auto *device = config.data().getDevice(id, &devicePos);
   auto commands = getAvailableCommands(device);
   if (commands.size() == 0) {
     emit writeMsg(
@@ -618,6 +637,10 @@ bool DeviceSoftButtonModel::addButton(int row)
 
 bool DeviceSoftButtonModel::removeButton(int row)
 {
+  uint32_t devicePos;
+
+  config.data().getDevice(id, &devicePos);
+
   //only remove from the end
   row = rowCount() - 1;
   return config.modify().removeDeviceButtonCommand(devicePos, type, row);
@@ -685,6 +708,7 @@ QVariant DeviceSoftButtonModel::getForegroundData(
 QVariant DeviceSoftButtonModel::getSelectionItemsData(
     const QModelIndex &index) const
 {
+  auto *device = config.data().getDevice(id);
   try {
     switch (static_cast<Column>(index.column())) {
       case Column::COMMAND: {
@@ -726,14 +750,16 @@ QStringList models::DeviceSoftButtonModel::getUnusedCommands(
 
 ActivityHardButtonModel::ActivityHardButtonModel(document::Config &config,
     uint32_t activityId, QObject *parent) :
-    ButtonBaseModel(config, document::data::Item::ACTIVITY_HARD_BUTTON)
+    ButtonBaseModel(config, document::data::Item::ACTIVITY_HARD_BUTTON), id(
+        activityId)
 {
-  activity = config.data().getActivity(activityId, &activityPos);
 }
 
 bool ActivityHardButtonModel::setData(const QModelIndex &index,
     const QVariant &value, int role)
 {
+  uint32_t activityPos;
+
   if (index.parent().isValid() || (role != Qt::EditRole)) {
     return false;
   }
@@ -755,9 +781,11 @@ bool ActivityHardButtonModel::setData(const QModelIndex &index,
     return true;
   }
 
+  config.data().getActivity(id, &activityPos);
+
   switch (static_cast<Column>(index.column())) {
     case Column::DEVICE:
-      return setDeviceData(row, value);
+      return setDeviceData(activityPos, row, value);
     case Column::COMMAND:
       return config.modify().setActivityButtonAction(
           value.toString().toStdString(), activityPos, type, row);
@@ -800,11 +828,12 @@ int ActivityHardButtonModel::columnCount(const QModelIndex &parent) const
 
 const vector<document::data::item::Button>& ActivityHardButtonModel::getButtons() const
 {
-  return activity->getHardButtons();
+  return config.data().getActivity(id)->getHardButtons();
 }
 
 bool ActivityHardButtonModel::addButton(int row)
 {
+  uint32_t activityPos;
   uint32_t deviceId;
   QString commandToUse;
 
@@ -838,6 +867,7 @@ bool ActivityHardButtonModel::addButton(int row)
   }
   auto buttonToUse = buttons[0];
 
+  config.data().getActivity(id, &activityPos);
   auto ret = config.modify().addActivityButtonCommand(activityPos, type, row);
   if (ret != true) {
     return ret;
@@ -857,6 +887,10 @@ bool ActivityHardButtonModel::addButton(int row)
 
 bool ActivityHardButtonModel::removeButton(int row)
 {
+  uint32_t activityPos;
+
+  config.data().getActivity(id, &activityPos);
+
   return config.modify().removeActivityButtonCommand(activityPos, type, row);
 }
 
@@ -966,10 +1000,9 @@ QVariant ActivityHardButtonModel::getSelectionItemsData(
   return {};
 }
 
-bool ActivityHardButtonModel::setDeviceData(int row, const QVariant &value)
+bool ActivityHardButtonModel::setDeviceData(uint32_t activityPos, int row, const QVariant &value)
 {
   bool ok;
-
   auto deviceId = value.toUInt(&ok);
   if (!ok) {
     return false;
@@ -1024,14 +1057,16 @@ bool ActivityHardButtonModel::setDeviceData(int row, const QVariant &value)
 
 ActivitySoftButtonModel::ActivitySoftButtonModel(document::Config &config,
     uint32_t activityId, QObject *parent) :
-    ButtonBaseModel(config, document::data::Item::ACTIVITY_SOFT_BUTTON)
+    ButtonBaseModel(config, document::data::Item::ACTIVITY_SOFT_BUTTON), id(
+        activityId)
 {
-  activity = config.data().getActivity(activityId, &activityPos);
 }
 
 bool ActivitySoftButtonModel::setData(const QModelIndex &index,
     const QVariant &value, int role)
 {
+  uint32_t activityPos;
+
   if (index.parent().isValid() || (role != Qt::EditRole)) {
     return false;
   }
@@ -1053,11 +1088,13 @@ bool ActivitySoftButtonModel::setData(const QModelIndex &index,
     return true;
   }
 
+  config.data().getActivity(id, &activityPos);
+
   switch (static_cast<Column>(index.column())) {
     case Column::DEVICE:
-      return setDeviceData(row, value);
+      return setDeviceData(activityPos, row, value);
     case Column::COMMAND:
-      return setDeviceCommand(row, value);
+      return setDeviceCommand(activityPos, row, value);
     case Column::NAME:
       return config.modify().setActivityButtonName(
           value.toString().toStdString(), activityPos, type, row);
@@ -1104,11 +1141,12 @@ int ActivitySoftButtonModel::columnCount(const QModelIndex &parent) const
 
 const vector<document::data::item::Button>& ActivitySoftButtonModel::getButtons() const
 {
-  return activity->getSoftButtons();
+  return config.data().getActivity(id)->getSoftButtons();
 }
 
 bool ActivitySoftButtonModel::addButton(int row)
 {
+  uint32_t activityPos;
   uint32_t deviceId;
   QString commandToUse;
 
@@ -1137,6 +1175,8 @@ bool ActivitySoftButtonModel::addButton(int row)
   //only append to the end
   row = rowCount();
 
+  auto *activity = config.data().getActivity(id, &activityPos);
+
   auto ret = config.modify().addActivityButtonCommand(activityPos, type, row);
   if (ret != true) {
     return ret;
@@ -1162,6 +1202,10 @@ bool ActivitySoftButtonModel::addButton(int row)
 
 bool ActivitySoftButtonModel::removeButton(int row)
 {
+  uint32_t activityPos;
+
+  config.data().getActivity(id, &activityPos);
+
   //only remove from the end
   row = rowCount() - 1;
   return config.modify().removeActivityButtonCommand(activityPos, type, row);
@@ -1270,10 +1314,10 @@ QVariant ActivitySoftButtonModel::getSelectionItemsData(
   return {};
 }
 
-bool ActivitySoftButtonModel::setDeviceData(int row, const QVariant &value)
+bool ActivitySoftButtonModel::setDeviceData(uint32_t activityPos, int row,
+    const QVariant &value)
 {
   bool ok;
-
   auto deviceId = value.toUInt(&ok);
   if (!ok) {
     return false;
@@ -1322,7 +1366,8 @@ bool ActivitySoftButtonModel::setDeviceData(int row, const QVariant &value)
   return false;
 }
 
-bool ActivitySoftButtonModel::setDeviceCommand(int row, const QVariant &value)
+bool ActivitySoftButtonModel::setDeviceCommand(uint32_t activityPos, int row,
+    const QVariant &value)
 {
   auto cmd = value.toString().toStdString();
 
