@@ -89,8 +89,9 @@ set(sources ${sources}
   models/buttonListModel.cpp
   models/rawIrListModel.cpp
   ui/delegates/combobox.cpp
-  ui/delegates/monospaceTextDisplay.cpp
+  ui/delegates/rawIr.cpp
   ui/delegates/uidCombobox.cpp
+  ui/editors/rawIrEditor.cpp
   ui/activityButtonTreeView.cpp
   ui/activityEditor.cpp
   ui/activityTreeView.cpp

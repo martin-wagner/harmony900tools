@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "models/rawIrListModel.h"
-#include "delegates/monospaceTextDisplay.h"
+#include "delegates/rawIr.h"
 #include "commandEditorView.h"
 
 using namespace std;
@@ -24,9 +24,9 @@ void RawCommandTreeView::setModel(QAbstractItemModel *model)
 
 void RawCommandTreeView::setupDelegates()
 {
-//  auto *monospaceDelegate = new delegates::MonospaceTextDisplay(this);
-//  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::RawIrModel::Column::DATA), monospaceDelegate);
+  auto *editorDelegate = new delegates::RawIr(this);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::RawIrModel::Column::DATA), editorDelegate);
 }
 
 ProtoCommandTreeView::ProtoCommandTreeView(Context &ctx, QWidget *parent) :
