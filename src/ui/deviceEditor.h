@@ -4,6 +4,7 @@
 
 #include <QStandardItemModel> //todo remove
 
+#include "concordConnection.h"
 #include "models/buttonListModel.h"
 #include "models/deviceListModel.h"
 #include "models/rawIrListModel.h"
@@ -35,6 +36,14 @@ class DeviceEditor: public BaseEditor
     /** set new device model. nullptr = remove */
     void setModel(models::DeviceModel *model);
 
+  signals:
+    /** we are ready to process a learned IR command */
+    void enableLearnMode(bool start);
+
+  public slots:
+    /** add a learned command to the command lists. dropped if none is active */
+    void setLearnedCommand(ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
+
   protected slots:
     virtual void onSelectionChanged(int row) override;
 
@@ -53,6 +62,9 @@ class DeviceEditor: public BaseEditor
 
     virtual void createView() override;
     virtual void createConnections() override;
+
+  private:
+    void updateLearnMode(int row);
 
     //create model for deviceId
     void updateCommandEditorView(uint32_t deviceId);

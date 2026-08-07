@@ -31,6 +31,9 @@ class ConcordConnection: public QWidget
     void doImport(const std::vector<uint8_t> &data);
     void requestQuit();
 
+  public slots:
+    void enableLearnMode(bool start);
+
   protected slots:
     void onOpenConnection();
     void onCloseConnection();
@@ -61,6 +64,7 @@ class ConcordConnection: public QWidget
     Context &ctx;
     Concord &concord;
 
+    bool learningEnabled = false;
     bool dataMode = false;
     LearnedCommandMode learnMode = LearnedCommandMode::IR_STREAM;
 

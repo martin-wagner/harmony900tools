@@ -64,6 +64,19 @@ void ConcordConnection::addToMenu(QMenu *menu)
   menu->addAction(actionLearnIrStream);
 }
 
+void ConcordConnection::enableLearnMode(bool start)
+{
+  learningEnabled = start;
+
+  auto connected = concord.isConnected();
+  if (!connected) {
+    return;
+  }
+
+  actionLearnIrSingle->setEnabled(start);
+  actionLearnIrStream->setEnabled(start);
+}
+
 void ConcordConnection::onOpenConnection()
 {
   if (concord.isInitialised()) {
@@ -299,7 +312,7 @@ void ConcordConnection::onLearnWindowIsOpen(bool waits)
       waitMsg->setWindowTitle(tr("Info"));
       waitMsg->setText(tr("Press button on source remote"));
       waitMsg->setStandardButtons(QMessageBox::NoButton);
-      waitMsg->setModal(false);
+      //waitMsg->setModal(false); modal -> prevents changing selection while learning is active
     }
     waitMsg->show();
   } else {
@@ -535,8 +548,8 @@ void ConcordConnection::updateActionStates(bool setToBusy)
   actionWriteConfig->setEnabled(state);
   actionBackupConfig->setEnabled(state);
   actionBackupConfigRestore->setEnabled(state);
-  actionLearnIrSingle->setEnabled(state);
-  actionLearnIrStream->setEnabled(state);
+  actionLearnIrSingle->setEnabled(state & learningEnabled);
+  actionLearnIrStream->setEnabled(state & learningEnabled);
   if (!setToBusy) {
     progressBar->setEnabled(state);
   }
@@ -544,6 +557,7 @@ void ConcordConnection::updateActionStates(bool setToBusy)
 
 void ConcordConnection::cleanup()
 {
+  learningEnabled = false;
   dataMode = false;
   learnMode = LearnedCommandMode::IR_STREAM;
   if (disconnectMsg != nullptr) {

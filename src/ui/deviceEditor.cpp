@@ -34,6 +34,18 @@ void DeviceEditor::setModel(models::DeviceModel *model)
   mainView->setModel(model);
 }
 
+
+void editors::DeviceEditor::setLearnedCommand(
+    ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t,
+    uint32_t carrier)
+{
+  if (lastActiveView == protoCommandView) {
+    protoCommandView->setLearnedCommand(m, t, carrier);
+  } else if (lastActiveView == rawCommandView) {
+    rawCommandView->setLearnedCommand(m, t, carrier);
+  }
+}
+
 void DeviceEditor::onSelectionChanged(int row)
 {
   auto deviceId =
@@ -79,9 +91,14 @@ void DeviceEditor::createView()
   layout->addWidget(splitter);
 }
 
-void editors::DeviceEditor::createConnections()
+void DeviceEditor::createConnections()
 {
   BaseEditor::createConnections();
+
+  connect(protoCommandView, &ProtoCommandTreeView::selectionChanged, this,
+      &DeviceEditor::updateLearnMode);
+  connect(rawCommandView, &RawCommandTreeView::selectionChanged, this,
+      &DeviceEditor::updateLearnMode);
 
   connect(commandEditorView, &CommandEditorView::writeLog, this,
       &DeviceEditor::writeLog);
@@ -89,7 +106,16 @@ void editors::DeviceEditor::createConnections()
       &DeviceEditor::writeMsg);
 }
 
-void editors::DeviceEditor::updateCommandEditorView(uint32_t deviceId)
+void DeviceEditor::updateLearnMode(int row)
+{
+  if (row >= 0) {
+    emit enableLearnMode(true);
+  } else {
+    emit enableLearnMode(false);
+  }
+}
+
+void DeviceEditor::updateCommandEditorView(uint32_t deviceId)
 {
   commandEditorView->setData(0, nullptr, nullptr);
   protoCommandView->setModel(nullptr);

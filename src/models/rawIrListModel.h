@@ -29,7 +29,7 @@ class RawIrModel: public BaseModel
     const std::map<Column, Setup> columnSetup = {
         { Column::NAME,          { "Name", "The command name is used to reference this command in other tables (Buttons, ...).", "QString", false, {}, } },
         { Column::DATACLOCK,     { "Data clock / Hz", "IR Command data clock. Auto-detected at learn time, don't change unless you know what you are doing.", "int", false, {}, } },
-        { Column::DATA,          { "Data", "- Select this to enable learning for this command.\nDouble-click to edit\n\nVisual representation of IR data. If you only see a flat line, learning most likely has failed.", "SerialStreamIr", false, {}, } }
+        { Column::DATA,          { "Data", "- Select cell to enable learning. Needs remote to be connected.\n- Double-click to edit manually\n\nVisual representation of IR data. If you only see a flat line, learning most likely has failed.", "SerialStreamIr", false, {}, } }
     };
 
   public:

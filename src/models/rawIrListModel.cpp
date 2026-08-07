@@ -206,7 +206,7 @@ bool models::RawIrModel::addItem(int row)
   }
   suggestName = makeStringUnique(usedNames, suggestName);
   cmd.name = suggestName.toStdString();
-  cmd.stream.addData( { 300, 300, 300 }); //add some dummy data, clock is pre-set
+  cmd.stream.addData( { 300, 300, 0, 300 }); //add some dummy data, clock is pre-set
   return config.modify().setIrCommand(devicePos, cmd, row, false);
 }
 
@@ -258,6 +258,8 @@ QVariant RawIrModel::getEditData(const QModelIndex &index) const
   try {
     auto &cmd = getCmds(&devicePos).at(index.row());
     switch (index.column()) {
+      case Column::NAME:
+        return QString::fromStdString(cmd.name.get());
       case Column::DATACLOCK:
         return cmd.stream.getClock();
       case Column::DATA: {

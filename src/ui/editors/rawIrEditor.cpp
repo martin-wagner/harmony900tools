@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include <algorithm>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QFormLayout>
@@ -29,9 +30,13 @@ RawIrEditor::RawIrEditor(const SerialStreamIr &stream, QWidget *parent) :
   table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   table->verticalHeader()->setVisible(false);
 
+  durationLabel = new QLabel(this);
+
   for (const auto &block : stream.accessStream().timings()) {
     addRow(table->rowCount(), block.mark_us, block.pause_us);
   }
+
+  connect(table, &QTableWidget::itemChanged, this, &RawIrEditor::itemChanged);
 
   auto *addButton = new QPushButton(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
@@ -64,10 +69,13 @@ RawIrEditor::RawIrEditor(const SerialStreamIr &stream, QWidget *parent) :
   auto *layout = new QVBoxLayout(this);
   layout->addLayout(formLayout);
   layout->addWidget(table);
+  layout->addWidget(durationLabel);
   layout->addLayout(rowButtonLayout);
   layout->addWidget(buttonBox);
 
   resize(400, 500);
+
+  updateDuration();
 }
 
 RawIrEditor::~RawIrEditor() = default;
@@ -98,6 +106,8 @@ void RawIrEditor::addRow(int row, uint16_t mark_us, uint16_t pause_us)
   table->insertRow(row);
   table->setItem(row, 0, new QTableWidgetItem(QString::number(mark_us)));
   table->setItem(row, 1, new QTableWidgetItem(QString::number(pause_us)));
+
+  updateDuration();
 }
 
 void RawIrEditor::addRowClicked()
@@ -119,6 +129,7 @@ void RawIrEditor::removeRowClicked()
     return;
   }
   table->removeRow(row);
+  updateDuration();
 }
 
 void RawIrEditor::itemChanged(QTableWidgetItem *item)
@@ -137,6 +148,25 @@ void RawIrEditor::itemChanged(QTableWidgetItem *item)
   //avoid re-entering itemChanged while normalising the text
   const QSignalBlocker blocker(table);
   item->setText(QString::number(value));
+
+  updateDuration();
+}
+
+void RawIrEditor::updateDuration()
+{
+  uint64_t total_us = 0;
+
+  for (int row = 0; row < table->rowCount(); row++) {
+    auto *markItem = table->item(row, 0);
+    auto *pauseItem = table->item(row, 1);
+    if ((markItem == nullptr) || (pauseItem == nullptr)) {
+      continue;
+    }
+    total_us += markItem->text().toULong();
+    total_us += pauseItem->text().toULong();
+  }
+
+  durationLabel->setText(tr("Duration: %1 ms").arg(total_us / 1000));
 }
 
 }

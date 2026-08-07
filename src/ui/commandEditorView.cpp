@@ -22,6 +22,22 @@ void RawCommandTreeView::setModel(QAbstractItemModel *model)
   bindModel(model);
 }
 
+void RawCommandTreeView::setLearnedCommand(
+    ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t,
+    uint32_t carrier)
+{
+  if (model == nullptr) {
+    return;
+  }
+
+  auto stream = binary::ssIr::SerialStreamIr(t, carrier);
+  auto value = QVariant::fromValue(stream);
+
+  auto *rawModel = static_cast<models::RawIrModel *>(model);
+  auto index = rawModel->index(getCurrentRow(), models::RawIrModel::Column::DATA);
+  rawModel->setData(index, value, Qt::EditRole);
+}
+
 void RawCommandTreeView::setupDelegates()
 {
   auto *editorDelegate = new delegates::RawIr(this);
@@ -40,6 +56,12 @@ ProtoCommandTreeView::~ProtoCommandTreeView() = default;
 void ProtoCommandTreeView::setModel(QAbstractItemModel *model)
 {
   bindModel(model);
+}
+
+void ProtoCommandTreeView::setLearnedCommand(
+    ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t,
+    uint32_t carrier)
+{
 }
 
 void ProtoCommandTreeView::setupDelegates()
@@ -90,12 +112,6 @@ void CommandEditorView::setData(uint32_t deviceId,
 
   //pull data from document
   onIrDeviceDataChanged(document::data::Item::DEVICE_IR, 0);
-}
-
-void CommandEditorView::setLearnedCommand(
-    ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t,
-    uint32_t carrier)
-{
 }
 
 void CommandEditorView::onEditingPressPreSilenceFinished()

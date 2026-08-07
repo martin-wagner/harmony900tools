@@ -26,6 +26,9 @@ class RawCommandTreeView: public BaseTreeView
 
     void setModel(QAbstractItemModel *model) override;
 
+  public slots:
+    void setLearnedCommand(ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
+
   private:
     void setupDelegates();
 };
@@ -42,6 +45,9 @@ class ProtoCommandTreeView: public BaseTreeView
     ~ProtoCommandTreeView() override;
 
     void setModel(QAbstractItemModel *model) override;
+
+  public slots:
+    void setLearnedCommand(ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
 
   private:
     void setupDelegates();
@@ -67,14 +73,9 @@ class CommandEditorView: public QWidget
      * non-table values are directly pulled / set from the config data set, not via model */
     void setData(uint32_t deviceId, QAbstractItemModel *protoModel, QAbstractItemModel *rawModel);
 
-    void setLearnedCommand(ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
-
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
-
-    /** view is ready to process a learned IR command */
-    void enableLernMode(bool start);
 
   protected slots:
     void onEditingPressPreSilenceFinished();

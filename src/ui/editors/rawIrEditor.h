@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QLabel>
 #include <QTableWidgetItem>
 
 #include "bin/ssIr/file.h"
@@ -37,10 +38,12 @@ class RawIrEditor: public QDialog
 
     QTableWidget *table = nullptr;
     QDoubleSpinBox *clockBox = nullptr;
+    QLabel *durationLabel = nullptr;
 
     void addRowClicked();
     void removeRowClicked();
     void itemChanged(QTableWidgetItem *item);
+    void updateDuration();
 };
 
 }

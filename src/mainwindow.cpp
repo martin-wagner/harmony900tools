@@ -431,6 +431,10 @@ void MainWindow::createActions()
       &LogViewer::addEntry);
   connect(deviceEditor, &editors::DeviceEditor::writeMsg, log,
       &LogViewer::addMessage);
+  connect(deviceEditor, &editors::DeviceEditor::enableLearnMode,
+      concordConnection, &ConcordConnection::enableLearnMode);
+  connect(concordConnection, &ConcordConnection::learnedCommand,
+      deviceEditor, &editors::DeviceEditor::setLearnedCommand);
 
   connect(activityEditor, &editors::ActivityEditor::writeLog, log,
       &LogViewer::addEntry);
