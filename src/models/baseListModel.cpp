@@ -125,6 +125,28 @@ QString BaseModel::makeStringUnique(const QStringList &input, QString str)
   return str;
 }
 
+QStringList BaseModel::toQStringList(const vector<string> &list)
+{
+  QStringList qlist;
+  qlist.reserve(static_cast<qsizetype>(list.size()));
+
+  for (const auto &i : list) {
+    qlist.push_back(QString::fromStdString(i));
+  }
+  return qlist;
+}
+
+vector<string> BaseModel::toStringList(const QStringList &qlist)
+{
+  vector<string> list;
+  list.reserve(static_cast<size_t>(qlist.size()));
+
+  for (const auto &i : qlist) {
+    list.push_back(i.toStdString());
+  }
+  return list;
+}
+
 void BaseModel::itemChangedObserver(document::data::Item item, int pos)
 {
   if (item != this->item) {

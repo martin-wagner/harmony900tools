@@ -27,8 +27,6 @@
 #include "cmd/removeActivity.h"
 #include "cmd/setIrProto.h"
 #include "cmd/removeIrProto.h"
-#include "cmd/setIrStream.h"
-#include "cmd/removeIrStream.h"
 #include "cmd/addChannel.h"
 #include "cmd/removeChannel.h"
 #include "cmd/addActivityAction.h"
@@ -2033,7 +2031,7 @@ bool CmdCatalogue::setActivityButtonName(const std::string &v,
   PropertyAccess<string> access =
       {
         tr("set button activity name"),
-        [this, activityPos, t, buttonPos]() { return getActivitiesButton(c, activityPos, t, buttonPos)->name.get();},
+        [this, activityPos, t, buttonPos]() {return getActivitiesButton(c, activityPos, t, buttonPos)->name.get();},
         [this, activityPos, t, buttonPos](
             const string &v) {getActivitiesButton(c, activityPos, t, buttonPos)->name.set(v).setIncluded(Used::YES);},
         v,
@@ -2431,10 +2429,10 @@ bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)
   return true;
 }
 
-bool CmdCatalogue::addIrProtoLibItem(const binary::irProto::IrProto &prot,
-    int pos)
+bool CmdCatalogue::setIrProtoLibItem(const binary::irProto::IrProto &prot,
+    int pos, bool overwrite)
 {
-  auto *cmd = new AddIrProtoLibItemCommand(c, prot, pos);
+  auto *cmd = new SetIrProtoLibItemCommand(c, prot, pos, overwrite);
   auto ret = cmd->valid();
   if (ret == true) {
     connectCommand(cmd);
@@ -2459,45 +2457,6 @@ bool CmdCatalogue::removeIrProtoLibItem(int pos)
     emit writeLog(LogLevel::Warning,
         tr("modify: remove ir proto from lib failed, dropped"),
         ContentType::PlainText);
-    delete cmd;
-  }
-  return true;
-}
-
-bool CmdCatalogue::setIrStreams(const binary::ssIr::File &file)
-{
-  auto *cmd = new SetIrStreamsCommand(c, file);
-  connectCommand(cmd);
-  undo.push(cmd);
-  return true;
-}
-
-bool CmdCatalogue::addIrStreamItem(binary::TimingStream stream, double clock,
-    int pos)
-{
-  auto *cmd = new AddIrStreamtemCommand(c, stream, clock, pos); //stream -- non-const
-  auto ret = cmd->valid();
-  if (ret == true) {
-    connectCommand(cmd);
-    undo.push(cmd);
-  } else {
-    emit writeLog(LogLevel::Warning,
-        tr("modify: add ir stream failed, dropped"), ContentType::PlainText);
-    delete cmd;
-  }
-  return true;
-}
-
-bool CmdCatalogue::removeIrStreamItem(int pos)
-{
-  auto *cmd = new RemoveIrStreamtemCommand(c, pos);
-  auto ret = cmd->valid();
-  if (ret == true) {
-    connectCommand(cmd);
-    undo.push(cmd);
-  } else {
-    emit writeLog(LogLevel::Warning,
-        tr("modify: remove ir stream failed, dropped"), ContentType::PlainText);
     delete cmd;
   }
   return true;

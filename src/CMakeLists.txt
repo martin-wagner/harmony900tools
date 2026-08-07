@@ -55,7 +55,6 @@ set(sources ${sources}
   document/data/cmd/moveActivity.cpp
   document/data/cmd/setIr.cpp
   document/data/cmd/setIrProto.cpp
-  document/data/cmd/setIrStream.cpp
   document/data/cmd/setRole.cpp
   document/data/cmd/setId.cpp
   document/data/cmd/removeActionSequence.cpp
@@ -66,7 +65,6 @@ set(sources ${sources}
   document/data/cmd/removeDevice.cpp
   document/data/cmd/removeIr.cpp
   document/data/cmd/removeIrProto.cpp
-  document/data/cmd/removeIrStream.cpp
   document/data/cmd/removeNumpad.cpp
   document/data/cmd/removePowerOnDevice.cpp
   document/data/cmd/removeRole.cpp
@@ -86,9 +84,12 @@ set(sources ${sources}
   document/files/h900.cpp
   document/files/storage.cpp
   models/activityListModel.cpp
+  models/baseListModel.cpp
   models/deviceListModel.cpp
   models/buttonListModel.cpp
+  models/rawIrListModel.cpp
   ui/delegates/combobox.cpp
+  ui/delegates/monospaceTextDisplay.cpp
   ui/delegates/uidCombobox.cpp
   ui/activityButtonTreeView.cpp
   ui/activityEditor.cpp

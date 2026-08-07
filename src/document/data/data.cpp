@@ -159,16 +159,6 @@ binary::irProto::File& ConfigData::getProtocolLib()
   return protocolLib;
 }
 
-const binary::ssIr::File& ConfigData::getStreamLib() const
-{
-  return streamLib;
-}
-
-binary::ssIr::File& ConfigData::getStreamLib()
-{
-  return streamLib;
-}
-
 const item::UserInfo& ConfigData::getUser() const
 {
   return user;

@@ -32,20 +32,19 @@ class SerialStreamIr
 
     static constexpr int HEADER_SIZE = 3;
 
-    void setClock(double clock);
-
   public:
     SerialStreamIr();
     /** add a stream, alternating mark<us>, pause<us> + clock */
     SerialStreamIr(const std::vector<uint16_t> &data, double clock /* hz */);
     /** add a stream + clock */
-    SerialStreamIr(TimingStream &stream, double clock /* hz */);
+    SerialStreamIr(const TimingStream &stream, double clock /* hz */);
     /** add a raw stream from SsIr.bin file */
     SerialStreamIr(std::vector<uint16_t> data);
 
-    void addData(std::vector<uint16_t> &data);
+    void addData(const std::vector<uint16_t> &data);
     const TimingStream &accessStream() const { return stream; };
     double getClock() const { return 1.0 / static_cast<double>(clockPeriod) * 1000000000.0; };
+    void setClock(double clock);
 
     /** raw clock period in ns */
     uint16_t getClockPeriod() const { return clockPeriod; }
@@ -95,6 +94,14 @@ class File
      * @param index [out] position where stream was added
      */
     void appendStream(const SerialStreamIr &stream, int &index);
+
+    /** insert a ready-to-use, fully-built stream
+      *
+      * @param stream stream
+      * @param index where to insert
+      * @return true = ok
+      */
+    bool insertStream(const SerialStreamIr &stream, int index);
 
     /** insert a stream
      *

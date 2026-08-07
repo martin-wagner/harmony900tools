@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "models/activityListModel.h"
-#include "delegates/combobox.h"
+#include "models/rawIrListModel.h"
+#include "delegates/monospaceTextDisplay.h"
 #include "commandEditorView.h"
 
 using namespace std;
@@ -24,17 +24,9 @@ void RawCommandTreeView::setModel(QAbstractItemModel *model)
 
 void RawCommandTreeView::setupDelegates()
 {
-//  auto *comboBoxDelegate = new delegates::ComboBox(this);
-//  auto *uidComboBoxDelegate = new delegates::UidComboBox(this);
+//  auto *monospaceDelegate = new delegates::MonospaceTextDisplay(this);
 //  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::ActivityHardButtonModel::Column::DEVICE),
-//      uidComboBoxDelegate);
-//  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::ActivityHardButtonModel::Column::COMMAND),
-//      comboBoxDelegate);
-//  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::ActivityHardButtonModel::Column::BUTTON),
-//      comboBoxDelegate);
+//      static_cast<int>(models::RawIrModel::Column::DATA), monospaceDelegate);
 }
 
 ProtoCommandTreeView::ProtoCommandTreeView(Context &ctx, QWidget *parent) :
@@ -181,6 +173,7 @@ void CommandEditorView::createView()
   pressPreSilenceSpinBox->setToolTip(tr("This pause is placed before sending "
       "a single command or a command sequence"));
   label = new QLabel(tr("Pause before send:"), this);
+  label->setToolTip(pressPreSilenceSpinBox->toolTip());
   label->setBuddy(pressPreSilenceSpinBox);
   delayLayout->addWidget(label, 0, 0);
   delayLayout->addWidget(pressPreSilenceSpinBox, 0, 1);
@@ -192,6 +185,7 @@ void CommandEditorView::createView()
   interKeySpinBox->setToolTip(tr("This pause is placed between two "
       "comamnds for the same device. This overrides the previous setting"));
   label = new QLabel(tr("Pause between send:"), this);
+  label->setToolTip(interKeySpinBox->toolTip());
   label->setBuddy(interKeySpinBox);
   delayLayout->addWidget(label, 1, 0);
   delayLayout->addWidget(interKeySpinBox, 1, 1);
@@ -204,6 +198,7 @@ void CommandEditorView::createView()
       "comamnds when holding the key down. This is the minimum, the actual "
       "pause can be longer if learned command demands so."));
   label = new QLabel(tr("Pause when holding button:"), this);
+  label->setToolTip(holdPreSilencSpinBox->toolTip());
   label->setBuddy(holdPreSilencSpinBox);
   delayLayout->addWidget(label, 2, 0);
   delayLayout->addWidget(holdPreSilencSpinBox, 2, 1);

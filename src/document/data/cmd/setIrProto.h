@@ -25,11 +25,11 @@ class SetIrProtoLibCommand: public BaseCommand
     binary::irProto::File prevFile;
 };
 
-class AddIrProtoLibItemCommand: public BaseCommand
+class SetIrProtoLibItemCommand: public BaseCommand
 {
     Q_OBJECT
   public:
-    AddIrProtoLibItemCommand(ConfigData &c, const binary::irProto::IrProto &prot, int pos = -1, QUndoCommand *parent = nullptr);
+    SetIrProtoLibItemCommand(ConfigData &c, const binary::irProto::IrProto &prot, int pos = -1, bool overwrite = false, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -38,10 +38,12 @@ class AddIrProtoLibItemCommand: public BaseCommand
 
   protected:
     bool isValid = false;
+    bool overwrite = false;
 
     ConfigData &c;
     int pos = -1;
     binary::irProto::IrProto prot;
+    binary::irProto::IrProto prevProt;
 };
 
 

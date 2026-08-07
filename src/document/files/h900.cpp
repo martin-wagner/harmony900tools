@@ -60,6 +60,7 @@ bool ConfigH900::dump(const ConfigData *c)
   this->c = c;
   this->worker = nullptr;
   writerTime = lib::writeTimeH900Xml();
+  streams = binary::ssIr::File();
 
   emit writeLog(LogLevel::Info, tr("Exporting data..."),
       ContentType::PlainText);
@@ -67,9 +68,9 @@ bool ConfigH900::dump(const ConfigData *c)
   QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
   try {
     ret &= writeIrProto(); //side effect: creates hash for xml files
-    ret &= writeIrStream();
     ret &= dumpUserConfigXml();
     ret &= dumpActionListXml();
+    ret &= writeIrStream();
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("export: exception: %1").arg(QString(e.what())),
@@ -97,9 +98,9 @@ bool ConfigH900::read(const ConfigData *c, CmdCatalogue *worker)
       ContentType::PlainText);
 
   try {
+    ret &= readIrStream();
     ret &= readUserConfigXml();
     ret &= readIrProto();
-    ret &= readIrStream();
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("import: exception: %1").arg(QString(e.what())),
@@ -1136,7 +1137,8 @@ bool ConfigH900::readIr(pugi::xml_node &command)
 
     item::RawCommand cmd;
     cmd.name.set(name);
-    cmd.streamIndex.set(lib::parseHarmony16_file(rawData[0], rawData[1]));
+    cmd.stream = streams.accessStream(
+        lib::parseHarmony16_file(rawData[0], rawData[1]));
     return worker->setIrCommand(devicePos, cmd);
   } else {
     //protocol command
@@ -1742,7 +1744,6 @@ bool ConfigH900::readIrProto()
 
 bool ConfigH900::readIrStream()
 {
-  binary::ssIr::File streams;
   auto status = streams.parse(QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
     emit writeLog(LogLevel::Error,
@@ -1750,11 +1751,10 @@ bool ConfigH900::readIrStream()
         ContentType::PlainText);
     return false;
   }
-  auto ret = worker->setIrStreams(streams);
   emit writeLog(LogLevel::Debug,
-      tr("read %1 binary ir streams").arg(c->getStreamLib().getStreamCount()),
+      tr("read %1 binary ir streams").arg(streams.getStreamCount()),
       ContentType::PlainText);
-  return ret;
+  return true;
 }
 
 bool ConfigH900::dumpUserConfigXml()
@@ -2172,12 +2172,20 @@ bool ConfigH900::writeIrList(pugi::xml_node &commands,
 
 bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
 {
+  int index;
   vector<uint8_t> raw { 0xff, 0xff }; //start with 0xffff
+
+  if (data.name.get().empty()) {
+    //skip
+    return true;
+  }
 
   command.append_child("Name").text().set(data.name.get());
   auto cmdData = command.append_child("Data");
   cmdData.append_child("Protocol").text().set(-1);
-  lib::setHarmony16_file(data.streamIndex.get(), raw);
+
+  streams.appendStream(data.stream, index);
+  lib::setHarmony16_file(index, raw);
   cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
   return true;
 }
@@ -2185,6 +2193,16 @@ bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
 bool ConfigH900::writeIr(pugi::xml_node &command,
     const item::ProtoCommand &data)
 {
+  if (c->getProtocolLib().getProtocolCount() <= data.protocolIndex.get()) {
+    emit writeLog(LogLevel::Error, tr("exporting xml failed (protocol at index"
+        "%1 missing)").arg(data.protocolIndex.get()), ContentType::PlainText);
+    return false;
+  }
+  if (data.name.get().empty()) {
+    //skip
+    return true;
+  }
+
   command.append_child("Name").text().set(data.name.get());
   auto cmdData = command.append_child("Data");
   cmdData.append_child("Protocol").text().set(data.protocolIndex.get());
@@ -2621,7 +2639,7 @@ bool ConfigH900::writeIrProto()
 
 bool ConfigH900::writeIrStream()
 {
-  auto status = c->getStreamLib().serialise(
+  auto status = streams.serialise(
       QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
     emit writeLog(LogLevel::Error,
@@ -2630,7 +2648,7 @@ bool ConfigH900::writeIrStream()
     return false;
   }
   emit writeLog(LogLevel::Debug,
-      tr("wrote %1 binary ir streams").arg(c->getStreamLib().getStreamCount()),
+      tr("wrote %1 binary ir streams").arg(streams.getStreamCount()),
       ContentType::PlainText);
   return true;
 }

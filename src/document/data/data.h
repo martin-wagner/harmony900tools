@@ -54,9 +54,6 @@ class ConfigData
     const binary::irProto::File& getProtocolLib() const;
     binary::irProto::File& getProtocolLib();
 
-    const binary::ssIr::File& getStreamLib() const;
-    binary::ssIr::File& getStreamLib();
-
     const item::UserInfo& getUser() const;
     item::UserInfo& getUser();
 
@@ -75,7 +72,6 @@ class ConfigData
     std::vector<item::Blob> blobs;
 
     /** ir command data */
-    binary::ssIr::File streamLib; //raw timing streams
     std::vector<binary::irProto::Code> commands; // command data
     binary::irProto::File protocolLib; // command-to-stream encoder data
 };

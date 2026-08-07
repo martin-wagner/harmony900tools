@@ -7,6 +7,7 @@
 
 #include "mainwindow.h"
 #include "version.h"
+#include "customTypes.h"
 
 const int defaultDebugLevel = 5;
 
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
   QCoreApplication::setApplicationName (PROGRAM_NAME);
   QCoreApplication::setApplicationVersion(
       QString::fromUtf8(BuildInfo::versionString));
+  registerTypes();
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());
   parser.addHelpOption();

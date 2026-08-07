@@ -157,6 +157,7 @@ class ConfigH900 : public QObject
     data::CmdCatalogue *worker = nullptr;
     std::string writerTime;
     std::string hash;
+    binary::ssIr::File streams;
 };
 
 }

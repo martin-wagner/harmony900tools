@@ -7,7 +7,9 @@
 #include <vector>
 #include <chrono>
 
+#include "bin/ssIr/file.h"
 #include "action.h"
+
 
 namespace document
 {
@@ -21,8 +23,7 @@ class RawCommand
 {
   public:
     PropertyString name { "Unknown" };
-    PropertyU16 streamIndex { 0 };
-
+    binary::ssIr::SerialStreamIr stream;
 };
 
 /** command builder */

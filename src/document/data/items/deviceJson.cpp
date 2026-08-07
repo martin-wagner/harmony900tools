@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "deviceJson.h"
+#include "ssIrJson.h"
 
 #include "jsonSerialise.h"
 
@@ -271,13 +272,13 @@ void fromJson(const ordered_json &in, item::Numpad &numpad)
 void toJson(ordered_json &out, const item::RawCommand &cmd)
 {
   toJson(out, "Name", cmd.name);
-  toJson(out, "StreamIndex", cmd.streamIndex);
+  toJson(out, cmd.stream);
 }
 
 void fromJson(const ordered_json &in, item::RawCommand &cmd)
 {
   fromJson(in, "Name", cmd.name);
-  fromJson(in, "StreamIndex", cmd.streamIndex);
+  fromJson(in, cmd.stream);
 }
 
 void toJson(ordered_json &out, const item::ProtoCommand &cmd)

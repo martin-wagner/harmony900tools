@@ -6,6 +6,7 @@
 
 #include "models/buttonListModel.h"
 #include "models/deviceListModel.h"
+#include "models/rawIrListModel.h"
 #include "baseEditor.h"
 
 namespace editors
@@ -45,8 +46,8 @@ class DeviceEditor: public BaseEditor
     DeviceHardButtonTreeView *hardButtonView = nullptr;
     DeviceSoftButtonTreeView *softButtonView = nullptr;
     //models
-    QStandardItemModel *protoCommandModel = nullptr;
-    QStandardItemModel *rawCommandModel = nullptr;
+    QStandardItemModel*protoCommandModel = nullptr;
+    models::RawIrModel *rawCommandModel = nullptr;
     models::DeviceHardButtonModel *hardButtonModel = nullptr;
     models::DeviceSoftButtonModel *softButtonModel = nullptr;
 

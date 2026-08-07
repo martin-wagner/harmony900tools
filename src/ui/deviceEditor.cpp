@@ -121,15 +121,12 @@ void editors::DeviceEditor::updateCommandEditorView(uint32_t deviceId)
     }
     protoCommandView->setModel(protoCommandModel); //todo richtiges modell eintragen
 
-    rawCommandModel = new QStandardItemModel(4, 4);
-    for (int row = 0; row < rawCommandModel->rowCount(); ++row) {
-      for (int column = 0; column < rawCommandModel->columnCount(); ++column) {
-        QStandardItem *item = new QStandardItem(
-            QString("row %0, column %1").arg(row).arg(column));
-        rawCommandModel->setItem(row, column, item);
-      }
-    }
-    rawCommandView->setModel(rawCommandModel); //todo richtiges modell eintragen
+    rawCommandModel = new models::RawIrModel(*ctx.config(), deviceId, this);
+    connect(rawCommandModel, &models::RawIrModel::writeLog, this,
+        &DeviceEditor::writeLog);
+    connect(rawCommandModel, &models::RawIrModel::writeMsg, this,
+        &DeviceEditor::writeMsg);
+    rawCommandView->setModel(rawCommandModel);
 
     commandEditorView->setData(deviceId, protoCommandModel, rawCommandModel);
   }

@@ -217,13 +217,8 @@ class CmdCatalogue : public QObject
 
     //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
     bool setIrProtoLib(const binary::irProto::File &file);
-    bool addIrProtoLibItem(const binary::irProto::IrProto &prot, int pos = -1);
+    bool setIrProtoLibItem(const binary::irProto::IrProto &prot, int pos = -1, bool overwrite = false);
     bool removeIrProtoLibItem(int pos = -1);
-
-    //irstream binary list. items can be added/removed, but currently not directly modified/overwritten
-    bool setIrStreams(const binary::ssIr::File &file);
-    bool addIrStreamItem(binary::TimingStream stream, double clock, int pos = -1);
-    bool removeIrStreamItem(int pos = -1);
 
   protected:
     //template for setting a property inside user data that uses the Property<x> template.

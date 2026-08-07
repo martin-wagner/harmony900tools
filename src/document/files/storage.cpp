@@ -11,7 +11,6 @@
 #include "document/data/items/commonJson.h"
 #include "document/data/items/deviceJson.h"
 #include "document/data/items/irProtoJson.h"
-#include "document/data/items/ssIrJson.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -32,8 +31,6 @@ bool ConfigStorage::write(const data::ConfigData &c)
 
   try {
     ret &= writeUserConfigJson(c);
-
-    //todo binary data
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("dump: exception: %1").arg(QString(e.what())),
@@ -49,12 +46,6 @@ bool ConfigStorage::read(data::ConfigData &c)
 
   try {
     ret &= readUserConfigJson(c);
-
-//  pugi::xml_document actionList;
-//  pugi::xml_document userConfiguration;
-//  vector<uint8_t> irProto;
-//  vector<uint8_t> ssir;
-
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("load: exception: %1").arg(QString(e.what())),
@@ -68,7 +59,6 @@ bool ConfigStorage::read(data::ConfigData &c)
 bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
 {
   int i;
-  int dummy;
   json j;
 
 #ifdef _WIN32
@@ -125,11 +115,6 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
     auto b = data::serialiser::fromJson(j["Blobs"][i]);
     c.getBlobs().push_back(b);
   }
-  for (i = 0; i < j["IrStreams"].size(); i++) {
-    binary::ssIr::SerialStreamIr stream;
-    data::serialiser::fromJson(j["IrStreams"][i], stream);
-    c.getStreamLib().appendStream(stream, dummy);
-  }
   for (i = 0; i < j["Commands"].size(); i++) {
     binary::irProto::Code cmd;
     data::serialiser::fromJson(j["Commands"][i], cmd);
@@ -163,9 +148,7 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
     data::serialiser::toJson(j["Blobs"][i], c.getBlobs()[i]);
   }
 
-  for (i = 0; i < c.getStreamLib().getStreamCount(); i++) {
-    data::serialiser::toJson(j["IrStreams"][i], c.getStreamLib().accessStream(i));
-  }
+
   for (i = 0; i < c.getCommands().size(); i++) {
     data::serialiser::toJson(j["Commands"][i], c.getCommands()[i]);
   }

@@ -47,7 +47,7 @@ enum class MediaButtonMode { ShowMedia, Unknown };
 enum class HardButtons { Menu, Exit, UpArrow,  DownArrow,  Info,  Guide,  Red,  Green,  Yellow,  Blue,  VolumeUp,  VolumeDown,
     DirectionLeft,  DirectionUp,  DirectionRight,  DirectionDown,  Select,  ChannelUp,  ChannelDown,  VolumeMute,  PrevChannel,
     Rewind,  SkipBack,  Record,  Play,  Pause,  FastForward,  SkipForward,  Stop,  Number1,  Number2,  Number3,  Number4,
-    Number5,  Number6,  Number7,  Number8,  Number9,  NumberPlus,  Number0, NumberEnter, Unknown };
+    Number5,  Number6,  Number7,  Number8,  Number9,  NumberPlus,  Number0, NumberEnter, Unknown }; //those are sorted by position on the remote. don't change!
 
 //non-remote enums
 enum class CodeType { Nec, PhilipsRc5, PhilipsRc6, Sony, Panasonic, Samsung, Lg, Jvc, Sharp, Denon, Pioneer, None, Proprietary, Unknown };

@@ -48,6 +48,8 @@ class BaseModel: public QAbstractItemModel
     virtual QVariant getSelectionItemsData(const QModelIndex &index) const;
 
     QString makeStringUnique(const QStringList &input, QString str);
+    static QStringList toQStringList(const std::vector<std::string> &list);
+    static std::vector<std::string> toStringList(const QStringList &qlist);
 
   protected slots:
     virtual void itemChangedObserver(document::data::Item item, int pos);

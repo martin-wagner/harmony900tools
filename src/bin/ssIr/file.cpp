@@ -13,13 +13,6 @@ namespace binary
 namespace ssIr
 {
 
-void SerialStreamIr::setClock(double clock)
-{
-  if ((clock >= 31500) && (clock <= 250000)) {
-    clockPeriod = 1.0 / clock * 1000000000.0;
-  }
-}
-
 SerialStreamIr::SerialStreamIr()
 {
 }
@@ -66,16 +59,23 @@ SerialStreamIr::SerialStreamIr(vector<uint16_t> data)
   stream = TimingStream::fromMarkPause(data);
 }
 
-SerialStreamIr::SerialStreamIr(TimingStream &stream, double clock)
+SerialStreamIr::SerialStreamIr(const TimingStream &stream, double clock)
 {
   setClock(clock);
 
-  this->stream = move(stream);
+  this->stream = stream;
 }
 
-void SerialStreamIr::addData(vector<uint16_t> &data)
+void SerialStreamIr::addData(const vector<uint16_t> &data)
 {
   stream.addMarkPause(data);
+}
+
+void SerialStreamIr::setClock(double clock)
+{
+  if ((clock >= 31500) && (clock <= 250000)) {
+    clockPeriod = 1.0 / clock * 1000000000.0;
+  }
 }
 
 vector<uint16_t> SerialStreamIr::serialise() const
@@ -212,14 +212,19 @@ void File::appendStream(const SerialStreamIr &stream, int &index)
   streams.push_back(stream);
 }
 
-bool File::insertStream(TimingStream &stream, double clock, int index)
+bool File::insertStream(const SerialStreamIr &stream, int index)
 {
   if ((index < 0) || (index > static_cast<int>(streams.size()))) {
     return false;
   }
-  auto s = SerialStreamIr(stream, clock);
-  streams.insert(streams.begin() + index, s);
+  streams.insert(streams.begin() + index, stream);
   return true;
+}
+
+bool File::insertStream(TimingStream &stream, double clock, int index)
+{
+  auto s = SerialStreamIr(stream, clock);
+  return insertStream(s, index);
 }
 
 vector<uint8_t> File::serialise() const

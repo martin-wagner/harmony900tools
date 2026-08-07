@@ -34,7 +34,11 @@ enum class Item
   ACTIVITY_ACTION,
   ACTIVITY_POWER,
 
-  IR,
+  IR_PROTO_LIB,
+  IR_PROTO_CMD,
+
+
+  IR, //todo
 };
 
 class BaseCommand: public QObject, public QUndoCommand

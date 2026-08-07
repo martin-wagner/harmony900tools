@@ -43,6 +43,8 @@ void RemoveIrProtoLibItemCommand::redo()
     return;
   }
 
+  emit itemAboutToBeRemoved(Item::IR_PROTO_LIB, pos);
+
   // add config file commands for undo
   //todo
 //    auto *cmd = new RemoveStatemachineFromActivityCommand(ids, a, this);
@@ -59,7 +61,11 @@ void RemoveIrProtoLibItemCommand::redo()
 //        this, &RemoveStatemachineCommand::activityAboutToBeRemoved);
 //    connect(cmd, &RemoveStatemachineFromActivityCommand::activityRemoved, this,
 //        &RemoveStatemachineCommand::activityRemoved); todo
+
+
   c.getProtocolLib().removeProtocol(pos);
+
+  emit itemRemoved(Item::IR_PROTO_LIB, pos);
   emit dirtyChanged(true);
 }
 
@@ -71,7 +77,11 @@ void RemoveIrProtoLibItemCommand::undo()
 
   // add config file commands for redo
 
+  emit itemAboutToBeAdded(Item::IR_PROTO_LIB, pos);
+
   c.getProtocolLib().insertProtocol(prot, pos);
+
+  emit itemAdded(Item::IR_PROTO_LIB, pos);
   emit dirtyChanged(true);
 }
 

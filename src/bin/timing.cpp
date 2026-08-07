@@ -95,7 +95,7 @@ string TimingStream::convertIntString() const
   return str.str();
 }
 
-string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh) const
+string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh, bool includeHeader) const
 {
   //todo active high...
   string header;
@@ -119,7 +119,9 @@ string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh) const
     return "";
   }
 
-  header = "µs per div: " + to_string(base);
+  if (includeHeader) {
+    header = "µs per div: " + to_string(base) + '\n';
+  }
 
   for (const auto &block : data) {
     // divs, do round. for shorter pulse min 1 div, even on round-down
@@ -184,7 +186,7 @@ string TimingStream::convertAsciiPlot(uint32_t width, bool activeHigh) const
     bottom += "\\++";
   }
 
-  return header + '\n' + top + '\n' + bottom + '\n';
+  return header + top + '\n' + bottom + '\n';
 }
 
 }
