@@ -45,6 +45,7 @@ class BaseModel: public QAbstractItemModel
     virtual QVariant getTooltipData(const QModelIndex &index) const;
     virtual QVariant getBackgroundData(const QModelIndex &index) const;
     virtual QVariant getForegroundData(const QModelIndex &index) const;
+    virtual QVariant getFontData(const QModelIndex &index) const;
     virtual QVariant getSelectionItemsData(const QModelIndex &index) const;
 
     QString makeStringUnique(const QStringList &input, QString str);

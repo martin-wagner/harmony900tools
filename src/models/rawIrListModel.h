@@ -28,8 +28,8 @@ class RawIrModel: public BaseModel
 
     const std::map<Column, Setup> columnSetup = {
         { Column::NAME,          { "Name", "The command name is used to reference this command in other tables (Buttons, ...).", "QString", false, {}, } },
-        { Column::DATACLOCK,     { "Data clock", "IR Command data clock. Auto-detected at learn time, don't change unless you know what you are doing.", "int", false, {}, } },
-        { Column::DATA,          { "Data", "Select this to enable learning for this command.\n\nVisual representation of IR data", "SerialStreamIr", false, {}, } }
+        { Column::DATACLOCK,     { "Data clock / Hz", "IR Command data clock. Auto-detected at learn time, don't change unless you know what you are doing.", "int", false, {}, } },
+        { Column::DATA,          { "Data", "Select this to enable learning for this command.\n\nVisual representation of IR data. If you only see a flat line, learning most likely has failed.", "SerialStreamIr", true, {}, } }
     };
 
   public:
@@ -65,6 +65,7 @@ class RawIrModel: public BaseModel
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
+    QVariant getFontData(const QModelIndex &index) const override;
 
     bool setCommandName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
 };

@@ -237,12 +237,12 @@ QVariant RawIrModel::getDisplayData(const QModelIndex &index) const
       case Column::DATACLOCK:
         return cmd.stream.getClock();
       case Column::DATA: {
-        auto str =
-            cmd.stream.accessStream().convertAsciiPlot(250, true, false);
+        auto str = cmd.stream.accessStream().convertAsciiPlot(250, true, false);
         while (!str.empty() && str.back() == '\n') {
           str.pop_back();
         }
-        return QString::fromStdString(str); }
+        return QString::fromStdString(str);
+      }
       default:
         break;
     }
@@ -295,6 +295,20 @@ bool RawIrModel::setCommandName(document::data::CmdCatalogue &worker, int row,
   auto cmd = cmds.at(row);
   cmd.name = name.toStdString();
   return worker.setIrCommand(devicePos, cmd, row, true);
+}
+
+QVariant RawIrModel::getFontData(const QModelIndex &index) const
+{
+  switch (index.column()) {
+    case Column::DATA: {
+      QFont font("Monospace");
+      font.setStyleHint(QFont::Monospace);
+      return font;
+    }
+    default:
+      break;
+  }
+  return {};
 }
 
 }

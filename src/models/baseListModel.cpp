@@ -35,6 +35,8 @@ QVariant BaseModel::data(const QModelIndex &index, int role) const
       return getBackgroundData(index);
     case Qt::ForegroundRole:
       return getForegroundData(index);
+    case Qt::FontRole:
+      return getFontData(index);
     case UserDataRole::SelectionItemsRole:
       return getSelectionItemsData(index);
     default:
@@ -100,6 +102,11 @@ QVariant BaseModel::getBackgroundData(const QModelIndex &index) const
 }
 
 QVariant BaseModel::getForegroundData(const QModelIndex &index) const
+{
+  return {};
+}
+
+QVariant BaseModel::getFontData(const QModelIndex &index) const
 {
   return {};
 }
