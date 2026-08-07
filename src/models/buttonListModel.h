@@ -3,17 +3,11 @@
 #pragma once
 
 #include "document/data/catalogue.h"
-#include "base.h"
+#include "baseListModel.h"
 
 namespace document
 {
   class Config;
-  namespace data {
-    class ConfigData;
-    namespace item {
-      class Button;
-    }
-  }
 }
 
 namespace models
@@ -40,7 +34,7 @@ inline static const QStringList icons {
 };
 
 //Model for buttons
-class ButtonBaseModel: public QAbstractItemModel
+class ButtonBaseModel: public BaseModel
 {
   Q_OBJECT
   public:
@@ -72,42 +66,24 @@ class ButtonBaseModel: public QAbstractItemModel
     ~ButtonBaseModel() override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
 
     virtual QModelIndex index(int row, int column, const QModelIndex &parent = { }) const override;
-    virtual QModelIndex parent(const QModelIndex &index) const override;
 
     virtual int rowCount(const QModelIndex &parent = { }) const override;
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
-    virtual bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
 
-    virtual bool insertColumns(int position, int columns, const QModelIndex &parent = { }) override;
-    virtual bool removeColumns(int position, int columns, const QModelIndex &parent = { }) override;
     virtual bool insertRows(int position, int rows, const QModelIndex &parent = { }) override;
     virtual bool removeRows(int position, int rows, const QModelIndex &parent = { }) override;
-
-  signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
 
   protected:
     //accessors
     virtual const std::vector<document::data::item::Button> &getButtons() const = 0;
     virtual bool addButton(int row) = 0;
     virtual bool removeButton(int row) = 0;
-    virtual QVariant getDisplayData(const QModelIndex &index) const = 0;
-    virtual QVariant getEditData(const QModelIndex &index) const = 0;
-    virtual QVariant getTooltipData(const QModelIndex &index) const = 0;
-    virtual QVariant getBackgroundData(const QModelIndex &index) const = 0;
-    virtual QVariant getForegroundData(const QModelIndex &index) const = 0;
-    virtual QVariant getSelectionItemsData(const QModelIndex &index) const = 0;
 
   protected:
     document::Config &config;
-    document::data::Item item;
-
-    void createActions();
 
   protected:
     QStringList getUnusedButtons(const document::data::item::Button &button) const;
@@ -149,11 +125,10 @@ class DeviceHardButtonModel: public ButtonBaseModel
     const std::vector<document::data::item::Button> &getButtons() const override;
     bool addButton(int row) override;
     bool removeButton(int row) override;
+
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
-    QVariant getBackgroundData(const QModelIndex &index) const override;
-    QVariant getForegroundData(const QModelIndex &index) const override;
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
@@ -187,11 +162,10 @@ class DeviceSoftButtonModel: public ButtonBaseModel
     const std::vector<document::data::item::Button> &getButtons() const override;
     bool addButton(int row) override;
     bool removeButton(int row) override;
+
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
-    QVariant getBackgroundData(const QModelIndex &index) const override;
-    QVariant getForegroundData(const QModelIndex &index) const override;
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   private:
@@ -228,11 +202,10 @@ class ActivityHardButtonModel: public ButtonBaseModel
     const std::vector<document::data::item::Button> &getButtons() const override;
     bool addButton(int row) override;
     bool removeButton(int row) override;
+
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
-    QVariant getBackgroundData(const QModelIndex &index) const override;
-    QVariant getForegroundData(const QModelIndex &index) const override;
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:
@@ -272,11 +245,10 @@ class ActivitySoftButtonModel: public ButtonBaseModel
     const std::vector<document::data::item::Button> &getButtons() const override;
     bool addButton(int row) override;
     bool removeButton(int row) override;
+
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
-    QVariant getBackgroundData(const QModelIndex &index) const override;
-    QVariant getForegroundData(const QModelIndex &index) const override;
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
 
   protected:

@@ -10,39 +10,12 @@ namespace models
 {
 
 DeviceModel::DeviceModel(document::Config &config, QObject *parent) :
-    QAbstractItemModel(parent), config(config)
+    BaseModel(document::data::Item::DEVICE, parent), config(config)
 {
-  createActions();
+  createActions(&config);
 }
 
 DeviceModel::~DeviceModel() = default;
-
-QVariant DeviceModel::data(const QModelIndex &index, int role) const
-{
-  if (!index.isValid()) {
-    return {};
-  }
-  if (index.parent().isValid()) {
-    return {};
-  }
-
-  switch (role) {
-    case Qt::DisplayRole:
-      return getDisplayData(index);
-    case Qt::EditRole:
-      return getEditData(index);
-    case Qt::ToolTipRole:
-      return getTooltipData(index);
-    case Qt::BackgroundRole:
-      return getBackgroundData(index);
-    case Qt::ForegroundRole:
-      return getForegroundData(index);
-    case UserDataRole::SelectionItemsRole:
-      return getSelectionItemsData(index);
-    default:
-      return {};
-  }
-}
 
 QVariant DeviceModel::headerData(int section, Qt::Orientation orientation,
     int role) const
@@ -68,11 +41,6 @@ QModelIndex DeviceModel::index(int row, int column,
     return {};
   }
   return createIndex(row, column, &config.data().getDevices()[row]);
-}
-
-QModelIndex DeviceModel::parent(const QModelIndex &index) const
-{
-  return {};
 }
 
 int DeviceModel::rowCount(const QModelIndex &parent) const
@@ -148,24 +116,6 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
   return true;
 }
 
-bool DeviceModel::setHeaderData(int section, Qt::Orientation orientation,
-    const QVariant &value, int role)
-{
-  return false;
-}
-
-bool DeviceModel::insertColumns(int position, int columns,
-    const QModelIndex &parent)
-{
-  return false;
-}
-
-bool DeviceModel::removeColumns(int position, int columns,
-    const QModelIndex &parent)
-{
-  return false;
-}
-
 bool DeviceModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
   bool success = true;
@@ -224,20 +174,6 @@ bool DeviceModel::removeRows(int position, int rows, const QModelIndex &parent)
   return success;
 }
 
-void models::DeviceModel::createActions()
-{
-  connect(&config, &document::Config::itemChanged, this,
-      &DeviceModel::itemChangedObserver);
-  connect(&config, &document::Config::itemAboutToBeAdded, this,
-      &DeviceModel::itemAboutToBeAddedObserver);
-  connect(&config, &document::Config::itemAdded, this,
-      &DeviceModel::itemAddedObserver);
-  connect(&config, &document::Config::itemAboutToBeRemoved, this,
-      &DeviceModel::itemAboutToBeRemovedObserver);
-  connect(&config, &document::Config::itemRemoved, this,
-      &DeviceModel::itemRemovedObserver);
-}
-
 QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
 {
   try {
@@ -293,16 +229,6 @@ QVariant DeviceModel::getTooltipData(const QModelIndex &index) const
   return {};
 }
 
-QVariant DeviceModel::getBackgroundData(const QModelIndex &index) const
-{
-  return {};
-}
-
-QVariant DeviceModel::getForegroundData(const QModelIndex &index) const
-{
-  return {};
-}
-
 QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
 {
   try {
@@ -321,70 +247,15 @@ QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
 bool DeviceModel::setDeviceName(document::data::CmdCatalogue &worker, int row,
     const QVariant &value)
 {
-  QList<string> usedNames;
+  QStringList usedNames;
 
   auto &devices = config.data().getDevices();
-  auto name = value.toString();
-  auto baseName = name;
-
-  for (const auto &device : devices) {
-    usedNames.push_back(device.label.get());
+  for (const auto &activity : devices) {
+    usedNames.push_back(QString::fromStdString(activity.label.get()));
   }
 
-  int suffix = 1;
-  while (usedNames.contains(name.toStdString())) {
-    name = baseName + QString::number(suffix);
-    suffix++;
-  }
-  if (suffix > 1) {
-    emit writeMsg(tr("%1 already used. Names must be unique").arg(baseName));
-  }
-
+  auto name = makeStringUnique(usedNames, value.toString());
   return worker.setDeviceLabel(name, row);
-}
-
-void DeviceModel::itemChangedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::DEVICE) {
-    return;
-  }
-  //we don't know the column!
-  emit dataChanged(index(pos, 0), index(pos, columnCount()), {
-    Qt::DisplayRole,
-    Qt::EditRole });
-}
-
-void DeviceModel::itemAboutToBeAddedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::DEVICE) {
-    return;
-  }
-  emit beginInsertRows(QModelIndex(), pos, pos);
-}
-
-void DeviceModel::itemAddedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::DEVICE) {
-    return;
-  }
-  emit endInsertRows();
-}
-
-void DeviceModel::itemAboutToBeRemovedObserver(document::data::Item item,
-    int pos)
-{
-  if (item != document::data::Item::DEVICE) {
-    return;
-  }
-  emit beginRemoveRows(QModelIndex(), pos, pos);
-}
-
-void DeviceModel::itemRemovedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::DEVICE) {
-    return;
-  }
-  emit endRemoveRows();
 }
 
 }

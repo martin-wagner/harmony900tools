@@ -9,39 +9,12 @@ namespace models
 {
 
 ActivityModel::ActivityModel(document::Config &config, QObject *parent) :
-    QAbstractItemModel(parent), config(config)
+    BaseModel(document::data::Item::ACTIVITY, parent), config(config)
 {
-  createActions();
+  createActions(&config);
 }
 
 ActivityModel::~ActivityModel() = default;
-
-QVariant ActivityModel::data(const QModelIndex &index, int role) const
-{
-  if (!index.isValid()) {
-    return {};
-  }
-  if (index.parent().isValid()) {
-    return {};
-  }
-
-  switch (role) {
-    case Qt::DisplayRole:
-      return getDisplayData(index);
-    case Qt::EditRole:
-      return getEditData(index);
-    case Qt::ToolTipRole:
-      return getTooltipData(index);
-    case Qt::BackgroundRole:
-      return getBackgroundData(index);
-    case Qt::ForegroundRole:
-      return getForegroundData(index);
-    case UserDataRole::SelectionItemsRole:
-      return getSelectionItemsData(index);
-    default:
-      return {};
-  }
-}
 
 QVariant ActivityModel::headerData(int section, Qt::Orientation orientation,
     int role) const
@@ -68,11 +41,6 @@ QModelIndex ActivityModel::index(int row, int column,
     return {};
   }
   return createIndex(row, column, &config.data().getActivities()[row]);
-}
-
-QModelIndex ActivityModel::parent(const QModelIndex &index) const
-{
-  return {};
 }
 
 int ActivityModel::rowCount(const QModelIndex &parent) const
@@ -142,24 +110,6 @@ bool ActivityModel::setData(const QModelIndex &index, const QVariant &value,
 
   //don't emit dataChanged event, is done inside observers anyway
   return true;
-}
-
-bool ActivityModel::setHeaderData(int section, Qt::Orientation orientation,
-    const QVariant &value, int role)
-{
-  return false;
-}
-
-bool ActivityModel::insertColumns(int position, int columns,
-    const QModelIndex &parent)
-{
-  return false;
-}
-
-bool ActivityModel::removeColumns(int position, int columns,
-    const QModelIndex &parent)
-{
-  return false;
 }
 
 bool ActivityModel::insertRows(int position, int rows,
@@ -240,20 +190,6 @@ bool ActivityModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
   return worker.moveActivityCommand(sourceRow, destinationChild);
 }
 
-void models::ActivityModel::createActions()
-{
-  connect(&config, &document::Config::itemChanged, this,
-      &ActivityModel::itemChangedObserver);
-  connect(&config, &document::Config::itemAboutToBeAdded, this,
-      &ActivityModel::itemAboutToBeAddedObserver);
-  connect(&config, &document::Config::itemAdded, this,
-      &ActivityModel::itemAddedObserver);
-  connect(&config, &document::Config::itemAboutToBeRemoved, this,
-      &ActivityModel::itemAboutToBeRemovedObserver);
-  connect(&config, &document::Config::itemRemoved, this,
-      &ActivityModel::itemRemovedObserver);
-}
-
 QVariant ActivityModel::getDisplayData(const QModelIndex &index) const
 {
   try {
@@ -301,16 +237,6 @@ QVariant ActivityModel::getTooltipData(const QModelIndex &index) const
   return {};
 }
 
-QVariant ActivityModel::getBackgroundData(const QModelIndex &index) const
-{
-  return {};
-}
-
-QVariant ActivityModel::getForegroundData(const QModelIndex &index) const
-{
-  return {};
-}
-
 QVariant ActivityModel::getSelectionItemsData(const QModelIndex &index) const
 {
   try {
@@ -329,71 +255,15 @@ QVariant ActivityModel::getSelectionItemsData(const QModelIndex &index) const
 bool ActivityModel::setActivityName(document::data::CmdCatalogue &worker, int row,
     const QVariant &value)
 {
-  QList<string> usedNames;
+  QStringList usedNames;
 
   auto &activities = config.data().getActivities();
-  auto name = value.toString();
-  auto baseName = name;
-
   for (const auto &activity : activities) {
-    usedNames.push_back(activity.label.get());
+    usedNames.push_back(QString::fromStdString(activity.label.get()));
   }
 
-  int suffix = 1;
-  while (usedNames.contains(name.toStdString())) {
-    name = baseName + QString::number(suffix);
-    suffix++;
-  }
-  if (suffix > 1) {
-    emit writeMsg(tr("%1 already used. Names must be unique").arg(baseName));
-  }
-
+  auto name = makeStringUnique(usedNames, value.toString());
   return worker.setActivityLabel(name, row);
-}
-
-void ActivityModel::itemChangedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::ACTIVITY) {
-    return;
-  }
-  //we don't know the column!
-  emit dataChanged(index(pos, 0), index(pos, columnCount()), {
-    Qt::DisplayRole,
-    Qt::EditRole });
-}
-
-void ActivityModel::itemAboutToBeAddedObserver(document::data::Item item,
-    int pos)
-{
-  if (item != document::data::Item::ACTIVITY) {
-    return;
-  }
-  emit beginInsertRows(QModelIndex(), pos, pos);
-}
-
-void ActivityModel::itemAddedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::ACTIVITY) {
-    return;
-  }
-  emit endInsertRows();
-}
-
-void ActivityModel::itemAboutToBeRemovedObserver(document::data::Item item,
-    int pos)
-{
-  if (item != document::data::Item::ACTIVITY) {
-    return;
-  }
-  emit beginRemoveRows(QModelIndex(), pos, pos);
-}
-
-void ActivityModel::itemRemovedObserver(document::data::Item item, int pos)
-{
-  if (item != document::data::Item::ACTIVITY) {
-    return;
-  }
-  emit endRemoveRows();
 }
 
 }

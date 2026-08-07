@@ -14,9 +14,9 @@ namespace models
 
 ButtonBaseModel::ButtonBaseModel(document::Config &config,
     document::data::Item item, QObject *parent) :
-    QAbstractItemModel(parent), config(config), item(item)
+    BaseModel(item, parent), config(config)
 {
-  createActions();
+  createActions(&config);
 }
 
 ButtonBaseModel::~ButtonBaseModel() = default;
@@ -34,33 +34,6 @@ QVariant ButtonBaseModel::headerData(int section, Qt::Orientation orientation,
   return {};
 }
 
-QVariant ButtonBaseModel::data(const QModelIndex &index, int role) const
-{
-  if (!index.isValid()) {
-    return {};
-  }
-  if (index.parent().isValid()) {
-    return {};
-  }
-
-  switch (role) {
-    case Qt::DisplayRole:
-      return getDisplayData(index);
-    case Qt::EditRole:
-      return getEditData(index);
-    case Qt::ToolTipRole:
-      return getTooltipData(index);
-    case Qt::BackgroundRole:
-      return getBackgroundData(index);
-    case Qt::ForegroundRole:
-      return getForegroundData(index);
-    case UserDataRole::SelectionItemsRole:
-      return getSelectionItemsData(index);
-    default:
-      return {};
-  }
-}
-
 QModelIndex ButtonBaseModel::index(int row, int column,
     const QModelIndex &parent) const
 {
@@ -72,11 +45,6 @@ QModelIndex ButtonBaseModel::index(int row, int column,
     return {};
   }
   return createIndex(row, column, &getButtons()[row]); //no "mapColumn()"!
-}
-
-QModelIndex ButtonBaseModel::parent(const QModelIndex &index) const
-{
-  return {};
 }
 
 int ButtonBaseModel::rowCount(const QModelIndex &parent) const
@@ -103,24 +71,6 @@ Qt::ItemFlags ButtonBaseModel::flags(const QModelIndex &index) const
   return QAbstractItemModel::flags(index);
 }
 
-bool ButtonBaseModel::setHeaderData(int section, Qt::Orientation orientation,
-    const QVariant &value, int role)
-{
-  return false;
-}
-
-bool ButtonBaseModel::insertColumns(int position, int columns,
-    const QModelIndex &parent)
-{
-  return false;
-}
-
-bool ButtonBaseModel::removeColumns(int position, int columns,
-    const QModelIndex &parent)
-{
-  return false;
-}
-
 bool ButtonBaseModel::insertRows(int position, int rows,
     const QModelIndex &parent)
 {
@@ -141,8 +91,6 @@ bool ButtonBaseModel::insertRows(int position, int rows,
       continue;
     }
   }
-
-  //todo fill the row with data that is not plainly invalid
 
   config.endMacro();
 
@@ -179,20 +127,6 @@ bool ButtonBaseModel::removeRows(int position, int rows,
   config.endMacro();
 
   return success;
-}
-
-void models::ButtonBaseModel::createActions()
-{
-  connect(&config, &document::Config::itemChanged, this,
-      &ButtonBaseModel::itemChangedObserver);
-  connect(&config, &document::Config::itemAboutToBeAdded, this,
-      &ButtonBaseModel::itemAboutToBeAddedObserver);
-  connect(&config, &document::Config::itemAdded, this,
-      &ButtonBaseModel::itemAddedObserver);
-  connect(&config, &document::Config::itemAboutToBeRemoved, this,
-      &ButtonBaseModel::itemAboutToBeRemovedObserver);
-  connect(&config, &document::Config::itemRemoved, this,
-      &ButtonBaseModel::itemRemovedObserver);
 }
 
 QStringList ButtonBaseModel::getUnusedButtons() const
@@ -483,18 +417,6 @@ QVariant DeviceHardButtonModel::getTooltipData(const QModelIndex &index) const
   return {};
 }
 
-QVariant DeviceHardButtonModel::getBackgroundData(
-    const QModelIndex &index) const
-{
-  return {};
-}
-
-QVariant DeviceHardButtonModel::getForegroundData(
-    const QModelIndex &index) const
-{
-  return {};
-}
-
 QVariant DeviceHardButtonModel::getSelectionItemsData(
     const QModelIndex &index) const
 {
@@ -690,18 +612,6 @@ QVariant DeviceSoftButtonModel::getTooltipData(const QModelIndex &index) const
     return columnSetup.at(mapColumn(index.column())).context;
   } catch (...) {
   }
-  return {};
-}
-
-QVariant DeviceSoftButtonModel::getBackgroundData(
-    const QModelIndex &index) const
-{
-  return {};
-}
-
-QVariant DeviceSoftButtonModel::getForegroundData(
-    const QModelIndex &index) const
-{
   return {};
 }
 
@@ -958,18 +868,6 @@ QVariant ActivityHardButtonModel::getTooltipData(const QModelIndex &index) const
     }
   } catch (...) {
   }
-  return {};
-}
-
-QVariant ActivityHardButtonModel::getBackgroundData(
-    const QModelIndex &index) const
-{
-  return {};
-}
-
-QVariant ActivityHardButtonModel::getForegroundData(
-    const QModelIndex &index) const
-{
   return {};
 }
 
@@ -1270,18 +1168,6 @@ QVariant ActivitySoftButtonModel::getTooltipData(const QModelIndex &index) const
     return columnSetup.at(mapColumn(index.column())).context;
   } catch (...) {
   }
-  return {};
-}
-
-QVariant ActivitySoftButtonModel::getBackgroundData(
-    const QModelIndex &index) const
-{
-  return {};
-}
-
-QVariant ActivitySoftButtonModel::getForegroundData(
-    const QModelIndex &index) const
-{
   return {};
 }
 
