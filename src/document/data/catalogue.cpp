@@ -1255,14 +1255,15 @@ bool CmdCatalogue::setIrHoldInterKeyMs(uint32_t v, uint32_t devicePos)
   return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::setIrCodeType(const Enum<CodeType> &v, uint32_t devicePos)
+bool CmdCatalogue::setIrDefaultCodeType(const Enum<CodeType> &v,
+    uint32_t devicePos)
 {
   PropertyAccess<Enum<CodeType>> access =
       {
         tr("set ir command code type"),
-        [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().codeType.get();},
+        [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().defaultCodeType.get();},
         [this, devicePos](
-            const Enum<CodeType> &v) {c.getDevices()[devicePos].getIrCommands().codeType.set(v).setIncluded(Used::YES);},
+            const Enum<CodeType> &v) {c.getDevices()[devicePos].getIrCommands().defaultCodeType.set(v).setIncluded(Used::YES);},
         v,
         Item::DEVICE_IR };
   return setProperty<Enum<CodeType>>(access);

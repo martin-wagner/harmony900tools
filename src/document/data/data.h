@@ -4,7 +4,6 @@
 
 #include "bin/ssIr/file.h"
 #include "bin/irProto/file.h"
-#include "bin/irProto/code.h"
 #include "items/activity.h"
 #include "items/blob.h"
 #include "items/controllerInfo.h"
@@ -32,9 +31,6 @@ class ConfigData
 
     const std::vector<item::Blob>& getBlobs() const;
     std::vector<item::Blob>& getBlobs();
-
-    const std::vector<binary::irProto::Code>& getCommands() const;
-    std::vector<binary::irProto::Code>& getCommands();
 
     const item::ControllerInfo& getController() const;
     item::ControllerInfo& getController();
@@ -71,8 +67,7 @@ class ConfigData
     std::vector<item::Activity> activities;
     std::vector<item::Blob> blobs;
 
-    /** ir command data */
-    std::vector<binary::irProto::Code> commands; // command data
+    /** ir command protocol lib */
     binary::irProto::File protocolLib; // command-to-stream encoder data
 };
 

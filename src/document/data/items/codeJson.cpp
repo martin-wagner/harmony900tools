@@ -64,13 +64,20 @@ void fromJson(const ordered_json &in, binary::TimingStream &stream)
 void toJson(ordered_json &out, const binary::irProto::Section &section)
 {
   out["Index"] = section.getIndex();
-  out["Data"] = section.getData();
+  out["Data"] = lib::bitsToHexString(section.getData());
+  out["DataBitCount"] = section.getData().size();
 }
 
 void fromJson(const ordered_json &in, binary::irProto::Section &section)
 {
+  std::vector<bool> data;
+
   int index = in.value("Index", 0);
-  std::vector<bool> data = in.value("Data", std::vector<bool>());
+  auto dataIt = in.find("Data");
+  if (dataIt != in.end()) {
+    size_t bitCount = in.value("DataBitCount", size_t(0));
+    data = lib::hexStringToBits(dataIt->get<std::string>(), bitCount);
+  }
   section = binary::irProto::Section(index, data);
 }
 

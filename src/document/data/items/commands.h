@@ -8,6 +8,7 @@
 #include <chrono>
 
 #include "bin/ssIr/file.h"
+#include "bin/irProto/code.h"
 #include "action.h"
 
 
@@ -30,16 +31,41 @@ class RawCommand
 class ProtoCommand
 {
   public:
-    //command creator. false = as read from xml
-    PropertyBool usesParentInfo { false, Used::NO };
-    PropertyU32 field3 {0, Used::NO};
-    PropertyU32 field4 {0, Used::NO};
+    //empty
+    ProtoCommand() {};
 
-    //for serialise
+    //create from binary
+    ProtoCommand(uint32_t protocolIndex, const std::vector<uint8_t> &data, CodeType t = CodeType::Proprietary) :
+      codeType(t), protocolIndex(protocolIndex), data(data)
+    {
+      status = command.parse(std::vector<uint8_t>(data));
+      if (status == binary::irProto::Status::OK) {
+        canDecode.set(true).setIncluded(Used::YES);
+      } else {
+        this->data.setIncluded(Used::YES);
+      }
+    }
+    //get status after constructor call
+    binary::irProto::Status getStatus() { return status; };
+
+    // from parent data
+    ProtoCommand(uint32_t protocolIndex, CodeType t) :
+      codeType(t), canDecode(true)
+    {
+    }
+
     PropertyString name { "Unknown" };
+    PropertyEnum<CodeType> codeType { CodeType::None} ;
     PropertyU32 protocolIndex { 0 };
-    PropertyU32 commandIndex { 0 };
-    Property<std::vector<uint8_t>> data {{}}; //encoded IR protocol config stream
+
+    //command creator. false = data as read from xml, decoding not possible
+    PropertyBool canDecode { false, Used::YES };
+    binary::irProto::Code command;
+    Property<std::vector<uint8_t>> data {{}, Used::NO};
+
+  private:
+    binary::irProto::Status status = binary::irProto::Status::OK;
+
 };
 
 /** IR command list
@@ -111,7 +137,7 @@ class Commands
 
     /** Info for building IR commands. IR commands seem to use max two static
      * params + command. We have space for three params. */
-    PropertyEnum<CodeType> codeType { CodeType::None, Used::NO} ;
+    PropertyEnum<CodeType> defaultCodeType { CodeType::None, Used::NO} ;
     PropertyU32 field0 {0, Used::NO};
     PropertyU32 field1 {0, Used::NO};
     PropertyU32 field2 {0, Used::NO};

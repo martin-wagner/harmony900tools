@@ -46,9 +46,9 @@ class Code
     Ctrl ctrl = Ctrl::FLAT;
     std::vector<Section> sections;
 
-    std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
-    std::vector<bool> u64tobits(uint8_t bitCount, uint64_t data);
-    std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
+    static std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
+    static std::vector<bool> u64tobits(uint8_t bitCount, uint64_t data);
+    static std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
     //bit-stream + end
     Status parseFlat(const std::vector<uint8_t>& data);
     //bit-stream
@@ -56,7 +56,7 @@ class Code
     //data section count 2byte bit-streams
     Status parseMultiSection(std::vector<uint8_t> data);
 
-    void writeSections(std::vector<uint8_t> &data);
+    void writeSections(std::vector<uint8_t> &data) const;
 
   public:
     /** create empty code item */
@@ -75,8 +75,8 @@ class Code
     void createMultiSection(uint8_t index, double clock, const std::vector<std::pair<uint8_t, uint16_t>> &data);
 
     /** create code */
-    std::string serialiseStr();
-    std::vector<uint8_t> serialiseVec();
+    std::string serialiseStr() const;
+    std::vector<uint8_t> serialiseVec() const;
 
     /** irProto protocol index */
     int getIndex() const { return index; };

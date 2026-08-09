@@ -1107,7 +1107,7 @@ bool ConfigH900::readIrList(pugi::xml_node &commands)
       }
     }
   }
-  worker->setIrCodeType(CodeType::Proprietary, devicePos);
+  worker->setIrDefaultCodeType(CodeType::Proprietary, devicePos);
 
   auto ret = true;
   for (pugi::xml_node prop : commands.children("Command")) {
@@ -1122,10 +1122,10 @@ bool ConfigH900::readIr(pugi::xml_node &command)
 
   auto name = command.child("Name").child_value();
   auto data = command.child("Data");
-  auto protocol = data.child("Protocol").text().as_int(); // -1 -> escape raw cmd
+  auto protoIndex = data.child("Protocol").text().as_int(); // -1 -> escape raw cmd
   auto code = string(data.child("Code").child_value());
   auto rawData = lib::hexStringToBytes(code);
-  if (protocol < 0) {
+  if (protoIndex < 0) {
     //raw command
     if (rawData.size() != 4) {
       emit writeLog(LogLevel::Warning,
@@ -1142,10 +1142,15 @@ bool ConfigH900::readIr(pugi::xml_node &command)
     return worker->setIrCommand(devicePos, cmd);
   } else {
     //protocol command
-    item::ProtoCommand cmd;
+    auto cmd = item::ProtoCommand(protoIndex, rawData);
+    if (cmd.getStatus() != binary::irProto::Status::OK) {
+      emit writeLog(LogLevel::Debug,
+          tr("import device: device %1 cmd %2 decode failed (%3). "
+              "Using copy-trough)").arg(devicePos).arg(
+              QString::fromStdString(name)).arg((int) cmd.getStatus()),
+          ContentType::PlainText);
+    }
     cmd.name.set(name);
-    cmd.protocolIndex.set(protocol);
-    cmd.data.set(rawData);
     return worker->setIrCommand(devicePos, cmd);
   }
 }
@@ -2206,8 +2211,13 @@ bool ConfigH900::writeIr(pugi::xml_node &command,
   command.append_child("Name").text().set(data.name.get());
   auto cmdData = command.append_child("Data");
   cmdData.append_child("Protocol").text().set(data.protocolIndex.get());
-  const auto &raw = data.data.get();
-  cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
+  if (data.canDecode.get() == true) {
+    auto raw = data.command.serialiseStr();
+    cmdData.append_child("Code").text().set(raw);
+  } else {
+    const auto &raw = data.data.get();
+    cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
+  }
   return true;
 }
 
@@ -2639,8 +2649,7 @@ bool ConfigH900::writeIrProto()
 
 bool ConfigH900::writeIrStream()
 {
-  auto status = streams.serialise(
-      QString(wp + "/" + ssIrPath).toStdString());
+  auto status = streams.serialise(QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
     emit writeLog(LogLevel::Error,
         tr("write ir stream parser error: %1").arg((int) status),

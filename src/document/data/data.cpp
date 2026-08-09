@@ -63,16 +63,6 @@ vector<item::Blob>& ConfigData::getBlobs()
   return blobs;
 }
 
-const vector<binary::irProto::Code>& ConfigData::getCommands() const
-{
-  return commands;
-}
-
-vector<binary::irProto::Code>& ConfigData::getCommands()
-{
-  return commands;
-}
-
 const item::ControllerInfo& ConfigData::getController() const
 {
   return controller;

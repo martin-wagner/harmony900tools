@@ -2,6 +2,7 @@
 
 #include "deviceJson.h"
 #include "ssIrJson.h"
+#include "codeJson.h"
 
 #include "jsonSerialise.h"
 
@@ -283,36 +284,45 @@ void fromJson(const ordered_json &in, item::RawCommand &cmd)
 
 void toJson(ordered_json &out, const item::ProtoCommand &cmd)
 {
-  toJson(out, "UsesParentInfo", cmd.usesParentInfo);
-  toJson(out, "Field3", cmd.field3);
-  toJson(out, "Field4", cmd.field4);
-
   toJson(out, "Name", cmd.name);
+  toJson(out, "CodeType", cmd.codeType);
   toJson(out, "ProtocolIndex", cmd.protocolIndex);
-  toJson(out, "CommandIndex", cmd.commandIndex);
-
-  //binary IR stream, base64 encoded
-  if (cmd.data.isIncluded() == Used::YES) {
+  toJson(out, "Decoder", cmd.canDecode);
+  if (cmd.canDecode.get() == true) {
+    ordered_json tmp;
+    toJson(tmp, cmd.command);
+    out["Command"] = tmp;
+  } else {
+    //binary IR stream, base64 encoded
     out["Data"] = base64Encode(cmd.data.get());
   }
 }
 
 void fromJson(const ordered_json &in, item::ProtoCommand &cmd)
 {
-  fromJson(in, "UsesParentInfo", cmd.usesParentInfo);
-  fromJson(in, "Field3", cmd.field3);
-  fromJson(in, "Field4", cmd.field4);
+  binary::irProto::Code decodeCmd;
 
   fromJson(in, "Name", cmd.name);
+  fromJson(in, "CodeType", cmd.codeType);
   fromJson(in, "ProtocolIndex", cmd.protocolIndex);
-  fromJson(in, "CommandIndex", cmd.commandIndex);
-
-  auto it = in.find("Data");
-  if (it != in.end()) {
-    cmd.data.set(base64Decode(it->get<std::string>()));
-    cmd.data.setIncluded(Used::YES);
+  fromJson(in, "Decoder", cmd.canDecode);
+  if (cmd.canDecode.get() == true) {
+    auto it = in.find("Command");
+    if (it != in.end()) {
+      fromJson(*it, cmd.command);
+    }
   } else {
-    cmd.data.setIncluded(Used::NO);
+    auto it = in.find("Data");
+    if (it != in.end()) {
+      cmd.data.set(base64Decode(it->get<std::string>())).setIncluded(Used::YES);
+      //re-try importing on every load. maybe version updated added the missing part...
+      auto status = decodeCmd.parse(cmd.data.get());
+      if (status == binary::irProto::Status::OK) {
+        cmd.command = decodeCmd;
+        cmd.canDecode.set(true).setIncluded(Used::YES);
+        cmd.data.setIncluded(Used::NO);
+      }
+    }
   }
 }
 
@@ -326,7 +336,7 @@ void toJson(ordered_json &out, const item::Commands &commands)
   toJsonVec(out, "RawCommands", commands.getRawCommands());
   toJsonVec(out, "ProtoCommands", commands.getProtoCommands());
 
-  toJson(out, "CodeType", commands.codeType);
+  toJson(out, "DefaultCodeType", commands.defaultCodeType);
   toJson(out, "Field0", commands.field0);
   toJson(out, "Field1", commands.field1);
   toJson(out, "Field2", commands.field2);
@@ -344,7 +354,7 @@ void fromJson(const ordered_json &in, item::Commands &commands)
   fromJson(in, "HoldPreSilenceMs", commands.holdPreSilenceMs);
   fromJson(in, "HoldInterKeyMs", commands.holdInterKeyMs);
 
-  fromJson(in, "CodeType", commands.codeType);
+  fromJson(in, "DefaultCodeType", commands.defaultCodeType);
   fromJson(in, "Field0", commands.field0);
   fromJson(in, "Field1", commands.field1);
   fromJson(in, "Field2", commands.field2);

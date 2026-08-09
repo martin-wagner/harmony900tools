@@ -115,11 +115,6 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
     auto b = data::serialiser::fromJson(j["Blobs"][i]);
     c.getBlobs().push_back(b);
   }
-  for (i = 0; i < j["Commands"].size(); i++) {
-    binary::irProto::Code cmd;
-    data::serialiser::fromJson(j["Commands"][i], cmd);
-    c.getCommands().push_back(cmd);
-  }
   for (i = 0; i < j["IrProtocols"].size(); i++) {
     binary::irProto::IrProto prot;
     data::serialiser::fromJson(j["IrProtocols"][i], prot);
@@ -146,11 +141,6 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
   }
   for (i = 0; i < c.getBlobs().size(); i++) {
     data::serialiser::toJson(j["Blobs"][i], c.getBlobs()[i]);
-  }
-
-
-  for (i = 0; i < c.getCommands().size(); i++) {
-    data::serialiser::toJson(j["Commands"][i], c.getCommands()[i]);
   }
   for (i = 0; i < c.getProtocolLib().getProtocolCount(); i++) {
     data::serialiser::toJson(j["IrProtocols"][i], c.getProtocolLib().accessProtocol(i));

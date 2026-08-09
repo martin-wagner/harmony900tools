@@ -109,7 +109,7 @@ Status Code::parseMultiSection(vector<uint8_t> data)
   return Status::OK;
 }
 
-void Code::writeSections(std::vector<uint8_t> &data)
+void Code::writeSections(std::vector<uint8_t> &data) const
 {
   for (const auto &s : sections) {
     auto bytes = bitsToBytes(s.getData());
@@ -228,13 +228,13 @@ Status Code::parse(const string &code)
   return parse(data);
 }
 
-string Code::serialiseStr()
+string Code::serialiseStr() const
 {
   auto data = serialiseVec();
   return lib::bytesToHexString(data);
 }
 
-vector<uint8_t> Code::serialiseVec()
+vector<uint8_t> Code::serialiseVec() const
 {
   vector<uint8_t> code;
 
@@ -273,7 +273,7 @@ const IrProto::Data Code::getData() const
     }
   }
   if (haveRepeatFrame) {
-    data.push_back( { dataSectionCount, {} });
+    data.push_back( { dataSectionCount, { } });
   }
   return data;
 }

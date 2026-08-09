@@ -20,7 +20,7 @@ inline const SettingDef loglevel()
   s.helpText = QObject::tr("Sets the minimum log level");
   s.type = SettingType::MultiSelection;
   s.defaultValue = 5;
-  s.tab = "";
+  s.tab = "Debug";
   s.minValue = QVariant { };
   s.maxValue = QVariant { };
   for (int i = 0; i <= (int)LogLevel::Debug; i++) {

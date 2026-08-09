@@ -13,7 +13,7 @@ namespace document
 namespace models
 {
 
-//Model for raw commands. this model uses data/device/command/rawcommand + device/streamlib
+//Model for raw commands. this model uses data/device/command/rawcommand
 class RawIrModel: public BaseModel
 {
   Q_OBJECT

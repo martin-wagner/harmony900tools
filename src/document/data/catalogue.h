@@ -131,7 +131,7 @@ class CmdCatalogue : public QObject
     bool setIrPressInterKeyMs(uint32_t v, uint32_t devicePos);
     bool setIrHoldPreSilenceMs(uint32_t v, uint32_t devicePos);
     bool setIrHoldInterKeyMs(uint32_t v, uint32_t devicePos);
-    bool setIrCodeType(const Enum<CodeType> &v, uint32_t devicePos);
+    bool setIrDefaultCodeType(const Enum<CodeType> &v, uint32_t devicePos);
     bool setIrCodeField0(uint32_t v, uint32_t devicePos);
     bool setIrCodeField1(uint32_t v, uint32_t devicePos);
     bool setIrCodeField2(uint32_t v, uint32_t devicePos);
