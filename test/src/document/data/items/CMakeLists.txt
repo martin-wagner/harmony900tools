@@ -12,7 +12,12 @@ set(BIN_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 # ---------------------------------------------------------------------------
 add_executable(test_deviceJson
     test_deviceJson.cpp
+    ${BIN_DIR}/irProto/code.cpp
+    ${BIN_DIR}/ssIr/file.cpp
+    ${BIN_DIR}/timing.cpp
     ${SERIAL_DIR}/deviceJson.cpp
+    ${SERIAL_DIR}/ssIrJson.cpp
+    ${SERIAL_DIR}/codeJson.cpp
     ${SRC_DIR}/enum.cpp
 )
 
@@ -146,8 +151,13 @@ target_link_libraries(test_ssIrJson
 # ---------------------------------------------------------------------------
 add_executable(test_activityJson
     test_activityJson.cpp
+    ${BIN_DIR}/irProto/code.cpp
+    ${BIN_DIR}/ssIr/file.cpp
+    ${BIN_DIR}/timing.cpp
     ${SERIAL_DIR}/activityJson.cpp
     ${SERIAL_DIR}/deviceJson.cpp
+    ${SERIAL_DIR}/ssIrJson.cpp
+    ${SERIAL_DIR}/codeJson.cpp
     ${SRC_DIR}/enum.cpp
 )
 

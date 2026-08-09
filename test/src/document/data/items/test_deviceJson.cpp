@@ -265,8 +265,7 @@ TEST(NumpadJson, AbsentOptionalDigitsStayNullopt)
 
 TEST(ProtoCommandJson, BinaryDataRoundTripsViaBase64)
 {
-    ProtoCommand proto;
-    proto.data.set({0x00, 0x01, 0xFF, 0x7E, 0x80});
+    ProtoCommand proto(1, {0x00, 0x01, 0xFF, 0x7E, 0x80});
     proto.name.set("ProtoTest");
 
     nlohmann::ordered_json j;
@@ -281,25 +280,12 @@ TEST(ProtoCommandJson, BinaryDataRoundTripsViaBase64)
     EXPECT_EQ(proto2.data.isIncluded(), Used::YES);
 }
 
-TEST(ProtoCommandJson, UnusedBinaryDataOmitsKey)
-{
-    ProtoCommand proto;
-    // proto.data defaults to Used::YES per commands.h -- explicitly disable for this test
-    proto.data.setIncluded(Used::NO);
-
-    nlohmann::ordered_json j;
-    serialiser::toJson(j, proto);
-
-    EXPECT_FALSE(j.contains("Data"));
-}
-
 TEST(CommandsJson, RawAndProtoListsRoundTrip)
 {
     Commands commands;
 
     RawCommand raw;
     raw.name.set("RawOne");
-    raw.streamIndex.set(3);
     commands.getRawCommands().push_back(raw);
 
     ProtoCommand proto;

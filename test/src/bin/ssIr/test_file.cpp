@@ -105,7 +105,7 @@ TEST(SerialStreamIrDataClock, StreamDataStored)
 
 TEST(SerialStreamIrDataClock, EmptyData)
 {
-  SerialStreamIr s( { }, 38000.0);
+  SerialStreamIr s(std::vector<uint16_t>{}, 38000.0);
   EXPECT_TRUE(s.accessStream().timings().empty());
 }
 

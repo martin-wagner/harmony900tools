@@ -12,9 +12,9 @@ namespace binary
 namespace irProto
 {
 
-std::vector<bool> Code::bytesToBits(const std::vector<uint8_t> &data)
+vector<bool> Code::bytesToBits(const vector<uint8_t> &data)
 {
-  std::vector<bool> bits;
+  vector<bool> bits;
   bits.reserve(data.size() * 8);
 
   for (auto byte : data) {
@@ -27,9 +27,21 @@ std::vector<bool> Code::bytesToBits(const std::vector<uint8_t> &data)
   return bits;
 }
 
-std::vector<uint8_t> Code::bitsToBytes(const std::vector<bool> &bits)
+vector<bool> Code::u64tobits(uint8_t bitCount, uint64_t data)
 {
-  std::vector<uint8_t> data;
+  vector<bool> bits;
+  bits.reserve(bitCount);
+
+  for (int i = bitCount - 1; i >= 0; --i) {
+    bits.push_back((data >> i) & 1);
+  }
+
+  return bits;
+}
+
+vector<uint8_t> Code::bitsToBytes(const vector<bool> &bits)
+{
+  vector<uint8_t> data;
   size_t numBytes = (bits.size() + 7) / 8; // ceil division
   data.reserve(numBytes);
 
@@ -51,7 +63,7 @@ std::vector<uint8_t> Code::bitsToBytes(const std::vector<bool> &bits)
   return data;
 }
 
-Status Code::parseFlat(const std::vector<uint8_t> &data)
+Status Code::parseFlat(const vector<uint8_t> &data)
 {
   //min 1 data byte + end code
   if (data.size() < 3) {
@@ -60,67 +72,60 @@ Status Code::parseFlat(const std::vector<uint8_t> &data)
 
   //ends with 0x01 0x01. use of this is unknown
   if ((data[data.size() - 1] != 1) || (data[data.size() - 2] != 1)) {
-    cout << "Warning: xml <code> flat/end != 0x01" << endl;
-    //ignore
+    cout << "Error: xml <code> flat/end != 0x01" << endl;
+    return Status::ERROR_PAYLOAD_FORMAT;
   }
   auto bits = bytesToBits( { data.begin(), data.end() - 2 });
-  for (int i = 0; i < dataFrameTxCount; i++) {
-    sections.push_back(Section(0, bits));
-  }
-
-  if (haveRepeatFrame) {
-    sections.push_back(Section(1, { }));
-  }
+  sections.push_back(Section(0, bits));
 
   return Status::OK;
 }
 
-Status Code::parseSingleSection(const std::vector<uint8_t> &data)
+Status Code::parseSingleSection(const vector<uint8_t> &data)
 {
   if (data.size() < 1) {
     return Status::ERROR_SIZE;
   }
 
   auto bits = bytesToBits( { data.begin(), data.end() });
-  for (int i = 0; i < dataFrameTxCount; i++) {
-    sections.push_back(Section(0, bits));
-  }
-
-  if (haveRepeatFrame) {
-    sections.push_back(Section(1, { }));
-  }
+  sections.push_back(Section(0, bits));
 
   return Status::OK;
 }
 
-Status Code::parseMultiSection(const std::vector<uint8_t> &data)
+Status Code::parseMultiSection(vector<uint8_t> data)
 {
   int i;
-  int j;
 
   if (data.size() < (2 * dataSectionCount)) {
     return Status::ERROR_SIZE;
   }
 
-  for (i = 0; i < dataFrameTxCount; i++) {
-    auto tmp = data;
-    for (j = 0; j < dataSectionCount; j++) {
-      auto bits = bytesToBits( { tmp.begin(), tmp.begin() + 2 });
-      sections.push_back(Section(j, bits));
-      tmp.erase(tmp.begin(), tmp.begin() + 2);
+  for (i = 0; i < dataSectionCount; i++) {
+    auto bits = bytesToBits( { data.begin(), data.begin() + 2 });
+    sections.push_back(Section(i, bits));
+    data.erase(data.begin(), data.begin() + 2);
+  }
+  return Status::OK;
+}
+
+void Code::writeSections(std::vector<uint8_t> &data)
+{
+  for (const auto &s : sections) {
+    auto bytes = bitsToBytes(s.getData());
+    for (auto &byte : bytes) {
+      data.push_back(byte);
     }
   }
-
-  if (haveRepeatFrame) {
-    //no idea where the repeat needs to be placed. just assume it is at the end...
-    sections.push_back(Section(j + 1, { }));
-  }
-
-  return Status::OK;
 }
 
 Code::Code()
 {
+}
+
+Code::Code(const vector<uint8_t> &code)
+{
+  parse(code);
 }
 
 Code::Code(const string &code)
@@ -128,57 +133,147 @@ Code::Code(const string &code)
   parse(code);
 }
 
-Status Code::parse(const string &code)
+Status Code::parse(vector<uint8_t> code)
 {
   sections.clear();
 
-  auto data = lib::hexStringToBytes(code);
-  if (data.size() < (HEADER_SIZE + FOOTER_SIZE)) {
+  if (code.size() < (HEADER_SIZE + FOOTER_SIZE)) {
     return Status::ERROR_SIZE;
   }
-  if (data[data.size() - 1] != 0) {
+  if (code[code.size() - 1] != 0) {
     return Status::ERROR_FILE_FORMAT;
   }
-  data.erase(data.end());
+  code.erase(code.end() - 1);
 
-  index = lib::parseHarmony16_file(data[0], data[1]);
-  ticks = lib::parseHarmony16_file(data[2], data[3]);
-  dataFrameTxCount = data[4];
-  haveRepeatFrame = data[5];
+  index = lib::parseHarmony16_file(code[0], code[1]);
+  ticks = lib::parseHarmony16_file(code[2], code[3]);
+  dataFrameTxCount = code[4];
+  haveRepeatFrame = code[5] & 0x01;
   if (haveRepeatFrame && (dataFrameTxCount > 1)) {
     //use either one...
-    cout << "Warning: xml <code> multi-tx + repeat selected" << endl;
-    //ignore
+    cout << "Error: xml <code> multi-tx + repeat selected" << endl;
+    return Status::ERROR_PAYLOAD_FORMAT;
   }
 
-  ctrl = static_cast<Ctrl>(data[6]);
+  ctrl = static_cast<Ctrl>(code[6]);
   switch (ctrl) {
     case Ctrl::FLAT:
       dataSectionCount = 1;
-      return parseFlat( { data.begin() + 7, data.end() });
+      return parseFlat( { code.begin() + 7, code.end() });
     case Ctrl::SECTIONS_1:
-      if (data[7] != 0) {
-        cout << "Warning: xml <code> ss pad7 != 0 (" << data[7] << ")" << endl;
-        //ignore
+      if (code[7] != 0) {
+        cout << "Error: xml <code> ss pad7 != 0 (" << code[7] << ")" << endl;
+        return Status::ERROR_PAYLOAD_FORMAT;
       }
       dataSectionCount = 1;
-      return parseSingleSection( { data.begin() + 8, data.end() });
+      return parseSingleSection( { code.begin() + 8, code.end() });
     default:
-      if (data[7] != 0) {
-        cout << "Warning: xml <code> ms pad7 != 0 (" << data[7] << ")" << endl;
-        //ignore
+      if (code[7] != 0) {
+        cout << "Error: xml <code> ms pad7 != 0 (" << code[7] << ")" << endl;
+        return Status::ERROR_PAYLOAD_FORMAT;
       }
       dataSectionCount = static_cast<uint8_t>(ctrl);
-      return parseMultiSection( { data.begin() + 8, data.end() });
+      return parseMultiSection( { code.begin() + 8, code.end() });
   }
+}
+
+void Code::createFlat(uint8_t index, double clock, uint8_t bits, uint64_t data)
+{
+  sections.clear();
+
+  this->index = index;
+  ticks = clock / 72; // @ 18 MHz
+  dataFrameTxCount = 1;
+  haveRepeatFrame = 0;
+  ctrl = Ctrl::FLAT;
+  auto section = Section(0, u64tobits(bits, data));
+  sections.push_back(section);
+}
+
+void Code::createSingleSection(uint8_t index, double clock, uint8_t bits,
+    uint64_t data)
+{
+  sections.clear();
+
+  this->index = index;
+  ticks = clock / 72; // @ 18 MHz
+  dataFrameTxCount = 1;
+  haveRepeatFrame = 0;
+  ctrl = Ctrl::SECTIONS_1;
+  auto section = Section(0, u64tobits(bits, data));
+  sections.push_back(section);
+}
+
+void Code::createMultiSection(uint8_t index, double clock,
+    const std::vector<std::pair<uint8_t, uint16_t> > &data)
+{
+  int i;
+
+  sections.clear();
+
+  this->index = index;
+  ticks = clock / 72; // @ 18 MHz
+  dataFrameTxCount = 1;
+  haveRepeatFrame = 0;
+  ctrl = static_cast<Ctrl>(data.size());
+  for (i = 0; i < data.size(); i++) {
+    auto section = Section(i, u64tobits(data[i].first, data[i].second));
+    sections.push_back(section);
+  }
+}
+
+Status Code::parse(const string &code)
+{
+  auto data = lib::hexStringToBytes(code);
+  return parse(data);
+}
+
+string Code::serialiseStr()
+{
+  auto data = serialiseVec();
+  return lib::bytesToHexString(data);
+}
+
+vector<uint8_t> Code::serialiseVec()
+{
+  vector<uint8_t> code;
+
+  lib::setHarmony16_file(index, code);
+  lib::setHarmony16_file(ticks, code);
+  code.push_back(dataFrameTxCount);
+  code.push_back(haveRepeatFrame);
+  code.push_back(static_cast<uint8_t>(ctrl));
+  switch (ctrl) {
+    case Ctrl::FLAT:
+      writeSections(code);
+      code.push_back(0x01); //footer
+      code.push_back(0x01);
+      break;
+    case Ctrl::SECTIONS_1:
+      code.push_back(0); //padding byte;
+      writeSections(code);
+      break;
+    default:
+      code.push_back(0); //padding byte;
+      writeSections(code);
+      break;
+  }
+  code.push_back(0); //terminator
+  return code;
 }
 
 const IrProto::Data Code::getData() const
 {
+  uint8_t i;
   IrProto::Data data;
 
-  for (const auto &s : sections) {
-    data.push_back( { s.getIndex(), s.getData() });
+  for (i = 0; i < dataFrameTxCount; i++) {
+    for (const auto &s : sections) {
+      data.push_back( { s.getIndex(), s.getData() });
+    }
+  }
+  if (haveRepeatFrame) {
+    data.push_back( { dataSectionCount, {} });
   }
   return data;
 }

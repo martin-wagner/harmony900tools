@@ -39,7 +39,7 @@ class Code
     static constexpr double SYSCLOCK = 18000000.0;
 
     uint16_t index = 0;
-    uint16_t ticks = 0;
+    uint16_t ticks = 500; //38kHz
     uint8_t dataSectionCount = 0;
     uint8_t haveRepeatFrame = 0;
     uint8_t dataFrameTxCount = 1;
@@ -47,22 +47,36 @@ class Code
     std::vector<Section> sections;
 
     std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
+    std::vector<bool> u64tobits(uint8_t bitCount, uint64_t data);
     std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
     //bit-stream + end
     Status parseFlat(const std::vector<uint8_t>& data);
     //bit-stream
     Status parseSingleSection(const std::vector<uint8_t>& data);
     //data section count 2byte bit-streams
-    Status parseMultiSection(const std::vector<uint8_t>& data);
+    Status parseMultiSection(std::vector<uint8_t> data);
+
+    void writeSections(std::vector<uint8_t> &data);
 
   public:
     /** create empty code item */
     Code();
     /** parse code */
+    Code(const std::vector<uint8_t> &code);
     Code(const std::string &code);
 
     /** parse code (overwrite existing) */
+    Status parse(std::vector<uint8_t> code);
     Status parse(const std::string &code);
+
+    /** create code items from data. manually set either of setDataFrameTxCount / setRepeatFrame afterwards! */
+    void createFlat(uint8_t index, double clock, uint8_t bits, uint64_t data);
+    void createSingleSection(uint8_t index, double clock, uint8_t bits, uint64_t data);
+    void createMultiSection(uint8_t index, double clock, const std::vector<std::pair<uint8_t, uint16_t>> &data);
+
+    /** create code */
+    std::string serialiseStr();
+    std::vector<uint8_t> serialiseVec();
 
     /** irProto protocol index */
     int getIndex() const { return index; };
