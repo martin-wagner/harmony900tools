@@ -140,7 +140,7 @@ bool Config::read(const QString &file)
     return false;
   }
 
-  auto ok = lib::unzipToDirectory(uf, workPath);
+  auto ok = lib::unzipToDirectory(uf, tempDir->path());
   unzClose(uf);
   if (!ok) {
     emit writeLog(LogLevel::Error, tr("config: extraction failed"),
@@ -242,7 +242,7 @@ bool Config::saveAs(const QString &file)
     return false;
   }
 
-  auto ok = lib::zipDirectory(zf, workPath);
+  auto ok = lib::zipDirectory(zf, tempDir->path());
   if (!ok) {
     zipClose(zf, nullptr);
     return false;
@@ -295,7 +295,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
     return false;
   }
 
-  auto ok = lib::zipDirectory(zf, exportPath);
+  auto ok = lib::zipDirectory(zf, exportPath, {".postinstall", ".preinstall"});
   if (!ok) {
     zipClose(zf, nullptr);
     return false;

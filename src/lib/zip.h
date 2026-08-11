@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include <QString>
+#include <QStringList>
 
 #include <minizip/zip.h>
 #include <minizip/unzip.h>
 
 namespace lib {
 
-bool zipDirectory(zipFile &zf, const QString &baseDir);
+bool zipDirectory(zipFile &zf, const QString &baseDir, const QStringList executableFileNames = {});
 bool unzipToDirectory(unzFile &uf, const QString &destDir);
 
 }

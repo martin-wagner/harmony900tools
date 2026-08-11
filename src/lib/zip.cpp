@@ -14,9 +14,11 @@ namespace lib
 
 static const uLong UTF8_FLAG = 0x0800;
 
-bool zipDirectory(zipFile &zf, const QString &baseDir)
+bool zipDirectory(zipFile &zf, const QString &baseDir,
+    const QStringList executableFileNames)
 {
-  QDirIterator it(baseDir, QDir::Files | QDir::NoDotAndDotDot,
+  QDirIterator it(baseDir,
+      QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
       QDirIterator::Subdirectories);
 
   while (it.hasNext()) {
@@ -36,6 +38,10 @@ bool zipDirectory(zipFile &zf, const QString &baseDir)
     QByteArray entryName = relPath.toUtf8();
     zip_fileinfo fi = { };
 
+    if (executableFileNames.contains(QFileInfo(it.filePath()).fileName())) {
+      fi.external_fa = 0100775 << 16;
+    }
+
     int err = zipOpenNewFileInZip4_64(zf, entryName.constData(), &fi, nullptr,
         0, nullptr, 0, nullptr,
         Z_DEFLATED,
@@ -43,7 +49,7 @@ bool zipDirectory(zipFile &zf, const QString &baseDir)
         -MAX_WBITS,         // raw deflate (zip format)
         DEF_MEM_LEVEL,
         Z_DEFAULT_STRATEGY, nullptr, 0,         // no password
-        0,                  // versionMadeBy
+        (3 << 8) | 23,      // Unix, ZIP 2.3
         UTF8_FLAG,          // flagBase: mark filename as UTF-8
         1                   // zip64
         );
