@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "models/rawIrListModel.h"
+#include "models/protocolIrListModel.h"
 #include "delegates/rawIr.h"
+#include "delegates/combobox.h"
 #include "commandEditorView.h"
 
 using namespace std;
@@ -66,17 +68,10 @@ void ProtoCommandTreeView::setLearnedCommand(
 
 void ProtoCommandTreeView::setupDelegates()
 {
-//  auto *comboBoxDelegate = new delegates::ComboBox(this);
-//  auto *uidComboBoxDelegate = new delegates::UidComboBox(this);
-//  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::ActivitySoftButtonModel::Column::DEVICE),
-//      uidComboBoxDelegate);
-//  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::ActivitySoftButtonModel::Column::COMMAND),
-//      comboBoxDelegate);
-//  treeView->setItemDelegateForColumn(
-//      static_cast<int>(models::ActivitySoftButtonModel::Column::ICON),
-//      comboBoxDelegate);
+  auto *comboBoxDelegate = new delegates::ComboBox(this);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ProtocolIrModel::Column::TYPE),
+      comboBoxDelegate);
 }
 
 CommandEditorView::CommandEditorView(Context &ctx, QWidget *parent) :

@@ -34,7 +34,6 @@ void DeviceEditor::setModel(models::DeviceModel *model)
   mainView->setModel(model);
 }
 
-
 void editors::DeviceEditor::setLearnedCommand(
     ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t,
     uint32_t carrier)
@@ -130,22 +129,13 @@ void DeviceEditor::updateCommandEditorView(uint32_t deviceId)
   }
 
   if (deviceId > 0) {
-//    commandEditorView = new CommandEditorView(*ctx.config(), deviceId,
-//        this);
-//    connect(commandEditorView, &models::DeviceHardButtonModel::writeLog, this,
-//        &DeviceEditor::writeLog);
-//    connect(commandEditorView, &models::DeviceHardButtonModel::writeMsg, this,
-//        &DeviceEditor::writeMsg); todo
-    protoCommandModel = new QStandardItemModel(4, 4);
-    for (int row = 0; row < protoCommandModel->rowCount(); ++row) {
-      for (int column = 0; column < protoCommandModel->columnCount();
-          ++column) {
-        QStandardItem *item = new QStandardItem(
-            QString("row %0, column %1").arg(row).arg(column));
-        protoCommandModel->setItem(row, column, item);
-      }
-    }
-    protoCommandView->setModel(protoCommandModel); //todo richtiges modell eintragen
+    protoCommandModel = new models::ProtocolIrModel(*ctx.config(), deviceId,
+        this);
+    connect(protoCommandModel, &models::ProtocolIrModel::writeLog, this,
+        &DeviceEditor::writeLog);
+    connect(protoCommandModel, &models::ProtocolIrModel::writeMsg, this,
+        &DeviceEditor::writeMsg);
+    protoCommandView->setModel(protoCommandModel);
 
     rawCommandModel = new models::RawIrModel(*ctx.config(), deviceId, this);
     connect(rawCommandModel, &models::RawIrModel::writeLog, this,

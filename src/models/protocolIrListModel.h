@@ -21,6 +21,7 @@ class ProtocolIrModel: public BaseModel
     enum Column {
       NAME,
       TYPE,
+      PROTO,
       DATA,
 
       COUNT
@@ -28,8 +29,9 @@ class ProtocolIrModel: public BaseModel
 
     const std::map<Column, Setup> columnSetup = {
         { Column::NAME,          { "Name", "The command name is used to reference this command in other tables (Buttons, ...).", "QString", false, {}, } },
-        { Column::TYPE,          { "Protocol", "IR Protocol name. \"Proprietary\" means from your original data set.", "Enum", false, {} } },
-        { Column::DATA,          { "Data", "- Select cell to enable learning. Needs remote to be connected.\n- Double-click to edit manually\n\nVisual representation of IR data..", "Code", false, {}, } }
+        { Column::TYPE,          { "Protocol", "IR Protocol name. \"Proprietary\" means created by the Harmony 900 software.", "Enum", false, {} } },
+        { Column::PROTO,         { "Protocol Index", "Protocol index for proprietary / none / unknown", "int", true, {}, } },
+        { Column::DATA,          { "Data", "- Select cell to enable learning. Needs remote to be connected.\n- Double-click to edit manually\n\nVisual representation of IR data..", "Code", false, {}, } },
     };
 
   public:
@@ -61,13 +63,18 @@ class ProtocolIrModel: public BaseModel
     document::Config &config;
     uint32_t id;
 
-    const std::vector<document::data::item::ProtocolCommand> &getCmds(uint32_t *devicePos = nullptr) const;
+    const std::vector<document::data::item::ProtoCommand> &getCmds(uint32_t *devicePos = nullptr) const;
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
+    QVariant getSelectionItemsData(const QModelIndex &index) const override;
     QVariant getFontData(const QModelIndex &index) const override;
 
+    QVariant visualiseData(const document::data::item::ProtoCommand &cmd) const;
+
     bool setCommandName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
+    bool setCommandType(document::data::CmdCatalogue &worker, int row, const QVariant &value);
+    bool setCommandData(document::data::CmdCatalogue &worker, int row, const QVariant &value);
 };
 
 }

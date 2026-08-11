@@ -77,8 +77,6 @@ Qt::ItemFlags ProtocolIrModel::flags(const QModelIndex &index) const
 bool ProtocolIrModel::setData(const QModelIndex &index, const QVariant &value,
     int role)
 {
-  uint32_t devicePos;
-
   if (index.parent().isValid() || (role != Qt::EditRole)) {
     return false;
   }
@@ -105,18 +103,10 @@ bool ProtocolIrModel::setData(const QModelIndex &index, const QVariant &value,
     switch (index.column()) {
       case Column::NAME:
         return setCommandName(worker, row, value);
-      case Column::DATACLOCK: {
-        auto cmd = getCmds(&devicePos).at(row);
-        cmd.stream.setClock(value.toDouble());
-        return worker.setIrCommand(devicePos, cmd, row, true);
-      }
-      case Column::DATA: {
-        //also overwrites clock!
-        auto cmd = getCmds(&devicePos).at(row);
-        auto stream = qvariant_cast<binary::ssIr::SerialStreamIr>(value);
-        cmd.stream = stream;
-        return worker.setIrCommand(devicePos, cmd, row, true);
-      }
+      case Column::TYPE:
+        return setCommandType(worker, row, value);
+      case Column::DATA:
+        return setCommandData(worker, row, value);
       default:
         return false;
     }
@@ -128,7 +118,8 @@ bool ProtocolIrModel::setData(const QModelIndex &index, const QVariant &value,
   return true;
 }
 
-bool ProtocolIrModel::insertRows(int position, int rows, const QModelIndex &parent)
+bool ProtocolIrModel::insertRows(int position, int rows,
+    const QModelIndex &parent)
 {
   bool success = true;
 
@@ -153,7 +144,8 @@ bool ProtocolIrModel::insertRows(int position, int rows, const QModelIndex &pare
   return success;
 }
 
-bool ProtocolIrModel::removeRows(int position, int rows, const QModelIndex &parent)
+bool ProtocolIrModel::removeRows(int position, int rows,
+    const QModelIndex &parent)
 {
   bool success = true;
 
@@ -188,7 +180,7 @@ bool models::ProtocolIrModel::addItem(int row)
 {
   uint32_t devicePos;
   QString commandToUse;
-  document::data::item::ProtocolCommand cmd;
+  document::data::item::ProtoCommand cmd;
 
   QString suggestName = tr("New Command");
 
@@ -206,7 +198,8 @@ bool models::ProtocolIrModel::addItem(int row)
   }
   suggestName = makeStringUnique(usedNames, suggestName);
   cmd.name = suggestName.toStdString();
-  cmd.stream.addData( { 300, 300, 0, 300 }); //add some dummy data, clock is pre-set
+  cmd.codeType.set(document::data::CodeType::None);
+  cmd.canDecode.set(true);
   return config.modify().setIrCommand(devicePos, cmd, row, false);
 }
 
@@ -216,13 +209,13 @@ bool models::ProtocolIrModel::removeItem(int row)
 
   config.data().getDevice(id, &devicePos);
 
-  return config.modify().removeIrProtocolCommand(devicePos, row);
+  return config.modify().removeIrProtoCommand(devicePos, row);
 }
 
-const std::vector<document::data::item::ProtocolCommand>& ProtocolIrModel::getCmds(
+const std::vector<document::data::item::ProtoCommand>& ProtocolIrModel::getCmds(
     uint32_t *devicePos) const
 {
-  return config.data().getDevice(id, devicePos)->getIrCommands().getProtocolCommands();
+  return config.data().getDevice(id, devicePos)->getIrCommands().getProtoCommands();
 }
 
 QVariant ProtocolIrModel::getDisplayData(const QModelIndex &index) const
@@ -234,15 +227,12 @@ QVariant ProtocolIrModel::getDisplayData(const QModelIndex &index) const
     switch (index.column()) {
       case Column::NAME:
         return QString::fromStdString(cmd.name.get());
-      case Column::DATACLOCK:
-        return cmd.stream.getClock();
-      case Column::DATA: {
-        auto str = cmd.stream.accessStream().convertAsciiPlot(250, true, false);
-        while (!str.empty() && str.back() == '\n') {
-          str.pop_back();
-        }
-        return QString::fromStdString(str);
-      }
+      case Column::TYPE:
+        return cmd.codeType.get().getQString();
+      case Column::PROTO:
+        return cmd.protocolIndex.get();
+      case Column::DATA:
+        return visualiseData(cmd);
       default:
         break;
     }
@@ -260,10 +250,12 @@ QVariant ProtocolIrModel::getEditData(const QModelIndex &index) const
     switch (index.column()) {
       case Column::NAME:
         return QString::fromStdString(cmd.name.get());
-      case Column::DATACLOCK:
-        return cmd.stream.getClock();
+      case Column::TYPE:
+        return cmd.codeType.get().getQString();
+      case Column::PROTO:
+        return cmd.protocolIndex.get();
       case Column::DATA: {
-        return QVariant::fromValue(cmd.stream);
+        return QVariant::fromValue(cmd.command);
       }
       default:
         break;
@@ -282,8 +274,73 @@ QVariant ProtocolIrModel::getTooltipData(const QModelIndex &index) const
   return {};
 }
 
-bool ProtocolIrModel::setCommandName(document::data::CmdCatalogue &worker, int row,
-    const QVariant &value)
+QVariant ProtocolIrModel::getSelectionItemsData(const QModelIndex &index) const
+{
+  uint32_t devicePos;
+
+  try {
+    auto &cmd = getCmds(&devicePos).at(index.row());
+    switch (index.column()) {
+      case Column::TYPE: {
+        const auto &current = cmd.codeType.get();
+        auto list = current.getQStringList();
+        list.removeAll(
+            document::data::Enum(document::data::CodeType::Unknown).getQString());
+        list.removeAll(
+            document::data::Enum(document::data::CodeType::Proprietary).getQString());
+        if (!list.contains(current.getQString())) {
+          list.prepend(current.getQString());
+        }
+        return list;
+      }
+      default:
+        break;
+    }
+  } catch (const out_of_range &ex) {
+  }
+  return {};
+}
+
+QVariant ProtocolIrModel::getFontData(const QModelIndex &index) const
+{
+  switch (index.column()) {
+    case Column::DATA: {
+      QFont font("Monospace");
+      font.setStyleHint(QFont::Monospace);
+      return font;
+    }
+    default:
+      break;
+  }
+  return {};
+}
+
+QVariant ProtocolIrModel::visualiseData(
+    const document::data::item::ProtoCommand &cmd) const
+{
+  binary::TimingStream timingData;
+
+  if (cmd.canDecode.get() != true) {
+    return tr("Proprietary data, format not supported!");
+  }
+  if ((cmd.codeType.get().getValue() == document::data::CodeType::Unknown) ||
+      (cmd.codeType.get().getValue() == document::data::CodeType::None)) {
+    return "";
+  }
+
+  //todo alle als bit view decodieren oder protokollabh. nuetzliche infos anzeigen (device, command, ...)?
+  auto binaryData = cmd.command.getData();
+  config.data().getProtocolLib().serialiseIrStream(timingData,
+      cmd.protocolIndex.get(), binaryData);
+  auto str = timingData.convertAsciiPlot(250, true, false);
+  while (!str.empty() && str.back() == '\n') {
+    str.pop_back();
+  }
+  return QString::fromStdString(str);
+}
+
+bool ProtocolIrModel::setCommandName(document::data::CmdCatalogue &worker,
+    int row, const QVariant &value)
 {
   uint32_t devicePos;
   QStringList usedNames;
@@ -299,18 +356,31 @@ bool ProtocolIrModel::setCommandName(document::data::CmdCatalogue &worker, int r
   return worker.setIrCommand(devicePos, cmd, row, true);
 }
 
-QVariant ProtocolIrModel::getFontData(const QModelIndex &index) const
+bool models::ProtocolIrModel::setCommandType(
+    document::data::CmdCatalogue &worker, int row, const QVariant &value)
 {
-  switch (index.column()) {
-    case Column::DATA: {
-      QFont font("Monospace");
-      font.setStyleHint(QFont::Monospace);
-      return font;
-    }
-    default:
-      break;
-  }
-  return {};
+  uint32_t devicePos;
+
+  auto cmd = getCmds(&devicePos).at(row);
+  cmd.codeType.set(value.toString());
+  cmd.protocolIndex.set(0);
+  cmd.canDecode.set(true);
+  cmd.command = binary::irProto::Code(); //empty
+  cmd.data.set( { });
+  return worker.setIrCommand(devicePos, cmd, row, true);
+}
+
+bool models::ProtocolIrModel::setCommandData(
+    document::data::CmdCatalogue &worker, int row, const QVariant &value)
+{
+  uint32_t devicePos;
+
+  auto cmd = getCmds(&devicePos).at(row);
+  auto code = qvariant_cast<binary::irProto::Code>(value);
+  cmd.canDecode.set(true);
+  cmd.command = code;
+  cmd.data.set( { });
+  return worker.setIrCommand(devicePos, cmd, row, true);
 }
 
 }

@@ -2198,14 +2198,16 @@ bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
 bool ConfigH900::writeIr(pugi::xml_node &command,
     const item::ProtoCommand &data)
 {
+  if (data.name.get().empty()
+      || (data.codeType.get().getValue() == CodeType::None)
+      || (data.codeType.get().getValue() == CodeType::Unknown)) {
+    //skip
+    return true;
+  }
   if (c->getProtocolLib().getProtocolCount() <= data.protocolIndex.get()) {
     emit writeLog(LogLevel::Error, tr("exporting xml failed (protocol at index"
         "%1 missing)").arg(data.protocolIndex.get()), ContentType::PlainText);
     return false;
-  }
-  if (data.name.get().empty()) {
-    //skip
-    return true;
   }
 
   command.append_child("Name").text().set(data.name.get());

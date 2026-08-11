@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include <QStandardItemModel> //todo remove
-
 #include "concordConnection.h"
 #include "models/buttonListModel.h"
 #include "models/deviceListModel.h"
+#include "models/protocolIrListModel.h"
 #include "models/rawIrListModel.h"
 #include "baseEditor.h"
 
@@ -55,7 +54,7 @@ class DeviceEditor: public BaseEditor
     DeviceHardButtonTreeView *hardButtonView = nullptr;
     DeviceSoftButtonTreeView *softButtonView = nullptr;
     //models
-    QStandardItemModel*protoCommandModel = nullptr;
+    models::ProtocolIrModel *protoCommandModel = nullptr;
     models::RawIrModel *rawCommandModel = nullptr;
     models::DeviceHardButtonModel *hardButtonModel = nullptr;
     models::DeviceSoftButtonModel *softButtonModel = nullptr;

@@ -87,6 +87,7 @@ set(sources ${sources}
   models/baseListModel.cpp
   models/deviceListModel.cpp
   models/buttonListModel.cpp
+  models/protocolIrListModel.cpp
   models/rawIrListModel.cpp
   ui/delegates/combobox.cpp
   ui/delegates/rawIr.cpp
