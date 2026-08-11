@@ -1950,6 +1950,10 @@ bool ConfigH900::writeDeviceButtons(pugi::xml_node &buttons, uint32_t deviceId,
   bool ret = true;
 
   for (const auto &d : data) {
+    if (d.action.get() == item::Button::UNUSED) {
+      //marker for skipping export
+      continue;
+    }
     auto button = buttons.append_child("Button");
     ret &= writeDeviceButton(button, deviceId, d, t);
   }
@@ -1959,11 +1963,6 @@ bool ConfigH900::writeDeviceButtons(pugi::xml_node &buttons, uint32_t deviceId,
 bool ConfigH900::writeDeviceButton(pugi::xml_node &button, uint32_t deviceId,
     const item::Button &data, enum item::ButtonType t)
 {
-  if (data.action.get() == item::Button::UNUSED) {
-    //marker for skipping export
-    return true;
-  }
-
   if (t == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
     button.append_child("Label"); //empty
@@ -2165,12 +2164,24 @@ bool ConfigH900::writeIrList(pugi::xml_node &commands,
   }
 
   for (int i = 0; i < data.getRawCommands().size(); i++) {
+    auto &cmdData = data.getProtoCommands()[i];
+    if (cmdData.name.get().empty()) {
+      //skip
+      continue;
+    }
     auto command = commands.append_child("Command");
-    ret &= writeIr(command, data.getRawCommands()[i]);
+    ret &= writeIr(command, cmdData);
   }
   for (int i = 0; i < data.getProtoCommands().size(); i++) {
+    auto &cmdData = data.getProtoCommands()[i];
+    if (cmdData.name.get().empty()
+        || (cmdData.codeType.get().getValue() == CodeType::None)
+        || (cmdData.codeType.get().getValue() == CodeType::Unknown)) {
+      //skip
+      continue;
+    }
     auto command = commands.append_child("Command");
-    ret &= writeIr(command, data.getProtoCommands()[i]);
+    ret &= writeIr(command, cmdData);
   }
   return ret;
 }
@@ -2179,11 +2190,6 @@ bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
 {
   int index;
   vector<uint8_t> raw { 0xff, 0xff }; //start with 0xffff
-
-  if (data.name.get().empty()) {
-    //skip
-    return true;
-  }
 
   command.append_child("Name").text().set(data.name.get());
   auto cmdData = command.append_child("Data");
@@ -2198,12 +2204,6 @@ bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
 bool ConfigH900::writeIr(pugi::xml_node &command,
     const item::ProtoCommand &data)
 {
-  if (data.name.get().empty()
-      || (data.codeType.get().getValue() == CodeType::None)
-      || (data.codeType.get().getValue() == CodeType::Unknown)) {
-    //skip
-    return true;
-  }
   if (c->getProtocolLib().getProtocolCount() <= data.protocolIndex.get()) {
     emit writeLog(LogLevel::Error, tr("exporting xml failed (protocol at index"
         "%1 missing)").arg(data.protocolIndex.get()), ContentType::PlainText);
@@ -2387,6 +2387,10 @@ bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
   bool ret = true;
 
   for (const auto &d : data) {
+    if (d.action.get() == item::Button::UNUSED) {
+      //marker for skipping export
+      continue;
+    }
     auto button = buttons.append_child("Button");
     ret &= writeActivityButton(button, d, t);
   }
@@ -2396,11 +2400,6 @@ bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
 bool ConfigH900::writeActivityButton(pugi::xml_node &button,
     const item::Button &data, enum item::ButtonType t)
 {
-  if (data.action.get() == item::Button::UNUSED) {
-    //marker for skipping export
-    return true;
-  }
-
   if (t == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
     button.append_child("Label"); //empty
