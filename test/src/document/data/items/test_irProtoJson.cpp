@@ -186,7 +186,7 @@ TEST(IrProtoJson, ClockPeriodRoundTrips)
   IrProto proto(26316, {});
 
   serialiser::ordered_json j;
-  serialiser::toJson(j, proto);
+  serialiser::toJson(j, proto, "Test");
 
   EXPECT_EQ(j["ClockPeriod"], 26316);
 
@@ -203,7 +203,7 @@ TEST(IrProtoJson, SectionsRoundTrip)
   IrProto proto(1234, {section});
 
   serialiser::ordered_json j;
-  serialiser::toJson(j, proto);
+  serialiser::toJson(j, proto, "Test");
 
   ASSERT_TRUE(j["Sections"].is_array());
   EXPECT_EQ(j["Sections"].size(), 1u);

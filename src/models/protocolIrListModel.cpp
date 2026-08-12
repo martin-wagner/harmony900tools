@@ -361,13 +361,24 @@ bool models::ProtocolIrModel::setCommandType(
 {
   uint32_t devicePos;
 
+  config.beginMacro(QObject::tr("Set IR protocol"));
+
   auto cmd = getCmds(&devicePos).at(row);
   cmd.codeType.set(value.toString());
-  cmd.protocolIndex.set(0);
+  auto index = worker.appendIrProtoLibItem(cmd.codeType.get());
+  if (index < 0) {
+    config.endMacro();
+    return false;
+  }
+  cmd.protocolIndex.set(index);
   cmd.canDecode.set(true);
-  cmd.command = binary::irProto::Code(); //empty
+  cmd.command = binary::irProto::Code(); //empty fixme non-empty, use protocol type
   cmd.data.set( { });
-  return worker.setIrCommand(devicePos, cmd, row, true);
+  auto ret = worker.setIrCommand(devicePos, cmd, row, true);
+
+  config.endMacro();
+
+  return ret;
 }
 
 bool models::ProtocolIrModel::setCommandData(

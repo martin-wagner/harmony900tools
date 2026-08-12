@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <boost/bimap.hpp>
+
 #include "bin/ssIr/file.h"
 #include "bin/irProto/file.h"
 #include "items/activity.h"
@@ -9,6 +11,8 @@
 #include "items/controllerInfo.h"
 #include "items/device.h"
 #include "items/userInfo.h"
+#include "document/files/protocols.h"
+
 
 
 namespace document
@@ -49,6 +53,12 @@ class ConfigData
 
     const binary::irProto::File& getProtocolLib() const;
     binary::irProto::File& getProtocolLib();
+    int getPrococolLibIndex(CodeType t) const;
+    CodeType getPrococolLibType(int index) const;
+    void addProtocolLibListItem(CodeType t, int index);
+    void removePrococolLibListItem(CodeType t);
+
+    const files::ProtocolCatalogue &getProtocolCatalogue() const;
 
     const item::UserInfo& getUser() const;
     item::UserInfo& getUser();
@@ -69,6 +79,8 @@ class ConfigData
 
     /** ir command protocol lib */
     binary::irProto::File protocolLib; // command-to-stream encoder data
+    boost::bimap<CodeType, int> protocolIndices; //map code to index for our own protocol data
+    const files::ProtocolCatalogue protocolCatalogue; //generally available code data
 };
 
 

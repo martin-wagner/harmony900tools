@@ -25,25 +25,27 @@ class SetIrProtoLibCommand: public BaseCommand
     binary::irProto::File prevFile;
 };
 
-class SetIrProtoLibItemCommand: public BaseCommand
+class AppendIrProtoLibItemCommand: public BaseCommand
 {
     Q_OBJECT
   public:
-    SetIrProtoLibItemCommand(ConfigData &c, const binary::irProto::IrProto &prot, int pos = -1, bool overwrite = false, QUndoCommand *parent = nullptr);
+    AppendIrProtoLibItemCommand(ConfigData &c, const Enum<CodeType> &t, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
 
     bool valid() const;
 
+    int index() const;
+
   protected:
     bool isValid = false;
-    bool overwrite = false;
 
+    binary::irProto::IrProto protocol;
     ConfigData &c;
-    int pos = -1;
-    binary::irProto::IrProto prot;
-    binary::irProto::IrProto prevProt;
+    Enum<CodeType> t;
+    int exists;
+    int pos;
 };
 
 

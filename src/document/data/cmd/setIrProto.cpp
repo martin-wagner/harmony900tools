@@ -28,83 +28,60 @@ void SetIrProtoLibCommand::undo()
   emit dirtyChanged(true);
 }
 
-SetIrProtoLibItemCommand::SetIrProtoLibItemCommand(ConfigData &c,
-    const binary::irProto::IrProto &prot, int pos, bool overwrite,
-    QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Add IR Proto Lib item"), parent), overwrite(
-        overwrite), c(c), prot(prot)
+AppendIrProtoLibItemCommand::AppendIrProtoLibItemCommand(ConfigData &c,
+    const Enum<CodeType> &t, QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Append IR Proto Lib item"), parent), c(c), t(t)
 {
-  auto &protocols = c.getProtocolLib();
-  auto protCount = protocols.getProtocolCount();
-
-  if (overwrite) {
-    if ((pos < 0) || (static_cast<uint32_t>(pos) >= protCount)) {
-      return;
-    }
-    prevProt = protocols.accessProtocol(pos);
-  } else {
-    if (pos < 0) {
-      //append
-      pos = protCount;
-    }
-    if (pos > protCount) {
-      return;
-    }
+  exists = c.getPrococolLibIndex(t.getValue());
+  if (exists >= 0) {
+    //already exists. don't do anything
+    pos = exists;
+    isValid = true;
+    return;
   }
 
-  this->pos = pos;
+  protocol = c.getProtocolCatalogue().get(t.getQString());
+  if (protocol.isEmpty()) {
+    return;
+  }
+  pos = c.getProtocolLib().getProtocolCount();
   isValid = true;
 }
 
-void SetIrProtoLibItemCommand::redo()
+void AppendIrProtoLibItemCommand::redo()
 {
-  if (!isValid) {
+  if (!isValid || (exists >= 0)) {
     return;
   }
 
-  if (!overwrite) {
-    emit itemAboutToBeAdded(Item::IR_PROTO_LIB, pos);
-  }
-
-  if (overwrite) {
-    c.getProtocolLib().removeProtocol(pos);
-  }
-  c.getProtocolLib().insertProtocol(prot, pos);
-
-  if (overwrite) {
-    emit itemChanged(Item::IR_PROTO_LIB, pos);
-  } else {
-    emit itemAdded(Item::IR_PROTO_LIB, pos);
-  }
+  emit itemAboutToBeAdded(Item::IR_PROTO_LIB, pos);
+  c.getProtocolLib().insertProtocol(protocol, pos);
+  c.addProtocolLibListItem(t.getValue(), pos);
+  emit itemAdded(Item::IR_PROTO_LIB, pos);
   emit dirtyChanged(true);
 }
 
-void SetIrProtoLibItemCommand::undo()
+void AppendIrProtoLibItemCommand::undo()
 {
-  if (!isValid) {
+  if (!isValid || (exists >= 0)) {
     return;
   }
 
-  if (!overwrite) {
-    emit itemAboutToBeRemoved(Item::IR_PROTO_LIB, pos);
-  }
-
+  emit itemAboutToBeRemoved(Item::IR_PROTO_LIB, pos);
+  c.removePrococolLibListItem(t.getValue());
   c.getProtocolLib().removeProtocol(pos);
-  if (overwrite) {
-    c.getProtocolLib().insertProtocol(prevProt, pos);
-  }
-
-  if (overwrite) {
-    emit itemChanged(Item::IR_PROTO_LIB, pos);
-  } else {
-    emit itemRemoved(Item::IR_PROTO_LIB, pos);
-  }
+  emit itemRemoved(Item::IR_PROTO_LIB, pos);
   emit dirtyChanged(true);
 }
 
-bool SetIrProtoLibItemCommand::valid() const
+bool AppendIrProtoLibItemCommand::valid() const
 {
   return isValid;
+}
+
+int AppendIrProtoLibItemCommand::index() const
+{
+  return pos;
 }
 
 }

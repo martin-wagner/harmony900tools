@@ -215,10 +215,10 @@ class CmdCatalogue : public QObject
     bool removeActivityPowerOffDevicesCommand(uint32_t activityPos, uint32_t devicePos);
     bool removeActivityPowerOffDevicesCommandById(uint32_t activityPos, uint32_t deviceId);
 
-    //irproto binary lib. items can be added/removed, but currently not directly modified/overwritten
+    //irproto binary lib. lib can be added and protocols appended.
+    //items can't be removed, as this would require re-mapping of all consumers (not implemented)
     bool setIrProtoLib(const binary::irProto::File &file);
-    bool setIrProtoLibItem(const binary::irProto::IrProto &prot, int pos = -1, bool overwrite = false);
-    bool removeIrProtoLibItem(int pos = -1);
+    int appendIrProtoLibItem(const Enum<CodeType> &t); //check if exists, append if not
 
   protected:
     //template for setting a property inside user data that uses the Property<x> template.

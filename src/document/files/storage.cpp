@@ -52,7 +52,6 @@ bool ConfigStorage::read(data::ConfigData &c)
         ContentType::PlainText);
   }
 
-
   return ret;
 }
 
@@ -117,8 +116,9 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
   }
   for (i = 0; i < j["IrProtocols"].size(); i++) {
     binary::irProto::IrProto prot;
-    data::serialiser::fromJson(j["IrProtocols"][i], prot);
-    c.getProtocolLib().appendProtocol(prot);
+    auto name = data::serialiser::fromJson(j["IrProtocols"][i], prot);
+    auto index = c.getProtocolLib().appendProtocol(prot);
+    c.addProtocolLibListItem(data::Enum<data::CodeType>(name).getValue(), index);
   }
 
   return true;
@@ -143,7 +143,13 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
     data::serialiser::toJson(j["Blobs"][i], c.getBlobs()[i]);
   }
   for (i = 0; i < c.getProtocolLib().getProtocolCount(); i++) {
-    data::serialiser::toJson(j["IrProtocols"][i], c.getProtocolLib().accessProtocol(i));
+    auto name = data::Enum(data::CodeType::Proprietary).getString();
+    auto type = c.getPrococolLibType(i);
+    if (type != data::CodeType::Unknown) {
+      name = data::Enum(type).getString();
+    }
+    data::serialiser::toJson(j["IrProtocols"][i],
+        c.getProtocolLib().accessProtocol(i), name);
   }
 
 #ifdef _WIN32

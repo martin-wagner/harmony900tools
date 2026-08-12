@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "irProtoJson.h"
+#include "document/data/enum.h"
 
 using namespace std;
 
@@ -211,8 +212,10 @@ void fromJson(const ordered_json &in, binary::irProto::TimingSection &section)
 // IrProto
 //---------------------------------------------------------------------------
 
-void toJson(ordered_json &out, const binary::irProto::IrProto &proto)
+void toJson(ordered_json &out, const binary::irProto::IrProto &proto,
+    const string &name)
 {
+  out["Name"] = name;
   out["ClockPeriod"] = proto.getClockPeriod();
 
   ordered_json sectionsArr = ordered_json::array();
@@ -224,7 +227,7 @@ void toJson(ordered_json &out, const binary::irProto::IrProto &proto)
   out["Sections"] = sectionsArr;
 }
 
-void fromJson(const ordered_json &in, binary::irProto::IrProto &proto)
+string fromJson(const ordered_json &in, binary::irProto::IrProto &proto)
 {
   std::vector<binary::irProto::TimingSection> sections;
   auto sectionsIt = in.find("Sections");
@@ -237,6 +240,7 @@ void fromJson(const ordered_json &in, binary::irProto::IrProto &proto)
   }
   proto = binary::irProto::IrProto(in.value("ClockPeriod", uint16_t(26316)),
       sections);
+  return in.value("Name", data::Enum(data::CodeType::Proprietary).getString());
 }
 
 }

@@ -28,8 +28,8 @@ void fromJson(const ordered_json &in, binary::irProto::TimingSectionIrPayload &p
 void toJson(ordered_json &out, const binary::irProto::TimingSection &section);
 void fromJson(const ordered_json &in, binary::irProto::TimingSection &section);
 
-void toJson(ordered_json &out, const binary::irProto::IrProto &proto);
-void fromJson(const ordered_json &in, binary::irProto::IrProto &proto);
+void toJson(ordered_json &out, const binary::irProto::IrProto &proto, const std::string &name);
+std::string fromJson(const ordered_json &in, binary::irProto::IrProto &proto);
 
 }
 }

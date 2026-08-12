@@ -64,7 +64,6 @@ set(sources ${sources}
   document/data/cmd/removeChannel.cpp  
   document/data/cmd/removeDevice.cpp
   document/data/cmd/removeIr.cpp
-  document/data/cmd/removeIrProto.cpp
   document/data/cmd/removeNumpad.cpp
   document/data/cmd/removePowerOnDevice.cpp
   document/data/cmd/removeRole.cpp
@@ -82,6 +81,7 @@ set(sources ${sources}
   document/data/items/ssIrJson.cpp
   document/files/create.cpp
   document/files/h900.cpp
+  document/files/protocols.cpp
   document/files/storage.cpp
   models/activityListModel.cpp
   models/baseListModel.cpp
@@ -155,6 +155,7 @@ set(iconPath "${resourcePath}icons/BreezeConverted/64x64/")
 set(${programName}_resource_files
     ${resourcePath}/splash.png
     ${resourcePath}/harmony-900-color-screen.png
+    ${resourcePath}/ir_protocols.json
     ${iconPath}/actions/edit-copy.png
     ${iconPath}/actions/edit-paste.png
     ${iconPath}/actions/edit-cut.png

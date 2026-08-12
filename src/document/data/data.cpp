@@ -149,6 +149,43 @@ binary::irProto::File& ConfigData::getProtocolLib()
   return protocolLib;
 }
 
+int ConfigData::getPrococolLibIndex(CodeType t) const
+{
+  auto search = protocolIndices.left.find(t);
+  if (search != protocolIndices.left.end()) {
+    return search->second;
+  }
+  return -1;
+}
+
+CodeType ConfigData::getPrococolLibType(int index) const
+{
+  auto search = protocolIndices.right.find(index);
+  if (search != protocolIndices.right.end()) {
+    return search->second;
+  }
+  return CodeType::Proprietary;
+}
+
+void ConfigData::addProtocolLibListItem(CodeType t, int index)
+{
+  if ((t == CodeType::None) || (t == CodeType::Proprietary)
+      || (t == CodeType::Unknown) || (index < 0)) {
+    return;
+  }
+  protocolIndices.insert( { t, index });
+}
+
+void ConfigData::removePrococolLibListItem(CodeType t)
+{
+  protocolIndices.left.erase(t);
+}
+
+const files::ProtocolCatalogue& ConfigData::getProtocolCatalogue() const
+{
+  return protocolCatalogue;
+}
+
 const item::UserInfo& ConfigData::getUser() const
 {
   return user;

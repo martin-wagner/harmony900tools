@@ -96,6 +96,7 @@ target_link_libraries(test_codeJson
 add_executable(test_irProtoJson
     test_irProtoJson.cpp
     ${SERIAL_DIR}/irProtoJson.cpp
+    ${SRC_DIR}/enum.cpp
     ${BIN_DIR}/timing.cpp
     ${BIN_DIR}/irProto/file.cpp
 )
@@ -110,6 +111,7 @@ target_include_directories(test_irProtoJson
 target_link_libraries(test_irProtoJson
     PRIVATE
         GTest::gtest_main
+        magic_enum::magic_enum
         nlohmann_json::nlohmann_json
         Qt6::Core
 )

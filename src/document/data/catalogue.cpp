@@ -26,7 +26,6 @@
 #include "cmd/moveActivity.h"
 #include "cmd/removeActivity.h"
 #include "cmd/setIrProto.h"
-#include "cmd/removeIrProto.h"
 #include "cmd/addChannel.h"
 #include "cmd/removeChannel.h"
 #include "cmd/addActivityAction.h"
@@ -2430,37 +2429,23 @@ bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)
   return true;
 }
 
-bool CmdCatalogue::setIrProtoLibItem(const binary::irProto::IrProto &prot,
-    int pos, bool overwrite)
+int CmdCatalogue::appendIrProtoLibItem(const Enum<CodeType> &t)
 {
-  auto *cmd = new SetIrProtoLibItemCommand(c, prot, pos, overwrite);
-  auto ret = cmd->valid();
-  if (ret == true) {
-    connectCommand(cmd);
-    undo.push(cmd);
-  } else {
-    emit writeLog(LogLevel::Warning,
-        tr("modify: add ir proto to lib failed, dropped"),
-        ContentType::PlainText);
-    delete cmd;
-  }
-  return true;
-}
+  int index = -1;
 
-bool CmdCatalogue::removeIrProtoLibItem(int pos)
-{
-  auto *cmd = new RemoveIrProtoLibItemCommand(c, pos);
+  auto *cmd = new AppendIrProtoLibItemCommand(c, t);
   auto ret = cmd->valid();
   if (ret == true) {
+    index = cmd->index();
     connectCommand(cmd);
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: remove ir proto from lib failed, dropped"),
+        tr("modify: append ir proto to lib failed, dropped"),
         ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return index;
 }
 
 void CmdCatalogue::connectCommand(BaseCommand *cmd)
