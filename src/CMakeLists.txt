@@ -91,7 +91,9 @@ set(sources ${sources}
   models/rawIrListModel.cpp
   ui/delegates/combobox.cpp
   ui/delegates/rawIr.cpp
+  ui/delegates/protocolIr.cpp
   ui/delegates/uidCombobox.cpp
+  ui/editors/codeEditor.cpp
   ui/editors/rawIrEditor.cpp
   ui/activityButtonTreeView.cpp
   ui/activityEditor.cpp

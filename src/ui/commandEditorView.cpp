@@ -2,6 +2,7 @@
 
 #include "models/rawIrListModel.h"
 #include "models/protocolIrListModel.h"
+#include "delegates/protocolIr.h"
 #include "delegates/rawIr.h"
 #include "delegates/combobox.h"
 #include "commandEditorView.h"
@@ -35,8 +36,9 @@ void RawCommandTreeView::setLearnedCommand(
   auto stream = binary::ssIr::SerialStreamIr(t, carrier);
   auto value = QVariant::fromValue(stream);
 
-  auto *rawModel = static_cast<models::RawIrModel *>(model);
-  auto index = rawModel->index(getCurrentRow(), models::RawIrModel::Column::DATA);
+  auto *rawModel = static_cast<models::RawIrModel*>(model);
+  auto index = rawModel->index(getCurrentRow(),
+      models::RawIrModel::Column::DATA);
   rawModel->setData(index, value, Qt::EditRole);
 }
 
@@ -69,9 +71,12 @@ void ProtoCommandTreeView::setLearnedCommand(
 void ProtoCommandTreeView::setupDelegates()
 {
   auto *comboBoxDelegate = new delegates::ComboBox(this);
+  auto *editorDelegate = new delegates::ProtocolIr(this);
   treeView->setItemDelegateForColumn(
       static_cast<int>(models::ProtocolIrModel::Column::TYPE),
       comboBoxDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ProtocolIrModel::Column::DATA), editorDelegate);
 }
 
 CommandEditorView::CommandEditorView(Context &ctx, QWidget *parent) :
