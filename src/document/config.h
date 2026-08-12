@@ -31,6 +31,7 @@ class Config : public QObject
   Q_OBJECT
   public:
     inline static const QString defaultFilePostfix = "hzip";
+    inline static const QString resourceH900PlatformConfig = ":/res/h900platform";
 
   public:
     /** new config. init = true -> create a new, empty config */

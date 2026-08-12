@@ -47,12 +47,12 @@ void writeProperty(pugi::xml_node &parent, const char *name,
   property.text().set(prop.get().getString().c_str());
 }
 
-ConfigH900::ConfigH900(const QString &workPath) :
+H900userconfig::H900userconfig(const QString &workPath) :
     wp(workPath)
 {
 }
 
-bool ConfigH900::dump(const ConfigData *c)
+bool H900userconfig::dump(const ConfigData *c)
 {
   bool ret = true;
   vector<uint8_t> tmp;
@@ -87,7 +87,7 @@ bool ConfigH900::dump(const ConfigData *c)
   return ret;
 }
 
-bool ConfigH900::read(const ConfigData *c, CmdCatalogue *worker)
+bool H900userconfig::read(const ConfigData *c, CmdCatalogue *worker)
 {
   bool ret = true;
 
@@ -118,7 +118,7 @@ bool ConfigH900::read(const ConfigData *c, CmdCatalogue *worker)
   return ret;
 }
 
-bool ConfigH900::readUserConfigXml()
+bool H900userconfig::readUserConfigXml()
 {
   pugi::xml_parse_result res;
   pugi::xml_document xml;
@@ -169,7 +169,7 @@ bool ConfigH900::readUserConfigXml()
   return true;
 }
 
-bool ConfigH900::readProperties(pugi::xml_node &root)
+bool H900userconfig::readProperties(pugi::xml_node &root)
 {
   QString s;
 
@@ -204,7 +204,7 @@ bool ConfigH900::readProperties(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::readUser(pugi::xml_node &root)
+bool H900userconfig::readUser(pugi::xml_node &root)
 {
   auto user = root.child("User");
 
@@ -257,7 +257,7 @@ bool ConfigH900::readUser(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::readController(pugi::xml_node &root)
+bool H900userconfig::readController(pugi::xml_node &root)
 {
   auto controller = root.child("Controller");
 
@@ -282,7 +282,7 @@ bool ConfigH900::readController(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::readDevices(pugi::xml_node &root)
+bool H900userconfig::readDevices(pugi::xml_node &root)
 {
   bool ret = true;
 
@@ -295,7 +295,7 @@ bool ConfigH900::readDevices(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::readDevice(pugi::xml_node &device)
+bool H900userconfig::readDevice(pugi::xml_node &device)
 {
   auto id = device.child("Id").text().as_uint();
   addId(id);
@@ -462,7 +462,7 @@ bool ConfigH900::readDevice(pugi::xml_node &device)
   return ret;
 }
 
-bool ConfigH900::readDeviceHardButtons(pugi::xml_node &buttons)
+bool H900userconfig::readDeviceHardButtons(pugi::xml_node &buttons)
 {
   auto ret = true;
   for (pugi::xml_node prop : buttons.children("Button")) {
@@ -471,7 +471,7 @@ bool ConfigH900::readDeviceHardButtons(pugi::xml_node &buttons)
   return ret;
 }
 
-bool ConfigH900::readDeviceHardButton(pugi::xml_node &button)
+bool H900userconfig::readDeviceHardButton(pugi::xml_node &button)
 {
   int buttonPos;
   auto t = item::ButtonType::Hard;
@@ -495,7 +495,7 @@ bool ConfigH900::readDeviceHardButton(pugi::xml_node &button)
   return true;
 }
 
-bool ConfigH900::readDeviceSoftButtons(pugi::xml_node &buttons)
+bool H900userconfig::readDeviceSoftButtons(pugi::xml_node &buttons)
 {
   auto ret = true;
   std::map<int, pugi::xml_node> buttonsByPos;
@@ -524,7 +524,7 @@ bool ConfigH900::readDeviceSoftButtons(pugi::xml_node &buttons)
   return ret;
 }
 
-bool ConfigH900::readDeviceSoftButton(pugi::xml_node &button, int devicePos,
+bool H900userconfig::readDeviceSoftButton(pugi::xml_node &button, int devicePos,
     int uiPos)
 {
   auto t = item::ButtonType::Soft;
@@ -550,7 +550,7 @@ bool ConfigH900::readDeviceSoftButton(pugi::xml_node &button, int devicePos,
   return true;
 }
 
-bool ConfigH900::addDummyDeviceSoftButton(int devicePos, int pos)
+bool H900userconfig::addDummyDeviceSoftButton(int devicePos, int pos)
 {
   auto t = item::ButtonType::Soft;
 
@@ -565,7 +565,7 @@ bool ConfigH900::addDummyDeviceSoftButton(int devicePos, int pos)
   return true;
 }
 
-bool ConfigH900::readStatemachines(pugi::xml_node &states)
+bool H900userconfig::readStatemachines(pugi::xml_node &states)
 {
   auto ret = true;
   for (pugi::xml_node prop : states.children("State")) {
@@ -574,7 +574,7 @@ bool ConfigH900::readStatemachines(pugi::xml_node &states)
   return ret;
 }
 
-bool ConfigH900::readStatemachine(pugi::xml_node &state)
+bool H900userconfig::readStatemachine(pugi::xml_node &state)
 {
   bool ret = true;
 
@@ -612,7 +612,7 @@ bool ConfigH900::readStatemachine(pugi::xml_node &state)
   return ret;
 }
 
-bool ConfigH900::readStartAction(pugi::xml_node &state)
+bool H900userconfig::readStartAction(pugi::xml_node &state)
 {
   auto action = state.child("StartAction");
   if (action.empty()) {
@@ -621,7 +621,7 @@ bool ConfigH900::readStartAction(pugi::xml_node &state)
   return readGeneralAction(action, item::StateMachineAction::Start);
 }
 
-bool ConfigH900::readFinishAction(pugi::xml_node &state)
+bool H900userconfig::readFinishAction(pugi::xml_node &state)
 {
   auto action = state.child("FinishAction");
   if (action.empty()) {
@@ -630,7 +630,7 @@ bool ConfigH900::readFinishAction(pugi::xml_node &state)
   return readGeneralAction(action, item::StateMachineAction::Finish);
 }
 
-bool ConfigH900::readGeneralAction(pugi::xml_node &action,
+bool H900userconfig::readGeneralAction(pugi::xml_node &action,
     item::StateMachineAction t)
 {
   auto devicePos = c->getDevices().size() - 1;
@@ -645,7 +645,7 @@ bool ConfigH900::readGeneralAction(pugi::xml_node &action,
   return readRelativeActionSequences(action, t);
 }
 
-bool ConfigH900::readDiscreteActions(pugi::xml_node &actions)
+bool H900userconfig::readDiscreteActions(pugi::xml_node &actions)
 {
   auto ret = true;
 
@@ -659,7 +659,7 @@ bool ConfigH900::readDiscreteActions(pugi::xml_node &actions)
   return ret;
 }
 
-bool ConfigH900::readDiscreteAction(pugi::xml_node &action)
+bool H900userconfig::readDiscreteAction(pugi::xml_node &action)
 {
   auto devicePos = c->getDevices().size() - 1;
   auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
@@ -687,7 +687,7 @@ bool ConfigH900::readDiscreteAction(pugi::xml_node &action)
   return readDiscreteActionSequences(action);
 }
 
-bool ConfigH900::readDiscreteActionSequences(pugi::xml_node &action)
+bool H900userconfig::readDiscreteActionSequences(pugi::xml_node &action)
 {
   auto ret = true;
 
@@ -697,7 +697,7 @@ bool ConfigH900::readDiscreteActionSequences(pugi::xml_node &action)
   return ret;
 }
 
-bool ConfigH900::readDiscreteActionSequence(pugi::xml_node &sequence)
+bool H900userconfig::readDiscreteActionSequence(pugi::xml_node &sequence)
 {
   auto devicePos = c->getDevices().size() - 1;
   auto smPos = c->getDevices()[devicePos].getStateMachines().size() - 1;
@@ -713,7 +713,7 @@ bool ConfigH900::readDiscreteActionSequence(pugi::xml_node &sequence)
       item::StateMachineAction::Discrete_Enter, seqPos);
 }
 
-bool ConfigH900::readRelativeActions(pugi::xml_node &state)
+bool H900userconfig::readRelativeActions(pugi::xml_node &state)
 {
   auto ret = true;
 
@@ -742,7 +742,7 @@ bool ConfigH900::readRelativeActions(pugi::xml_node &state)
   return ret;
 }
 
-bool ConfigH900::readRelativeAction(pugi::xml_node &action)
+bool H900userconfig::readRelativeAction(pugi::xml_node &action)
 {
   item::StateMachineAction add;
   auto devicePos = c->getDevices().size() - 1;
@@ -773,7 +773,7 @@ bool ConfigH900::readRelativeAction(pugi::xml_node &action)
   return readRelativeActionSequences(action, add);
 }
 
-bool ConfigH900::readRelativeActionSequences(pugi::xml_node &action,
+bool H900userconfig::readRelativeActionSequences(pugi::xml_node &action,
     item::StateMachineAction t)
 {
   auto ret = true;
@@ -784,7 +784,7 @@ bool ConfigH900::readRelativeActionSequences(pugi::xml_node &action,
   return ret;
 }
 
-bool ConfigH900::readRelativeActionSequence(pugi::xml_node &sequence,
+bool H900userconfig::readRelativeActionSequence(pugi::xml_node &sequence,
     item::StateMachineAction t)
 {
   uint32_t seqPos;
@@ -825,7 +825,7 @@ bool ConfigH900::readRelativeActionSequence(pugi::xml_node &sequence,
   return readActionSequenceData(sequence, devicePos, smPos, 0, t, seqPos);
 }
 
-bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
+bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
     uint32_t devicePos, uint32_t smPos, uint32_t actPos,
     item::StateMachineAction t, uint32_t seqPos)
 {
@@ -895,7 +895,7 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
   return true;
 }
 
-bool ConfigH900::readNumeric(pugi::xml_node &numeric)
+bool H900userconfig::readNumeric(pugi::xml_node &numeric)
 {
   auto devicePos = c->getDevices().size() - 1;
 
@@ -937,7 +937,7 @@ bool ConfigH900::readNumeric(pugi::xml_node &numeric)
   return ret;
 }
 
-bool ConfigH900::readNumericActions(pugi::xml_node &actions,
+bool H900userconfig::readNumericActions(pugi::xml_node &actions,
     item::DigitSection s)
 {
   uint32_t i;
@@ -965,7 +965,7 @@ bool ConfigH900::readNumericActions(pugi::xml_node &actions,
   return ret;
 }
 
-bool ConfigH900::readNumericActionSequences(pugi::xml_node &action,
+bool H900userconfig::readNumericActionSequences(pugi::xml_node &action,
     uint32_t devicePos, item::DigitSection s, uint32_t digit)
 {
   auto ret = true;
@@ -976,7 +976,7 @@ bool ConfigH900::readNumericActionSequences(pugi::xml_node &action,
   return ret;
 }
 
-bool ConfigH900::readNumericActionSequence(pugi::xml_node &sequence,
+bool H900userconfig::readNumericActionSequence(pugi::xml_node &sequence,
     uint32_t devicePos, item::DigitSection s, uint32_t digit)
 {
   uint32_t seqPos;
@@ -1000,7 +1000,7 @@ bool ConfigH900::readNumericActionSequence(pugi::xml_node &sequence,
   return readActionSequenceData(sequence, devicePos, s, digit, seqPos);
 }
 
-bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
+bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
     uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
 {
   auto target = sequence.child("Target").text().as_string();
@@ -1068,7 +1068,7 @@ bool ConfigH900::readActionSequenceData(pugi::xml_node &sequence,
   return true;
 }
 
-bool ConfigH900::readIrList(pugi::xml_node &commands)
+bool H900userconfig::readIrList(pugi::xml_node &commands)
 {
   auto devicePos = c->getDevices().size() - 1;
 
@@ -1116,7 +1116,7 @@ bool ConfigH900::readIrList(pugi::xml_node &commands)
   return ret;
 }
 
-bool ConfigH900::readIr(pugi::xml_node &command)
+bool H900userconfig::readIr(pugi::xml_node &command)
 {
   auto devicePos = c->getDevices().size() - 1;
 
@@ -1155,7 +1155,7 @@ bool ConfigH900::readIr(pugi::xml_node &command)
   }
 }
 
-bool ConfigH900::readActivities(pugi::xml_node &root)
+bool H900userconfig::readActivities(pugi::xml_node &root)
 {
   auto ret = true;
 
@@ -1173,7 +1173,7 @@ bool ConfigH900::readActivities(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
+bool H900userconfig::readActivitiy(pugi::xml_node &activity, uint32_t id)
 {
   addId(id);
   auto ret = worker->addActivityCommand(-1, id); //append
@@ -1379,7 +1379,7 @@ bool ConfigH900::readActivitiy(pugi::xml_node &activity, uint32_t id)
   return ret;
 }
 
-bool ConfigH900::readActivityChannels(pugi::xml_node &channels)
+bool H900userconfig::readActivityChannels(pugi::xml_node &channels)
 {
   auto ret = true;
   for (pugi::xml_node prop : channels.children("Channel")) {
@@ -1388,7 +1388,7 @@ bool ConfigH900::readActivityChannels(pugi::xml_node &channels)
   return ret;
 }
 
-bool ConfigH900::readActivityChannel(pugi::xml_node &channel)
+bool H900userconfig::readActivityChannel(pugi::xml_node &channel)
 {
   int channelPos;
 
@@ -1411,7 +1411,7 @@ bool ConfigH900::readActivityChannel(pugi::xml_node &channel)
   return true;
 }
 
-bool ConfigH900::readActivityHardButtons(pugi::xml_node &buttons)
+bool H900userconfig::readActivityHardButtons(pugi::xml_node &buttons)
 {
   auto ret = true;
   for (pugi::xml_node prop : buttons.children("Button")) {
@@ -1420,7 +1420,7 @@ bool ConfigH900::readActivityHardButtons(pugi::xml_node &buttons)
   return ret;
 }
 
-bool ConfigH900::readActivityHardButton(pugi::xml_node &button)
+bool H900userconfig::readActivityHardButton(pugi::xml_node &button)
 {
   int buttonPos;
   auto t = item::ButtonType::Hard;
@@ -1447,7 +1447,7 @@ bool ConfigH900::readActivityHardButton(pugi::xml_node &button)
   return true;
 }
 
-bool ConfigH900::readActivitySoftButtons(pugi::xml_node &buttons)
+bool H900userconfig::readActivitySoftButtons(pugi::xml_node &buttons)
 {
   auto ret = true;
   std::map<int, pugi::xml_node> buttonsByPos;
@@ -1476,8 +1476,8 @@ bool ConfigH900::readActivitySoftButtons(pugi::xml_node &buttons)
   return ret;
 }
 
-bool ConfigH900::readActivitySoftButton(pugi::xml_node &button, int activityPos,
-    int uiPos)
+bool H900userconfig::readActivitySoftButton(pugi::xml_node &button,
+    int activityPos, int uiPos)
 {
   auto t = item::ButtonType::Soft;
 
@@ -1504,7 +1504,7 @@ bool ConfigH900::readActivitySoftButton(pugi::xml_node &button, int activityPos,
   return true;
 }
 
-bool ConfigH900::addDummyActivitySoftButton(int activityPos, int pos)
+bool H900userconfig::addDummyActivitySoftButton(int activityPos, int pos)
 {
   auto t = item::ButtonType::Soft;
 
@@ -1519,7 +1519,7 @@ bool ConfigH900::addDummyActivitySoftButton(int activityPos, int pos)
   return true;
 }
 
-bool ConfigH900::readActivityAction(pugi::xml_node &actions,
+bool H900userconfig::readActivityAction(pugi::xml_node &actions,
     item::ActivityAction t)
 {
   auto activityPos = c->getActivities().size() - 1;
@@ -1531,7 +1531,7 @@ bool ConfigH900::readActivityAction(pugi::xml_node &actions,
   return readActivityActionSequences(actions, t);
 }
 
-bool ConfigH900::readActivityActionSequences(pugi::xml_node &action,
+bool H900userconfig::readActivityActionSequences(pugi::xml_node &action,
     item::ActivityAction t)
 {
   auto ret = true;
@@ -1542,7 +1542,7 @@ bool ConfigH900::readActivityActionSequences(pugi::xml_node &action,
   return ret;
 }
 
-bool ConfigH900::readActivityActionSequence(pugi::xml_node &sequence,
+bool H900userconfig::readActivityActionSequence(pugi::xml_node &sequence,
     item::ActivityAction t)
 {
   uint32_t actionPos;
@@ -1573,7 +1573,7 @@ bool ConfigH900::readActivityActionSequence(pugi::xml_node &sequence,
       seqPos);
 }
 
-bool ConfigH900::readActivityActionSequenceData(pugi::xml_node &sequence,
+bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
     uint32_t activityPos, uint32_t actionPos, item::ActivityAction t,
     uint32_t seqPos)
 {
@@ -1645,7 +1645,7 @@ bool ConfigH900::readActivityActionSequenceData(pugi::xml_node &sequence,
   return true;
 }
 
-bool ConfigH900::readActivityRoles(pugi::xml_node &activity)
+bool H900userconfig::readActivityRoles(pugi::xml_node &activity)
 {
   auto ret = true;
   for (pugi::xml_node prop : activity.children("Role")) {
@@ -1654,7 +1654,7 @@ bool ConfigH900::readActivityRoles(pugi::xml_node &activity)
   return ret;
 }
 
-bool ConfigH900::readActivityRole(pugi::xml_node &role)
+bool H900userconfig::readActivityRole(pugi::xml_node &role)
 {
   item::Role tmpRole;
   auto activityPos = c->getActivities().size() - 1;
@@ -1676,7 +1676,7 @@ bool ConfigH900::readActivityRole(pugi::xml_node &role)
   return true;
 }
 
-bool ConfigH900::readActivityPowerStateDevices(pugi::xml_node &power)
+bool H900userconfig::readActivityPowerStateDevices(pugi::xml_node &power)
 {
   auto ret = true;
   auto activityPos = c->getActivities().size() - 1;
@@ -1698,7 +1698,8 @@ bool ConfigH900::readActivityPowerStateDevices(pugi::xml_node &power)
   return ret;
 }
 
-item::UnknownElement ConfigH900::toUnknownElement(const pugi::xml_node &node)
+item::UnknownElement H900userconfig::toUnknownElement(
+    const pugi::xml_node &node)
 {
   string text;
   map<string, string> attrs;
@@ -1725,12 +1726,12 @@ item::UnknownElement ConfigH900::toUnknownElement(const pugi::xml_node &node)
       children);
 }
 
-void ConfigH900::addId(uint32_t id)
+void H900userconfig::addId(uint32_t id)
 {
   lib::UidGenerator::getInstance().markUsed(id);
 }
 
-bool ConfigH900::readIrProto()
+bool H900userconfig::readIrProto()
 {
   binary::irProto::File protocols;
   auto status = protocols.parse(QString(wp + "/" + irProtoPath).toStdString());
@@ -1747,7 +1748,7 @@ bool ConfigH900::readIrProto()
   return ret;
 }
 
-bool ConfigH900::readIrStream()
+bool H900userconfig::readIrStream()
 {
   auto status = streams.parse(QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
@@ -1762,7 +1763,7 @@ bool ConfigH900::readIrStream()
   return true;
 }
 
-bool ConfigH900::dumpUserConfigXml()
+bool H900userconfig::dumpUserConfigXml()
 {
   pugi::xml_document xml;
 
@@ -1813,7 +1814,7 @@ bool ConfigH900::dumpUserConfigXml()
   return true;
 }
 
-bool ConfigH900::writeProperties(pugi::xml_node &root)
+bool H900userconfig::writeProperties(pugi::xml_node &root)
 {
   auto properties = root.append_child("Properties");
   auto property = properties.append_child("Property");
@@ -1828,7 +1829,7 @@ bool ConfigH900::writeProperties(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::writeUser(pugi::xml_node &root)
+bool H900userconfig::writeUser(pugi::xml_node &root)
 {
   auto user = root.append_child("User");
   auto id = user.append_child("Id");
@@ -1850,7 +1851,7 @@ bool ConfigH900::writeUser(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::writeController(pugi::xml_node &root)
+bool H900userconfig::writeController(pugi::xml_node &root)
 {
   // @formatter:off
   auto controller = root.append_child("Controller");
@@ -1868,7 +1869,7 @@ bool ConfigH900::writeController(pugi::xml_node &root)
   return true;
 }
 
-bool ConfigH900::writeDevices(pugi::xml_node &root)
+bool H900userconfig::writeDevices(pugi::xml_node &root)
 {
   bool ret = true;
 
@@ -1880,7 +1881,8 @@ bool ConfigH900::writeDevices(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
+bool H900userconfig::writeDevice(pugi::xml_node &device,
+    const item::Device &data)
 {
   bool ret = true;
 
@@ -1944,8 +1946,9 @@ bool ConfigH900::writeDevice(pugi::xml_node &device, const item::Device &data)
   return ret;
 }
 
-bool ConfigH900::writeDeviceButtons(pugi::xml_node &buttons, uint32_t deviceId,
-    const vector<item::Button> &data, enum item::ButtonType t)
+bool H900userconfig::writeDeviceButtons(pugi::xml_node &buttons,
+    uint32_t deviceId, const vector<item::Button> &data,
+    enum item::ButtonType t)
 {
   bool ret = true;
 
@@ -1960,8 +1963,8 @@ bool ConfigH900::writeDeviceButtons(pugi::xml_node &buttons, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::writeDeviceButton(pugi::xml_node &button, uint32_t deviceId,
-    const item::Button &data, enum item::ButtonType t)
+bool H900userconfig::writeDeviceButton(pugi::xml_node &button,
+    uint32_t deviceId, const item::Button &data, enum item::ButtonType t)
 {
   if (t == item::ButtonType::Hard) {
     button.append_attribute("name").set_value(data.name.get());
@@ -1981,8 +1984,8 @@ bool ConfigH900::writeDeviceButton(pugi::xml_node &button, uint32_t deviceId,
   return true;
 }
 
-bool ConfigH900::writeStatemachines(pugi::xml_node &states, uint32_t deviceId,
-    const vector<item::StateMachine> &data)
+bool H900userconfig::writeStatemachines(pugi::xml_node &states,
+    uint32_t deviceId, const vector<item::StateMachine> &data)
 {
   bool ret = true;
 
@@ -1993,7 +1996,7 @@ bool ConfigH900::writeStatemachines(pugi::xml_node &states, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::writeStatemachine(pugi::xml_node &state, uint32_t deviceId,
+bool H900userconfig::writeStatemachine(pugi::xml_node &state, uint32_t deviceId,
     const item::StateMachine &data)
 {
   bool ret = true;
@@ -2036,8 +2039,8 @@ bool ConfigH900::writeStatemachine(pugi::xml_node &state, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId,
-    const item::DiscreteActions &data)
+bool H900userconfig::writeDiscreteActions(pugi::xml_node &action,
+    uint32_t deviceId, const item::DiscreteActions &data)
 {
   bool ret = true;
 
@@ -2051,8 +2054,8 @@ bool ConfigH900::writeDiscreteActions(pugi::xml_node &action, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::writeRelativeActions(pugi::xml_node &action, uint32_t deviceId,
-    const item::RelativeActions &data)
+bool H900userconfig::writeRelativeActions(pugi::xml_node &action,
+    uint32_t deviceId, const item::RelativeActions &data)
 {
   bool ret = true;
 
@@ -2077,7 +2080,7 @@ bool ConfigH900::writeRelativeActions(pugi::xml_node &action, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::writeDeviceAction(pugi::xml_node &actionType,
+bool H900userconfig::writeDeviceAction(pugi::xml_node &actionType,
     uint32_t deviceId, const item::DeviceAction &data, item::StateMachineType t)
 {
   for (const auto &s : data.sequence) {
@@ -2107,7 +2110,7 @@ bool ConfigH900::writeDeviceAction(pugi::xml_node &actionType,
   return true;
 }
 
-bool ConfigH900::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
+bool H900userconfig::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
     const item::Numpad &data)
 {
   bool ret = true;
@@ -2135,8 +2138,8 @@ bool ConfigH900::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
   return true;
 }
 
-bool ConfigH900::writeNumericActions(pugi::xml_node &action, uint32_t deviceId,
-    const item::Digits &data)
+bool H900userconfig::writeNumericActions(pugi::xml_node &action,
+    uint32_t deviceId, const item::Digits &data)
 {
   bool ret = true;
 
@@ -2149,7 +2152,7 @@ bool ConfigH900::writeNumericActions(pugi::xml_node &action, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::writeIrList(pugi::xml_node &commands,
+bool H900userconfig::writeIrList(pugi::xml_node &commands,
     const item::Commands &data)
 {
   bool ret = true;
@@ -2164,7 +2167,7 @@ bool ConfigH900::writeIrList(pugi::xml_node &commands,
   }
 
   for (int i = 0; i < data.getRawCommands().size(); i++) {
-    auto &cmdData = data.getProtoCommands()[i];
+    auto &cmdData = data.getRawCommands()[i];
     if (cmdData.name.get().empty()) {
       //skip
       continue;
@@ -2186,7 +2189,8 @@ bool ConfigH900::writeIrList(pugi::xml_node &commands,
   return ret;
 }
 
-bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
+bool H900userconfig::writeIr(pugi::xml_node &command,
+    const item::RawCommand &data)
 {
   int index;
   vector<uint8_t> raw { 0xff, 0xff }; //start with 0xffff
@@ -2201,7 +2205,7 @@ bool ConfigH900::writeIr(pugi::xml_node &command, const item::RawCommand &data)
   return true;
 }
 
-bool ConfigH900::writeIr(pugi::xml_node &command,
+bool H900userconfig::writeIr(pugi::xml_node &command,
     const item::ProtoCommand &data)
 {
   if (c->getProtocolLib().getProtocolCount() <= data.protocolIndex.get()) {
@@ -2223,7 +2227,7 @@ bool ConfigH900::writeIr(pugi::xml_node &command,
   return true;
 }
 
-bool ConfigH900::writeActivities(pugi::xml_node &root)
+bool H900userconfig::writeActivities(pugi::xml_node &root)
 {
   bool ret = true;
 
@@ -2238,7 +2242,7 @@ bool ConfigH900::writeActivities(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::writePowerOffActivity(pugi::xml_node &activity)
+bool H900userconfig::writePowerOffActivity(pugi::xml_node &activity)
 {
   activity.append_child("Id").text().set(-1); //magic for power off
   activity.append_child("Type").text().set("PowerOff");
@@ -2284,7 +2288,7 @@ bool ConfigH900::writePowerOffActivity(pugi::xml_node &activity)
   return true;
 }
 
-bool ConfigH900::writeActivity(pugi::xml_node &activity,
+bool H900userconfig::writeActivity(pugi::xml_node &activity,
     const item::Activity &data)
 {
   bool ret = true;
@@ -2359,7 +2363,7 @@ bool ConfigH900::writeActivity(pugi::xml_node &activity,
   return ret;
 }
 
-bool ConfigH900::writeActivityChannels(pugi::xml_node &channels,
+bool H900userconfig::writeActivityChannels(pugi::xml_node &channels,
     const std::vector<item::Channel> &data)
 {
   bool ret = true;
@@ -2371,7 +2375,7 @@ bool ConfigH900::writeActivityChannels(pugi::xml_node &channels,
   return ret;
 }
 
-bool ConfigH900::writeActivityChannel(pugi::xml_node &channel,
+bool H900userconfig::writeActivityChannel(pugi::xml_node &channel,
     const item::Channel &data)
 {
   channel.append_child("Station").text().set(data.station.get());
@@ -2381,7 +2385,7 @@ bool ConfigH900::writeActivityChannel(pugi::xml_node &channel,
   return true;
 }
 
-bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
+bool H900userconfig::writeActivityButtons(pugi::xml_node &buttons,
     const std::vector<item::Button> &data, enum item::ButtonType t)
 {
   bool ret = true;
@@ -2397,7 +2401,7 @@ bool ConfigH900::writeActivityButtons(pugi::xml_node &buttons,
   return ret;
 }
 
-bool ConfigH900::writeActivityButton(pugi::xml_node &button,
+bool H900userconfig::writeActivityButton(pugi::xml_node &button,
     const item::Button &data, enum item::ButtonType t)
 {
   if (t == item::ButtonType::Hard) {
@@ -2418,7 +2422,7 @@ bool ConfigH900::writeActivityButton(pugi::xml_node &button,
   return true;
 }
 
-bool ConfigH900::writeActivityActions(pugi::xml_node &action,
+bool H900userconfig::writeActivityActions(pugi::xml_node &action,
     const std::vector<item::DeviceAction> &data)
 {
   bool ret = true;
@@ -2429,7 +2433,7 @@ bool ConfigH900::writeActivityActions(pugi::xml_node &action,
   return ret;
 }
 
-bool ConfigH900::writeActivityAction(pugi::xml_node &actionType,
+bool H900userconfig::writeActivityAction(pugi::xml_node &actionType,
     const item::DeviceAction &data)
 {
   for (const auto &s : data.sequence) {
@@ -2450,7 +2454,7 @@ bool ConfigH900::writeActivityAction(pugi::xml_node &actionType,
   return true;
 }
 
-bool ConfigH900::writeActivityRoles(pugi::xml_node &activity,
+bool H900userconfig::writeActivityRoles(pugi::xml_node &activity,
     const std::vector<item::Role> &data)
 {
   bool ret = true;
@@ -2461,7 +2465,7 @@ bool ConfigH900::writeActivityRoles(pugi::xml_node &activity,
   return ret;
 }
 
-bool ConfigH900::writeActivityRole(pugi::xml_node &activity,
+bool H900userconfig::writeActivityRole(pugi::xml_node &activity,
     const item::Role &data)
 {
   auto role = activity.append_child("Role");
@@ -2471,7 +2475,7 @@ bool ConfigH900::writeActivityRole(pugi::xml_node &activity,
   return true;
 }
 
-bool ConfigH900::writeActivityPowerStateDevices(pugi::xml_node &power,
+bool H900userconfig::writeActivityPowerStateDevices(pugi::xml_node &power,
     const item::Activity &data)
 {
   for (const auto &onDeviceId : data.getPowerOnDevices()) {
@@ -2483,7 +2487,7 @@ bool ConfigH900::writeActivityPowerStateDevices(pugi::xml_node &power,
   return true;
 }
 
-bool ConfigH900::writeProtocols(pugi::xml_node &root)
+bool H900userconfig::writeProtocols(pugi::xml_node &root)
 {
   bool ret = true;
 
@@ -2495,7 +2499,7 @@ bool ConfigH900::writeProtocols(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::writeProtocol(pugi::xml_node &protocols, int idx,
+bool H900userconfig::writeProtocol(pugi::xml_node &protocols, int idx,
     const binary::irProto::IrProto &irProto)
 {
   for (int i = 0; i < irProto.getSectionCount(); i++) {
@@ -2520,7 +2524,7 @@ bool ConfigH900::writeProtocol(pugi::xml_node &protocols, int idx,
   return true;
 }
 
-void ConfigH900::writeUnknownElement(pugi::xml_node &parent,
+void H900userconfig::writeUnknownElement(pugi::xml_node &parent,
     const item::UnknownElement &element)
 {
   auto node = parent.append_child(element.tag.c_str());
@@ -2538,7 +2542,7 @@ void ConfigH900::writeUnknownElement(pugi::xml_node &parent,
   }
 }
 
-bool ConfigH900::dumpActionListXml()
+bool H900userconfig::dumpActionListXml()
 {
   pugi::xml_document xml;
 
@@ -2572,7 +2576,7 @@ bool ConfigH900::dumpActionListXml()
   return true;
 }
 
-bool ConfigH900::exportDevices(pugi::xml_node &root)
+bool H900userconfig::exportDevices(pugi::xml_node &root)
 {
   bool ret = true;
 
@@ -2583,7 +2587,8 @@ bool ConfigH900::exportDevices(pugi::xml_node &root)
   return ret;
 }
 
-bool ConfigH900::exportDevice(pugi::xml_node &root, const item::Device &data)
+bool H900userconfig::exportDevice(pugi::xml_node &root,
+    const item::Device &data)
 {
   bool ret = true;
 
@@ -2592,7 +2597,7 @@ bool ConfigH900::exportDevice(pugi::xml_node &root, const item::Device &data)
   return ret;
 }
 
-bool ConfigH900::exportButtons(pugi::xml_node &root, uint32_t deviceId,
+bool H900userconfig::exportButtons(pugi::xml_node &root, uint32_t deviceId,
     const std::vector<item::Button> &data)
 {
   bool ret = true;
@@ -2603,7 +2608,7 @@ bool ConfigH900::exportButtons(pugi::xml_node &root, uint32_t deviceId,
   return ret;
 }
 
-bool ConfigH900::exportButton(pugi::xml_node &root, uint32_t deviceId,
+bool H900userconfig::exportButton(pugi::xml_node &root, uint32_t deviceId,
     const item::Button &data)
 {
   string str;
@@ -2627,7 +2632,7 @@ bool ConfigH900::exportButton(pugi::xml_node &root, uint32_t deviceId,
   return true;
 }
 
-bool ConfigH900::writeIrProto()
+bool H900userconfig::writeIrProto()
 {
   uint32_t crc;
   vector<uint8_t> tmp;
@@ -2648,7 +2653,7 @@ bool ConfigH900::writeIrProto()
   return true;
 }
 
-bool ConfigH900::writeIrStream()
+bool H900userconfig::writeIrStream()
 {
   auto status = streams.serialise(QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
@@ -2660,6 +2665,59 @@ bool ConfigH900::writeIrStream()
   emit writeLog(LogLevel::Debug,
       tr("wrote %1 binary ir streams").arg(streams.getStreamCount()),
       ContentType::PlainText);
+  return true;
+}
+
+H900platformconfig::H900platformconfig(const QString &workPath,
+    const QString &sourcePath, const QString &defaultsPath) :
+    wp(workPath), sp(sourcePath), dp(defaultsPath)
+{
+}
+
+bool H900platformconfig::dump(const data::ConfigData *c)
+{
+  QDir sourceDir(sp);
+  const QDir workDir(wp);
+
+  if (!sourceDir.exists() || sourceDir.entryList(QDir::Files).isEmpty()) {
+    sourceDir = QDir(dp);
+  }
+  if (!workDir.exists()) {
+    return false;
+  }
+
+  for (const QString &file : copyFiles) {
+    const QString sourcePath = sourceDir.filePath(file);
+    const QString destinationPath = workDir.filePath(file);
+    QFileInfo sourceInfo(sourcePath);
+
+    if (!sourceInfo.exists()) {
+      return false;
+    }
+
+    if (QFile::exists(destinationPath)) {
+      continue;
+    }
+    QDir destinationParent(QFileInfo(destinationPath).path());
+
+    if (!destinationParent.exists()) {
+      if (!destinationParent.mkpath(".")) {
+        return false;
+      }
+    }
+
+    if (!QFile::copy(sourcePath, destinationPath)) {
+      return false;
+    }
+    QFile destinationFile(destinationPath);
+    destinationFile.setPermissions(sourceInfo.permissions());
+  }
+  return true;
+}
+
+bool H900platformconfig::read(const data::ConfigData *c,
+    data::CmdCatalogue *worker)
+{
   return true;
 }
 

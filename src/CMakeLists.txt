@@ -147,7 +147,8 @@ if(WIN32)
 endif()
 
 # Resources:
-file(GLOB buttonIcons RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${resourcePath}buttons/*.jpg")
+file(GLOB_RECURSE buttonIcons RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${resourcePath}buttons/*.jpg")
+file(GLOB_RECURSE h900platform RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${resourcePath}h900platform/*")
 set(iconPath "${resourcePath}icons/BreezeConverted/64x64/")
 set(${programName}_resource_files
     ${resourcePath}/splash.png
@@ -175,6 +176,7 @@ set(${programName}_resource_files
     ${iconPath}/actions/media-record.png
     ${iconPath}/actions/keyframe-record.png
     ${buttonIcons}
+    ${h900platform}
 )
 
 qt_add_resources(${programName} "application"

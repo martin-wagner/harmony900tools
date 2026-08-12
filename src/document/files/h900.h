@@ -29,11 +29,12 @@ namespace data {
 namespace files
 {
 
-class ConfigH900 : public QObject
+//userconfig dir
+class H900userconfig : public QObject
 {
   Q_OBJECT
   public:
-    ConfigH900(const QString &workPath);
+    H900userconfig(const QString &workPath);
 
     /** write files to disk at _workPath_ */
     bool dump(const data::ConfigData *c);
@@ -160,7 +161,51 @@ class ConfigH900 : public QObject
     binary::ssIr::File streams;
 };
 
-}
-}
+//the rest -- platformconfig dir, meta-inf, scripts
+class H900platformconfig : public QObject
+{
+  Q_OBJECT
+  public:
 
+    //copy / install only this list. those have timestamps that indicate that
+    //those files are not created by the remote itself at first boot / setup.
+    //By default those files seem to be ignored. It is unclear if there
+    //are cases where they are used.
+    const QStringList copyFiles {
+      ".postinstall",
+      ".preinstall",
+      ".version",
+      "META-INF/MANIFEST.MF",
+      "platformconfig/batt_lvls.dat",
+      "platformconfig/pmiccfg.dat",
+      "platformconfig/sleepcfg.dat",
+      "platformconfig/system_rtd_initbattset.dat",
+      "platformconfig/system_rtd_maxbattset.dat",
+      "platformconfig/tiltcfg.dat",
+    };
+
+    H900platformconfig(const QString &workPath, const QString &sourcePath, const QString &defaultsPath);
+
+    /** create files in _workPath_, prefer those from _sourcePath_ over _defaultsPath_ */
+    bool dump(const data::ConfigData *c);
+    /** read files fom disk at _workPath_, use cmd (undo) catalogue for additional data verification */
+    bool read(const data::ConfigData *c, data::CmdCatalogue *worker);
+
+  signals:
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
+  protected:
+    const QString wp;
+    const QString sp;
+    const QString dp;
+
+  private:
+    const data::ConfigData *c = nullptr;
+    data::CmdCatalogue *worker = nullptr;
+
+};
+
+}
+}
 

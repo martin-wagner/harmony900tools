@@ -100,11 +100,20 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
 
   switch (t) {
     case Type::H900: {
-      auto parser = files::ConfigH900(importPath);
-      connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
-      connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
+      auto platformcfgParser = files::H900platformconfig(workPath, importPath,
+          resourceH900PlatformConfig);
+      connect(&platformcfgParser, &files::H900platformconfig::writeLog, this,
+          &Config::writeLog);
+      connect(&platformcfgParser, &files::H900platformconfig::writeMsg, this,
+          &Config::writeMsg);
+      auto usercfgParser = files::H900userconfig(importPath);
+      connect(&usercfgParser, &files::H900userconfig::writeLog, this,
+          &Config::writeLog);
+      connect(&usercfgParser, &files::H900userconfig::writeMsg, this,
+          &Config::writeMsg);
       stack.beginMacro(tr("Import Harmony 900 Config")); //macro -> speedup
-      ret = parser.read(configData.get(), worker);
+      ret = platformcfgParser.read(configData.get(), worker);
+      ret &= usercfgParser.read(configData.get(), worker);
       stack.endMacro();
       stack.clear(); // no undo for this!
       break;
@@ -258,10 +267,21 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
 
   switch (t) {
     case Type::H900: {
-      auto parser = files::ConfigH900(exportPath);
-      connect(&parser, &files::ConfigH900::writeLog, this, &Config::writeLog);
-      connect(&parser, &files::ConfigH900::writeMsg, this, &Config::writeMsg);
-      ret = parser.dump(configData.get());
+      //dump platform / general stuff
+      auto platformcfgWriter = files::H900platformconfig(exportPath, importPath,
+          resourceH900PlatformConfig);
+      connect(&platformcfgWriter, &files::H900platformconfig::writeLog, this,
+          &Config::writeLog);
+      connect(&platformcfgWriter, &files::H900platformconfig::writeMsg, this,
+          &Config::writeMsg);
+      ret = platformcfgWriter.dump(configData.get());
+      //dump actual userconfig
+      auto usercfgWriter = files::H900userconfig(exportPath);
+      connect(&usercfgWriter, &files::H900userconfig::writeLog, this,
+          &Config::writeLog);
+      connect(&usercfgWriter, &files::H900userconfig::writeMsg, this,
+          &Config::writeMsg);
+      ret &= usercfgWriter.dump(configData.get());
       break;
     }
     default:
@@ -295,7 +315,8 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
     return false;
   }
 
-  auto ok = lib::zipDirectory(zf, exportPath, {".postinstall", ".preinstall"});
+  auto ok = lib::zipDirectory(zf, exportPath,
+      { ".postinstall", ".preinstall" });
   if (!ok) {
     zipClose(zf, nullptr);
     return false;

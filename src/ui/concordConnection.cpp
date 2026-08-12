@@ -155,9 +155,21 @@ void ConcordConnection::onWriteConfig()
     return;
   }
 
-  emit writeLog(LogLevel::Critical,
-      tr("not ready for this yet -- rejecting write"), ContentType::PlainText);
-  return; //todo
+  const QMessageBox::StandardButton button =
+      QMessageBox::warning(this, tr("Write config"),
+          tr(
+              "This is alpha software.\n\n"
+                  "Create a backup using \"connection -> create remote backup\" first!!!\n\n"
+                  "If something doesn't work, you can restore your backup in the same way.\n"
+                  "Continue downloading your new config?"),
+          QMessageBox::Ok | QMessageBox::Cancel);
+  switch (button) {
+    case QMessageBox::Ok:
+      break;
+    case QMessageBox::Cancel:
+    default:
+      return;
+  }
 
   updateActionStates(true);
   concord.updateUserConfigData(data, false);
