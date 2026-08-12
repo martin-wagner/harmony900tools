@@ -74,4 +74,13 @@ class CodeEditor: public QDialog
     static uint64_t parsePrefixedValue(const QString &text, bool *ok);
 };
 
+//todo verschiedene protokoll varianten https://www.mikrocontroller.net/articles/IRMP#Anhang
+//nec: nec Addr: 8 / ~8 + Cmd 8 / ~8 ; ext-nec addr 16 + Cmd 8 / ~8 ; onkyo addr 16 + Cmd 16, apple 16 Adress-Bits + 11100000 + 8 Kommando-Bits
+//KASEIKYO / panasonic  16 Hersteller-Bits + 4 Parity-Bits + 4 Genre1-Bits + 4 Genre2-Bits + 10 Kommando-Bits + 2 ID-Bits + 8 Parity-Bits
+//rc5: 14 datenbits im editor, start, toggle, end im editor belegen.
+//rc6: check ob das so ok ist, 4 startbits rc6 + 16 datenbits
+//sony sircs, 12 datenbits, problem: bitanzahl 12..20 in sircs... 7 Kommando-Bits + 5 Adress-Bits, mind. 3 x senden
+//samsung   16 Adress-Bits + 16 Kommando-Bits
+
+
 }

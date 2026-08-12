@@ -39,7 +39,7 @@ CodeEditor::CodeEditor(const Code &code, CodeType type, QWidget *parent) :
   stack->addWidget(createRc5Page());
 
   switch (codeType) {
-    case CodeType::PhilipsRc5:
+    case CodeType::PhilipsRC5:
       stack->setCurrentIndex(1);
       loadRc5(code);
       break;
@@ -67,7 +67,7 @@ CodeEditor::~CodeEditor() = default;
 Code CodeEditor::getCode() const
 {
   switch (codeType) {
-    case CodeType::PhilipsRc5:
+    case CodeType::PhilipsRC5:
       return getRc5Code();
     case CodeType::Proprietary:
     default:

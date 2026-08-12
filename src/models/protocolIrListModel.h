@@ -29,7 +29,13 @@ class ProtocolIrModel: public BaseModel
 
     const std::map<Column, Setup> columnSetup = {
         { Column::NAME,          { "Name", "The command name is used to reference this command in other tables (Buttons, ...).", "QString", false, {}, } },
-        { Column::TYPE,          { "Protocol", "IR Protocol name. \"Proprietary\" means created by the Harmony 900 software.", "Enum", false, {} } },
+        { Column::TYPE,          { "Protocol", "IR Protocol name. \"Proprietary\" means created by the Harmony 900 software.\n"
+            "- NEC: Most common, used by NEC, Yamaha, Canon, Tevion, Harman/Kardon, Hitachi, JVC, Pioneer, Toshiba, Xoro, Orion, Apple, many NoNames, etc.\n"
+            "- KASEIKYO: Mostly japanese, used by Panasonic, Technics, Denon and other AEHA manufacturers.\n"
+            "- Philips RC5: Most european manufacturers, including Philips, older devices.\n"
+            "- Philips RC6: Most european manufacturers, including Philips, newer devices.\n"
+            "- SIRCS: Sony.\n"
+            "- Samsung32: Samsung.", "Enum", false, {} } },
         { Column::PROTO,         { "Protocol Index", "Protocol index for proprietary / none / unknown", "int", true, {}, } },
         { Column::DATA,          { "Data", "- Select cell to enable learning. Needs remote to be connected.\n- Double-click to edit manually\n\nVisual representation of IR data..", "Code", false, {}, } },
     };

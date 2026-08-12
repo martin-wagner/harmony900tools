@@ -30,7 +30,7 @@ QWidget* ProtocolIr::createEditor(QWidget *parent,
   auto codeType = Enum<CodeType>(codeTypeStr);
 
   if ((codeType.getValue() != CodeType::Proprietary)
-      && (codeType.getValue() != CodeType::PhilipsRc5)) {
+      && (codeType.getValue() != CodeType::PhilipsRC5)) {
     //unsupported protocol, no editor available yet
     return nullptr;
   } //todo hier wegmachen. eine stelle wo das steht sollte ausreichen.

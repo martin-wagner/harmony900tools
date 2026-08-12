@@ -2,7 +2,7 @@
     "Version": 1,
     "IrProtocols": [
         {
-            "Name": "Nec",
+            "Name": "NEC",
             "ClockPeriod": 26316,
             "Sections": [
                 {
@@ -80,6 +80,69 @@
             ]
         },
         {
+            "Name": "KASEIKYO",
+            "ClockPeriod": 26316,
+            "Sections": [
+                {
+                    "BitCount": 48,
+                    "Toggle": 255,
+                    "Timing": 4294967295,
+                    "Ctrl0": "IsDataFrame",
+                    "Ctrl1": "DataTwoPairs",
+                    "SoF": [
+                        {
+                            "State": true,
+                            "Time": 3380
+                        },
+                        {
+                            "State": false,
+                            "Time": 1690
+                        }
+                    ],
+                    "Data": {
+                        "FalsePair": [
+                            {
+                                "State": true,
+                                "Time": 423
+                            },
+                            {
+                                "State": false,
+                                "Time": 423
+                            }
+                        ],
+                        "TruePair": [
+                            {
+                                "State": true,
+                                "Time": 423
+                            },
+                            {
+                                "State": false,
+                                "Time": 1269
+                            }
+                        ]
+                    },
+                    "EoF": [
+                        {
+                            "State": true,
+                            "Time": 423
+                        },
+                        {
+                            "State": false,
+                            "Time": 32767
+                        },
+                        {
+                            "State": false,
+                            "Time": 32767
+                        },
+                        {
+                            "State": false,
+                            "Time": 14466
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "Name": "PhilipsRc5",
             "ClockPeriod": 27778,
             "Sections": [
@@ -121,11 +184,11 @@
             "ClockPeriod": 27778,
             "Sections": [
                 {
-                    "BitCount": 0,
+                    "BitCount": 4,
                     "Toggle": 255,
                     "Timing": 0,
                     "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "NotDataFrame",
+                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -134,43 +197,29 @@
                         {
                             "State": false,
                             "Time": 889
-                        },
-                        {
-                            "State": true,
-                            "Time": 889
-                        },
-                        {
-                            "State": false,
-                            "Time": 889
-                        },
-                        {
-                            "State": false,
-                            "Time": 444
-                        },
-                        {
-                            "State": true,
-                            "Time": 444
-                        },
-                        {
-                            "State": false,
-                            "Time": 444
-                        },
-                        {
-                            "State": true,
-                            "Time": 444
-                        },
-                        {
-                            "State": false,
-                            "Time": 444
-                        },
-                        {
-                            "State": true,
-                            "Time": 444
                         }
                     ],
                     "Data": {
-                        "FalsePair": [],
-                        "TruePair": []
+                        "FalsePair": [
+                            {
+                                "State": false,
+                                "Time": 444
+                            },
+                            {
+                                "State": true,
+                                "Time": 444
+                            }
+                        ],
+                        "TruePair": [
+                            {
+                                "State": true,
+                                "Time": 444
+                            },
+                            {
+                                "State": false,
+                                "Time": 444
+                            }
+                        ]
                     },
                     "EoF": []
                 },
@@ -239,13 +288,13 @@
             ]
         },
         {
-            "Name": "Sony",
+            "Name": "SIRCS",
             "ClockPeriod": 25000,
             "Sections": [
                 {
                     "BitCount": 12,
                     "Toggle": 255,
-                    "Timing": 45000,
+                    "Timing": 4294967295,
                     "Ctrl0": "IsDataFrame",
                     "Ctrl1": "DataTwoPairs",
                     "SoF": [
@@ -280,326 +329,61 @@
                             }
                         ]
                     },
-                    "EoF": []
-                }
-            ]
-        },
-        {
-            "Name": "Panasonic",
-            "ClockPeriod": 27027,
-            "Sections": [
-                {
-                    "BitCount": 48,
-                    "Toggle": 255,
-                    "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
-                    "SoF": [
-                        {
-                            "State": true,
-                            "Time": 3456
-                        },
-                        {
-                            "State": false,
-                            "Time": 1728
-                        }
-                    ],
-                    "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 432
-                            },
-                            {
-                                "State": false,
-                                "Time": 432
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 432
-                            },
-                            {
-                                "State": false,
-                                "Time": 1296
-                            }
-                        ]
-                    },
                     "EoF": [
                         {
-                            "State": true,
-                            "Time": 432
-                        },
-                        {
                             "State": false,
-                            "Time": 32767
-                        },
-                        {
-                            "State": false,
-                            "Time": 32767
-                        },
-                        {
-                            "State": false,
-                            "Time": 9202
+                            "Time": 25000
                         }
                     ]
                 }
             ]
         },
         {
-            "Name": "Samsung",
+            "Name": "Samsung32",
             "ClockPeriod": 26316,
             "Sections": [
                 {
                     "BitCount": 32,
                     "Toggle": 255,
-                    "Timing": 108000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
-                    "SoF": [
-                        {
-                            "State": true,
-                            "Time": 4500
-                        },
-                        {
-                            "State": false,
-                            "Time": 4500
-                        }
-                    ],
-                    "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 560
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 1690
-                            }
-                        ]
-                    },
-                    "EoF": [
-                        {
-                            "State": true,
-                            "Time": 560
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "Lg",
-            "ClockPeriod": 26316,
-            "Sections": [
-                {
-                    "BitCount": 28,
-                    "Toggle": 255,
-                    "Timing": 108000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
-                    "SoF": [
-                        {
-                            "State": true,
-                            "Time": 9000
-                        },
-                        {
-                            "State": false,
-                            "Time": 4500
-                        }
-                    ],
-                    "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 560
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 1690
-                            }
-                        ]
-                    },
-                    "EoF": [
-                        {
-                            "State": true,
-                            "Time": 560
-                        }
-                    ]
-                },
-                {
-                    "BitCount": 0,
-                    "Toggle": 255,
-                    "Timing": 108000,
-                    "Ctrl0": "IsRepeatFrame",
-                    "Ctrl1": "NotDataFrame",
-                    "SoF": [
-                        {
-                            "State": true,
-                            "Time": 9000
-                        },
-                        {
-                            "State": false,
-                            "Time": 2250
-                        }
-                    ],
-                    "Data": {
-                        "FalsePair": [],
-                        "TruePair": []
-                    },
-                    "EoF": [
-                        {
-                            "State": true,
-                            "Time": 560
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "Jvc",
-            "ClockPeriod": 26316,
-            "Sections": [
-                {
-                    "BitCount": 16,
-                    "Toggle": 255,
-                    "Timing": 25000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
-                    "SoF": [
-                        {
-                            "State": true,
-                            "Time": 8400
-                        },
-                        {
-                            "State": false,
-                            "Time": 4200
-                        }
-                    ],
-                    "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 526
-                            },
-                            {
-                                "State": false,
-                                "Time": 524
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 526
-                            },
-                            {
-                                "State": false,
-                                "Time": 1574
-                            }
-                        ]
-                    },
-                    "EoF": [
-                        {
-                            "State": true,
-                            "Time": 526
-                        }
-                    ]
-                },
-                {
-                    "BitCount": 16,
-                    "Toggle": 255,
-                    "Timing": 25000,
-                    "Ctrl0": "IsRepeatFrame",
-                    "Ctrl1": "DataTwoPairs",
-                    "SoF": [],
-                    "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 526
-                            },
-                            {
-                                "State": false,
-                                "Time": 524
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 526
-                            },
-                            {
-                                "State": false,
-                                "Time": 1574
-                            }
-                        ]
-                    },
-                    "EoF": [
-                        {
-                            "State": true,
-                            "Time": 526
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "Sharp",
-            "ClockPeriod": 26316,
-            "Sections": [
-                {
-                    "BitCount": 15,
-                    "Toggle": 255,
                     "Timing": 4294967295,
                     "Ctrl0": "IsDataFrame",
                     "Ctrl1": "DataTwoPairs",
-                    "SoF": [],
+                    "SoF": [
+                        {
+                            "State": true,
+                            "Time": 4500
+                        },
+                        {
+                            "State": false,
+                            "Time": 4500
+                        }
+                    ],
                     "Data": {
                         "FalsePair": [
                             {
                                 "State": true,
-                                "Time": 264
+                                "Time": 550
                             },
                             {
                                 "State": false,
-                                "Time": 792
+                                "Time": 550
                             }
                         ],
                         "TruePair": [
                             {
                                 "State": true,
-                                "Time": 264
+                                "Time": 550
                             },
                             {
                                 "State": false,
-                                "Time": 1848
+                                "Time": 1650
                             }
                         ]
                     },
                     "EoF": [
                         {
                             "State": true,
-                            "Time": 264
+                            "Time": 550
                         },
                         {
                             "State": false,
@@ -607,62 +391,7 @@
                         },
                         {
                             "State": false,
-                            "Time": 10793
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "Rca",
-            "ClockPeriod": 17241,
-            "Sections": [
-                {
-                    "BitCount": 24,
-                    "Toggle": 255,
-                    "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
-                    "SoF": [
-                        {
-                            "State": true,
-                            "Time": 3680
-                        },
-                        {
-                            "State": false,
-                            "Time": 3680
-                        }
-                    ],
-                    "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 460
-                            },
-                            {
-                                "State": false,
-                                "Time": 920
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 460
-                            },
-                            {
-                                "State": false,
-                                "Time": 1840
-                            }
-                        ]
-                    },
-                    "EoF": [
-                        {
-                            "State": true,
-                            "Time": 460
-                        },
-                        {
-                            "State": false,
-                            "Time": 7360
+                            "Time": 14233
                         }
                     ]
                 }

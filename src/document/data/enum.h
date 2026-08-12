@@ -50,7 +50,8 @@ enum class HardButtons { Menu, Exit, UpArrow,  DownArrow,  Info,  Guide,  Red,  
     Number5,  Number6,  Number7,  Number8,  Number9,  NumberPlus,  Number0, NumberEnter, Unknown }; //those are sorted by position on the remote. don't change!
 
 //non-remote enums
-enum class CodeType { Nec, PhilipsRc5, PhilipsRc6, Sony, Panasonic, Samsung, Lg, Jvc, Sharp, Rca, None, Proprietary, Unknown };
+enum class CodeType { NEC, KASEIKYO, PhilipsRC5, PhilipsRC6, SIRCS, Samsung32, None, Proprietary, Unknown };
+
 
 /**
  * stores enums as enum value and string.
