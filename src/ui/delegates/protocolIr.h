@@ -4,6 +4,8 @@
 
 #include <QStyledItemDelegate>
 
+class Context;
+
 namespace delegates
 {
 
@@ -21,10 +23,13 @@ class ProtocolIr: public QStyledItemDelegate
   Q_OBJECT
 
   public:
-    explicit ProtocolIr(QObject *parent = nullptr);
+    explicit ProtocolIr(Context &ctx, QObject *parent = nullptr);
     ~ProtocolIr() override;
 
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+  protected:
+    Context &ctx;
 };
 
 }

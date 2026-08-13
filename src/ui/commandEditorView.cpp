@@ -71,7 +71,7 @@ void ProtoCommandTreeView::setLearnedCommand(
 void ProtoCommandTreeView::setupDelegates()
 {
   auto *comboBoxDelegate = new delegates::ComboBox(this);
-  auto *editorDelegate = new delegates::ProtocolIr(this);
+  auto *editorDelegate = new delegates::ProtocolIr(ctx, this);
   treeView->setItemDelegateForColumn(
       static_cast<int>(models::ProtocolIrModel::Column::TYPE),
       comboBoxDelegate);

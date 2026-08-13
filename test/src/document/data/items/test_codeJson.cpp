@@ -95,8 +95,7 @@ TEST(CodeJson, RawFieldsRoundTrip)
 {
   Code code;
   code.setIndex(7);
-  code.setTicks(526);
-  code.setDataSectionCount(2);
+  code.setDelay(526);
   code.setRepeatFrame(1);
   code.setDataFrameTxCount(1);
   code.setControl(3);
@@ -105,8 +104,7 @@ TEST(CodeJson, RawFieldsRoundTrip)
   serialiser::toJson(j, code);
 
   EXPECT_EQ(j["Index"], 7);
-  EXPECT_EQ(j["Ticks"], 526);
-  EXPECT_EQ(j["DataSectionCount"], 2);
+  EXPECT_EQ(j["Delay"], 526);
   EXPECT_EQ(j["RepeatFrame"], 1);
   EXPECT_EQ(j["Control"], 3);
 
@@ -114,8 +112,7 @@ TEST(CodeJson, RawFieldsRoundTrip)
   serialiser::fromJson(j, code2);
 
   EXPECT_EQ(code2.getIndex(), 7);
-  EXPECT_EQ(code2.getTicks(), 526);
-  EXPECT_EQ(code2.getDataSectionCount(), 2);
+  EXPECT_EQ(code2.getDelay(), 526);
   EXPECT_EQ(code2.getRepeatFrame(), 1);
   EXPECT_EQ(code2.getControl(), 3);
 }
@@ -144,8 +141,7 @@ TEST(CodeJson, FullRoundTripProducesIdenticalJson)
 {
   Code code;
   code.setIndex(3);
-  code.setTicks(526);
-  code.setDataSectionCount(1);
+  code.setDelay(526);
   code.setRepeatFrame(0);
   code.setDataFrameTxCount(2);
   code.setControl(0);

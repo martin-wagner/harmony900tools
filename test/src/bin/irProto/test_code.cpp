@@ -59,14 +59,14 @@ TEST(CodeParse, MissingTrailingZero)
 
 TEST(CodeParse, FlatHeaderFields_LG)
 {
-  // LG 82UN85006LA: proto=0, ticks=500, tx=1, repeat=1, ctrl=FLAT
+  // LG 82UN85006LA: proto=0, Delay=500, tx=1, repeat=1, ctrl=FLAT
   Code c("0x0000F40101010020DF32CD010100");
   EXPECT_EQ(c.parse("0x0000F40101010020DF32CD010100"), Status::OK);
 
   EXPECT_EQ(c.getIndex(), 0);
-  EXPECT_EQ(c.getTicks(), 500);
+  EXPECT_EQ(c.getDelay(), 500);
   EXPECT_EQ(c.getControl(), 0u);  // FLAT
-  EXPECT_NEAR(c.getClock(), 36000.0, 10.0);
+  EXPECT_EQ(c.getDataSectionCount(), 1);
   EXPECT_EQ(c.getRepeatTypeStr(), "Repeat Frame");
 }
 
@@ -79,6 +79,7 @@ TEST(CodeParse, FlatSectionCount_LG)
   EXPECT_EQ(data[0].first, 0);   // data section index 0
   EXPECT_EQ(data[1].first, 1);   // repeat section index 1
   EXPECT_TRUE(data[1].second.empty()); // repeat has no bits
+  EXPECT_EQ(c.getDataSectionCount(), 1); //repeat is no data section
 }
 
 TEST(CodeParse, FlatBits_LG)
@@ -102,11 +103,12 @@ TEST(CodeParse, FlatBits_LG)
 
 TEST(CodeParse, SingleSectionHeaderFields_Samsung)
 {
-  // Samsung SV-6332X: proto=1, ticks=500, tx=3, repeat=0, ctrl=SINGLE_SECTION
+  // Samsung SV-6332X: proto=1, Delay=500, tx=3, repeat=0, ctrl=SINGLE_SECTION
   Code c("0x0100F401030001005F5F778800");
   EXPECT_EQ(c.getIndex(), 1);
-  EXPECT_EQ(c.getTicks(), 500);
+  EXPECT_EQ(c.getDelay(), 500);
   EXPECT_EQ(c.getControl(), 1u);  // SINGLE_SECTION
+  EXPECT_EQ(c.getDataSectionCount(), 1);
   EXPECT_EQ(c.getRepeatTypeStr(), "Repeats: 3");
 }
 
@@ -138,11 +140,12 @@ TEST(CodeParse, SingleSectionBits_Samsung)
 
 TEST(CodeParse, MultiSectionHeaderFields_Philips)
 {
-  // Philips BDP-2700: proto=2, ticks=500, tx=3, repeat=0, ctrl=MULTI_SECTION(3)
+  // Philips BDP-2700: proto=2, Delay=500, tx=3, repeat=0, ctrl=MULTI_SECTION(3)
   Code c("0x0200F4010300030070010002B9FF00");
   EXPECT_EQ(c.getIndex(), 2);
-  EXPECT_EQ(c.getTicks(), 500);
+  EXPECT_EQ(c.getDelay(), 500);
   EXPECT_EQ(c.getControl(), 3u);  // MULTI_SECTION, dataSectionCount=3
+  EXPECT_EQ(c.getDataSectionCount(), 3);
 }
 
 TEST(CodeParse, MultiSectionCount_Philips)
@@ -177,21 +180,20 @@ TEST(CodeParse, MultiSectionBits_Philips)
   EXPECT_EQ(sec1[15], false);
 }
 
-TEST(CodeParse, OnkyoFlatDifferentTicks)
+TEST(CodeParse, OnkyoFlatDifferentDelay)
 {
-  // Onkyo TX-NR414: proto=0, ticks=200 (90kHz)
+  // Onkyo TX-NR414: proto=0, Delay=200 (90kHz)
   Code c("0x0000C8000101004B407B84010100");
   EXPECT_EQ(c.getIndex(), 0);
-  EXPECT_EQ(c.getTicks(), 200);
-  EXPECT_NEAR(c.getClock(), 90000.0, 10.0);
+  EXPECT_EQ(c.getDelay(), 200);
 }
 
 TEST(CodeParse, VuPlusSingleSection)
 {
-  // Vu+ DUO 2: proto=4, ticks=200, tx=1, no repeat
+  // Vu+ DUO 2: proto=4, Delay=200, tx=1, no repeat
   Code c("0x0400C80001000100FEB5BFFC00");
   EXPECT_EQ(c.getIndex(), 4);
-  EXPECT_EQ(c.getTicks(), 200);
+  EXPECT_EQ(c.getDelay(), 200);
   EXPECT_EQ(c.getControl(), 1u);
   auto data = c.getData();
   ASSERT_EQ(data.size(), 1u);  // tx=1, no repeat

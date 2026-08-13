@@ -364,8 +364,8 @@ where _7_ is the protocol index and _0x07..._ is the parameter for command encod
 | Offset |    Bytes     |  Value  |  Meaning|
 | ---|---|---|---|
 |[0:1]  |    07 00     |  7      |  Protocol index → IrProto.bin|
-|[2:3]  |    F4 01     |  500    |  Carrier period in system clock ticks (LE16)|
-|       |              |         |  500 ticks @ 18 MHz = 27.778 µs = 36.000 kHz |
+|[2:3]  |    F4 01     |  500    |  Unknown, maybe another pause / delay? |
+|       |              |         |  |
 |[4]    |    03        |  3      |  Repeats|
 |[5]    |    00        |  0      |  Special repeat frame (true = 1, false = 0)|
 |       |              |         |  Either repeats or repeat frame should be used.|

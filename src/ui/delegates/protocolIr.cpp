@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include <QAbstractItemModel>
+
 #include "protocolIr.h"
 #include "ui/editors/codeEditor.h"
-
 #include "bin/irProto/code.h"
 #include "document/data/enum.h"
 #include "models/protocolIrListModel.h"
-
-#include <QAbstractItemModel>
+#include "context.h"
 
 using namespace document::data;
 
 namespace delegates
 {
 
-ProtocolIr::ProtocolIr(QObject *parent) :
-    QStyledItemDelegate(parent)
+ProtocolIr::ProtocolIr(Context &ctx, QObject *parent) :
+    QStyledItemDelegate(parent), ctx(ctx)
 {
 }
 
@@ -29,15 +29,14 @@ QWidget* ProtocolIr::createEditor(QWidget *parent,
   auto codeTypeStr = typeIndex.data(Qt::EditRole).toString();
   auto codeType = Enum<CodeType>(codeTypeStr);
 
-  if ((codeType.getValue() != CodeType::Proprietary)
-      && (codeType.getValue() != CodeType::PhilipsRC5)) {
+  if (!editors::CodeEditor::isSupported(codeType.getValue())) {
     //unsupported protocol, no editor available yet
     return nullptr;
-  } //todo hier wegmachen. eine stelle wo das steht sollte ausreichen.
+  }
 
   auto code = index.data(Qt::EditRole).value<binary::irProto::Code>();
 
-  editors::CodeEditor editor(code, codeType.getValue(), parent);
+  editors::CodeEditor editor(ctx, code, codeType.getValue(), parent);
   if (editor.exec() == QDialog::Accepted) {
     auto *model = const_cast<QAbstractItemModel*>(index.model());
     model->setData(index, QVariant::fromValue(editor.getCode()), Qt::EditRole);

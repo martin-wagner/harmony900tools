@@ -27,20 +27,19 @@ class Section
 /** decode "code" field from xml */
 class Code
 {
-  protected:
+  public:
     enum class Ctrl : uint8_t {
       FLAT = 0,
       SECTIONS_1 = 1,
       SECTIONS_N, // 2, 3...
     };
 
+  protected:
     static constexpr int HEADER_SIZE = 8;
     static constexpr int FOOTER_SIZE = 1;
-    static constexpr double SYSCLOCK = 18000000.0;
 
     uint16_t index = 0;
-    uint16_t ticks = 500; //38kHz
-    uint8_t dataSectionCount = 0;
+    uint16_t delay = 500; //ms, most likely. Unable to find what this is or where it applies. Most devices have 500, seen 0 ... 1500 in steps of 100.
     uint8_t haveRepeatFrame = 0;
     uint8_t dataFrameTxCount = 1;
     Ctrl ctrl = Ctrl::FLAT;
@@ -54,7 +53,7 @@ class Code
     //bit-stream
     Status parseSingleSection(const std::vector<uint8_t>& data);
     //data section count 2byte bit-streams
-    Status parseMultiSection(std::vector<uint8_t> data);
+    Status parseMultiSection(uint8_t expectedSectionCount, std::vector<uint8_t> data);
 
     void writeSections(std::vector<uint8_t> &data) const;
 
@@ -70,9 +69,9 @@ class Code
     Status parse(const std::string &code);
 
     /** create code items from data. manually set either of setDataFrameTxCount / setRepeatFrame afterwards! */
-    void createFlat(uint8_t index, double clock, uint8_t bits, uint64_t data);
-    void createSingleSection(uint8_t index, double clock, uint8_t bits, uint64_t data);
-    void createMultiSection(uint8_t index, double clock, const std::vector<std::pair<uint8_t, uint16_t>> &data);
+    void createFlat(uint8_t index, int delay, uint8_t bits, uint64_t data);
+    void createSingleSection(uint8_t index, int delay, uint8_t bits, uint64_t data);
+    void createMultiSection(uint8_t index, int delay, const std::vector<std::pair<uint8_t, uint16_t>> &data);
 
     /** create code */
     std::string serialiseStr() const;
@@ -99,12 +98,9 @@ class Code
       }
     };
 
-    /** irProto protocol ticks */
-    int getTicks() const { return ticks; };
-    void setTicks(uint16_t v) { ticks = v; }
-
-    /** get carrier clock */
-    double getClock() const { return (SYSCLOCK / ticks); };
+    /** Delay */
+    int getDelay() const { return delay; };
+    void setDelay(uint16_t v) { delay = v; }
 
     std::string getRepeatTypeStr() const
     {
@@ -114,8 +110,7 @@ class Code
       return "Repeats: " + std::to_string(dataFrameTxCount);
     }
 
-    uint8_t getDataSectionCount() const { return dataSectionCount; }
-    void setDataSectionCount(uint8_t v) { dataSectionCount = v; }
+    uint8_t getDataSectionCount() const { return sections.size(); }
 
     uint8_t getRepeatFrame() const { return haveRepeatFrame; }
     void setRepeatFrame(uint8_t v) { haveRepeatFrame = v; }

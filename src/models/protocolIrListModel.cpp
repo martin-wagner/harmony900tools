@@ -3,6 +3,7 @@
 #include "document/config.h"
 #include "protocolIrListModel.h"
 #include "lib/qtHelpers.h"
+#include "ui/editors/codeEditor.h" //default code generation, code serialiser
 
 using namespace std;
 
@@ -323,12 +324,18 @@ QVariant ProtocolIrModel::visualiseData(
   if (cmd.canDecode.get() != true) {
     return tr("Proprietary data, format not supported!");
   }
-  if ((cmd.codeType.get().getValue() == document::data::CodeType::Unknown) ||
-      (cmd.codeType.get().getValue() == document::data::CodeType::None)) {
+  if ((cmd.codeType.get().getValue() == document::data::CodeType::Unknown)
+      || (cmd.codeType.get().getValue() == document::data::CodeType::None)) {
     return "";
   }
 
-  //todo alle als bit view decodieren oder protokollabh. nuetzliche infos anzeigen (device, command, ...)?
+  //decode as readable data
+  auto qstr = editors::CodeEditor::toString(cmd.codeType.get().getValue(),
+      cmd.command);
+  if (!qstr.isEmpty()) {
+    return qstr;
+  }
+  //not available, decode as waveform
   auto binaryData = cmd.command.getData();
   config.data().getProtocolLib().serialiseIrStream(timingData,
       cmd.protocolIndex.get(), binaryData);
@@ -360,19 +367,23 @@ bool models::ProtocolIrModel::setCommandType(
     document::data::CmdCatalogue &worker, int row, const QVariant &value)
 {
   uint32_t devicePos;
+  int index = -1;
 
   config.beginMacro(QObject::tr("Set IR protocol"));
 
   auto cmd = getCmds(&devicePos).at(row);
   cmd.codeType.set(value.toString());
-  auto index = worker.appendIrProtoLibItem(cmd.codeType.get());
-  if (index < 0) {
-    config.endMacro();
-    return false;
+  if (cmd.codeType.get().getValue() != document::data::CodeType::None) {
+    index = worker.appendIrProtoLibItem(cmd.codeType.get());
+    if (index < 0) {
+      config.endMacro();
+      return false;
+    }
   }
   cmd.protocolIndex.set(index);
   cmd.canDecode.set(true);
-  cmd.command = binary::irProto::Code(); //empty fixme non-empty, use protocol type
+  cmd.command = editors::CodeEditor::createDefault(index,
+      cmd.codeType.get().getValue());
   cmd.data.set( { });
   auto ret = worker.setIrCommand(devicePos, cmd, row, true);
 

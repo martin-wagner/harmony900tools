@@ -13,6 +13,8 @@ class QStackedWidget;
 class QTableWidget;
 class QTableWidgetItem;
 
+class Context;
+
 namespace editors
 {
 
@@ -26,27 +28,48 @@ namespace editors
  * - PhilipsRc5: simplified Address / Command fields, built internally
  *   into a single-section Code
  *
- * Other CodeType values are not yet supported by this editor.
+ * Other CodeType values are not yet supported by this editor. Add new
+ * protocols by extending isSupported(), createDefault(), and adding a
+ * page + load/get pair, all in this one class.
  */
 class CodeEditor: public QDialog
 {
   Q_OBJECT
 
   public:
-    CodeEditor(const binary::irProto::Code &code, document::data::CodeType codeType, QWidget *parent = nullptr);
+    //RC5: 2 start bits (not stored in Code) + toggle (not stored, always 0 here) + 5 bit address + 6 bit command
+    static constexpr uint8_t RC5_ADDRESS_BITS = 5;
+    static constexpr uint8_t RC5_COMMAND_BITS = 6;
+    static constexpr uint8_t RC5_PAYLOAD_BITS = 1 + RC5_ADDRESS_BITS + RC5_COMMAND_BITS; //toggle + address + command
+    static constexpr uint8_t RC5_START_BITS = 2;
+    static constexpr uint8_t RC5_FRAME_BITS = RC5_PAYLOAD_BITS + RC5_START_BITS;
+    static constexpr double RC5_CLOCK_HZ = 36000.0;
+
+    CodeEditor(Context &ctx, const binary::irProto::Code &code, document::data::CodeType codeType, QWidget *parent = nullptr);
     ~CodeEditor() override;
 
     /** build a Code from the current field content, matching the constructor's codeType */
     binary::irProto::Code getCode() const;
 
+    /** which CodeType values can this editor handle */
+    static bool isSupported(document::data::CodeType type);
+
+    /** build an empty, but valid, code instance for type */
+    static binary::irProto::Code createDefault(int index, document::data::CodeType type);
+
+    /** create human readable string for model -- displayrole */
+    static QString toString(document::data::CodeType type, const binary::irProto::Code &code);
+
   private:
+    Context &ctx;
     document::data::CodeType codeType;
+    bool editAll = false;
 
     QStackedWidget *stack = nullptr;
 
     //proprietary page
     QSpinBox *indexBox = nullptr;
-    QSpinBox *clockBox = nullptr;
+    QSpinBox *delayBox = nullptr;
     QComboBox *controlTypeBox = nullptr;
     QSpinBox *sectionCountBox = nullptr; //only used for Multi Section
     QComboBox *repeatModeBox = nullptr;
@@ -54,24 +77,26 @@ class CodeEditor: public QDialog
     QTableWidget *sectionTable = nullptr;
 
     //rc5 page
+    QSpinBox *rc5IndexBox = nullptr;
     QSpinBox *rc5AddressBox = nullptr;
     QSpinBox *rc5CommandBox = nullptr;
+    QSpinBox *rc5RepeatCountBox = nullptr;
 
     QWidget* createProprietaryPage();
     QWidget* createRc5Page();
 
     void loadProprietary(const binary::irProto::Code &code);
     void loadRc5(const binary::irProto::Code &code);
+    static void decodeRc5(const binary::irProto::Code &code, uint32_t &address, uint32_t &command);
 
     binary::irProto::Code getProprietaryCode() const;
     binary::irProto::Code getRc5Code() const;
 
-    void updateSectionTableRowCount();
-    void controlTypeChanged(int index);
-    void repeatModeChanged(int index);
-
     /** parse "1234" / "0x1234" / "0b1010" into a value, based on prefix */
-    static uint64_t parsePrefixedValue(const QString &text, bool *ok);
+    static uint64_t parsePrefixedValue(const QString &text, bool *ok = nullptr);
+    static inline uint32_t MASK(uint8_t bits) { return ((1u << bits) - 1); };
+    static uint64_t bitsTou64(const std::vector<bool> &data);
+    static std::vector<bool> u64ToBits(uint8_t bitCount, uint64_t data);
 };
 
 //todo verschiedene protokoll varianten https://www.mikrocontroller.net/articles/IRMP#Anhang

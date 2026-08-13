@@ -143,7 +143,7 @@
             ]
         },
         {
-            "Name": "PhilipsRc5",
+            "Name": "PhilipsRC5",
             "ClockPeriod": 27778,
             "Sections": [
                 {
@@ -180,7 +180,7 @@
             ]
         },
         {
-            "Name": "PhilipsRc6",
+            "Name": "PhilipsRC6",
             "ClockPeriod": 27778,
             "Sections": [
                 {

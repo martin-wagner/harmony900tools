@@ -84,8 +84,7 @@ void fromJson(const ordered_json &in, binary::irProto::Section &section)
 void toJson(ordered_json &out, const binary::irProto::Code &code)
 {
   out["Index"] = code.getIndex();
-  out["Ticks"] = code.getTicks();
-  out["DataSectionCount"] = code.getDataSectionCount();
+  out["Delay"] = code.getDelay();
   out["RepeatFrame"] = code.getRepeatFrame();
   out["DataFrameTxCount"] = code.getDataFrameTxCount();
   out["Control"] = code.getControl();
@@ -102,8 +101,7 @@ void toJson(ordered_json &out, const binary::irProto::Code &code)
 void fromJson(const ordered_json &in, binary::irProto::Code &code)
 {
   code.setIndex(in.value("Index", uint16_t(0)));
-  code.setTicks(in.value("Ticks", uint16_t(0)));
-  code.setDataSectionCount(in.value("DataSectionCount", uint8_t(0)));
+  code.setDelay(in.value("Delay", uint16_t(0)));
   code.setRepeatFrame(in.value("RepeatFrame", uint8_t(0)));
   code.setDataFrameTxCount(in.value("DataFrameTxCount", uint8_t(1)));
   code.setControl(in.value("Control", uint8_t(0)));

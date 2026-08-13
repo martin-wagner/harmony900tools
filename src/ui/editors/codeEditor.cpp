@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "codeEditor.h"
-
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFormLayout>
@@ -12,26 +10,24 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
+#include "lib/users.h"
+#include "context.h"
+#include "codeEditor.h"
+
 using namespace binary::irProto;
 using namespace document::data;
 
 namespace editors
 {
 
-namespace
+CodeEditor::CodeEditor(Context &ctx, const Code &code, CodeType type,
+    QWidget *parent) :
+    QDialog(parent), ctx(ctx), codeType(type)
 {
-constexpr double SYSCLOCK_HZ = 18000000.0;
+  if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    editAll = true;
+  }
 
-//RC5: 2 start bits (not stored in Code) + toggle (not stored, always 0 here) + 5 bit address + 6 bit command
-constexpr uint8_t RC5_ADDRESS_BITS = 5;
-constexpr uint8_t RC5_COMMAND_BITS = 6;
-constexpr uint8_t RC5_PAYLOAD_BITS = 1 + RC5_ADDRESS_BITS + RC5_COMMAND_BITS; //toggle + address + command
-constexpr double RC5_CLOCK_HZ = 36000.0;
-}
-
-CodeEditor::CodeEditor(const Code &code, CodeType type, QWidget *parent) :
-    QDialog(parent), codeType(type)
-{
   setWindowTitle(tr("Edit IR Code"));
 
   stack = new QStackedWidget(this);
@@ -64,48 +60,103 @@ CodeEditor::CodeEditor(const Code &code, CodeType type, QWidget *parent) :
 
 CodeEditor::~CodeEditor() = default;
 
+bool CodeEditor::isSupported(CodeType type)
+{
+  switch (type) {
+    case CodeType::Proprietary:
+    case CodeType::PhilipsRC5:
+      return true;
+    default:
+      return false;
+  }
+}
+
+Code CodeEditor::createDefault(int index, CodeType type)
+{
+  Code code;
+
+  switch (type) {
+    case CodeType::PhilipsRC5:
+      code.createSingleSection(index, RC5_CLOCK_HZ, RC5_FRAME_BITS,
+          0x03 << RC5_PAYLOAD_BITS);
+      code.setRepeatFrame(0);
+      code.setDataFrameTxCount(3);
+      break;
+    case CodeType::Proprietary:
+    case CodeType::None:
+    case CodeType::Unknown:
+    default:
+      break;
+  }
+
+  return code;
+}
+
 Code CodeEditor::getCode() const
 {
   switch (codeType) {
     case CodeType::PhilipsRC5:
       return getRc5Code();
     case CodeType::Proprietary:
-    default:
       return getProprietaryCode();
+    default:
+      return Code();
   }
+}
+
+QString editors::CodeEditor::toString(document::data::CodeType type,
+    const binary::irProto::Code &code)
+{
+  uint32_t address;
+  uint32_t command;
+
+  switch (type) {
+    case CodeType::PhilipsRC5:
+      if (code.getDataSectionCount() != 1) {
+        return QString();
+      }
+      decodeRc5(code, address, command);
+      return tr("Address: %1, Command: %2, Tx: %3").arg(address).arg(
+          command).arg(code.getDataFrameTxCount());
+    default:
+      break;
+  }
+  return QString();
 }
 
 QWidget* CodeEditor::createProprietaryPage()
 {
   auto *page = new QWidget(this);
 
-  indexBox = new QSpinBox(page);
-  indexBox->setRange(0, 65535);
+  //base info is not editable
 
-  clockBox = new QSpinBox(page);
-  clockBox->setRange(1, 1000000);
-  clockBox->setSuffix(tr(" Hz"));
+  indexBox = new QSpinBox(page);
+  indexBox->setEnabled(false); //must match irProto, not editable
+
+  delayBox = new QSpinBox(page);
+  delayBox->setRange(0, 100000);
+  delayBox->setSuffix(tr(" ms"));
+  delayBox->setToolTip(
+      tr("Yet another pause or delay (most likely). Not yet found "
+          "where it applies. Default seems to be 500ms"));
 
   controlTypeBox = new QComboBox(page);
   controlTypeBox->addItem(tr("Flat"));
   controlTypeBox->addItem(tr("Single Section"));
   controlTypeBox->addItem(tr("Multi Section"));
-  connect(controlTypeBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-      this, &CodeEditor::controlTypeChanged);
+  controlTypeBox->setEnabled(editAll); //must match irProto, not editable
 
   sectionCountBox = new QSpinBox(page);
-  sectionCountBox->setRange(2, 255);
-  connect(sectionCountBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
-      &CodeEditor::updateSectionTableRowCount);
+  sectionCountBox->setRange(0, 25);
+  sectionCountBox->setEnabled(editAll); //must match irProto, not editable
 
   repeatModeBox = new QComboBox(page);
   repeatModeBox->addItem(tr("Repeat Frame"));
   repeatModeBox->addItem(tr("Tx Count"));
-  connect(repeatModeBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-      this, &CodeEditor::repeatModeChanged);
+  repeatModeBox->setEnabled(editAll); //must match irProto, not editable
 
   repeatCountBox = new QSpinBox(page);
-  repeatCountBox->setRange(1, 255);
+  repeatCountBox->setRange(0, 25);
 
   sectionTable = new QTableWidget(0, 2, page);
   sectionTable->setHorizontalHeaderLabels( { tr("Value"), tr("Bits") });
@@ -115,7 +166,7 @@ QWidget* CodeEditor::createProprietaryPage()
 
   auto *formLayout = new QFormLayout();
   formLayout->addRow(tr("Index:"), indexBox);
-  formLayout->addRow(tr("Clock:"), clockBox);
+  formLayout->addRow(tr("Pause/Delay:"), delayBox);
   formLayout->addRow(tr("Control type:"), controlTypeBox);
   formLayout->addRow(tr("Section count:"), sectionCountBox);
   formLayout->addRow(tr("Repeat mode:"), repeatModeBox);
@@ -134,15 +185,28 @@ QWidget* CodeEditor::createRc5Page()
 {
   auto *page = new QWidget(this);
 
+  rc5IndexBox = new QSpinBox(page);
+  rc5IndexBox->setEnabled(false); //must match user data entry, not editable
+  if (!ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    rc5IndexBox->setVisible(false);
+  }
+
   rc5AddressBox = new QSpinBox(page);
-  rc5AddressBox->setRange(0, (1 << RC5_ADDRESS_BITS) - 1);
+  rc5AddressBox->setRange(0, MASK(RC5_ADDRESS_BITS));
 
   rc5CommandBox = new QSpinBox(page);
-  rc5CommandBox->setRange(0, (1 << RC5_COMMAND_BITS) - 1);
+  rc5CommandBox->setRange(0, MASK(RC5_COMMAND_BITS));
+
+  rc5RepeatCountBox = new QSpinBox(page);
+  rc5RepeatCountBox->setRange(1, 25);
 
   auto *formLayout = new QFormLayout(page);
+  if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    formLayout->addRow(tr("Index:"), rc5IndexBox);
+  }
   formLayout->addRow(tr("Address:"), rc5AddressBox);
   formLayout->addRow(tr("Command:"), rc5CommandBox);
+  formLayout->addRow(tr("Tx count:"), rc5RepeatCountBox);
 
   return page;
 }
@@ -150,16 +214,20 @@ QWidget* CodeEditor::createRc5Page()
 void CodeEditor::loadProprietary(const Code &code)
 {
   indexBox->setValue(code.getIndex());
-  clockBox->setValue(static_cast<int>(code.getClock()));
+  delayBox->setValue(code.getDelay());
+  sectionCountBox->setValue(code.getDataSectionCount());
 
-  auto control = code.getControl();
-  if (control == 0) {
-    controlTypeBox->setCurrentIndex(0); //Flat
-  } else if (control == 1) {
-    controlTypeBox->setCurrentIndex(1); //Single Section
-  } else {
-    controlTypeBox->setCurrentIndex(2); //Multi Section
-    sectionCountBox->setValue(code.getDataSectionCount());
+  auto control = static_cast<Code::Ctrl>(code.getControl());
+  switch (control) {
+    case Code::Ctrl::FLAT:
+      controlTypeBox->setCurrentIndex(0); //Flat
+      break;
+    case Code::Ctrl::SECTIONS_1:
+      controlTypeBox->setCurrentIndex(1); //Single Section
+      break;
+    default:
+      controlTypeBox->setCurrentIndex(2); //Multi Section
+      break;
   }
 
   if (code.getRepeatFrame() != 0) {
@@ -175,10 +243,7 @@ void CodeEditor::loadProprietary(const Code &code)
     sectionTable->insertRow(row);
 
     const auto &bits = section.getData();
-    uint64_t value = 0;
-    for (bool bit : bits) {
-      value = (value << 1) | (bit ? 1 : 0);
-    }
+    auto value = bitsTou64(bits);
 
     sectionTable->setItem(row, 0,
         new QTableWidgetItem("0x" + QString::number(value, 16).toUpper()));
@@ -186,33 +251,40 @@ void CodeEditor::loadProprietary(const Code &code)
     auto *bitsBox = new QSpinBox(sectionTable);
     bitsBox->setRange(1, 64);
     bitsBox->setValue(static_cast<int>(bits.size()));
+    bitsBox->setEnabled(editAll); //must match irProto, not editable
     sectionTable->setCellWidget(row, 1, bitsBox);
   }
-
-  updateSectionTableRowCount();
 }
 
 void CodeEditor::loadRc5(const Code &code)
 {
-  //RC5 payload is a single section: [toggle(1)][address(5)][command(6)]
+  uint32_t address;
+  uint32_t command;
+
+  decodeRc5(code, address, command);
+
+  rc5IndexBox->setValue(code.getIndex());
+  rc5AddressBox->setValue(address);
+  rc5CommandBox->setValue(command);
+  rc5RepeatCountBox->setValue(code.getDataFrameTxCount());
+}
+
+void CodeEditor::decodeRc5(const binary::irProto::Code &code, uint32_t &address,
+    uint32_t &command)
+{
+  //RC5 payload is a single section: [start(2)][toggle(1)][address(5)][command(6)]
   const auto &sections = code.accessSections();
   if (sections.empty()) {
-    rc5AddressBox->setValue(0);
-    rc5CommandBox->setValue(0);
+    address = 0;
+    command = 0;
     return;
   }
 
   const auto &bits = sections.front().getData();
-  uint64_t value = 0;
-  for (bool bit : bits) {
-    value = (value << 1) | (bit ? 1 : 0);
-  }
+  auto value = bitsTou64(bits);
 
-  auto command = value & ((1u << RC5_COMMAND_BITS) - 1);
-  auto address = (value >> RC5_COMMAND_BITS) & ((1u << RC5_ADDRESS_BITS) - 1);
-
-  rc5AddressBox->setValue(static_cast<int>(address));
-  rc5CommandBox->setValue(static_cast<int>(command));
+  address = (value >> RC5_COMMAND_BITS) & MASK(RC5_ADDRESS_BITS);
+  command = value & MASK(RC5_COMMAND_BITS);
 }
 
 Code CodeEditor::getProprietaryCode() const
@@ -220,11 +292,12 @@ Code CodeEditor::getProprietaryCode() const
   Code code;
 
   code.setIndex(static_cast<uint16_t>(indexBox->value()));
-  code.setTicks(static_cast<uint16_t>(SYSCLOCK_HZ / clockBox->value()));
-  code.setControl(
-      static_cast<uint8_t>(
-          controlTypeBox->currentIndex() == 2 ?
-              sectionCountBox->value() : controlTypeBox->currentIndex()));
+  code.setDelay(static_cast<uint16_t>(delayBox->value()));
+  if (controlTypeBox->currentIndex() == 2) {
+    code.setControl(sectionCountBox->value()); // >= 2
+  } else {
+    code.setControl(controlTypeBox->currentIndex());
+  }
 
   if (repeatModeBox->currentIndex() == 0) {
     code.setRepeatFrame(1);
@@ -234,8 +307,6 @@ Code CodeEditor::getProprietaryCode() const
     code.setDataFrameTxCount(static_cast<uint8_t>(repeatCountBox->value()));
   }
 
-  code.setDataSectionCount(static_cast<uint8_t>(sectionTable->rowCount()));
-
   std::vector<Section> sections;
   for (int row = 0; row < sectionTable->rowCount(); row++) {
     auto *valueItem = sectionTable->item(row, 0);
@@ -244,15 +315,9 @@ Code CodeEditor::getProprietaryCode() const
       continue;
     }
 
-    bool ok = false;
-    auto value = parsePrefixedValue(valueItem->text(), &ok);
+    auto value = parsePrefixedValue(valueItem->text());
     auto bitCount = static_cast<uint8_t>(bitsBox->value());
-
-    std::vector<bool> bits;
-    bits.reserve(bitCount);
-    for (int i = bitCount - 1; i >= 0; i--) {
-      bits.push_back((value >> i) & 1);
-    }
+    auto bits = u64ToBits(bitCount, value);
     sections.push_back(Section(row, bits));
   }
   code.setSections(sections);
@@ -264,48 +329,15 @@ Code CodeEditor::getRc5Code() const
 {
   Code code;
 
-  uint64_t payload = 0; //toggle bit is always 0 here, actual toggling happens at send time
-  payload = (payload << RC5_ADDRESS_BITS)
-      | static_cast<uint64_t>(rc5AddressBox->value());
-  payload = (payload << RC5_COMMAND_BITS)
-      | static_cast<uint64_t>(rc5CommandBox->value());
+  uint64_t payload = 0x03 << RC5_PAYLOAD_BITS; // 2 start bits (1), 1 toggle bit (not placed here)
+  payload |= static_cast<uint64_t>(rc5AddressBox->value()) << RC5_COMMAND_BITS;
+  payload |= static_cast<uint64_t>(rc5CommandBox->value());
 
-  code.createSingleSection(0, RC5_CLOCK_HZ, RC5_PAYLOAD_BITS, payload);
-
+  code.createSingleSection(rc5IndexBox->value(), RC5_CLOCK_HZ, RC5_FRAME_BITS,
+      payload);
+  code.setRepeatFrame(0);
+  code.setDataFrameTxCount(rc5RepeatCountBox->value());
   return code;
-}
-
-void CodeEditor::updateSectionTableRowCount()
-{
-  int wanted = 1;
-  if (controlTypeBox->currentIndex() == 2) {
-    wanted = sectionCountBox->value();
-  }
-
-  while (sectionTable->rowCount() < wanted) {
-    auto row = sectionTable->rowCount();
-    sectionTable->insertRow(row);
-    sectionTable->setItem(row, 0, new QTableWidgetItem("0x0"));
-
-    auto *bitsBox = new QSpinBox(sectionTable);
-    bitsBox->setRange(1, 64);
-    bitsBox->setValue(16);
-    sectionTable->setCellWidget(row, 1, bitsBox);
-  }
-  while (sectionTable->rowCount() > wanted) {
-    sectionTable->removeRow(sectionTable->rowCount() - 1);
-  }
-}
-
-void CodeEditor::controlTypeChanged(int index)
-{
-  sectionCountBox->setEnabled(index == 2);
-  updateSectionTableRowCount();
-}
-
-void CodeEditor::repeatModeChanged(int index)
-{
-  repeatCountBox->setEnabled(index == 1);
 }
 
 uint64_t CodeEditor::parsePrefixedValue(const QString &text, bool *ok)
@@ -319,6 +351,25 @@ uint64_t CodeEditor::parsePrefixedValue(const QString &text, bool *ok)
     return trimmed.mid(2).toULongLong(ok, 2);
   }
   return trimmed.toULongLong(ok, 10);
+}
+
+uint64_t CodeEditor::bitsTou64(const std::vector<bool> &data)
+{
+  uint64_t value = 0;
+  for (bool bit : data) {
+    value = (value << 1) | (bit ? 1 : 0);
+  }
+  return value;
+}
+
+std::vector<bool> CodeEditor::u64ToBits(uint8_t bitCount, uint64_t data)
+{
+  std::vector<bool> bits;
+  bits.reserve(bitCount);
+  for (int i = bitCount - 1; i >= 0; i--) {
+    bits.push_back((data >> i) & 1);
+  }
+  return bits;
 }
 
 }

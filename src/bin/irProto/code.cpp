@@ -93,15 +93,16 @@ Status Code::parseSingleSection(const vector<uint8_t> &data)
   return Status::OK;
 }
 
-Status Code::parseMultiSection(vector<uint8_t> data)
+Status Code::parseMultiSection(uint8_t expectedSectionCount,
+    vector<uint8_t> data)
 {
   int i;
 
-  if (data.size() < (2 * dataSectionCount)) {
+  if (data.size() < (2 * expectedSectionCount)) {
     return Status::ERROR_SIZE;
   }
 
-  for (i = 0; i < dataSectionCount; i++) {
+  for (i = 0; i < expectedSectionCount; i++) {
     auto bits = bytesToBits( { data.begin(), data.begin() + 2 });
     sections.push_back(Section(i, bits));
     data.erase(data.begin(), data.begin() + 2);
@@ -146,10 +147,11 @@ Status Code::parse(vector<uint8_t> code)
   code.erase(code.end() - 1);
 
   index = lib::parseHarmony16_file(code[0], code[1]);
-  ticks = lib::parseHarmony16_file(code[2], code[3]);
+  delay = lib::parseHarmony16_file(code[2], code[3]);
   dataFrameTxCount = code[4];
   haveRepeatFrame = code[5] & 0x01;
   if (haveRepeatFrame && (dataFrameTxCount > 1)) {
+    //fixme seems to exist. no idea how this is supposed to work then.
     //use either one...
     cout << "Error: xml <code> multi-tx + repeat selected" << endl;
     return Status::ERROR_PAYLOAD_FORMAT;
@@ -158,31 +160,30 @@ Status Code::parse(vector<uint8_t> code)
   ctrl = static_cast<Ctrl>(code[6]);
   switch (ctrl) {
     case Ctrl::FLAT:
-      dataSectionCount = 1;
       return parseFlat( { code.begin() + 7, code.end() });
     case Ctrl::SECTIONS_1:
       if (code[7] != 0) {
         cout << "Error: xml <code> ss pad7 != 0 (" << code[7] << ")" << endl;
         return Status::ERROR_PAYLOAD_FORMAT;
       }
-      dataSectionCount = 1;
       return parseSingleSection( { code.begin() + 8, code.end() });
     default:
       if (code[7] != 0) {
         cout << "Error: xml <code> ms pad7 != 0 (" << code[7] << ")" << endl;
         return Status::ERROR_PAYLOAD_FORMAT;
       }
-      dataSectionCount = static_cast<uint8_t>(ctrl);
-      return parseMultiSection( { code.begin() + 8, code.end() });
+      return parseMultiSection(static_cast<uint8_t>(ctrl), {
+        code.begin() + 8,
+        code.end() });
   }
 }
 
-void Code::createFlat(uint8_t index, double clock, uint8_t bits, uint64_t data)
+void Code::createFlat(uint8_t index, int delay, uint8_t bits, uint64_t data)
 {
   sections.clear();
 
   this->index = index;
-  ticks = clock / 72; // @ 18 MHz
+  this->delay = delay;
   dataFrameTxCount = 1;
   haveRepeatFrame = 0;
   ctrl = Ctrl::FLAT;
@@ -190,13 +191,13 @@ void Code::createFlat(uint8_t index, double clock, uint8_t bits, uint64_t data)
   sections.push_back(section);
 }
 
-void Code::createSingleSection(uint8_t index, double clock, uint8_t bits,
+void Code::createSingleSection(uint8_t index, int delay, uint8_t bits,
     uint64_t data)
 {
   sections.clear();
 
   this->index = index;
-  ticks = clock / 72; // @ 18 MHz
+  this->delay = delay;
   dataFrameTxCount = 1;
   haveRepeatFrame = 0;
   ctrl = Ctrl::SECTIONS_1;
@@ -204,7 +205,7 @@ void Code::createSingleSection(uint8_t index, double clock, uint8_t bits,
   sections.push_back(section);
 }
 
-void Code::createMultiSection(uint8_t index, double clock,
+void Code::createMultiSection(uint8_t index, int delay,
     const std::vector<std::pair<uint8_t, uint16_t> > &data)
 {
   int i;
@@ -212,7 +213,7 @@ void Code::createMultiSection(uint8_t index, double clock,
   sections.clear();
 
   this->index = index;
-  ticks = clock / 72; // @ 18 MHz
+  this->delay = delay;
   dataFrameTxCount = 1;
   haveRepeatFrame = 0;
   ctrl = static_cast<Ctrl>(data.size());
@@ -239,7 +240,7 @@ vector<uint8_t> Code::serialiseVec() const
   vector<uint8_t> code;
 
   lib::setHarmony16_file(index, code);
-  lib::setHarmony16_file(ticks, code);
+  lib::setHarmony16_file(delay, code);
   code.push_back(dataFrameTxCount);
   code.push_back(haveRepeatFrame);
   code.push_back(static_cast<uint8_t>(ctrl));
@@ -273,7 +274,7 @@ const IrProto::Data Code::getData() const
     }
   }
   if (haveRepeatFrame) {
-    data.push_back( { dataSectionCount, { } });
+    data.push_back( { static_cast<int>(sections.size()), { } });
   }
   return data;
 }
