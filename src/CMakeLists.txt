@@ -34,6 +34,7 @@ set(sources ${sources}
   mainwindow.cpp
   bin/timing.cpp
   bin/irProto/code.cpp
+  bin/irProto/decode.cpp
   bin/irProto/file.cpp
   bin/ssIr/file.cpp
   comm/concord.cpp

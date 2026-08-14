@@ -366,6 +366,39 @@ void TimingSection::serialiseIrStream(vector<Item> &out,
   }
 }
 
+vector<Item> IrProto::compress(vector<Item> items)
+{
+  vector<Item> ret;
+
+  //merge when mutliple timings have the same logic level
+  while (items.size() > 0) {
+    if (items.size() > 1) {
+      auto mark = items[0].first;
+      auto time_us = items[0].second;
+      auto next_mark = items[1].first;
+      auto next_time_us = items[1].second;
+
+      if ((mark == next_mark)) {
+        auto compressed = static_cast<uint32_t>(time_us) + next_time_us;
+        if (compressed > 0x7fff) {
+          items[1].second = compressed - 0x7fff;
+          ret.push_back( { mark, 0x7fff });
+        } else {
+          //add to next timing
+          items[1].second = compressed;
+        }
+      } else {
+        ret.push_back(items[0]);
+      }
+    } else {
+      //last item
+      ret.push_back(items[0]);
+    }
+    items.erase(items.begin());
+  }
+  return ret;
+}
+
 IrProto::IrProto()
 {
 }
@@ -425,6 +458,16 @@ IrProto::IrProto(uint16_t clockPeriod_ns,
 {
 }
 
+int IrProto::getBitCount() const
+{
+  int bitCount = 0;
+
+  for (const auto &section : sections) {
+    bitCount = bitCount + section.getBitCount();
+  }
+  return bitCount;
+}
+
 const TimingSection& IrProto::accessSection(int index) const
 {
   static const TimingSection s;
@@ -465,6 +508,49 @@ vector<uint8_t> IrProto::serialise(int offset) const
   return data;
 }
 
+Status IrProto::serialiseIrStream(binary::TimingStream &out,
+    const IrProto::Data &data) const
+{
+  vector<Item> items;
+
+  serialiseIrStream(items, data);
+  items = compress(items);
+
+  //we have list of coded bits (time + mark/pause).
+  //we need timing stream (time-mark + time-pause).
+  while (items.size() > 0) {
+    const auto mark = items[0].first;
+    const auto time_us = items[0].second;
+
+    if (!mark) {
+      //Block is always mark/pause, add empty mark
+      out.addMarkPause( { 0, time_us });
+      items.erase(items.begin());
+      continue;
+    }
+
+    if (items.size() > 1) {
+      const auto next_mark = items[1].first;
+      const auto next_time_us = items[1].second;
+
+      if (next_mark == true) {
+        //Block is always mark/pause, add empty pause
+        out.addMarkPause( { time_us, 0 });
+        items.erase(items.begin());
+      } else {
+        //insert mark/pause
+        out.addMarkPause( { time_us, next_time_us });
+        items.erase(items.begin(), items.begin() + 2);
+      }
+    } else {
+      //last item
+      out.addMarkPause( { time_us, 0 });
+      items.erase(items.begin());
+    }
+  }
+  return Status::OK;
+}
+
 void IrProto::serialiseIrStream(vector<Item> &out, const Data &data) const
 {
   for (const auto &s : data) {
@@ -474,39 +560,6 @@ void IrProto::serialiseIrStream(vector<Item> &out, const Data &data) const
     }
     sections[index].serialiseIrStream(out, s.second);
   }
-}
-
-vector<Item> File::compress(vector<Item> items)
-{
-  vector<Item> ret;
-
-  //merge when mutliple timings have the same logic level
-  while (items.size() > 0) {
-    if (items.size() > 1) {
-      auto mark = items[0].first;
-      auto time_us = items[0].second;
-      auto next_mark = items[1].first;
-      auto next_time_us = items[1].second;
-
-      if ((mark == next_mark)) {
-        auto compressed = static_cast<uint32_t>(time_us) + next_time_us;
-        if (compressed > 0x7fff) {
-          items[1].second = compressed - 0x7fff;
-          ret.push_back( { mark, 0x7fff });
-        } else {
-          //add to next timing
-          items[1].second = compressed;
-        }
-      } else {
-        ret.push_back(items[0]);
-      }
-    } else {
-      //last item
-      ret.push_back(items[0]);
-    }
-    items.erase(items.begin());
-  }
-  return ret;
 }
 
 File::File()
@@ -700,42 +753,7 @@ Status File::serialiseIrStream(binary::TimingStream &out, uint16_t index,
     return Status::ERROR_INDEX;
   }
 
-  protocols[index].serialiseIrStream(items, data);
-  items = compress(items);
-
-  //we have list of coded bits (time + mark/pause).
-  //we need timing stream (time-mark + time-pause).
-  while (items.size() > 0) {
-    const auto mark = items[0].first;
-    const auto time_us = items[0].second;
-
-    if (!mark) {
-      //Block is always mark/pause, add empty mark
-      out.addMarkPause( { 0, time_us });
-      items.erase(items.begin());
-      continue;
-    }
-
-    if (items.size() > 1) {
-      const auto next_mark = items[1].first;
-      const auto next_time_us = items[1].second;
-
-      if (next_mark == true) {
-        //Block is always mark/pause, add empty pause
-        out.addMarkPause( { time_us, 0 });
-        items.erase(items.begin());
-      } else {
-        //insert mark/pause
-        out.addMarkPause( { time_us, next_time_us });
-        items.erase(items.begin(), items.begin() + 2);
-      }
-    } else {
-      //last item
-      out.addMarkPause( { time_us, 0 });
-      items.erase(items.begin());
-    }
-  }
-  return Status::OK;
+  return protocols[index].serialiseIrStream(out, data);
 }
 
 Status File::parseObject(const vector<uint8_t> &raw, uint16_t startOffset,

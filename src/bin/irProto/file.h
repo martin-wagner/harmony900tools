@@ -175,6 +175,9 @@ class IrProto
     std::vector<TimingSection> sections;
 
   public:
+
+    static std::vector<Item> compress(std::vector<Item> items);
+
     /** create an empty protocol */
     IrProto();
     /** add a protocol block from IrProto.bin*/
@@ -185,6 +188,7 @@ class IrProto
     /** read section count */
     int getSectionCount() const { return sections.size(); };
     bool isEmpty() const { return sections.empty(); };
+    int getBitCount() const;
 
     /** access a single section */
     const TimingSection &accessSection(int index) const;
@@ -198,7 +202,11 @@ class IrProto
 
     /** input data section index + section data (if any) */
     using Data = std::vector<std::pair<int, std::vector<bool>>>;
-    /** serialise for creating timing stream */
+
+    /** serialise to timing stream */
+    Status serialiseIrStream(binary::TimingStream &out, const IrProto::Data &data) const;
+
+  protected:
     void serialiseIrStream(std::vector<Item> &out, const Data &data) const;
 };
 
@@ -212,8 +220,6 @@ class File
     static constexpr int HEADER_SIZE = 5; //last 0x01 of header above belongs to payload with unknown use.
 
     std::vector<IrProto> protocols;
-
-    static std::vector<Item> compress(std::vector<Item> items);
 
   public:
     /** create empty file */

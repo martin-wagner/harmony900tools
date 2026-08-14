@@ -4,7 +4,6 @@
 
 #include <QObject>
 
-#include "ui/logViewer.h"
 #include "bin/irProto/file.h"
 
 namespace document
@@ -13,11 +12,11 @@ namespace document
 namespace files
 {
 
-class ProtocolCatalogue : public QObject
+class ProtocolCatalogue
 {
-  Q_OBJECT
   public:
     ProtocolCatalogue();
+    ProtocolCatalogue(const QString &path);
 
     /** get a protocol from the name. check "ret.isEmpty()" for success */
     binary::irProto::IrProto get(const QString &name) const;

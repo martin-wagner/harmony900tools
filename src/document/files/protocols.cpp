@@ -19,6 +19,11 @@ ProtocolCatalogue::ProtocolCatalogue()
 {
 }
 
+ProtocolCatalogue::ProtocolCatalogue(const QString &path) :
+    jsonPath(path)
+{
+}
+
 binary::irProto::IrProto ProtocolCatalogue::get(const QString &name) const
 {
   try {
@@ -28,7 +33,8 @@ binary::irProto::IrProto ProtocolCatalogue::get(const QString &name) const
   return binary::irProto::IrProto();
 }
 
-binary::irProto::IrProto ProtocolCatalogue::getFromJson(const QString &name) const
+binary::irProto::IrProto ProtocolCatalogue::getFromJson(
+    const QString &name) const
 {
   int i;
   json j;
@@ -63,7 +69,6 @@ binary::irProto::IrProto ProtocolCatalogue::getFromJson(const QString &name) con
   //not found
   return binary::irProto::IrProto();
 }
-
 
 }
 }
