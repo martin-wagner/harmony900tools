@@ -28,7 +28,8 @@ class Decode
     CodeType codeType = CodeType::Unknown;
     const IrProto *prot = nullptr;
     std::vector<bool> payload;
-    double tolerance = 0.2; //+/-
+    double timingTolerance = 0.2; //factor +/-
+    double ratioTolerance = 0.2;  //abs +/-
 
   public:
     /** create empty Decoder item */
@@ -37,7 +38,7 @@ class Decode
     Decode(const document::files::ProtocolCatalogue &cat, const TimingStream &data);
 
     /** set timing tolerance */
-    void setTolerance(double v) { tolerance = v; };
+    void setTolerance(double v) { timingTolerance = v; };
 
     /** parse Decode (overwrite existing) */
     Status parse(TimingStream data, bool headerOnly = false);
@@ -53,8 +54,10 @@ class Decode
 
   protected:
     void buildData(const document::files::ProtocolCatalogue &cat);
-    bool checkTolerance(double expectedTime, double time);
+    bool checkTime(double expectedTime, double time);
+    bool checkRatio(double expectedRatio, double ratio);
 
+    //sorted by how unambiguously a protocol can be detected
     std::vector<std::pair<CodeType, IrProto>> protocols;
 
   protected:
@@ -63,12 +66,6 @@ class Decode
 
     IrProto::Data createSearchData(uint64_t data);
     uint8_t checkData(const TimingStream &test, const TimingStream &check);
-
-
-
-    bool removeSof(TimingStream &data);
-    bool getPayload(int section, TimingStream &data, bool containsStartBit = false);
-
 };
 
 }

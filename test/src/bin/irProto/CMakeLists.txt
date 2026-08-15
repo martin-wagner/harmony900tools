@@ -45,7 +45,7 @@ target_link_libraries(test_irProto
 target_compile_definitions(test_irProto PRIVATE
     ENUMSONLY
     REAL_IRPROTO_BIN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/IrProto.bin"
-    TEST_CONFIG_PATH="${CMAKE_CURRENT_SOURCE_DIR}/ir_protocols.json"
+    TEST_CONFIG_PATH="${CMAKE_SOURCE_DIR}/res/ir_protocols.json"
 )
 
 # ---------------------------------------------------------------------------

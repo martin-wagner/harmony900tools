@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 
 #include "lib/users.h"
+#include "lib/bits.h"
 #include "context.h"
 #include "codeEditor.h"
 
@@ -78,7 +79,7 @@ Code CodeEditor::createDefault(int index, CodeType type)
   switch (type) {
     case CodeType::PhilipsRC5:
       code.createSingleSection(index, RC5_CLOCK_HZ, RC5_FRAME_BITS,
-          0x03 << RC5_PAYLOAD_BITS);
+          0x01 << RC5_PAYLOAD_BITS);
       code.setRepeatFrame(0);
       code.setDataFrameTxCount(3);
       break;
@@ -243,7 +244,7 @@ void CodeEditor::loadProprietary(const Code &code)
     sectionTable->insertRow(row);
 
     const auto &bits = section.getData();
-    auto value = bitsTou64(bits);
+    auto value = lib::bitsTou64Msb(bits);
 
     sectionTable->setItem(row, 0,
         new QTableWidgetItem("0x" + QString::number(value, 16).toUpper()));
@@ -281,7 +282,7 @@ void CodeEditor::decodeRc5(const binary::irProto::Code &code, uint32_t &address,
   }
 
   const auto &bits = sections.front().getData();
-  auto value = bitsTou64(bits);
+  auto value = lib::bitsTou64Msb(bits);
 
   address = (value >> RC5_COMMAND_BITS) & MASK(RC5_ADDRESS_BITS);
   command = value & MASK(RC5_COMMAND_BITS);
@@ -317,7 +318,7 @@ Code CodeEditor::getProprietaryCode() const
 
     auto value = parsePrefixedValue(valueItem->text());
     auto bitCount = static_cast<uint8_t>(bitsBox->value());
-    auto bits = u64ToBits(bitCount, value);
+    auto bits = lib::u64ToBitsMsb(bitCount, value);
     sections.push_back(Section(row, bits));
   }
   code.setSections(sections);
@@ -329,7 +330,7 @@ Code CodeEditor::getRc5Code() const
 {
   Code code;
 
-  uint64_t payload = 0x03 << RC5_PAYLOAD_BITS; // 2 start bits (1), 1 toggle bit (not placed here)
+  uint64_t payload = 0x01 << RC5_PAYLOAD_BITS; // 1 software start bits (1), 1 toggle bit (not placed here)
   payload |= static_cast<uint64_t>(rc5AddressBox->value()) << RC5_COMMAND_BITS;
   payload |= static_cast<uint64_t>(rc5CommandBox->value());
 
@@ -353,23 +354,5 @@ uint64_t CodeEditor::parsePrefixedValue(const QString &text, bool *ok)
   return trimmed.toULongLong(ok, 10);
 }
 
-uint64_t CodeEditor::bitsTou64(const std::vector<bool> &data)
-{
-  uint64_t value = 0;
-  for (bool bit : data) {
-    value = (value << 1) | (bit ? 1 : 0);
-  }
-  return value;
-}
-
-std::vector<bool> CodeEditor::u64ToBits(uint8_t bitCount, uint64_t data)
-{
-  std::vector<bool> bits;
-  bits.reserve(bitCount);
-  for (int i = bitCount - 1; i >= 0; i--) {
-    bits.push_back((data >> i) & 1);
-  }
-  return bits;
-}
 
 }

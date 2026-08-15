@@ -37,11 +37,11 @@ class CodeEditor: public QDialog
   Q_OBJECT
 
   public:
-    //RC5: 2 start bits (not stored in Code) + toggle (not stored, always 0 here) + 5 bit address + 6 bit command
+    //RC5: 2 start bits (one part of protocol) + toggle (not stored, always 0 here) + 5 bit address + 6 bit command
     static constexpr uint8_t RC5_ADDRESS_BITS = 5;
     static constexpr uint8_t RC5_COMMAND_BITS = 6;
     static constexpr uint8_t RC5_PAYLOAD_BITS = 1 + RC5_ADDRESS_BITS + RC5_COMMAND_BITS; //toggle + address + command
-    static constexpr uint8_t RC5_START_BITS = 2;
+    static constexpr uint8_t RC5_START_BITS = 1;
     static constexpr uint8_t RC5_FRAME_BITS = RC5_PAYLOAD_BITS + RC5_START_BITS;
     static constexpr double RC5_CLOCK_HZ = 36000.0;
 
@@ -95,8 +95,6 @@ class CodeEditor: public QDialog
     /** parse "1234" / "0x1234" / "0b1010" into a value, based on prefix */
     static uint64_t parsePrefixedValue(const QString &text, bool *ok = nullptr);
     static inline uint32_t MASK(uint8_t bits) { return ((1u << bits) - 1); };
-    static uint64_t bitsTou64(const std::vector<bool> &data);
-    static std::vector<bool> u64ToBits(uint8_t bitCount, uint64_t data);
 };
 
 //todo verschiedene protokoll varianten https://www.mikrocontroller.net/articles/IRMP#Anhang

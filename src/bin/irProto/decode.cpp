@@ -63,12 +63,23 @@ void Decode::buildData(const document::files::ProtocolCatalogue &cat)
   }
 }
 
-bool Decode::checkTolerance(double expectedTime, double time)
+bool Decode::checkTime(double expectedTime, double time)
 {
-  auto rangeMax = expectedTime + expectedTime * tolerance;
-  auto rangeMin = expectedTime - expectedTime * tolerance;
+  auto rangeMax = expectedTime + expectedTime * timingTolerance;
+  auto rangeMin = expectedTime - expectedTime * timingTolerance;
 
   if ((time < rangeMax) && (time > rangeMin)) {
+    return true;
+  }
+  return false;
+}
+
+bool Decode::checkRatio(double expectedRatio, double ratio)
+{
+  auto rangeMax = expectedRatio + ratioTolerance;
+  auto rangeMin = expectedRatio - ratioTolerance;
+
+  if ((ratio < rangeMax) && (ratio > rangeMin)) {
     return true;
   }
   return false;
@@ -79,13 +90,28 @@ bool Decode::searchHeader(const TimingStream &data)
   double expectedStartBitTime;
   double expectedPauseBitTime;
 
-  auto startBitTime = data.timings()[0].mark_us;
-  auto startPauseTime = data.timings()[0].pause_us;
+  double startBitTime = data.timings()[0].mark_us;
+  double startPauseTime = data.timings()[0].pause_us;
 
   for (const auto &protocol : protocols) {
     if (protocol.second.isEmpty()) {
       continue;
     }
+    //some protocols don't use the generic decoder
+    switch (protocol.first) {
+      //manchester. don't use start bit, can start with a single/double-wide mark and continue with a single/double wide pause
+      case CodeType::PhilipsRC5:
+        if ((checkTime(889, startBitTime) || checkTime(2 * 889, startBitTime))
+            && (checkTime(889, startPauseTime)
+                || checkTime(2 * 889, startPauseTime))) {
+          codeType = protocol.first;
+          prot = &protocol.second;
+        }
+        continue;
+      default:
+        break;
+    }
+
     auto sof = protocol.second.accessSection(0).getSoF().accessStream();
     if (!sof.empty()) {
       //check SoF
@@ -94,9 +120,9 @@ bool Decode::searchHeader(const TimingStream &data)
         sof.erase(sof.begin());
       }
       //check start "mark"
+      expectedStartBitTime = sof.front().second;
       if (!sof.empty()) {
-        expectedStartBitTime = sof.front().second;
-        if (!checkTolerance(expectedStartBitTime, startBitTime)) {
+        if (!checkTime(expectedStartBitTime, startBitTime)) {
           continue;
         }
         //"mark" matches, store away and continue search for a better match
@@ -105,33 +131,18 @@ bool Decode::searchHeader(const TimingStream &data)
 
         sof.erase(sof.begin());
       }
-      //check start "pause"
+      //check start/pause ratio. using the ratio cancels out osc tolerances.
       //fixme this doesnt work with "manchester" coding when the pause is enlarged by the first data bit!
       if (!sof.empty() && (sof.front().first == false)) {
         expectedPauseBitTime = sof.front().second;
-        if (checkTolerance(expectedPauseBitTime, startPauseTime)) {
+        auto expectedRatio = expectedStartBitTime / expectedPauseBitTime;
+        auto ratio = startBitTime / startPauseTime;
+        if (checkRatio(expectedRatio, ratio)) {
           //match
           codeType = protocol.first;
           prot = &protocol.second;
           return true;
         }
-      }
-    } else {
-      //no SoF. special checks.
-      switch (protocol.first) {
-        case CodeType::PhilipsRC5:
-          //manchester. can start with a single/double-wide mark and continue with a single/double wide pause
-          if ((checkTolerance(889, startBitTime)
-              || checkTolerance(2 * 889, startBitTime))
-              && (checkTolerance(889, startPauseTime)
-                  || checkTolerance(2 * 889, startPauseTime))) {
-            //wide range of validity, store away and continue search for a better match
-            codeType = protocol.first;
-            prot = &protocol.second;
-          }
-          break;
-        default:
-          break;
       }
     }
   }
@@ -179,7 +190,7 @@ Status Decode::searchData(const TimingStream &data)
 
 IrProto::Data Decode::createSearchData(uint64_t data)
 {
-  uint32_t i;
+  int i;
   IrProto::Data ret;
 
   for (i = 0; i < prot->getSectionCount(); i++) {
@@ -189,6 +200,7 @@ IrProto::Data Decode::createSearchData(uint64_t data)
     }
     auto bits = lib::u64ToBitsLsb(section.getBitCount(), data);
     ret.push_back( { i, move(bits) });
+    data = data >> section.getBitCount();
   }
   return ret;
 }
@@ -201,8 +213,8 @@ uint8_t Decode::checkData(const TimingStream &test, const TimingStream &check)
     for (pos = 0; pos < test.timings().size(); pos++) {
       const auto &testBlock = test.timings().at(pos);
       const auto &checkBlock = check.timings().at(pos);
-      auto checkMark = checkTolerance(checkBlock.mark_us, testBlock.mark_us);
-      auto checkPause = checkTolerance(checkBlock.pause_us, testBlock.pause_us);
+      auto checkMark = checkTime(checkBlock.mark_us, testBlock.mark_us);
+      auto checkPause = checkTime(checkBlock.pause_us, testBlock.pause_us);
       if (!checkMark || !checkPause) {
         //mismatch
         return pos;
@@ -211,84 +223,6 @@ uint8_t Decode::checkData(const TimingStream &test, const TimingStream &check)
   } catch (out_of_range&) {
   }
   return pos;
-}
-
-bool Decode::removeSof(TimingStream &data)
-{
-//  auto stream = prot->accessSection(0).getSoF().accessStream(); todo wegmachen...
-//  if (stream.empty()) {
-//    //no SoF
-//    return true;
-//  }
-//  if (stream[0].first == false) {
-//    //stream start with false => idle time before rx begins
-//    stream.erase(stream.begin());
-//  }
-//
-//  //SoF has bitwise coding of data -- search for exact match
-//  try {
-//    for (const auto& [state, time] : stream) {
-//      auto &timing = data.timings().at(0);
-//      if (state == true) {
-//        if (checkTolerance(timing.mark_us, time)) {
-//          //found item, remove
-//          data.timings().erase(data.timings().begin());
-//        } else {
-//          return false;
-//        }
-//      } else {
-//        if (checkTolerance(timing.pause_us, time)) {
-//          //found item, remove
-//          data.timings().erase(data.timings().begin());
-//        } else {
-//          return false;
-//        }
-//      }
-//    }
-//  } catch (out_of_range&) {
-//    return false;
-//  }
-//  return true;
-}
-
-bool Decode::getPayload(int section, TimingStream &data, bool containsStartBit)
-{
-//  bool initialFalseChecked = false;
-//
-//  auto stream = prot->accessSection(section).getData().accessStream();
-//  if (stream.empty()) {
-//    //no SoF
-//    return true;
-//  }
-//  if (stream[0].first == false) {
-//    //stream start with false => idle time before rx begins
-//    stream.erase(stream.begin());
-//  }
-//
-//  try {
-//    for (const auto& [state, time] : stream) {
-//      auto &timing = data.timings().at(0);
-//      if (state == true) {
-//        if (checkTolerance(timing.mark_us, time)) {
-//          //found item, remove
-//          data.timings().erase(data.timings().begin());
-//        } else {
-//          return false;
-//        }
-//      } else {
-//        if (checkTolerance(timing.pause_us, time)) {
-//          //found item, remove
-//          data.timings().erase(data.timings().begin());
-//        } else {
-//          return false;
-//        }
-//      }
-//    }
-//  } catch (out_of_range&) {
-//    return false;
-//  }
-//  return true;
-
 }
 
 }
