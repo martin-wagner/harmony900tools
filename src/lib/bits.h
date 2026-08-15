@@ -73,4 +73,11 @@ inline std::vector<bool> u64ToBitsMsb(uint8_t bitCount, uint64_t data)
   return bits;
 }
 
+inline uint8_t reverseBits(uint8_t v)
+{
+    v = ((v & 0x55) << 1) | ((v >> 1) & 0x55);
+    v = ((v & 0x33) << 2) | ((v >> 2) & 0x33);
+    return (v << 4) | (v >> 4);
+}
+
 }

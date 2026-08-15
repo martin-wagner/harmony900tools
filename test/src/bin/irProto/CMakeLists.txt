@@ -37,6 +37,7 @@ target_link_libraries(test_irProto
     PRIVATE
         GTest::gtest_main
         magic_enum::magic_enum
+        decodeir
         nlohmann_json::nlohmann_json
         Qt6::Core
 )

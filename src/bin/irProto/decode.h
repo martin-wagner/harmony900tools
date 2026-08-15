@@ -5,67 +5,59 @@
 #include "bin/timing.h"
 #include "file.h"
 #include "document/data/enum.h"
-#include "document/files/protocols.h"
 
 namespace binary {
 namespace irProto {
 
 
-/** decode timing stream to get info about used protocol and data
- *
- * assumption: all protocol start bits in ir_protocols.h have length
- * so that the start bit + / - tolerance can be identified fully
- *
- * protocols that are not within that list, but have matching start
- * bit length should be excluded by further decoding / errors.
- * */
+/** decode timing stream to get info about used protocol and data */
 class Decode
 {
   public:
+
     using CodeType = document::data::CodeType;
 
-  protected:
-    CodeType codeType = CodeType::Unknown;
-    const IrProto *prot = nullptr;
-    std::vector<bool> payload;
-    double timingTolerance = 0.2; //factor +/-
-    double ratioTolerance = 0.2;  //abs +/-
+    struct IrDecodeResult
+    {
+        Status decoded = Status::ERROR_UNKNOWN;
+        CodeType codeType = CodeType::Unknown;
+        std::string codeString = "Unknown";
+        int device = -1;
+        int subDevice = -1;
+        int command = -1;
+        int subCommand = -1;
+        int hex[4]; //don't use, debugging only
+        std::vector<bool> data;
+        std::string misc;
+        std::string error;
+    };
+
+    static constexpr int REPEAT_FRAME_THRESHOLD_us = 10000;
 
   public:
     /** create empty Decoder item */
-    Decode(const document::files::ProtocolCatalogue &cat);
+    Decode();
     /** Do decode */
-    Decode(const document::files::ProtocolCatalogue &cat, const TimingStream &data);
-
-    /** set timing tolerance */
-    void setTolerance(double v) { timingTolerance = v; };
+    Decode(const TimingStream &data, int carrier);
 
     /** parse Decode (overwrite existing) */
-    Status parse(TimingStream data, bool headerOnly = false);
+    Status parse(TimingStream data, int carrier);
 
     /** get detected code type */
-    CodeType getCodeType() const;
+    CodeType getCodeType() const { return res.codeType; };
 
-    /** create data item for coding with irProto data.
-     *
-     * @remark time-on-wire last => lsb => vec[0], independent of protocol type!
-     */
-    const std::vector<bool> getData() const;
+    /** get data */
+    const IrDecodeResult &getData() const { return res; };
 
   protected:
-    void buildData(const document::files::ProtocolCatalogue &cat);
-    bool checkTime(double expectedTime, double time);
-    bool checkRatio(double expectedRatio, double ratio);
+    IrDecodeResult res;
 
-    //sorted by how unambiguously a protocol can be detected
-    std::vector<std::pair<CodeType, IrProto>> protocols;
+    IrDecodeResult decodeIrTimings(const std::vector<uint16_t> &raw, int carrierHz);
 
-  protected:
-    bool searchHeader(const TimingStream &data);
-    Status searchData(const TimingStream &data);
-
-    IrProto::Data createSearchData(uint64_t data);
-    uint8_t checkData(const TimingStream &test, const TimingStream &check);
+    //reimplements DecodeIr()
+    void myDecodeIr(unsigned int* Context, int* TpaiBursts, int TiFreq, int TiSingleBurstCount,
+        int TiRepeatBurstCount, char* TsProtocol, int* TiDevice, int* TiSubDevice, int* TiOBC,
+        int* TaiHex, char* TsMisc, char* TsError, int &bitCount, std::vector<uint8_t> &data);
 };
 
 }
