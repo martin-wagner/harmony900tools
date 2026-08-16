@@ -1107,7 +1107,6 @@ bool H900userconfig::readIrList(pugi::xml_node &commands)
       }
     }
   }
-  worker->setIrDefaultCodeType(CodeType::Proprietary, devicePos);
 
   auto ret = true;
   for (pugi::xml_node prop : commands.children("Command")) {

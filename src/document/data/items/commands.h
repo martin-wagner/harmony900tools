@@ -65,7 +65,7 @@ class ProtoCommand
     PropertyString libName { "Unknown" }; //name assigned by the IR (de)coder lib. just pass trough
     PropertyU32 irAddress {0} ;   //device address, decoded
     PropertyU32 irCommand {0} ;   //device command, decoded
-    PropertyU32 irBitCount {0} ;  //bit count in bitData
+    PropertyU8 irBitCount {0} ;  //bit count in bitData
     PropertyU64 irBitData {0};   //ir command raw bit stream, not decoded
 
     //command writer output
@@ -144,13 +144,6 @@ class Commands
     PropertyU32 pressInterKeyMs {100, Used::YES};
     PropertyU32 holdPreSilenceMs {50, Used::YES};
     PropertyU32 holdInterKeyMs {100, Used::YES};
-
-    /** Info for building IR commands. IR commands seem to use max two static
-     * params + command. We have space for three params. */
-    PropertyEnum<CodeType> defaultCodeType { CodeType::None, Used::NO} ;
-    PropertyU32 field0 {0, Used::NO};
-    PropertyU32 field1 {0, Used::NO};
-    PropertyU32 field2 {0, Used::NO}; //todo verwenden oder kann das weg?
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

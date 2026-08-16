@@ -5,6 +5,8 @@
 #include "delegates/protocolIr.h"
 #include "delegates/rawIr.h"
 #include "delegates/combobox.h"
+#include "bin/codec/decode.h"
+#include "bin/codec/encode.h"
 #include "commandEditorView.h"
 
 using namespace std;
@@ -66,6 +68,120 @@ void ProtoCommandTreeView::setLearnedCommand(
     ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t,
     uint32_t carrier)
 {
+  QMessageBox msgBox(this);
+  msgBox.setIcon(QMessageBox::Warning);
+
+  if (model == nullptr) {
+    return;
+  }
+
+  //step 1: decode the received data, check if valid
+
+  auto decoder = binary::codec::Decode(t, carrier);
+  auto &data = decoder.getData();
+  auto codeStr = QString::fromStdString(data.codeString);
+  switch (data.decoded) {
+    case binary::codec::Status::OK:
+      break;
+    case binary::codec::Status::ERROR_UNSUPPORTED:
+      msgBox.setText(tr("IR protocol %1 not supported in typed IR mode. "
+          "Try again or use Raw IR mode.").arg(codeStr));
+      msgBox.exec();
+      return;
+    case binary::codec::Status::ERROR_SIZE:
+      msgBox.setText(
+          tr("Learning failed (data to short). Try again.").arg(
+              QString::fromStdString(data.codeString)));
+      msgBox.exec();
+      return;
+    default:
+      msgBox.setText(
+          tr("Learning failed or IR protocol not supported in typed IR mode. "
+              "Try again or use Raw IR mode.").arg(
+              QString::fromStdString(data.codeString)));
+      msgBox.exec();
+      return;
+  }
+  switch (data.codeType) {
+    case document::data::CodeType::Unknown:
+    case document::data::CodeType::Proprietary:
+    case document::data::CodeType::None:
+      msgBox.setText(tr("Learning selected invalid protocol. "
+          "Try again or use Raw IR mode."));
+      msgBox.exec();
+      return;
+    default:
+      break;
+  }
+
+  auto *protocolModel = static_cast<models::ProtocolIrModel*>(model);
+  auto index = protocolModel->index(getCurrentRow(), 0);
+
+  ctx.undoStack().beginMacro(tr("learned command: %1").arg(codeStr));
+
+  //step 2: set protocol type in model. this will add the protocol to the
+  //        irProt list if necessary.
+  auto res = protocolModel->setData(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::TYPE),
+      document::data::Enum<document::data::CodeType>::toQString(data.codeType),
+      Qt::EditRole);
+  if (res != true) {
+    msgBox.setText(tr("Adding learned command failed (setting "
+        "protocol type)"));
+    msgBox.exec();
+    ctx.undoStack().endMacro();
+    return;
+  }
+  //step 3: get index of added protocol in irProt
+  auto protocolIndex = protocolModel->data(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::PROTO),
+      Qt::EditRole).toInt();
+  if (protocolIndex < 0) {
+    msgBox.setText(tr("Adding learned command failed (adding "
+        "protocol type)"));
+    msgBox.exec();
+    ctx.undoStack().endMacro();
+    return;
+  }
+  //step 4: create the command code from received data
+  auto code = binary::codec::encode(protocolIndex, data.codeType,
+      data.codeString, data.address, data.command, data.data);
+  if (code.getDataSectionCount() == 0) {
+    msgBox.setText(tr("Creating data stream from learned command failed. "
+        "Try again or use Raw IR mode."));
+    msgBox.exec();
+    ctx.undoStack().endMacro();
+    return;
+  }
+  //step 5: we have created a valid command. set all the data to the model
+  protocolModel->setData(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::VERBOSE),
+      QString::fromStdString(data.codeString), Qt::EditRole);
+  protocolModel->setData(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::IRADDRESS),
+      data.address, Qt::EditRole);
+  protocolModel->setData(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::IRCOMMAND),
+      data.command, Qt::EditRole);
+  protocolModel->setData(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::IRBITS),
+      QVariant::fromValue(data.data), Qt::EditRole);
+  protocolModel->setData(
+      index.siblingAtColumn(models::ProtocolIrModel::Column::DATA),
+      QVariant::fromValue(code), Qt::EditRole);
+
+  ctx.undoStack().endMacro();
+}
+
+void ProtoCommandTreeView::onUserLevelChanged(lib::UserLevel::Level l)
+{
+  BaseTreeView::onUserLevelChanged(l);
+
+  if (lib::UserLevel::validate(l, lib::UserLevel::Level::Developer)) {
+    treeView->showColumn(models::ProtocolIrModel::Column::IRBITS);
+  } else {
+    treeView->hideColumn(models::ProtocolIrModel::Column::IRBITS);
+  }
 }
 
 void ProtoCommandTreeView::setupDelegates()
@@ -75,6 +191,18 @@ void ProtoCommandTreeView::setupDelegates()
   treeView->setItemDelegateForColumn(
       static_cast<int>(models::ProtocolIrModel::Column::TYPE),
       comboBoxDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ProtocolIrModel::Column::VERBOSE),
+      editorDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ProtocolIrModel::Column::IRADDRESS),
+      editorDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ProtocolIrModel::Column::IRCOMMAND),
+      editorDelegate);
+  treeView->setItemDelegateForColumn(
+      static_cast<int>(models::ProtocolIrModel::Column::IRBITS),
+      editorDelegate);
   treeView->setItemDelegateForColumn(
       static_cast<int>(models::ProtocolIrModel::Column::DATA), editorDelegate);
 }

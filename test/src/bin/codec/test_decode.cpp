@@ -343,7 +343,7 @@ TEST(Decoder, KASEIKYOData2)
   ASSERT_EQ(dec.getCodeType(), data::CodeType::KASEIKYO);
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 17850);
-  EXPECT_EQ(dec.getData().command, 3125084162);
+  EXPECT_EQ(dec.getData().command, 0);
   EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA450002);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
@@ -389,7 +389,7 @@ TEST(Decoder, KASEIKYODataRepeat)
   ASSERT_EQ(dec.getCodeType(), data::CodeType::KASEIKYO);
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 17850);
-  EXPECT_EQ(dec.getData().command, 3125084162);
+  EXPECT_EQ(dec.getData().command, 0);
   EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA450002);
   EXPECT_STREQ(dec.getData().error.c_str(), "");//ignore repeat
 }

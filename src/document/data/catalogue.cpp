@@ -1254,59 +1254,6 @@ bool CmdCatalogue::setIrHoldInterKeyMs(uint32_t v, uint32_t devicePos)
   return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::setIrDefaultCodeType(const Enum<CodeType> &v,
-    uint32_t devicePos)
-{
-  PropertyAccess<Enum<CodeType>> access =
-      {
-        tr("set ir command code type"),
-        [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().defaultCodeType.get();},
-        [this, devicePos](
-            const Enum<CodeType> &v) {c.getDevices()[devicePos].getIrCommands().defaultCodeType.set(v).setIncluded(Used::YES);},
-        v,
-        Item::DEVICE_IR };
-  return setProperty<Enum<CodeType>>(access);
-}
-
-bool CmdCatalogue::setIrCodeField0(uint32_t v, uint32_t devicePos)
-{
-  PropertyAccess<uint32_t> access =
-      {
-        tr("set ir f0"),
-        [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().field0.get();},
-        [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field0.set(v).setIncluded(Used::YES);},
-        v,
-        Item::DEVICE_IR };
-  return setProperty<uint32_t>(access);
-}
-
-bool CmdCatalogue::setIrCodeField1(uint32_t v, uint32_t devicePos)
-{
-  PropertyAccess<uint32_t> access =
-      {
-        tr("set ir f1"),
-        [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().field1.get();},
-        [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field1.set(v).setIncluded(Used::YES);},
-        v,
-        Item::DEVICE_IR };
-  return setProperty<uint32_t>(access);
-}
-
-bool CmdCatalogue::setIrCodeField2(uint32_t v, uint32_t devicePos)
-{
-  PropertyAccess<uint32_t> access =
-      {
-        tr("set ir f2"),
-        [this, devicePos]() {return c.getDevices()[devicePos].getIrCommands().field2.get();},
-        [this, devicePos](
-            uint32_t v) {c.getDevices()[devicePos].getIrCommands().field2.set(v).setIncluded(Used::YES);},
-        v,
-        Item::DEVICE_IR };
-  return setProperty<uint32_t>(access);
-}
-
 bool CmdCatalogue::setIrUnknownProperty(const data::item::UnknownElement &v,
     uint32_t devicePos)
 {

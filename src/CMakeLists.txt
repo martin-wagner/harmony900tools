@@ -34,6 +34,7 @@ set(sources ${sources}
   mainwindow.cpp
   bin/timing.cpp
   bin/codec/decode.cpp
+  bin/codec/encode.cpp
   bin/irProto/code.cpp
   bin/irProto/file.cpp
   bin/ssIr/file.cpp

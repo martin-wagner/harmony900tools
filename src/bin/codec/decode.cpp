@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #ifndef UNIT_TEST
 #define IRREMOTEESP8266_DEFINED_UNIT_TEST
 #define UNIT_TEST //make IRemoteESP8266 run without the ESP8266...
@@ -90,6 +88,7 @@ Status Decode::parse(TimingStream data, int carrier)
   res.data = lib::u64ToBitsMsb(decoder.bits, decoder.value);
   res.decoded = Status::OK;
   //only allow the protocols we support encoding for
+  //functions must match "encode.cpp"
   switch (decoder.decode_type) {
     case decode_type_t::NEC:
       if (decoder.bits == 32) {
@@ -105,8 +104,10 @@ Status Decode::parse(TimingStream data, int carrier)
       break;
     case decode_type_t::PANASONIC:
     case decode_type_t::DENON:
-    case decode_type_t::SHARP:
       if (decoder.bits == 48) {
+        //address = "mnf"
+        res.command = 0;
+        //data contains among others: 8bit device, 8bit subdevice, 8bit command
         res.codeType = CodeType::KASEIKYO;
       }
       break;

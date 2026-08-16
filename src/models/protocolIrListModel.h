@@ -21,6 +21,10 @@ class ProtocolIrModel: public BaseModel
     enum Column {
       NAME,
       TYPE,
+      VERBOSE,
+      IRADDRESS,
+      IRCOMMAND,
+      IRBITS,
       PROTO,
       DATA,
 
@@ -31,11 +35,15 @@ class ProtocolIrModel: public BaseModel
         { Column::NAME,          { "Name", "The command name is used to reference this command in other tables (Buttons, ...).", "QString", false, {}, } },
         { Column::TYPE,          { "Protocol", "IR Protocol name. \"Proprietary\" means created by the Harmony 900 software.\n"
             "- NEC: Most common, used by NEC, Yamaha, Canon, Tevion, Harman/Kardon, Hitachi, JVC, Pioneer, Toshiba, Xoro, Orion, Apple, many NoNames, etc.\n"
-            "- KASEIKYO: Mostly japanese, used by Panasonic, Technics, Denon and other AEHA manufacturers.\n"
-            "- Philips RC5: Most european manufacturers, including Philips, older devices.\n"
+            "- KASEIKYO: Mostly japanese, used by Panasonic, Denon, Technics, and other AEHA manufacturers.\n"
+            "- Philips RC5: Most european manufacturers, including Philips, older / simpler devices.\n"
             "- Philips RC6: Most european manufacturers, including Philips, newer devices.\n"
             "- SIRCS: Sony.\n"
             "- Samsung32: Samsung.", "Enum", false, {} } },
+        { Column::VERBOSE,       { "Detail", "Verbose name of protocol type (from IRremoteESP8266 lib)", "int", false, {}, } },
+        { Column::IRADDRESS,     { "IR Address", "IR Device Address", "int", false, {}, } },
+        { Column::IRCOMMAND,     { "IR Command", "IR Device Command (=Button)", "int", false, {}, } },
+        { Column::IRBITS,        { "IR Bits", "IR raw command bits", "int", false, {}, } },
         { Column::PROTO,         { "Protocol Index", "Protocol index for proprietary / none / unknown", "int", true, {}, } },
         { Column::DATA,          { "Data", "- Select cell to enable learning. Needs remote to be connected.\n- Double-click to edit manually\n\nVisual representation of IR data..", "Code", false, {}, } },
     };
@@ -76,10 +84,15 @@ class ProtocolIrModel: public BaseModel
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
     QVariant getFontData(const QModelIndex &index) const override;
 
+    bool printData(const document::data::item::ProtoCommand &cmd) const;
     QVariant visualiseData(const document::data::item::ProtoCommand &cmd) const;
 
     bool setCommandName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
     bool setCommandType(document::data::CmdCatalogue &worker, int row, const QVariant &value);
+    bool setCommandVerbose(document::data::CmdCatalogue &worker, int row, const QVariant &value);
+    bool setCommandIrAddress(document::data::CmdCatalogue &worker, int row, const QVariant &value);
+    bool setCommandIrCommand(document::data::CmdCatalogue &worker, int row, const QVariant &value);
+    bool setCommandIrBits(document::data::CmdCatalogue &worker, int row, const QVariant &value);
     bool setCommandData(document::data::CmdCatalogue &worker, int row, const QVariant &value);
 };
 

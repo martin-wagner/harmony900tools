@@ -346,11 +346,6 @@ void toJson(ordered_json &out, const item::Commands &commands)
   toJsonVec(out, "RawCommands", commands.getRawCommands());
   toJsonVec(out, "ProtoCommands", commands.getProtoCommands());
 
-  toJson(out, "DefaultCodeType", commands.defaultCodeType);
-  toJson(out, "Field0", commands.field0);
-  toJson(out, "Field1", commands.field1);
-  toJson(out, "Field2", commands.field2);
-
   toJson(out, "UnknownProperties", commands.getUnknownProperties());
 }
 
@@ -363,11 +358,6 @@ void fromJson(const ordered_json &in, item::Commands &commands)
   fromJson(in, "PressInterKeyMs", commands.pressInterKeyMs);
   fromJson(in, "HoldPreSilenceMs", commands.holdPreSilenceMs);
   fromJson(in, "HoldInterKeyMs", commands.holdInterKeyMs);
-
-  fromJson(in, "DefaultCodeType", commands.defaultCodeType);
-  fromJson(in, "Field0", commands.field0);
-  fromJson(in, "Field1", commands.field1);
-  fromJson(in, "Field2", commands.field2);
 
   fromJson(in, "UnknownProperties", commands.getUnknownProperties());
 }

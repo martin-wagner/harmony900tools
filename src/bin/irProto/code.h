@@ -34,12 +34,15 @@ class Code
       SECTIONS_N, // 2, 3...
     };
 
+    static constexpr uint16_t DEFAULT_DELAY = 500;
+    static constexpr uint16_t DEFAULT_REPEATS = 3;
+
   protected:
     static constexpr int HEADER_SIZE = 8;
     static constexpr int FOOTER_SIZE = 1;
 
     uint16_t index = 0;
-    uint16_t delay = 500; //ms, most likely. Unable to find what this is or where it applies. Most devices have 500, seen 0 ... 1500 in steps of 100.
+    uint16_t delay = DEFAULT_DELAY; //ms, most likely. Unable to find what this is or where it applies. Most devices have 500, seen 0 ... 1500 in steps of 100.
     uint8_t haveRepeatFrame = 0;
     uint8_t dataFrameTxCount = 1;
     Ctrl ctrl = Ctrl::FLAT;

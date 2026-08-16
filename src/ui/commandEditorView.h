@@ -49,6 +49,9 @@ class ProtoCommandTreeView: public BaseTreeView
   public slots:
     void setLearnedCommand(ConcordConnection::LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
 
+  protected slots:
+    virtual void onUserLevelChanged(lib::UserLevel::Level l) override;
+
   private:
     void setupDelegates();
 };
