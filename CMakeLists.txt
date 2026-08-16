@@ -40,7 +40,7 @@ include(nlohmann_json.cmake)
 include(pugixml.cmake)
 include(magic_enum.cmake)
 include(zlib.cmake)
-include(decodeIr.cmake)
+include(IRremoteESP8266.cmake)
 include(versioninfo.cmake)
 
 # add project

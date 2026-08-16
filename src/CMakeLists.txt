@@ -142,6 +142,7 @@ target_link_libraries(${programName} PRIVATE
     nlohmann_json::nlohmann_json
     pugixml::pugixml
     magic_enum::magic_enum
+    IRremoteESP8266
 )
 
 if(WIN32)

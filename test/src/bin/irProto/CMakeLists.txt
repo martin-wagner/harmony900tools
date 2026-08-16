@@ -22,9 +22,7 @@ add_executable(test_irProto
     ${SRC_DIR}/file.cpp
     ${SRC_DIR}/code.cpp
     ${SRC_DIR}/decode.cpp
-    ${CMAKE_SOURCE_DIR}/src/document/files/protocols.cpp
     ${CMAKE_SOURCE_DIR}/src/document/data/enum.cpp
-    ${CMAKE_SOURCE_DIR}/src/document/data/items/irProtoJson.cpp
 )
 
 target_include_directories(test_irProto
@@ -37,8 +35,7 @@ target_link_libraries(test_irProto
     PRIVATE
         GTest::gtest_main
         magic_enum::magic_enum
-        decodeir
-        nlohmann_json::nlohmann_json
+        IRremoteESP8266
         Qt6::Core
 )
 

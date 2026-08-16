@@ -14,7 +14,8 @@ namespace irProto {
 class Decode
 {
   public:
-
+    static constexpr int REPEAT_FRAME_THRESHOLD_us = 10000;
+    static constexpr int MIN_SIZE = 4;
     using CodeType = document::data::CodeType;
 
     struct IrDecodeResult
@@ -22,17 +23,11 @@ class Decode
         Status decoded = Status::ERROR_UNKNOWN;
         CodeType codeType = CodeType::Unknown;
         std::string codeString = "Unknown";
-        int device = -1;
-        int subDevice = -1;
-        int command = -1;
-        int subCommand = -1;
-        int hex[4]; //don't use, debugging only
+        uint32_t address = -1;
+        uint32_t command = -1;
         std::vector<bool> data;
-        std::string misc;
         std::string error;
     };
-
-    static constexpr int REPEAT_FRAME_THRESHOLD_us = 10000;
 
   public:
     /** create empty Decoder item */
@@ -51,13 +46,6 @@ class Decode
 
   protected:
     IrDecodeResult res;
-
-    IrDecodeResult decodeIrTimings(const std::vector<uint16_t> &raw, int carrierHz);
-
-    //reimplements DecodeIr()
-    void myDecodeIr(unsigned int* Context, int* TpaiBursts, int TiFreq, int TiSingleBurstCount,
-        int TiRepeatBurstCount, char* TsProtocol, int* TiDevice, int* TiSubDevice, int* TiOBC,
-        int* TaiHex, char* TsMisc, char* TsError, int &bitCount, std::vector<uint8_t> &data);
 };
 
 }
