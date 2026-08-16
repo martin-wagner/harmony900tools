@@ -288,6 +288,11 @@ void toJson(ordered_json &out, const item::ProtoCommand &cmd)
   toJson(out, "CodeType", cmd.codeType);
   toJson(out, "ProtocolIndex", cmd.protocolIndex);
   toJson(out, "Decoder", cmd.canDecode);
+  toJson(out, "LibName", cmd.libName);
+  toJson(out, "IrAddress", cmd.irAddress);
+  toJson(out, "IrCommand", cmd.irCommand);
+  toJson(out, "IrBitCount", cmd.irBitCount);
+  toJson(out, "IrBitData", cmd.irBitData);
   if (cmd.canDecode.get() == true) {
     ordered_json tmp;
     toJson(tmp, cmd.command);
@@ -306,6 +311,11 @@ void fromJson(const ordered_json &in, item::ProtoCommand &cmd)
   fromJson(in, "CodeType", cmd.codeType);
   fromJson(in, "ProtocolIndex", cmd.protocolIndex);
   fromJson(in, "Decoder", cmd.canDecode);
+  fromJson(in, "LibName", cmd.libName);
+  fromJson(in, "IrAddress", cmd.irAddress);
+  fromJson(in, "IrCommand", cmd.irCommand);
+  fromJson(in, "IrBitCount", cmd.irBitCount);
+  fromJson(in, "IrBitData", cmd.irBitData);
   if (cmd.canDecode.get() == true) {
     auto it = in.find("Command");
     if (it != in.end()) {

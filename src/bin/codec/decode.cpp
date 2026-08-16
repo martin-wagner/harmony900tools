@@ -20,7 +20,7 @@ using namespace std;
 
 namespace binary
 {
-namespace irProto
+namespace codec
 {
 
 Decode::Decode()
@@ -40,8 +40,8 @@ Status Decode::parse(TimingStream data, int carrier)
 
   volatile irparams_t *params = receiver._getParamsPtr();
   if (params == nullptr) {
-    res.decoded = Status::ERROR_FILE;
-    res.error = "API error";
+    res.decoded = Status::ERROR_LIB;
+    res.error = "Lib error";
     return res.decoded;
   }
   auto raw = data.convertMarkPause();

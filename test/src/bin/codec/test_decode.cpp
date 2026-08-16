@@ -8,7 +8,7 @@
 
 using namespace std;
 using namespace binary;
-using namespace irProto;
+using namespace codec;
 using namespace document;
 
 

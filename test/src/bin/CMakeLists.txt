@@ -31,7 +31,7 @@ target_link_libraries(test_data
 # ---------------------------------------------------------------------------
 gtest_discover_tests(test_data)
 
-
+add_subdirectory(codec)
 add_subdirectory(irProto)
 add_subdirectory(ssIr)
 add_subdirectory(learn)

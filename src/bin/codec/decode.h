@@ -3,12 +3,20 @@
 #pragma once
 
 #include "bin/timing.h"
-#include "file.h"
 #include "document/data/enum.h"
 
 namespace binary {
-namespace irProto {
+namespace codec {
 
+/** File handling status */
+enum class Status {
+  OK,
+  ERROR_LIB,
+  ERROR_SIZE,
+  ERROR_PAYLOAD_FORMAT,
+  ERROR_UNSUPPORTED,
+  ERROR_UNKNOWN
+};
 
 /** decode timing stream to get info about used protocol and data */
 class Decode
@@ -20,13 +28,13 @@ class Decode
 
     struct IrDecodeResult
     {
-        Status decoded = Status::ERROR_UNKNOWN;
-        CodeType codeType = CodeType::Unknown;
-        std::string codeString = "Unknown";
-        uint32_t address = -1;
-        uint32_t command = -1;
-        std::vector<bool> data;
-        std::string error;
+        Status decoded = Status::ERROR_UNKNOWN; //decodeing sucessful?
+        CodeType codeType = CodeType::Unknown;  //our code type
+        std::string codeString = "Unknown";     //the libraries code type (as string)
+        uint32_t address = -1;                  //decoded address
+        uint32_t command = -1;                  //decoded command
+        std::vector<bool> data;                 //raw data as received from remote
+        std::string error;                      //info about !Status::OK
     };
 
   public:

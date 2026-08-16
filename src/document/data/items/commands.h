@@ -54,13 +54,23 @@ class ProtoCommand
     {
     }
 
+    //protocol
     PropertyString name { "Unknown" };
     PropertyEnum<CodeType> codeType { CodeType::None} ;
     PropertyU32 protocolIndex { 0 };
-
-    //command creator. false = data as read from xml, decoding not possible
+    //command writer. false = data as read from xml, decoding not possible
     PropertyBool canDecode { false, Used::YES };
+
+    //data for command writer
+    PropertyString libName { "Unknown" }; //name assigned by the IR (de)coder lib. just pass trough
+    PropertyU32 irAddress {0} ;   //device address, decoded
+    PropertyU32 irCommand {0} ;   //device command, decoded
+    PropertyU32 irBitCount {0} ;  //bit count in bitData
+    PropertyU64 irBitData {0};   //ir command raw bit stream, not decoded
+
+    //command writer output
     binary::irProto::Code command;
+    //raw data output (canDecode == false)
     Property<std::vector<uint8_t>> data {{}, Used::NO};
 
   private:
@@ -140,7 +150,7 @@ class Commands
     PropertyEnum<CodeType> defaultCodeType { CodeType::None, Used::NO} ;
     PropertyU32 field0 {0, Used::NO};
     PropertyU32 field1 {0, Used::NO};
-    PropertyU32 field2 {0, Used::NO};
+    PropertyU32 field2 {0, Used::NO}; //todo verwenden oder kann das weg?
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

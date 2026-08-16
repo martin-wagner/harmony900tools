@@ -64,6 +64,7 @@ using PropertyU8 = Property<uint8_t>;
 using PropertyU16 = Property<uint16_t>;
 using PropertyI32 = Property<int32_t>;
 using PropertyU32 = Property<uint32_t>;
+using PropertyU64 = Property<uint64_t>;
 template<typename T>
 using PropertyEnum = Property<Enum<T>>;
 
