@@ -86,20 +86,6 @@ inline std::vector<uint8_t> hexStringToBytes(const std::string &code)
   return data;
 }
 
-//convert hex string 0x123456789abcdef to vector<bool> [true, false, ...]
-inline std::vector<bool> hexStringToBits(const std::string &code, size_t bitCount)
-{
-  std::vector<uint8_t> bytes = hexStringToBytes(code);
-  std::vector<bool> bits;
-  bits.reserve(bitCount);
-
-  for (size_t i = 0; i < bitCount && (i / 8) < bytes.size(); i++) {
-    bits.push_back((bytes[i / 8] & static_cast<uint8_t>(1u << (i % 8))) != 0);
-  }
-
-  return bits;
-}
-
 // convert vector<uint8_t> to hex string "0x1234abcd..."
 inline std::string bytesToHexString(const std::vector<uint8_t> &data, bool addPrefix = true)
 {
@@ -119,20 +105,6 @@ inline std::string bytesToHexString(const std::vector<uint8_t> &data, bool addPr
   }
 
   return out;
-}
-
-// convert vector<bool> to hex string "0x1234abcd..."
-inline std::string bitsToHexString(const std::vector<bool> &data, bool addPrefix = true)
-{
-  std::vector<uint8_t> bytes((data.size() + 7) / 8, 0);
-
-  for (size_t i = 0; i < data.size(); i++) {
-    if (data[i] == true) {
-      bytes[i / 8] |= static_cast<uint8_t>(1u << (i % 8));
-    }
-  }
-
-  return bytesToHexString(bytes, addPrefix);
 }
 
 }

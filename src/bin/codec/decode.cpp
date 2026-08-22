@@ -11,8 +11,8 @@
 #undef IRREMOTEESP8266_DEFINED_UNIT_TEST
 #endif
 
-#include "lib/bits.h"
 #include "decode.h"
+#include "bin/irProto/code.h"
 
 using namespace std;
 
@@ -81,11 +81,11 @@ Status Decode::parse(TimingStream data, int carrier)
     return res.decoded;
   }
 
-  //pull the decoded data
+  //pull the decoded data. can be changed for various reasons further down.
   res.codeString = typeToString(decoder.decode_type);
   res.address = decoder.address;
   res.command = decoder.command;
-  res.data = lib::u64ToBitsMsb(decoder.bits, decoder.value);
+  res.data = irProto::Code::u64tobits(decoder.bits, decoder.value);
   res.decoded = Status::OK;
   //only allow the protocols we support encoding for
   //functions must match "encode.cpp"
@@ -114,6 +114,10 @@ Status Decode::parse(TimingStream data, int carrier)
     case decode_type_t::SONY:
       if (decoder.bits == 12) {
         res.codeType = CodeType::SIRCS12;
+      } else if (decoder.bits == 15) {
+        res.codeType = CodeType::SIRCS15;
+      } else if (decoder.bits == 20) {
+        res.codeType = CodeType::SIRCS20;
       }
       break;
     case decode_type_t::SAMSUNG:
@@ -126,7 +130,14 @@ Status Decode::parse(TimingStream data, int carrier)
       res.codeType = CodeType::PhilipsRC5;
       break;
     case decode_type_t::RC6:
-      res.codeType = CodeType::PhilipsRC6;
+      if (decoder.bits == 20) {
+        res.codeType = CodeType::PhilipsRC6;
+        res.address = res.address & 0xff; //mask header / toggle
+      } else if (decoder.bits == 36) {
+        res.codeType = CodeType::PhilipsRC6A;
+        res.address = res.address & 0x7FFF7F; //mask always-1-bit / header / toggle
+        res.data = irProto::Code::u64tobits(31, decoder.value);
+      }
       break;
     default:
       res.decoded = Status::ERROR_UNSUPPORTED;

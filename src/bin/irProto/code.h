@@ -48,9 +48,13 @@ class Code
     Ctrl ctrl = Ctrl::FLAT;
     std::vector<Section> sections;
 
+  public:
     static std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
     static std::vector<bool> u64tobits(uint8_t bitCount, uint64_t data);
     static std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
+    static uint64_t bitsToU64(const std::vector<bool>& bits);
+
+  protected:
     //bit-stream + end
     Status parseFlat(const std::vector<uint8_t>& data);
     //bit-stream

@@ -380,7 +380,7 @@ The header is always 6 bytes + terminator byte long. The payload size depends on
 
 Values in _Control_ are assumptions. Could as well be a direct reference to a protocol/protocol family
 - 0 = NEC (or generic + repeat)
-- 1 = Generic (toggle info in <CodeSequence index>)
+- 1 = Generic (if toggle is used, toggle info is in <CodeSequence index>)
 - 2 = ???
 - 3 = Philips RC-6
 ...
@@ -414,15 +414,15 @@ Each section is two bytes long and maps directly to the section in IrProto.bin.
 |Offset    | Bytes       | Value   | Meaning|
 |---|---|---|---|
 |[7]       | 00          | 0       | unknown (always 0)|
-|[8:9]     | 70 01       | bits    | Payload section 1. The bit stream is MSB aligned, so in conjunction with the bit count and mask in irProto you get the valid bit stream.|
-|[10:11]   | 00 02       | bits    |  Payload section 2. ...|
+|[8:9]     | 70 01       | bits    | Payload section 1. The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. you need to place 16 bits, with "1" at the end.|
+|[10:11]   | 00 02       | bits    |  Payload section 2. ... you need to place 16 bits, with "2" at the end.|
 |[12:13]   | B9 92       | bits    |  Payload section 3. ...|
 
 I have one sample of this, for a device using the Philips RC-6 code. 
-- Section 0 codes 4 bit start in the first byte (first nibble 0x7, second nibble ??). Use of second byte (0x02) unknown.
-- Section 1 codes 1 bit, but in RC-6 this is the toggle. Maybe second byte == 1 -> toggle?
+- Section 0 codes 4 bit MSB aligned as in the other protocols before. Second byte seems to be index "1".
+- Section 1 codes 1 bit MSB aligned as in the other protocols before. Second byte seems to be index "2".
 - Section 2 is data.
-RC-6 and Philips RCMM seem to be the only protocols to have different encodings for true/false within a single frame.
+RC-6 seem to be the only protocols to have different encodings for true/false within a single frame. The 1 bit section is the toggle bit.
 
 
 ---

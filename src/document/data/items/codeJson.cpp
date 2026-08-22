@@ -43,7 +43,7 @@ void toJson(ordered_json &out, const binary::TimingStream &stream)
 
 void fromJson(const ordered_json &in, binary::TimingStream &stream)
 {
-  std::vector<uint16_t> markPause;
+  vector<uint16_t> markPause;
 
   if (in.is_array()) {
     for (const auto &blockJson : in) {
@@ -64,19 +64,22 @@ void fromJson(const ordered_json &in, binary::TimingStream &stream)
 void toJson(ordered_json &out, const binary::irProto::Section &section)
 {
   out["Index"] = section.getIndex();
-  out["Data"] = lib::bitsToHexString(section.getData());
+  auto data = binary::irProto::Code::bitsToU64(section.getData());
+  out["Data"] = QString("0x" + QString::number(data, 16)).toStdString();
   out["DataBitCount"] = section.getData().size();
 }
 
 void fromJson(const ordered_json &in, binary::irProto::Section &section)
 {
-  std::vector<bool> data;
+  vector<bool> data;
 
   int index = in.value("Index", 0);
   auto dataIt = in.find("Data");
   if (dataIt != in.end()) {
-    size_t bitCount = in.value("DataBitCount", size_t(0));
-    data = lib::hexStringToBits(dataIt->get<std::string>(), bitCount);
+    auto bitCount = in.value("DataBitCount", size_t(0));
+    auto bits = QString::fromStdString(dataIt->get<string>()).toULongLong(
+        nullptr, 16);
+    data = binary::irProto::Code::u64tobits(bitCount, bits);
   }
   section = binary::irProto::Section(index, data);
 }
@@ -106,7 +109,7 @@ void fromJson(const ordered_json &in, binary::irProto::Code &code)
   code.setDataFrameTxCount(in.value("DataFrameTxCount", uint8_t(1)));
   code.setControl(in.value("Control", uint8_t(0)));
 
-  std::vector<binary::irProto::Section> sections;
+  vector<binary::irProto::Section> sections;
   auto sectionsIt = in.find("Sections");
   if (sectionsIt != in.end()) {
     for (const auto &sectionJson : *sectionsIt) {

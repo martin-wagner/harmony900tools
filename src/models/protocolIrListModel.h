@@ -36,8 +36,9 @@ class ProtocolIrModel: public BaseModel
         { Column::TYPE,          { "Protocol", "IR Protocol name. \"Proprietary\" means created by the Harmony 900 software.\n"
             "- NEC: Most common, used by NEC, Yamaha, Canon, Tevion, Harman/Kardon, Hitachi, JVC, Pioneer, Toshiba, Xoro, Orion, Apple, many NoNames, etc.\n"
             "- KASEIKYO: Mostly japanese, used by Panasonic, Denon, Technics, and other AEHA manufacturers.\n"
-            "- Philips RC5: Most european manufacturers, including Philips, older / simpler devices.\n"
-            "- Philips RC6: Most european manufacturers, including Philips, newer devices.\n"
+            "- Philips RC5: Mostly european manufacturers, including Philips, older / simpler devices.\n"
+            "- Philips RC6: Philips.\n"
+            "- Philips RC6A: Mostly european manufacturers, newer devices.\n"
             "- SIRCS: Sony.\n"
             "- Samsung32: Samsung.", "Enum", false, {} } },
         { Column::VERBOSE,       { "Detail", "Verbose name of protocol type (from IRremoteESP8266 lib)", "int", false, {}, } },

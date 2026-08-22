@@ -3,27 +3,111 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFormLayout>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QSpinBox>
 #include <QStackedWidget>
 #include <QTableWidget>
 #include <QVBoxLayout>
+#include <QLineEdit>
 
 #include "lib/users.h"
-#include "lib/bits.h"
+#include "bin/codec/encode.h"
 #include "context.h"
 #include "codeEditor.h"
 
 using namespace binary::irProto;
 using namespace document::data;
+using namespace std;
 
 namespace editors
 {
 
-CodeEditor::CodeEditor(Context &ctx, const Code &code, CodeType type,
-    QWidget *parent) :
-    QDialog(parent), ctx(ctx), codeType(type)
+BaseSpinBox::BaseSpinBox(QWidget *parent) :
+    QSpinBox(parent)
+{
+}
+
+void BaseSpinBox::setDisplayBase(Base newBase)
+{
+  displayBase = newBase;
+  //re-render the currently shown text in the new base
+  lineEdit()->setText(textFromValue(value()));
+}
+
+QValidator::State BaseSpinBox::validate(QString &input, int &pos) const
+{
+  Q_UNUSED(pos);
+
+  auto trimmed = input.trimmed();
+  if (trimmed.isEmpty()) {
+    return QValidator::Intermediate;
+  }
+
+  bool ok = false;
+  if (trimmed.startsWith("0x", Qt::CaseInsensitive)) {
+    auto digits = trimmed.mid(2);
+    if (digits.isEmpty()) {
+      return QValidator::Intermediate; //user is still typing the prefix
+    }
+    digits.toULongLong(&ok, 16);
+  } else if (trimmed.startsWith("0b", Qt::CaseInsensitive)) {
+    auto digits = trimmed.mid(2);
+    if (digits.isEmpty()) {
+      return QValidator::Intermediate; //user is still typing the prefix
+    }
+    digits.toULongLong(&ok, 2);
+  } else if ((trimmed == "0") || (QString("0b").startsWith(trimmed, Qt::CaseInsensitive))
+      || (QString("0x").startsWith(trimmed, Qt::CaseInsensitive))) {
+    return QValidator::Intermediate; //user could still be typing "0x"/"0b"
+  } else {
+    trimmed.toULongLong(&ok, 10);
+  }
+
+  if (!ok) {
+    return QValidator::Invalid;
+  }
+  return QValidator::Acceptable;
+}
+
+int BaseSpinBox::valueFromText(const QString &text) const
+{
+  auto trimmed = text.trimmed();
+
+  bool ok = false;
+  uint64_t result = 0;
+  if (trimmed.startsWith("0x", Qt::CaseInsensitive)) {
+    result = trimmed.mid(2).toULongLong(&ok, 16);
+  } else if (trimmed.startsWith("0b", Qt::CaseInsensitive)) {
+    result = trimmed.mid(2).toULongLong(&ok, 2);
+  } else {
+    result = trimmed.toULongLong(&ok, 10);
+  }
+
+  if (!ok) {
+    return 0;
+  }
+  return static_cast<int>(result);
+}
+
+QString BaseSpinBox::textFromValue(int value) const
+{
+  switch (displayBase) {
+    case Base::Hex:
+      return "0x" + QString::number(static_cast<uint32_t>(value), 16).toUpper();
+    case Base::Binary:
+      return "0b" + QString::number(static_cast<uint32_t>(value), 2);
+    default:
+      return QString::number(value);
+  }
+}
+
+editors::CodeEditor::CodeEditor(Context &ctx, CodeType codeType,
+    const QString &codeString, uint32_t address, uint32_t command,
+    const std::vector<bool> &rawData, const Code &code, QWidget *parent) :
+    QDialog(parent), ctx(ctx), codeType(codeType), codeString(codeString), address(
+        address), command(command), rawData(rawData), code(code)
 {
   if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
     editAll = true;
@@ -33,17 +117,31 @@ CodeEditor::CodeEditor(Context &ctx, const Code &code, CodeType type,
 
   stack = new QStackedWidget(this);
   stack->addWidget(createProprietaryPage());
-  stack->addWidget(createRc5Page());
+  stack->addWidget(createNecPage());
+  stack->addWidget(createKasPage());
+  stack->addWidget(createS20Page());
+  stack->addWidget(createACPage());
 
   switch (codeType) {
-    case CodeType::PhilipsRC5:
-      stack->setCurrentIndex(1);
-      loadRc5(code);
-      break;
     case CodeType::Proprietary:
-    default:
       stack->setCurrentIndex(0);
-      loadProprietary(code);
+      loadProprietary();
+      break;
+    case CodeType::NEC:
+      stack->setCurrentIndex(1);
+      loadNec();
+      break;
+    case CodeType::KASEIKYO:
+      stack->setCurrentIndex(2);
+      loadKas();
+      break;
+    case CodeType::SIRCS20:
+      stack->setCurrentIndex(3);
+      loadS20();
+      break;
+    default:
+      stack->setCurrentIndex(4);
+      loadAC();
       break;
   }
 
@@ -52,7 +150,22 @@ CodeEditor::CodeEditor(Context &ctx, const Code &code, CodeType type,
   connect(buttonBox, &QDialogButtonBox::accepted, this, &CodeEditor::accept);
   connect(buttonBox, &QDialogButtonBox::rejected, this, &CodeEditor::reject);
 
+  displayBaseBox = new QComboBox(this);
+  displayBaseBox->addItem(tr("Decimal"));
+  displayBaseBox->addItem(tr("Hex"));
+  displayBaseBox->addItem(tr("Binary"));
+  connect(displayBaseBox, &QComboBox::currentIndexChanged, this,
+      [this](int index) {
+        setDisplayBase(static_cast<BaseSpinBox::Base>(index));
+      });
+
+  auto *displayBaseLayout = new QHBoxLayout();
+  displayBaseLayout->addWidget(new QLabel(tr("Display as:"), this));
+  displayBaseLayout->addWidget(displayBaseBox);
+  displayBaseLayout->addStretch();
+
   auto *layout = new QVBoxLayout(this);
+  layout->addLayout(displayBaseLayout);
   layout->addWidget(stack);
   layout->addWidget(buttonBox);
 
@@ -61,68 +174,52 @@ CodeEditor::CodeEditor(Context &ctx, const Code &code, CodeType type,
 
 CodeEditor::~CodeEditor() = default;
 
+void CodeEditor::setDisplayBase(BaseSpinBox::Base newBase)
+{
+  for (auto *spinBox : baseSpinBoxes) {
+    spinBox->setDisplayBase(newBase);
+  }
+}
+
 bool CodeEditor::isSupported(CodeType type)
 {
   switch (type) {
     case CodeType::Proprietary:
+    case CodeType::NEC:
+    case CodeType::KASEIKYO:
+    case CodeType::SIRCS12:
+    case CodeType::SIRCS15:
+    case CodeType::SIRCS20:
+    case CodeType::Samsung32:
     case CodeType::PhilipsRC5:
+    case CodeType::PhilipsRC6:
+    case CodeType::PhilipsRC6A:
       return true;
     default:
       return false;
   }
 }
 
-Code CodeEditor::createDefault(int index, CodeType type)
-{
-  Code code;
-
-  switch (type) {
-    case CodeType::PhilipsRC5:
-      code.createSingleSection(index, RC5_CLOCK_HZ, RC5_FRAME_BITS,
-          0x01 << RC5_PAYLOAD_BITS);
-      code.setRepeatFrame(0);
-      code.setDataFrameTxCount(3);
-      break;
-    case CodeType::Proprietary:
-    case CodeType::None:
-    case CodeType::Unknown:
-    default:
-      break;
-  }
-
-  return code;
-}
-
-Code CodeEditor::getCode() const
+void CodeEditor::accept()
 {
   switch (codeType) {
-    case CodeType::PhilipsRC5:
-      return getRc5Code();
     case CodeType::Proprietary:
-      return getProprietaryCode();
+      updateProprietaryData();
+      break;
+    case CodeType::NEC:
+      updateNecData();
+      break;
+    case CodeType::KASEIKYO:
+      updateKasData();
+      break;
+    case CodeType::SIRCS20:
+      updateS20Data();
+      break;
     default:
-      return Code();
-  }
-}
-
-QString editors::CodeEditor::toString(document::data::CodeType type,
-    const binary::irProto::Code &code)
-{
-  uint32_t address;
-  uint32_t command;
-
-  switch (type) {
-    case CodeType::PhilipsRC5:
-      if (code.getDataSectionCount() != 1) {
-        return QString();
-      }
-      decodeRc5(code, address, command);
-      return tr("Address: %1, Command: %2, Tx: %3").arg(address).arg(
-          command).arg(code.getDataFrameTxCount());
-    default:
+      updateACData();
       break;
   }
-  return QString();
+  QDialog::accept();
 }
 
 QWidget* CodeEditor::createProprietaryPage()
@@ -182,37 +279,227 @@ QWidget* CodeEditor::createProprietaryPage()
   return page;
 }
 
-QWidget* CodeEditor::createRc5Page()
+QWidget* CodeEditor::createNecPage()
 {
+  auto updateLimits = [this](const QString &text) {
+    uint32_t addressLimit;
+    uint32_t commandLimit;
+
+    binary::codec::getCodeSize(codeType, text, addressLimit, commandLimit);
+    addressLimit = MASK(addressLimit);
+    commandLimit = MASK(commandLimit);
+
+    necAddressBox->setRange(0, addressLimit);
+    necCommandBox->setRange(0, commandLimit);
+  };
+
   auto *page = new QWidget(this);
 
-  rc5IndexBox = new QSpinBox(page);
-  rc5IndexBox->setEnabled(false); //must match user data entry, not editable
+  necIndexBox = new QSpinBox(page);
+  necIndexBox->setEnabled(false); //must match user data entry, not editable
   if (!ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
-    rc5IndexBox->setVisible(false);
+    necIndexBox->setVisible(false);
   }
 
-  rc5AddressBox = new QSpinBox(page);
-  rc5AddressBox->setRange(0, MASK(RC5_ADDRESS_BITS));
+  necDelayBox = new QSpinBox(page);
+  necDelayBox->setRange(0, 100000);
+  necDelayBox->setSuffix(tr(" ms"));
+  necDelayBox->setToolTip(
+      tr("Yet another pause or delay (most likely). Not yet found "
+          "where it applies. Default seems to be 500ms"));
 
-  rc5CommandBox = new QSpinBox(page);
-  rc5CommandBox->setRange(0, MASK(RC5_COMMAND_BITS));
+  necSubTypeBox = new QComboBox(page);
+  necSubTypeBox->addItems(binary::codec::getSubTypes(codeType));
+  necSubTypeBox->setCurrentText(codeString);
+  connect(necSubTypeBox, &QComboBox::currentTextChanged, this, updateLimits);
 
-  rc5RepeatCountBox = new QSpinBox(page);
-  rc5RepeatCountBox->setRange(1, 25);
+  necAddressBox = new BaseSpinBox(page);
+  necCommandBox = new BaseSpinBox(page);
+  baseSpinBoxes.push_back(necAddressBox);
+  baseSpinBoxes.push_back(necCommandBox);
+  updateLimits(codeString);
 
   auto *formLayout = new QFormLayout(page);
   if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
-    formLayout->addRow(tr("Index:"), rc5IndexBox);
+    formLayout->addRow(tr("Index:"), necIndexBox);
   }
-  formLayout->addRow(tr("Address:"), rc5AddressBox);
-  formLayout->addRow(tr("Command:"), rc5CommandBox);
-  formLayout->addRow(tr("Tx count:"), rc5RepeatCountBox);
+  formLayout->addRow(tr("Pause/Delay:"), necDelayBox);
+  formLayout->addRow(tr("Subtype:"), necSubTypeBox);
+  formLayout->addRow(tr("Address:"), necAddressBox);
+  formLayout->addRow(tr("Command:"), necCommandBox);
 
   return page;
 }
 
-void CodeEditor::loadProprietary(const Code &code)
+QWidget* CodeEditor::createKasPage()
+{
+  auto *page = new QWidget(this);
+
+  kasIndexBox = new QSpinBox(page);
+  kasIndexBox->setEnabled(false); //must match user data entry, not editable
+  if (!ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    kasIndexBox->setVisible(false);
+  }
+
+  kasDelayBox = new QSpinBox(page);
+  kasDelayBox->setRange(0, 100000);
+  kasDelayBox->setSuffix(tr(" ms"));
+  kasDelayBox->setToolTip(
+      tr("Yet another pause or delay (most likely). Not yet found "
+          "where it applies. Default seems to be 500ms"));
+
+  kasSubTypeBox = new QComboBox(page);
+  kasSubTypeBox->addItems(binary::codec::getSubTypes(codeType));
+  kasSubTypeBox->setCurrentText(codeString);
+  //keine Auswirkung auf Wertebereich
+
+  kasMnfBox = new BaseSpinBox(page);
+  kasMnfBox->setRange(0, 65535); //16 bit
+
+  kasDeviceBox = new BaseSpinBox(page);
+  kasDeviceBox->setRange(0, 255);
+
+  kasSubdeviceBox = new BaseSpinBox(page);
+  kasSubdeviceBox->setRange(0, 255);
+
+  kasCommandBox = new BaseSpinBox(page);
+  kasCommandBox->setRange(0, 255);
+
+  baseSpinBoxes.push_back(kasMnfBox);
+  baseSpinBoxes.push_back(kasDeviceBox);
+  baseSpinBoxes.push_back(kasSubdeviceBox);
+  baseSpinBoxes.push_back(kasCommandBox);
+
+  kasRepeatCountBox = new QSpinBox(page);
+  kasRepeatCountBox->setRange(1, 25);
+
+  auto *formLayout = new QFormLayout(page);
+  if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    formLayout->addRow(tr("Index:"), kasIndexBox);
+  }
+  formLayout->addRow(tr("Subtype:"), kasSubTypeBox);
+  formLayout->addRow(tr("Pause/Delay:"), kasDelayBox);
+  formLayout->addRow(tr("Manufacturer:"), kasMnfBox);
+  formLayout->addRow(tr("Device:"), kasDeviceBox);
+  formLayout->addRow(tr("Subdevice:"), kasSubdeviceBox);
+  formLayout->addRow(tr("Command:"), kasCommandBox);
+  formLayout->addRow(tr("Repeat count:"), kasRepeatCountBox);
+
+  return page;
+}
+
+QWidget* CodeEditor::createS20Page()
+{
+  uint32_t addressLimit;
+  uint32_t commandLimit;
+
+  binary::codec::getCodeSize(codeType, codeString, addressLimit, commandLimit);
+  addressLimit = MASK(addressLimit);
+  commandLimit = MASK(commandLimit);
+  uint32_t extraLimit = 255;
+
+  auto *page = new QWidget(this);
+
+  s20IndexBox = new QSpinBox(page);
+  s20IndexBox->setEnabled(false); //must match user data entry, not editable
+  if (!ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    s20IndexBox->setVisible(false);
+  }
+
+  s20DelayBox = new QSpinBox(page);
+  s20DelayBox->setRange(0, 100000);
+  s20DelayBox->setSuffix(tr(" ms"));
+  s20DelayBox->setToolTip(
+      tr("Yet another pause or delay (most likely). Not yet found "
+          "where it applies. Default seems to be 500ms"));
+
+  s20SubTypeBox = new QComboBox(page);
+  s20SubTypeBox->addItems(binary::codec::getSubTypes(codeType));
+
+  s20AddressBox = new BaseSpinBox(page);
+  s20AddressBox->setRange(0, addressLimit);
+  s20CommandBox = new BaseSpinBox(page);
+  s20CommandBox->setRange(0, commandLimit);
+  s20ExtraBox = new BaseSpinBox(page);
+  s20ExtraBox->setRange(0, extraLimit);
+
+  baseSpinBoxes.push_back(s20AddressBox);
+  baseSpinBoxes.push_back(s20CommandBox);
+  baseSpinBoxes.push_back(s20ExtraBox);
+
+  s20RepeatCountBox = new QSpinBox(page);
+  s20RepeatCountBox->setRange(1, 25);
+
+  auto *formLayout = new QFormLayout(page);
+  if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    formLayout->addRow(tr("Index:"), s20IndexBox);
+  }
+  formLayout->addRow(tr("Pause/Delay:"), s20DelayBox);
+  formLayout->addRow(tr("Subtype:"), s20SubTypeBox);
+  formLayout->addRow(tr("Address:"), s20AddressBox);
+  formLayout->addRow(tr("Command:"), s20CommandBox);
+  formLayout->addRow(tr("Extra:"), s20ExtraBox);
+  formLayout->addRow(tr("Tx count:"), s20RepeatCountBox);
+
+  return page;
+}
+
+QWidget* CodeEditor::createACPage()
+{
+  auto updateLimits = [this](const QString &text) {
+    uint32_t addressLimit;
+    uint32_t commandLimit;
+
+    binary::codec::getCodeSize(codeType, text, addressLimit, commandLimit);
+    addressLimit = MASK(addressLimit);
+    commandLimit = MASK(commandLimit);
+
+    acAddressBox->setRange(0, addressLimit);
+    acCommandBox->setRange(0, commandLimit);
+  };
+
+  auto *page = new QWidget(this);
+
+  acIndexBox = new QSpinBox(page);
+  acIndexBox->setEnabled(false); //must match user data entry, not editable
+  if (!ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    acIndexBox->setVisible(false);
+  }
+
+  acDelayBox = new QSpinBox(page);
+  acDelayBox->setRange(0, 100000);
+  acDelayBox->setSuffix(tr(" ms"));
+  acDelayBox->setToolTip(
+      tr("Yet another pause or delay (most likely). Not yet found "
+          "where it applies. Default seems to be 500ms"));
+
+  acSubTypeBox = new QComboBox(page);
+  acSubTypeBox->addItems(binary::codec::getSubTypes(codeType));
+  connect(acSubTypeBox, &QComboBox::currentTextChanged, this, updateLimits);
+
+  acAddressBox = new BaseSpinBox(page);
+  acCommandBox = new BaseSpinBox(page);
+  baseSpinBoxes.push_back(acAddressBox);
+  baseSpinBoxes.push_back(acCommandBox);
+  updateLimits(codeString);
+
+  acRepeatCountBox = new QSpinBox(page);
+  acRepeatCountBox->setRange(1, 25);
+
+  auto *formLayout = new QFormLayout(page);
+  if (ctx.userLevel().validate(lib::UserLevel::Level::Developer)) {
+    formLayout->addRow(tr("Index:"), acIndexBox);
+  }
+  formLayout->addRow(tr("Pause/Delay:"), acDelayBox);
+  formLayout->addRow(tr("Subtype:"), acSubTypeBox);
+  formLayout->addRow(tr("Address:"), acAddressBox);
+  formLayout->addRow(tr("Command:"), acCommandBox);
+  formLayout->addRow(tr("Tx count:"), acRepeatCountBox);
+
+  return page;
+}
+
+void CodeEditor::loadProprietary()
 {
   indexBox->setValue(code.getIndex());
   delayBox->setValue(code.getDelay());
@@ -244,7 +531,7 @@ void CodeEditor::loadProprietary(const Code &code)
     sectionTable->insertRow(row);
 
     const auto &bits = section.getData();
-    auto value = lib::bitsTou64Msb(bits);
+    auto value = binary::irProto::Code::bitsToU64(bits);
 
     sectionTable->setItem(row, 0,
         new QTableWidgetItem("0x" + QString::number(value, 16).toUpper()));
@@ -257,41 +544,52 @@ void CodeEditor::loadProprietary(const Code &code)
   }
 }
 
-void CodeEditor::loadRc5(const Code &code)
+void CodeEditor::loadNec()
 {
-  uint32_t address;
-  uint32_t command;
-
-  decodeRc5(code, address, command);
-
-  rc5IndexBox->setValue(code.getIndex());
-  rc5AddressBox->setValue(address);
-  rc5CommandBox->setValue(command);
-  rc5RepeatCountBox->setValue(code.getDataFrameTxCount());
+  necIndexBox->setValue(code.getIndex());
+  necDelayBox->setValue(code.getDelay());
+  necSubTypeBox->setCurrentText(codeString);
+  necAddressBox->setValue(address);
+  necCommandBox->setValue(command);
 }
 
-void CodeEditor::decodeRc5(const binary::irProto::Code &code, uint32_t &address,
-    uint32_t &command)
+void CodeEditor::loadKas()
 {
-  //RC5 payload is a single section: [start(2)][toggle(1)][address(5)][command(6)]
-  const auto &sections = code.accessSections();
-  if (sections.empty()) {
-    address = 0;
-    command = 0;
-    return;
-  }
+  uint64_t data = binary::irProto::Code::bitsToU64(rawData);
 
-  const auto &bits = sections.front().getData();
-  auto value = lib::bitsTou64Msb(bits);
-
-  address = (value >> RC5_COMMAND_BITS) & MASK(RC5_ADDRESS_BITS);
-  command = value & MASK(RC5_COMMAND_BITS);
+  kasIndexBox->setValue(code.getIndex());
+  kasDelayBox->setValue(code.getDelay());
+  kasMnfBox->setValue(address);
+  kasDeviceBox->setValue((data >> 24) & 0xff);
+  kasSubdeviceBox->setValue((data >> 16) & 0xff);
+  kasCommandBox->setValue((data >> 8) & 0xff);
+  kasRepeatCountBox->setValue(code.getDataFrameTxCount());
 }
 
-Code CodeEditor::getProprietaryCode() const
+void CodeEditor::loadS20()
 {
-  Code code;
+  s20IndexBox->setValue(code.getIndex());
+  s20DelayBox->setValue(code.getDelay());
+  s20SubTypeBox->setCurrentText(codeString);
+  s20AddressBox->setValue(address);
+  s20CommandBox->setValue(command & 0x7f);
+  s20ExtraBox->setValue((command >> 7) & 0xff);
+  s20RepeatCountBox->setValue(code.getDataFrameTxCount());
+}
 
+void CodeEditor::loadAC()
+{
+  acIndexBox->setValue(code.getIndex());
+  acDelayBox->setValue(code.getDelay());
+  acSubTypeBox->setCurrentText(codeString);
+  acAddressBox->setValue(address);
+  acCommandBox->setValue(command);
+  acRepeatCountBox->setValue(code.getDataFrameTxCount());
+}
+
+void CodeEditor::updateProprietaryData()
+{
+  code = Code(); //wipe
   code.setIndex(static_cast<uint16_t>(indexBox->value()));
   code.setDelay(static_cast<uint16_t>(delayBox->value()));
   if (controlTypeBox->currentIndex() == 2) {
@@ -318,27 +616,61 @@ Code CodeEditor::getProprietaryCode() const
 
     auto value = parsePrefixedValue(valueItem->text());
     auto bitCount = static_cast<uint8_t>(bitsBox->value());
-    auto bits = lib::u64ToBitsMsb(bitCount, value);
+    auto bits = binary::irProto::Code::u64tobits(bitCount, value);
     sections.push_back(Section(row, bits));
   }
   code.setSections(sections);
-
-  return code;
 }
 
-Code CodeEditor::getRc5Code() const
+void CodeEditor::updateNecData()
 {
-  Code code;
+  codeString = necSubTypeBox->currentText();
+  address = necAddressBox->value();
+  command = necCommandBox->value();
+  code = binary::codec::encode(necIndexBox->value(), codeType,
+      codeString.toStdString(), address, command, rawData);
+  code.setDelay(static_cast<uint16_t>(necDelayBox->value()));
+}
 
-  uint64_t payload = 0x01 << RC5_PAYLOAD_BITS; // 1 software start bits (1), 1 toggle bit (not placed here)
-  payload |= static_cast<uint64_t>(rc5AddressBox->value()) << RC5_COMMAND_BITS;
-  payload |= static_cast<uint64_t>(rc5CommandBox->value());
+void CodeEditor::updateKasData()
+{
+  uint64_t data = 0;
 
-  code.createSingleSection(rc5IndexBox->value(), RC5_CLOCK_HZ, RC5_FRAME_BITS,
-      payload);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(rc5RepeatCountBox->value());
-  return code;
+  codeString = kasSubTypeBox->currentText();
+  address = kasMnfBox->value();
+  command = 0;
+  data = data | (kasDeviceBox->value() << 24);
+  data = data | (kasSubdeviceBox->value() << 16);
+  data = data | (kasCommandBox->value() << 8);
+  //parity byte not required for encoding
+  rawData = binary::irProto::Code::u64tobits(48, data);
+  code = binary::codec::encode(kasIndexBox->value(), codeType,
+      codeString.toStdString(), address, command, rawData);
+  code.setDataFrameTxCount(kasRepeatCountBox->value());
+  code.setDelay(static_cast<uint16_t>(kasDelayBox->value()));
+}
+
+void CodeEditor::updateS20Data()
+{
+  codeString = s20SubTypeBox->currentText();
+  address = s20AddressBox->value();
+  command = (s20CommandBox->value() & 0x7f)
+      | ((s20ExtraBox->value() & 0xff) << 7);
+  code = binary::codec::encode(s20IndexBox->value(), codeType,
+      codeString.toStdString(), address, command, rawData);
+  code.setDataFrameTxCount(s20RepeatCountBox->value());
+  code.setDelay(static_cast<uint16_t>(s20DelayBox->value()));
+}
+
+void CodeEditor::updateACData()
+{
+  codeString = acSubTypeBox->currentText();
+  address = acAddressBox->value();
+  command = acCommandBox->value();
+  code = binary::codec::encode(acIndexBox->value(), codeType,
+      codeString.toStdString(), address, command, rawData);
+  code.setDataFrameTxCount(acRepeatCountBox->value());
+  code.setDelay(static_cast<uint16_t>(acDelayBox->value()));
 }
 
 uint64_t CodeEditor::parsePrefixedValue(const QString &text, bool *ok)
@@ -353,6 +685,5 @@ uint64_t CodeEditor::parsePrefixedValue(const QString &text, bool *ok)
   }
   return trimmed.toULongLong(ok, 10);
 }
-
 
 }

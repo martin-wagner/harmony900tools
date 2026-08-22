@@ -2,8 +2,8 @@
 
 #include "document/config.h"
 #include "protocolIrListModel.h"
+#include "bin/codec/encode.h"
 #include "lib/qtHelpers.h"
-#include "lib/bits.h"
 #include "ui/editors/codeEditor.h" //default code generation, code serialiser
 
 using namespace std;
@@ -258,9 +258,9 @@ QVariant ProtocolIrModel::getDisplayData(const QModelIndex &index) const
         break;
       case Column::IRBITS:
         if (printData(cmd)) {
-          return tr("0x%1, %2 bits")
-              .arg(QString::number(cmd.irBitData.get(), 16))
-              .arg(cmd.irBitCount.get());
+          return tr("0x%1, %2 bits").arg(
+              QString::number(cmd.irBitData.get(), 16)).arg(
+              cmd.irBitCount.get());
         }
         break;
       case Column::DATA:
@@ -294,7 +294,8 @@ QVariant ProtocolIrModel::getEditData(const QModelIndex &index) const
         return cmd.irCommand.get();
       case Column::IRBITS:
         return QVariant::fromValue(
-            lib::u64ToBitsMsb(cmd.irBitCount.get(), cmd.irBitData.get()));
+            binary::irProto::Code::u64tobits(cmd.irBitCount.get(),
+                cmd.irBitData.get()));
       case Column::DATA: {
         return QVariant::fromValue(cmd.command);
       }
@@ -385,13 +386,6 @@ QVariant ProtocolIrModel::visualiseData(
     return "";
   }
 
-//  //decode as readable data
-//  auto qstr = editors::CodeEditor::toString(cmd.codeType.get().getValue(),
-//      cmd.command);
-//  if (!qstr.isEmpty()) {
-//    return qstr; //todo geben wir direkt aus, ggf. woandershin aufraeumen
-//  }
-//  //not available, decode as waveform
   auto binaryData = cmd.command.getData();
   config.data().getProtocolLib().serialiseIrStream(timingData,
       cmd.protocolIndex.get(), binaryData);
@@ -424,6 +418,10 @@ bool models::ProtocolIrModel::setCommandType(
 {
   uint32_t devicePos;
   int index = -1;
+  string codeString;
+  uint32_t address;
+  uint32_t command;
+  vector<bool> rawData;
 
   config.beginMacro(QObject::tr("Set IR protocol"));
 
@@ -438,8 +436,14 @@ bool models::ProtocolIrModel::setCommandType(
   }
   cmd.protocolIndex.set(index);
   cmd.canDecode.set(true);
-  cmd.command = editors::CodeEditor::createDefault(index,
-      cmd.codeType.get().getValue()); //todo fill other columns too
+  auto code = binary::codec::encodeDefaults(cmd.protocolIndex.get(),
+      cmd.codeType.get().getValue(), codeString, address, command, rawData);
+  cmd.libName.set(codeString);
+  cmd.irAddress.set(address);
+  cmd.irCommand.set(command);
+  cmd.irBitCount.set(rawData.size());
+  cmd.irBitData.set(binary::irProto::Code::bitsToU64(rawData));
+  cmd.command = code;
   cmd.data.set( { });
   auto ret = worker.setIrCommand(devicePos, cmd, row, true);
 
@@ -486,7 +490,7 @@ bool ProtocolIrModel::setCommandIrBits(document::data::CmdCatalogue &worker,
   auto cmd = getCmds(&devicePos).at(row);
   auto bits = qvariant_cast<vector<bool>>(value);
   cmd.irBitCount = bits.size();
-  cmd.irBitData = lib::bitsTou64Msb(bits);
+  cmd.irBitData = binary::irProto::Code::bitsToU64(bits);
   return worker.setIrCommand(devicePos, cmd, row, true);
 }
 

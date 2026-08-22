@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #include "decode.h"
-#include "lib/bits.h"
+#include "bin/irProto/code.h"
 
 using namespace std;
 using namespace binary;
@@ -98,7 +98,7 @@ TEST(Decoder, NecData1)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 0);
   EXPECT_EQ(dec.getData().command, 0);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x00FF00FF);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x00FF00FF);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -126,7 +126,7 @@ TEST(Decoder, NecData2)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 162);
   EXPECT_EQ(dec.getData().command, 93);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA45);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x45BABA45);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -155,7 +155,7 @@ TEST(Decoder, NecData3)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 162);
   EXPECT_EQ(dec.getData().command, 93);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA45);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x45BABA45);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -182,7 +182,7 @@ TEST(Decoder, NecData1addr2cmd) //1x8 addr, 2x8 cmd
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 255);
   EXPECT_EQ(dec.getData().command, 0x40fe);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x00FF40FE);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x00FF40FE);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -209,7 +209,7 @@ TEST(Decoder, NecDataExtNec) //2x8 addr, 1x8 cmd
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 23714);
   EXPECT_EQ(dec.getData().command, 93);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x453ABA45);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x453ABA45);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -237,7 +237,7 @@ TEST(Decoder, NecDataOnkyo) //1x16 addr 1x16 cmd
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 0x40ff);
   EXPECT_EQ(dec.getData().command, 0x40fe);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x40FF40FE);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x40FF40FE);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -265,7 +265,7 @@ TEST(Decoder, NecDataRepeat)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 162);
   EXPECT_EQ(dec.getData().command, 93);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA45);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x45BABA45);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -312,7 +312,7 @@ TEST(Decoder, KASEIKYOData1)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 0);
   EXPECT_EQ(dec.getData().command, 0);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -344,7 +344,7 @@ TEST(Decoder, KASEIKYOData2)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 17850);
   EXPECT_EQ(dec.getData().command, 0);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA450002);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x45BABA450002);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -390,7 +390,7 @@ TEST(Decoder, KASEIKYODataRepeat)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 17850);
   EXPECT_EQ(dec.getData().command, 0);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x45BABA450002);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x45BABA450002);
   EXPECT_STREQ(dec.getData().error.c_str(), "");//ignore repeat
 }
 
@@ -412,7 +412,7 @@ TEST(Decoder, RC5Data1)
   EXPECT_EQ(dec.getData().address, 10);
   EXPECT_EQ(dec.getData().command, 42);
   EXPECT_EQ(dec.getData().data.size(), 12);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x2aa); //strip start
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x2aa); //strip start
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -434,7 +434,7 @@ TEST(Decoder, RC5Data2)
   EXPECT_EQ(dec.getData().address, 7);
   EXPECT_EQ(dec.getData().command, 112);
   EXPECT_EQ(dec.getData().data.size(), 13);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x11f0);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x11f0);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -456,7 +456,7 @@ TEST(Decoder, RC5Data3)
   EXPECT_EQ(dec.getData().address, 24);
   EXPECT_EQ(dec.getData().command, 15);
   EXPECT_EQ(dec.getData().data.size(), 12);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0xE0F); //strip start
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0xE0F); //strip start
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -478,17 +478,16 @@ TEST(Decoder, RC5Data4)
   EXPECT_EQ(dec.getData().address, 26);
   EXPECT_EQ(dec.getData().command, 15);
   EXPECT_EQ(dec.getData().data.size(), 12);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0xe8f); //strip start
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0xe8f); //strip start
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
 TEST(Decoder, RC6Data)
 {
-  //Binary: 1000 0 1010010000111010
   vector<uint16_t> raw {
-    2666, 883, 444, 883, 444, 444, 444, 444, 444, 889, 1333, 888, 888,
-    888, 444, 444, 444, 444, 444, 444, 888, 444, 444, 444, 444, 888,
-    888, 888, 444, 31000
+    2666, 889, 444, 888, 444, 444, 444, 444, 444, 889, 889, 444, 444, 444, 444,
+    444, 444, 444, 444, 444, 888, 888, 444, 444, 444, 444, 888, 888, 888, 444,
+    444, 444, 444, 888, 444, 444, 444, 50000
   };
   auto s = TimingStream::fromMarkPause(raw);
 
@@ -496,13 +495,34 @@ TEST(Decoder, RC6Data)
   ASSERT_EQ(dec.getData().decoded, Status::OK);
   ASSERT_EQ(dec.getCodeType(), data::CodeType::PhilipsRC6);
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
-  EXPECT_EQ(dec.getData().address, 20);
-  EXPECT_EQ(dec.getData().command, 58);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x143a);
+  EXPECT_EQ(dec.getData().address, 4);
+  EXPECT_EQ(dec.getData().command, 92);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x45c);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
-TEST(Decoder, SIRCSdata)
+TEST(Decoder, RC6AData)
+{
+  vector<uint16_t> raw {
+    2666, 889, 444, 444, 444, 444, 444, 889, 444, 889, 1333, 888, 444, 444, 444,
+    444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 888, 444, 444,
+    888, 888, 888, 444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 444, 888,
+    888, 444, 444, 444, 444, 888, 888, 888, 444, 444, 444, 444, 888, 444, 444, 444,
+    50000
+  };
+  auto s = TimingStream::fromMarkPause(raw);
+
+  auto dec = Decode(s, 36000);
+  ASSERT_EQ(dec.getData().decoded, Status::OK);
+  ASSERT_EQ(dec.getCodeType(), data::CodeType::PhilipsRC6A);
+  EXPECT_STRNE(dec.getData().codeString.c_str(), "");
+  EXPECT_EQ(dec.getData().address, 13316);
+  EXPECT_EQ(dec.getData().command, 92);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x34045C);
+  EXPECT_STREQ(dec.getData().error.c_str(), "");
+}
+
+TEST(Decoder, SIRCS12data)
 {
   vector<uint16_t> raw {
       2400, 600,
@@ -531,7 +551,86 @@ TEST(Decoder, SIRCSdata)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 1);
   EXPECT_EQ(dec.getData().command, 18);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0x490);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x490);
+  EXPECT_STREQ(dec.getData().error.c_str(), "");
+}
+
+TEST(Decoder, SIRCS15data)
+{
+  vector<uint16_t> raw {
+      2400, 600,
+
+      // command 18, LSB first: 0 1 0 0 1 0 0
+      600, 600,
+      1200, 600,
+      600, 600,
+      600, 600,
+      1200, 600,
+      600, 600,
+      600, 600,
+
+      // address 129, LSB first: 1 0 0 0 0 0 1 0
+      1200, 600,
+      600, 600,
+      600, 600,
+      600, 600,
+      600, 600,
+      600, 600,
+      1200, 600,
+      600, 25000
+  };
+  auto s = TimingStream::fromMarkPause(raw);
+
+  auto dec = Decode(s, 40000);
+  ASSERT_EQ(dec.getData().decoded, Status::OK);
+  ASSERT_EQ(dec.getCodeType(), data::CodeType::SIRCS15);
+  EXPECT_STRNE(dec.getData().codeString.c_str(), "");
+  EXPECT_EQ(dec.getData().address, 65);
+  EXPECT_EQ(dec.getData().command, 18);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x2482);
+  EXPECT_STREQ(dec.getData().error.c_str(), "");
+}
+
+TEST(Decoder, SIRCS20data)
+{
+  vector<uint16_t> raw {
+      2400, 600,
+
+      // command 18, LSB first: 0 1 0 0 1 0 0
+      600, 600,
+      1200, 600,
+      600, 600,
+      600, 600,
+      1200, 600,
+      600, 600,
+      600, 600,
+
+      // address 1, LSB first: 1 0 0 0 0
+      1200, 600,
+      600, 600,
+      600, 600,
+      600, 600,
+      600, 600,
+
+      //extra LSB first: 0 1 0 0 1 0 0 0
+      600, 600,
+      1200, 600,
+      600, 600,
+      600, 600,
+      1200, 600,
+      600, 600,
+      600, 600,
+      600, 25000
+  };
+  auto s = TimingStream::fromMarkPause(raw);
+
+  auto dec = Decode(s, 40000);
+  ASSERT_EQ(dec.getData().decoded, Status::OK);
+  ASSERT_EQ(dec.getCodeType(), data::CodeType::SIRCS20);
+  EXPECT_STRNE(dec.getData().codeString.c_str(), "");
+  EXPECT_EQ(dec.getData().address, 1);
+  EXPECT_EQ(dec.getData().command, 2322);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0x49048);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }
 
@@ -590,6 +689,6 @@ TEST(Decoder, Samsung32data)
   EXPECT_STRNE(dec.getData().codeString.c_str(), "");
   EXPECT_EQ(dec.getData().address, 0x07);
   EXPECT_EQ(dec.getData().command, 0xE0);
-  EXPECT_EQ(lib::bitsTou64Msb(dec.getData().data), 0xE0E007F8);
+  EXPECT_EQ(irProto::Code::bitsToU64(dec.getData().data), 0xE0E007F8);
   EXPECT_STREQ(dec.getData().error.c_str(), "");
 }

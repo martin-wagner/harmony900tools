@@ -2,13 +2,15 @@
 
 #pragma once
 
+#include <vector>
+
 #include <QDialog>
+#include <QSpinBox>
 
 #include "bin/irProto/code.h"
 #include "document/data/enum.h"
 
 class QComboBox;
-class QSpinBox;
 class QStackedWidget;
 class QTableWidget;
 class QTableWidgetItem;
@@ -17,6 +19,33 @@ class Context;
 
 namespace editors
 {
+
+/**
+ * @brief QSpinBox that can display its value as decimal, hex (0x...), or
+ * binary (0b...), while always accepting decimal, 0x, or 0b prefixed
+ * text as input (e.g. when pasting).
+ */
+class BaseSpinBox: public QSpinBox
+{
+  Q_OBJECT
+
+  public:
+    enum class Base
+    {
+      Decimal, Hex, Binary
+    };
+
+    explicit BaseSpinBox(QWidget *parent = nullptr);
+
+    void setDisplayBase(Base newBase);
+
+    QValidator::State validate(QString &input, int &pos) const override;
+    int valueFromText(const QString &text) const override;
+    QString textFromValue(int value) const override;
+
+  private:
+    Base displayBase = Base::Decimal;
+};
 
 /**
  * @brief Modal dialog to view/edit a binary::irProto::Code.
@@ -37,35 +66,39 @@ class CodeEditor: public QDialog
   Q_OBJECT
 
   public:
-    //RC5: 2 start bits (one part of protocol) + toggle (not stored, always 0 here) + 5 bit address + 6 bit command
-    static constexpr uint8_t RC5_ADDRESS_BITS = 5;
-    static constexpr uint8_t RC5_COMMAND_BITS = 6;
-    static constexpr uint8_t RC5_PAYLOAD_BITS = 1 + RC5_ADDRESS_BITS + RC5_COMMAND_BITS; //toggle + address + command
-    static constexpr uint8_t RC5_START_BITS = 1;
-    static constexpr uint8_t RC5_FRAME_BITS = RC5_PAYLOAD_BITS + RC5_START_BITS;
-    static constexpr double RC5_CLOCK_HZ = 36000.0;
-
-    CodeEditor(Context &ctx, const binary::irProto::Code &code, document::data::CodeType codeType, QWidget *parent = nullptr);
+    CodeEditor(Context &ctx, document::data::CodeType codeType,
+        const QString &codeString, uint32_t address, uint32_t command,
+        const std::vector<bool> &rawData, const binary::irProto::Code &code,
+        QWidget *parent = nullptr);
     ~CodeEditor() override;
-
-    /** build a Code from the current field content, matching the constructor's codeType */
-    binary::irProto::Code getCode() const;
 
     /** which CodeType values can this editor handle */
     static bool isSupported(document::data::CodeType type);
 
-    /** build an empty, but valid, code instance for type */
-    static binary::irProto::Code createDefault(int index, document::data::CodeType type);
+    /** getters after editing */
+    QString getCodeString() const { return codeString; };
+    uint32_t getAddress() const { return address; };
+    uint32_t getCommand() const { return command; };
+    std::vector<bool>getRawData() const { return rawData; };
+    binary::irProto::Code getCode() const { return code; };
 
-    /** create human readable string for model -- displayrole */
-    static QString toString(document::data::CodeType type, const binary::irProto::Code &code);
+  protected slots:
+    virtual void accept() override;
 
   private:
     Context &ctx;
     document::data::CodeType codeType;
+    QString codeString;
+    uint32_t address;
+    uint32_t command;
+    std::vector<bool> rawData;
+    binary::irProto::Code code;
+
     bool editAll = false;
 
     QStackedWidget *stack = nullptr;
+    QComboBox *displayBaseBox = nullptr;
+    std::vector<BaseSpinBox*> baseSpinBoxes;
 
     //proprietary page
     QSpinBox *indexBox = nullptr;
@@ -76,34 +109,63 @@ class CodeEditor: public QDialog
     QSpinBox *repeatCountBox = nullptr;
     QTableWidget *sectionTable = nullptr;
 
-    //rc5 page
-    QSpinBox *rc5IndexBox = nullptr;
-    QSpinBox *rc5AddressBox = nullptr;
-    QSpinBox *rc5CommandBox = nullptr;
-    QSpinBox *rc5RepeatCountBox = nullptr;
+    //nec page
+    QSpinBox *necIndexBox = nullptr;
+    QSpinBox *necDelayBox = nullptr;
+    QComboBox *necSubTypeBox = nullptr;
+    BaseSpinBox *necAddressBox = nullptr;
+    BaseSpinBox *necCommandBox = nullptr;
+
+    //kaseikyo page
+    QSpinBox *kasIndexBox = nullptr;
+    QSpinBox *kasDelayBox = nullptr;
+    QComboBox *kasSubTypeBox = nullptr;
+    BaseSpinBox *kasMnfBox = nullptr;
+    BaseSpinBox *kasDeviceBox = nullptr;
+    BaseSpinBox *kasSubdeviceBox = nullptr;
+    BaseSpinBox *kasCommandBox = nullptr;
+    QSpinBox *kasRepeatCountBox = nullptr;
+
+    //sirc20 page
+    QSpinBox *s20IndexBox = nullptr;
+    QSpinBox *s20DelayBox = nullptr;
+    QComboBox *s20SubTypeBox = nullptr;
+    BaseSpinBox *s20AddressBox = nullptr;
+    BaseSpinBox *s20CommandBox = nullptr;
+    BaseSpinBox *s20ExtraBox = nullptr;
+    QSpinBox *s20RepeatCountBox = nullptr;
+
+    //address/command page
+    QSpinBox *acIndexBox = nullptr;
+    QSpinBox *acDelayBox = nullptr;
+    QComboBox *acSubTypeBox = nullptr;
+    BaseSpinBox *acAddressBox = nullptr;
+    BaseSpinBox *acCommandBox = nullptr;
+    QSpinBox *acRepeatCountBox = nullptr;
+
+    void setDisplayBase(BaseSpinBox::Base newBase);
 
     QWidget* createProprietaryPage();
-    QWidget* createRc5Page();
+    QWidget* createNecPage();
+    QWidget* createKasPage();
+    QWidget* createS20Page();
+    QWidget* createACPage();
 
-    void loadProprietary(const binary::irProto::Code &code);
-    void loadRc5(const binary::irProto::Code &code);
-    static void decodeRc5(const binary::irProto::Code &code, uint32_t &address, uint32_t &command);
+    void loadProprietary();
+    void loadNec();
+    void loadKas();
+    void loadS20();
+    void loadAC();
 
-    binary::irProto::Code getProprietaryCode() const;
-    binary::irProto::Code getRc5Code() const;
+    void updateProprietaryData();
+    void updateNecData();
+    void updateKasData();
+    void updateS20Data();
+    void updateACData();
 
     /** parse "1234" / "0x1234" / "0b1010" into a value, based on prefix */
     static uint64_t parsePrefixedValue(const QString &text, bool *ok = nullptr);
     static inline uint32_t MASK(uint8_t bits) { return ((1u << bits) - 1); };
 };
-
-//todo verschiedene protokoll varianten https://www.mikrocontroller.net/articles/IRMP#Anhang
-//nec: nec Addr: 8 / ~8 + Cmd 8 / ~8 ; ext-nec addr 16 + Cmd 8 / ~8 ; onkyo addr 16 + Cmd 16, apple 16 Adress-Bits + 11100000 + 8 Kommando-Bits
-//KASEIKYO / panasonic  16 Hersteller-Bits + 4 Parity-Bits + 4 Genre1-Bits + 4 Genre2-Bits + 10 Kommando-Bits + 2 ID-Bits + 8 Parity-Bits
-//rc5: 14 datenbits im editor, start, toggle, end im editor belegen.
-//rc6: check ob das so ok ist, 4 startbits rc6 + 16 datenbits
-//sony sircs, 12 datenbits, problem: bitanzahl 12..20 in sircs... 7 Kommando-Bits + 5 Adress-Bits, mind. 3 x senden
-//samsung   16 Adress-Bits + 16 Kommando-Bits
-
 
 }

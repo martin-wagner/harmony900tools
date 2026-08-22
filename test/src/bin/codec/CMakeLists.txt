@@ -16,8 +16,11 @@ set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 # ---------------------------------------------------------------------------
 add_executable(test_codec
     test_decode.cpp
-    ${LIB_DIR}/timing.cpp
+    test_encode.cpp
     ${SRC_DIR}/decode.cpp
+    ${SRC_DIR}/encode.cpp
+    ${LIB_DIR}/timing.cpp
+    ${LIB_DIR}/irProto/code.cpp
     ${CMAKE_SOURCE_DIR}/src/document/data/enum.cpp
 )
 

@@ -63,6 +63,17 @@ vector<uint8_t> Code::bitsToBytes(const vector<bool> &bits)
   return data;
 }
 
+uint64_t Code::bitsToU64(const vector<bool> &bits)
+{
+  uint64_t data = 0;
+
+  for (size_t i = 0; i < bits.size(); ++i) {
+    data = (data << 1) | bits[i];
+  }
+
+  return data;
+}
+
 Status Code::parseFlat(const vector<uint8_t> &data)
 {
   //min 1 data byte + end code
