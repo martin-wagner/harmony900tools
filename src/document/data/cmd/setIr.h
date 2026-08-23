@@ -35,6 +35,14 @@ class SetIrCommand: public BaseCommand
     std::optional<item::ProtoCommand> prevProto;
     std::optional<item::RawCommand> raw;
     std::optional<item::RawCommand> prevRaw;
+
+  protected:
+    void updateActions(const std::string &oldAction, const std::string &newAction);
+
+  private:
+    void updateDeviceAction(item::DeviceAction &d, const std::string &oldAction, const std::string &newAction, Item event, int eventPos = 0);
+
+
 };
 
 }

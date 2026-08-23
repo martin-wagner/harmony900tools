@@ -64,7 +64,7 @@ class ConfigData
     item::UserInfo& getUser();
 
     /** max 15 devices (limit from the user manual, not actually checked) */
-    static constexpr uint32_t DEVICE_LIMIT = 15; //todo use this
+    static constexpr uint32_t DEVICE_LIMIT = 15;
 
   protected:
     /** device limit. set once, clear never */

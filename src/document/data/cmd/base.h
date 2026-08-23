@@ -48,6 +48,9 @@ class BaseCommand: public QObject, public QUndoCommand
   public:
     explicit BaseCommand(const QString &text, QUndoCommand *parent = nullptr);
 
+    //connect signals of this base command to consumer command
+    void connectCommand(BaseCommand *cmd);
+
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);

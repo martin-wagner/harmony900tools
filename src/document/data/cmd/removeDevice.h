@@ -9,16 +9,6 @@ namespace document
 namespace data
 {
 
-class RemoveDeviceFromActivityCommand: public BaseCommand
-{
-  Q_OBJECT
-  public:
-    RemoveDeviceFromActivityCommand(std::set<uint32_t> ids, uint32_t pos, QUndoCommand *parent = nullptr);
-
-    void redo() override;
-    void undo() override;
-};
-
 class RemoveDeviceCommand: public BaseCommand
 {
   Q_OBJECT
@@ -36,6 +26,13 @@ class RemoveDeviceCommand: public BaseCommand
     ConfigData &c;
     uint32_t pos;
     item::Device device;
+
+  protected:
+    bool checkRemove();
+
+  private:
+    bool checkActivityAction(const item::DeviceAction &d, uint32_t deviceId) const;
+    bool doRemove(uint32_t deviceId);
 };
 
 }

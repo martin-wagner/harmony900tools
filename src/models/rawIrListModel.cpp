@@ -292,6 +292,11 @@ bool RawIrModel::setCommandName(document::data::CmdCatalogue &worker, int row,
   for (const auto &cmd : cmds) {
     usedNames.push_back(QString::fromStdString(cmd.name.get()));
   }
+  auto &protoCmds =
+      config.data().getDevices()[devicePos].getIrCommands().getProtoCommands();
+  for (const auto &cmd : protoCmds) {
+    usedNames.push_back(QString::fromStdString(cmd.name.get()));
+  }
 
   auto name = makeStringUnique(usedNames, value.toString());
   auto cmd = cmds.at(row);

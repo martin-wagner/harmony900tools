@@ -67,7 +67,7 @@ class Button
 class Channel
 {
   public:
-    /** command that will be sent on press */
+    /** Station name */
     PropertyString station{"act"};
     /** channel number (what you enter on the remote to select a channel) */
     PropertyU32 channel{1};

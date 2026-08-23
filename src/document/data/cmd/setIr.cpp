@@ -102,6 +102,7 @@ void SetIrCommand::redo()
     auto &cmds = c.getDevices()[devicePos].getIrCommands().getProtoCommands();
     if (overwrite) {
       cmds[cmdPos] = proto.value();
+      updateActions(prevProto->name.get(), proto->name.get());
     } else {
       cmds.insert(cmds.begin() + cmdPos, proto.value());
     }
@@ -109,6 +110,7 @@ void SetIrCommand::redo()
     auto &cmds = c.getDevices()[devicePos].getIrCommands().getRawCommands();
     if (overwrite) {
       cmds[cmdPos] = raw.value();
+      updateActions(prevRaw->name.get(), raw->name.get());
     } else {
       cmds.insert(cmds.begin() + cmdPos, raw.value());
     }
@@ -136,6 +138,7 @@ void SetIrCommand::undo()
     auto &cmds = c.getDevices()[devicePos].getIrCommands().getProtoCommands();
     if (overwrite) {
       cmds[cmdPos] = prevProto.value();
+      updateActions(proto->name.get(), prevProto->name.get());
     } else {
       cmds.erase(cmds.begin() + cmdPos);
     }
@@ -143,6 +146,7 @@ void SetIrCommand::undo()
     auto &cmds = c.getDevices()[devicePos].getIrCommands().getRawCommands();
     if (overwrite) {
       cmds[cmdPos] = prevRaw.value();
+      updateActions(raw->name.get(), prevRaw->name.get());
     } else {
       cmds.erase(cmds.begin() + cmdPos);
     }
@@ -159,6 +163,128 @@ void SetIrCommand::undo()
 bool SetIrCommand::valid() const
 {
   return isValid;
+}
+
+void SetIrCommand::updateActions(const string &oldAction,
+    const string &newAction)
+{
+  int i;
+  int j;
+
+  if (oldAction == newAction) {
+    return;
+  }
+
+  //fixme can we use signal/slot for this? the current implementation
+  //requires all dependencies to be hard-coded.
+  //we could also assign a uid to each IR command.
+
+  //update the name within our device
+  auto &device = c.getDevices()[devicePos];
+  auto &hardButtons = device.getHardButtons();
+  for (i = 0; i < hardButtons.size(); i++) {
+    auto &button = hardButtons[i];
+    if (button.action.get() == oldAction) {
+      button.action.set(newAction);
+      emit itemChanged(Item::DEVICE_HARD_BUTTON, i);
+    }
+  }
+  auto &softButtons = device.getSoftButtons();
+  for (i = 0; i < softButtons.size(); i++) {
+    auto &button = softButtons[i];
+    if (button.action.get() == oldAction) {
+      button.action.set(newAction);
+      emit itemChanged(Item::DEVICE_SOFT_BUTTON, i);
+    }
+  }
+  auto &stateMachines = device.getStateMachines();
+  for (i = 0; i < stateMachines.size(); i++) {
+    auto &sm = stateMachines[i];
+    if (sm.startAction.has_value()) {
+      updateDeviceAction(*(sm.startAction), oldAction, newAction,
+          Item::DEVICE_STATEMACHINE, i);
+    }
+    if (sm.finishAction.has_value()) {
+      updateDeviceAction(*(sm.finishAction), oldAction, newAction,
+          Item::DEVICE_STATEMACHINE, i);
+    }
+    for (j = 0; j < sm.discrete.enterStateAction.size(); j++) {
+      updateDeviceAction(sm.discrete.enterStateAction[j], oldAction, newAction,
+          Item::DEVICE_STATEMACHINE, i);
+    }
+    if (sm.relative.resetAction.has_value()) {
+      updateDeviceAction(*(sm.relative.resetAction), oldAction, newAction,
+          Item::DEVICE_STATEMACHINE, i);
+    }
+    if (sm.relative.nextStateAction.has_value()) {
+      updateDeviceAction(*(sm.relative.nextStateAction), oldAction, newAction,
+          Item::DEVICE_STATEMACHINE, i);
+    }
+    if (sm.relative.prevStateAction.has_value()) {
+      updateDeviceAction(*(sm.relative.prevStateAction), oldAction, newAction,
+          Item::DEVICE_STATEMACHINE, i);
+    }
+  }
+  auto numpad = device.getNumpad();
+  if (numpad.has_value()) {
+    if (numpad->first.has_value()) {
+      for (i = 0; i < numpad->first->size(); i++) {
+        updateDeviceAction((*numpad->first)[i], oldAction, newAction,
+            Item::DEVICE_NUMPAD, i);
+      }
+    }
+    if (numpad->middle.has_value()) {
+      for (i = 0; i < numpad->middle->size(); i++) {
+        updateDeviceAction((*numpad->middle)[i], oldAction, newAction,
+            Item::DEVICE_NUMPAD, i);
+      }
+    }
+    if (numpad->last.has_value()) {
+      for (i = 0; i < numpad->last->size(); i++) {
+        updateDeviceAction((*numpad->last)[i], oldAction, newAction,
+            Item::DEVICE_NUMPAD, i);
+      }
+    }
+    if (numpad->finish.has_value()) {
+      updateDeviceAction(*(numpad->finish), oldAction, newAction,
+          Item::DEVICE_NUMPAD, 0);
+    }
+  }
+
+  //update the name in referencing activities
+  auto &activities = c.getActivities();
+  auto deviceId = device.getId();
+  for (i = 0; i < activities.size(); i++) {
+    auto &hardButtons = activities[i].getHardButtons();
+    for (j = 0; j < hardButtons.size(); j++) {
+      auto &button = hardButtons[j];
+      if ((button.device.get() == deviceId)
+          && (button.action.get() == oldAction)) {
+        button.action.set(newAction);
+        emit itemChanged(Item::ACTIVITY_HARD_BUTTON, j);
+      }
+    }
+    auto &softButtons = activities[i].getSoftButtons();
+    for (j = 0; j < softButtons.size(); j++) {
+      auto &button = softButtons[j];
+      if ((button.device.get() == deviceId)
+          && (button.action.get() == oldAction)) {
+        button.action.set(newAction);
+        emit itemChanged(Item::ACTIVITY_SOFT_BUTTON, j);
+      }
+    }
+  }
+}
+
+void SetIrCommand::updateDeviceAction(item::DeviceAction &d,
+    const string &oldAction, const string &newAction, Item event, int eventPos)
+{
+  for (auto &s : d.sequence) {
+    if (s.cmd.get() == oldAction) {
+      s.cmd.set(newAction);
+      emit itemChanged(event, eventPos);
+    }
+  }
 }
 
 }

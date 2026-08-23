@@ -198,7 +198,7 @@ bool CmdCatalogue::addDeviceCommand(int pos, uint32_t id)
         ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::addDeviceCommand(int pos, uint32_t *id)
@@ -587,7 +587,7 @@ bool CmdCatalogue::addDeviceButtonCommand(uint32_t devicePos,
             devicePos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeDeviceButtonCommand(uint32_t devicePos,
@@ -680,7 +680,7 @@ bool CmdCatalogue::addDeviceStatemachineCommand(uint32_t devicePos, int smPos)
             smPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeDeviceStatemachineCommand(uint32_t devicePos,
@@ -744,7 +744,7 @@ bool CmdCatalogue::addDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos,
             smPos).arg(actPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos,
@@ -761,7 +761,7 @@ bool CmdCatalogue::addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos,
             smPos).arg((int) t), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeDeviceSmStateCommand(uint32_t devicePos,
@@ -1310,7 +1310,7 @@ bool CmdCatalogue::removeIrProtoCommand(uint32_t devicePos, uint32_t cmdPos)
             devicePos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeIrRawCommand(uint32_t devicePos, uint32_t cmdPos)
@@ -1326,7 +1326,7 @@ bool CmdCatalogue::removeIrRawCommand(uint32_t devicePos, uint32_t cmdPos)
         ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::addActivityCommand(int pos, uint32_t id)
@@ -1342,7 +1342,7 @@ bool CmdCatalogue::addActivityCommand(int pos, uint32_t id)
         ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::addActivityCommand(int pos, uint32_t *id)
@@ -1369,7 +1369,7 @@ bool CmdCatalogue::moveActivityCommand(uint32_t currentPos, uint32_t newPos)
         ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeActivityCommand(int pos)
@@ -1828,7 +1828,7 @@ bool CmdCatalogue::addActivityChannelCommand(uint32_t activityPos, int chPos)
             activityPos).arg(chPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeActivityChannelCommand(uint32_t activityPos,
@@ -1922,7 +1922,7 @@ bool CmdCatalogue::addActivityButtonCommand(uint32_t activityPos,
             activityPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeActivityButtonCommand(uint32_t activityPos,
@@ -2243,7 +2243,7 @@ bool CmdCatalogue::removeActivityRoleCommand(uint32_t activityPos,
             activityPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeActivityRoleCommandById(uint32_t activityPos,
@@ -2295,7 +2295,7 @@ bool CmdCatalogue::removeActivityPowerOnDevicesCommand(uint32_t activityPos,
             activityPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeActivityPowerOnDevicesCommandById(uint32_t activityPos,
@@ -2347,7 +2347,7 @@ bool CmdCatalogue::removeActivityPowerOffDevicesCommand(uint32_t activityPos,
             activityPos), ContentType::PlainText);
     delete cmd;
   }
-  return true;
+  return ret;
 }
 
 bool CmdCatalogue::removeActivityPowerOffDevicesCommandById(

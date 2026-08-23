@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include <QMessageBox>
+
 #include "addDevice.h"
 
 using namespace std;
@@ -14,6 +16,20 @@ AddDeviceCommand::AddDeviceCommand(ConfigData &c, int pos, QUndoCommand *parent)
 {
   id = lib::UidGenerator::getInstance().generate();
   setText(QObject::tr("Add device (Id: %1, Pos: %2)").arg(id).arg(pos));
+
+  if (c.getDevices().size() + 1 > ConfigData::DEVICE_LIMIT) {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(nullptr, tr("Add device"),
+        tr("According to the manual, you can have a max of %1 devices. "
+            "By adding another one you will exceed this number. You've "
+            "been warned...").arg(
+            ConfigData::DEVICE_LIMIT),
+        QMessageBox::Abort | QMessageBox::Ignore, QMessageBox::Abort);
+    if (reply == QMessageBox::Abort) {
+      return;
+    }
+  }
+
   setPos();
   isValid = true;
 }

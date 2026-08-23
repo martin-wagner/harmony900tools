@@ -9,17 +9,30 @@ namespace document
 namespace data
 {
 
-class RemoveIrFromButtonCommand: public BaseCommand
+class RemoveIrCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    RemoveIrFromButtonCommand(const std::string &name, uint32_t devicePos, QUndoCommand *parent = nullptr);
+  RemoveIrCommand(ConfigData &c, uint32_t devicePos, uint32_t cmdPos, QUndoCommand *parent = nullptr);
 
-    void redo() override;
-    void undo() override;
+    bool valid() const;
+
+  protected:
+    bool isValid = false;
+
+    ConfigData &c;
+    uint32_t devicePos;
+    uint32_t cmdPos;
+
+  protected:
+    bool checkRemove(const std::string &action);
+
+  private:
+    bool doRemove(const std::string &action);
+    bool checkDeviceAction(item::DeviceAction &d, const std::string &action);
 };
 
-class RemoveIrProtoCommand: public BaseCommand
+class RemoveIrProtoCommand: public RemoveIrCommand
 {
   Q_OBJECT
   public:
@@ -28,18 +41,11 @@ class RemoveIrProtoCommand: public BaseCommand
     void redo() override;
     void undo() override;
 
-    bool valid() const;
-
   protected:
-    bool isValid = false;
-
-    ConfigData &c;
-    uint32_t devicePos;
-    uint32_t cmdPos;
     item::ProtoCommand proto;
 };
 
-class RemoveIrRawCommand: public BaseCommand
+class RemoveIrRawCommand: public RemoveIrCommand
 {
   Q_OBJECT
   public:
@@ -48,14 +54,7 @@ class RemoveIrRawCommand: public BaseCommand
     void redo() override;
     void undo() override;
 
-    bool valid() const;
-
   protected:
-    bool isValid = false;
-
-    ConfigData &c;
-    uint32_t devicePos;
-    uint32_t cmdPos;
     item::RawCommand raw;
 };
 

@@ -162,10 +162,6 @@ bool ProtocolIrModel::removeRows(int position, int rows,
   if (parent.isValid()) {
     return false;
   }
-  auto &protocolIrs = config.data().getDevices();
-  if ((position + rows) > protocolIrs.size()) {
-    return false;
-  }
 
   //no begin/end remove rows, is done inside observers
 
@@ -404,6 +400,11 @@ bool ProtocolIrModel::setCommandName(document::data::CmdCatalogue &worker,
 
   auto &cmds = getCmds(&devicePos);
   for (const auto &cmd : cmds) {
+    usedNames.push_back(QString::fromStdString(cmd.name.get()));
+  }
+  auto &rawCmds =
+      config.data().getDevices()[devicePos].getIrCommands().getRawCommands();
+  for (const auto &cmd : rawCmds) {
     usedNames.push_back(QString::fromStdString(cmd.name.get()));
   }
 
