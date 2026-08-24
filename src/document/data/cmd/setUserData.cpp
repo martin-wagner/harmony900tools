@@ -30,7 +30,7 @@ SetUserMetadataCommand::SetUserMetadataCommand(ConfigData &c,
   if (user.empty()) {
     user = qgetenv("USERNAME");
   }
-  modification = lib::writeTime();
+  modification = lib::writeDateTime();
   creation = c.getUser().fileCreationDate.get(); //keep value if available
   if (creation.empty()) {
     creation = modification;

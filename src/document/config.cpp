@@ -231,7 +231,7 @@ bool Config::saveAs(const QString &file)
   auto storage = files::ConfigStorage(workPath);
   connect(&storage, &files::ConfigStorage::writeLog, this, &Config::writeLog);
   connect(&storage, &files::ConfigStorage::writeMsg, this, &Config::writeMsg);
-  configData->getUser().fileModificationDate.set(lib::writeTime()); //update save date, no undo stack!
+  configData->getUser().fileModificationDate.set(lib::writeDateTime()); //update save date, no undo stack!
   auto ret = storage.write(*configData);
   if (ret == true) {
     dirty = false;
