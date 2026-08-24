@@ -137,14 +137,14 @@ void BaseEditor::createConnections()
 
 void BaseEditor::updateActions()
 {
+  actionAdd->setEnabled(true);
+
   if (lastActiveView == nullptr) {
-    actionAdd->setEnabled(false);
     actionRemove->setEnabled(false);
     actionMoveUp->setEnabled(false);
     actionMoveDown->setEnabled(false);
     return;
   }
-  actionAdd->setEnabled(true);
   actionRemove->setEnabled(lastActiveView->canRemove());
 
   auto move = lastActiveView->availableMoveOperations();
