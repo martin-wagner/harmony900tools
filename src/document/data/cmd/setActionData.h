@@ -76,6 +76,21 @@ inline item::DeviceAction* getActionFromNumpadRef(ConfigData &c,
           return &num->last->at(digit);
         }
         break;
+      case item::DigitSection::Start:
+        if (num->start.has_value()) {
+          return &num->start.value();
+        }
+        break;
+      case item::DigitSection::GreaterTen:
+        if (num->greaterTen.has_value()) {
+          return &num->greaterTen.value();
+        }
+        break;
+      case item::DigitSection::GreaterHundred:
+        if (num->greaterHundred.has_value()) {
+          return &num->greaterHundred.value();
+        }
+        break;
       case item::DigitSection::Finish:
         if (num->finish.has_value()) {
           return &num->finish.value();

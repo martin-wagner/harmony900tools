@@ -77,6 +77,15 @@ void AddDigitsCommand::redo()
     case item::DigitSection::Last:
       c.getDevices()[devicePos].getNumpad()->last = item::Digits();
       break;
+    case item::DigitSection::Start:
+      c.getDevices()[devicePos].getNumpad()->start = item::DeviceAction();
+      break;
+    case item::DigitSection::GreaterTen:
+      c.getDevices()[devicePos].getNumpad()->greaterTen = item::DeviceAction();
+      break;
+    case item::DigitSection::GreaterHundred:
+      c.getDevices()[devicePos].getNumpad()->greaterHundred = item::DeviceAction();
+      break;
     case item::DigitSection::Finish:
       c.getDevices()[devicePos].getNumpad()->finish = item::DeviceAction();
       break;
@@ -102,6 +111,15 @@ void AddDigitsCommand::undo()
       break;
     case item::DigitSection::Last:
       c.getDevices()[devicePos].getNumpad()->last = nullopt;
+      break;
+    case item::DigitSection::Start:
+      c.getDevices()[devicePos].getNumpad()->start = nullopt;
+      break;
+    case item::DigitSection::GreaterTen:
+      c.getDevices()[devicePos].getNumpad()->greaterTen = nullopt;
+      break;
+    case item::DigitSection::GreaterHundred:
+      c.getDevices()[devicePos].getNumpad()->greaterHundred = nullopt;
       break;
     case item::DigitSection::Finish:
       c.getDevices()[devicePos].getNumpad()->finish = nullopt;

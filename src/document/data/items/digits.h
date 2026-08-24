@@ -26,6 +26,9 @@ enum class DigitSection {
   First,
   Middle,
   Last,
+  Start,
+  GreaterTen,
+  GreaterHundred,
   Finish
 };
 
@@ -34,11 +37,13 @@ class Numpad {
   public:
     PropertyU32 fixedDigits{0, Used::NO};
 
+    std::optional<DeviceAction> start;
+    std::optional<DeviceAction> greaterTen;
+    std::optional<DeviceAction> greaterHundred;
+    std::optional<DeviceAction> finish;
     std::optional<Digits> first;
     std::optional<Digits> middle;
     std::optional<Digits> last;
-    std::optional<DeviceAction> finish;
-    //todo do we have a start action?
 };
 
 }

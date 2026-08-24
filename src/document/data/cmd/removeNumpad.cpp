@@ -72,6 +72,15 @@ RemoveDigitsCommand::RemoveDigitsCommand(ConfigData &c, uint32_t devicePos,
       case item::DigitSection::Last:
         d = c.getDevices().at(devicePos).getNumpad()->last.value();
         break;
+      case item::DigitSection::Start:
+        a = c.getDevices().at(devicePos).getNumpad()->start.value();
+        break;
+      case item::DigitSection::GreaterTen:
+        a = c.getDevices().at(devicePos).getNumpad()->greaterTen.value();
+        break;
+      case item::DigitSection::GreaterHundred:
+        a = c.getDevices().at(devicePos).getNumpad()->greaterHundred.value();
+        break;
       case item::DigitSection::Finish:
         a = c.getDevices().at(devicePos).getNumpad()->finish.value();
         break;
@@ -100,6 +109,15 @@ void RemoveDigitsCommand::redo()
     case item::DigitSection::Last:
       c.getDevices()[devicePos].getNumpad()->last = nullopt;
       break;
+    case item::DigitSection::Start:
+      c.getDevices()[devicePos].getNumpad()->start = nullopt;
+      break;
+    case item::DigitSection::GreaterTen:
+      c.getDevices()[devicePos].getNumpad()->greaterTen = nullopt;
+      break;
+    case item::DigitSection::GreaterHundred:
+      c.getDevices()[devicePos].getNumpad()->greaterHundred = nullopt;
+      break;
     case item::DigitSection::Finish:
       c.getDevices()[devicePos].getNumpad()->finish = nullopt;
       break;
@@ -125,6 +143,15 @@ void RemoveDigitsCommand::undo()
       break;
     case item::DigitSection::Last:
       c.getDevices()[devicePos].getNumpad()->last = d;
+      break;
+    case item::DigitSection::Start:
+      c.getDevices()[devicePos].getNumpad()->start = a;
+      break;
+    case item::DigitSection::GreaterTen:
+      c.getDevices()[devicePos].getNumpad()->greaterTen = a;
+      break;
+    case item::DigitSection::GreaterHundred:
+      c.getDevices()[devicePos].getNumpad()->greaterHundred = a;
       break;
     case item::DigitSection::Finish:
       c.getDevices()[devicePos].getNumpad()->finish = a;

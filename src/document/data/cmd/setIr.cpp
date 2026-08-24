@@ -245,6 +245,18 @@ void SetIrCommand::updateActions(const string &oldAction,
             Item::DEVICE_NUMPAD, i);
       }
     }
+    if (numpad->start.has_value()) {
+      updateDeviceAction(*(numpad->start), oldAction, newAction,
+          Item::DEVICE_NUMPAD, 0);
+    }
+    if (numpad->greaterTen.has_value()) {
+      updateDeviceAction(*(numpad->greaterTen), oldAction, newAction,
+          Item::DEVICE_NUMPAD, 0);
+    }
+    if (numpad->greaterHundred.has_value()) {
+      updateDeviceAction(*(numpad->greaterHundred), oldAction, newAction,
+          Item::DEVICE_NUMPAD, 0);
+    }
     if (numpad->finish.has_value()) {
       updateDeviceAction(*(numpad->finish), oldAction, newAction,
           Item::DEVICE_NUMPAD, 0);

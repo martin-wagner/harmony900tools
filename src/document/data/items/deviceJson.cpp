@@ -240,6 +240,9 @@ void toJson(ordered_json &out, const item::Numpad &numpad)
     toJson(digitsJson, numpad.last.value());
     out["Last"] = digitsJson;
   }
+  toJsonOpt(out, "Start", numpad.start);
+  toJsonOpt(out, "GreaterTen", numpad.greaterTen);
+  toJsonOpt(out, "GreaterHundred", numpad.greaterHundred);
   toJsonOpt(out, "Finish", numpad.finish);
 }
 
@@ -263,6 +266,9 @@ void fromJson(const ordered_json &in, item::Numpad &numpad)
   readDigits("Middle", numpad.middle);
   readDigits("Last", numpad.last);
 
+  fromJsonOpt(in, "Start", numpad.start);
+  fromJsonOpt(in, "GreaterTen", numpad.greaterTen);
+  fromJsonOpt(in, "GreaterHundred", numpad.greaterHundred);
   fromJsonOpt(in, "Finish", numpad.finish);
 }
 

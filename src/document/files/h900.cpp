@@ -927,6 +927,28 @@ bool H900userconfig::readNumeric(pugi::xml_node &numeric)
         item::DigitSection::Last);
     ret &= readNumericActions(lastDigit, item::DigitSection::Last);
   }
+
+  auto start = numeric.child("Start");
+  if (start) {
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::Start);
+    ret &= readNumericActionSequences(start, devicePos,
+        item::DigitSection::Start, 0);
+  }
+  auto greaterTen = numeric.child("GreaterTen");
+  if (greaterTen) {
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::GreaterTen);
+    ret &= readNumericActionSequences(greaterTen, devicePos,
+        item::DigitSection::GreaterTen, 0);
+  }
+  auto greaterHundred = numeric.child("GreaterHundred");
+  if (greaterHundred) {
+    ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
+        item::DigitSection::GreaterHundred);
+    ret &= readNumericActionSequences(greaterHundred, devicePos,
+        item::DigitSection::GreaterHundred, 0);
+  }
   auto finish = numeric.child("Finish");
   if (finish) {
     ret &= worker->addDeviceNumpadDigitsCommand(devicePos,
@@ -2116,6 +2138,22 @@ bool H900userconfig::writeNumeric(pugi::xml_node &numeric, uint32_t deviceId,
 
   if (data.fixedDigits.isIncluded() == Used::YES) {
     numeric.append_child("FixedDigits").text().set(data.fixedDigits.get());
+  }
+
+  if (data.start.has_value()) {
+    auto actionType = numeric.append_child("Start");
+    ret &= writeDeviceAction(actionType, deviceId, *data.start,
+        item::StateMachineType::Discrete); //dummy
+  }
+  if (data.greaterTen.has_value()) {
+    auto actionType = numeric.append_child("GreaterTen");
+    ret &= writeDeviceAction(actionType, deviceId, *data.greaterTen,
+        item::StateMachineType::Discrete); //dummy
+  }
+  if (data.greaterHundred.has_value()) {
+    auto actionType = numeric.append_child("GreaterHundred");
+    ret &= writeDeviceAction(actionType, deviceId, *data.greaterHundred,
+        item::StateMachineType::Discrete); //dummy
   }
   if (data.finish.has_value()) {
     auto actionType = numeric.append_child("Finish");

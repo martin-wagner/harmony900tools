@@ -90,6 +90,15 @@ bool RemoveIrCommand::checkRemove(const std::string &action)
         reject |= checkDeviceAction((*numpad->last)[i], action);
       }
     }
+    if (numpad->start.has_value()) {
+      reject |= checkDeviceAction(*(numpad->start), action);
+    }
+    if (numpad->greaterTen.has_value()) {
+      reject |= checkDeviceAction(*(numpad->greaterTen), action);
+    }
+    if (numpad->greaterHundred.has_value()) {
+      reject |= checkDeviceAction(*(numpad->greaterHundred), action);
+    }
     if (numpad->finish.has_value()) {
       reject |= checkDeviceAction(*(numpad->finish), action);
     }
@@ -122,8 +131,8 @@ bool RemoveIrCommand::checkRemove(const std::string &action)
         tr("This command is used to control the device and can't "
             "be deleted (e.g power, numbers, input selection)."
             "Delete it there first.\n\n"
-            "Ignoring will leave your config in a broken state. Only use it "
-            "for re-adding in the other IR type table."),
+            "Ignoring will leave your config in a broken state. Only use "
+            "\"Ignore\" for re-adding it in the other IR commands table."),
         QMessageBox::Ok | QMessageBox::Ignore);
     if (reply == QMessageBox::Ignore) {
       return true;
@@ -135,8 +144,8 @@ bool RemoveIrCommand::checkRemove(const std::string &action)
     reply = QMessageBox::question(nullptr, tr("Delete buttons"),
         tr("This Command is used inside buttons. This will also "
             "delete those.\n\n"
-            "Ignoring will leave your config in a broken state. Only use it "
-            "for re-adding in the other IR type table."),
+            "Ignoring will leave your config in a broken state. Only use "
+            "\"Ignore\" for re-adding it in the other IR commands table."),
         QMessageBox::Ok | QMessageBox::Cancel | QMessageBox::Ignore);
     if (reply == QMessageBox::Ok) {
       return doRemove(action);
