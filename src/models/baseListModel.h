@@ -42,6 +42,7 @@ class BaseModel: public QAbstractItemModel
   protected:
     virtual QVariant getDisplayData(const QModelIndex &index) const;
     virtual QVariant getEditData(const QModelIndex &index) const;
+    virtual QVariant getCheckStateData(const QModelIndex &index) const;
     virtual QVariant getTooltipData(const QModelIndex &index) const;
     virtual QVariant getBackgroundData(const QModelIndex &index) const;
     virtual QVariant getForegroundData(const QModelIndex &index) const;

@@ -139,8 +139,8 @@ class Activity
     //other
     PropertyEnum<ChannelButtonBehaviour> channelButtonBehaviour{ChannelButtonBehaviour::BasicChannels, Used::NO};
     PropertyBool controlGroup_SoftButtons{true, Used::NO};
-    PropertyBool enableSmartMenu{true, Used::NO};
-    PropertyBool enableSmartZoom{true, Used::NO};
+    PropertyBool enableSmartMenu{false, Used::NO};
+    PropertyBool enableSmartZoom{false, Used::NO};
     PropertyEnum<GuideButtonMode> guideButtonMode{GuideButtonMode::TunerProgramGuide, Used::NO};
     PropertyBool hideModeControl{false, Used::NO};
     PropertyBool hideModeListen{false, Used::NO};
@@ -153,10 +153,10 @@ class Activity
     PropertyBool hideSurfFavoriteShows{false, Used::NO};
     PropertyI32 maxTvContentDays{0, Used::NO};
     PropertyEnum<MediaButtonMode> mediaButtonMode{MediaButtonMode::ShowMedia, Used::NO};
-    PropertyBool playOnEnter{true, Used::NO};
+    PropertyBool playOnEnter{false, Used::NO};
     PropertyBool retainStop{false, Used::NO};
-    PropertyBool scrollChannelsByPage{true, Used::NO};
-    PropertyBool scrollShowsByPage{true, Used::NO};
+    PropertyBool scrollChannelsByPage{false, Used::NO};
+    PropertyBool scrollShowsByPage{false, Used::NO};
     PropertyBool stopOnExit{false, Used::NO};
 
     const std::vector<UnknownElement> &getUnknownProperties() const

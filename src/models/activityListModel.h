@@ -22,6 +22,9 @@ class ActivityModel: public BaseModel
       ID,
       ACTTYPE,
       LABEL,
+      POWER_OFF,
+      PLAY,
+      TRAINING,
 
       COUNT
     };
@@ -30,6 +33,9 @@ class ActivityModel: public BaseModel
         { Column::ID,            { "ID", "id", "int", true,  {}, } },
         { Column::ACTTYPE,       { "Type", "What kind of Activity you have", "Enum", false, {}, } },
         { Column::LABEL,         { "Name", "Activity Name (displayed on \"My Activities\" screen)", "QString", false, {}, } },
+        { Column::POWER_OFF,     { "Auto off", "Power off unused devices when starting this activity", "bool", false, {}, } },
+        { Column::PLAY,          { "Auto play", "Auto start/stop playing content when starting/leaving this activity", "bool", false, {}, } },
+        { Column::TRAINING,      { "Training", "Start \"testing mode\" on the remote for this activity. Useful when you add/change a activity", "bool", false, {}, } },
     };
 
   public:
@@ -55,8 +61,12 @@ class ActivityModel: public BaseModel
 
     QVariant getDisplayData(const QModelIndex &index) const override;
     QVariant getEditData(const QModelIndex &index) const override;
+    QVariant getCheckStateData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
+
+    bool setDataValue(const QModelIndex &index, const QVariant &value);
+    bool setDataCheck(const QModelIndex &index, const QVariant &value);
 
     bool setActivityName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
 };

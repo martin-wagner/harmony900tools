@@ -29,6 +29,8 @@ QVariant BaseModel::data(const QModelIndex &index, int role) const
       return getDisplayData(index);
     case Qt::EditRole:
       return getEditData(index);
+    case Qt::CheckStateRole:
+      return getCheckStateData(index);
     case Qt::ToolTipRole:
       return getTooltipData(index);
     case Qt::BackgroundRole:
@@ -87,6 +89,11 @@ QVariant BaseModel::getDisplayData(const QModelIndex &index) const
 }
 
 QVariant BaseModel::getEditData(const QModelIndex &index) const
+{
+  return {};
+}
+
+QVariant BaseModel::getCheckStateData(const QModelIndex &index) const
 {
   return {};
 }

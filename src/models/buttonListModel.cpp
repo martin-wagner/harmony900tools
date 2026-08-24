@@ -61,14 +61,19 @@ Qt::ItemFlags ButtonBaseModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
   }
 
+  auto flags = QAbstractItemModel::flags(index);
   try {
     auto isConst = columnSetup.at(mapColumn(index.column())).isConst;
     if (!isConst) {
-      return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+      flags = flags | Qt::ItemIsEditable;
+    }
+    auto dataType = columnSetup.at(mapColumn(index.column())).dataType;
+    if (dataType == "bool") {
+      flags = flags | Qt::ItemIsUserCheckable;
     }
   } catch (...) {
   }
-  return QAbstractItemModel::flags(index);
+  return flags;
 }
 
 bool ButtonBaseModel::insertRows(int position, int rows,
@@ -788,6 +793,7 @@ bool ActivityHardButtonModel::addButton(int row)
       activityPos, type, row);
   config.modify().setActivityButtonName(buttonToUse.toStdString(), activityPos,
       type, row);
+  config.modify().setActivityControlGroupHardButtons(true, activityPos);
   return true;
 }
 
@@ -797,6 +803,9 @@ bool ActivityHardButtonModel::removeButton(int row)
 
   config.data().getActivity(id, &activityPos);
 
+  if (rowCount() <= 1) {
+    config.modify().setActivityControlGroupHardButtons(false, activityPos);
+  }
   return config.modify().removeActivityButtonCommand(activityPos, type, row);
 }
 
@@ -894,7 +903,8 @@ QVariant ActivityHardButtonModel::getSelectionItemsData(
   return {};
 }
 
-bool ActivityHardButtonModel::setDeviceData(uint32_t activityPos, int row, const QVariant &value)
+bool ActivityHardButtonModel::setDeviceData(uint32_t activityPos, int row,
+    const QVariant &value)
 {
   bool ok;
   auto deviceId = value.toUInt(&ok);
@@ -1091,6 +1101,8 @@ bool ActivitySoftButtonModel::addButton(int row)
   }
   //assume infinite touch positions for the real world
   config.modify().setActivityButtonPosition(row, activityPos, type, row);
+
+  config.modify().setActivityControlGroupSoftButtons(true, activityPos);
   return true;
 }
 
@@ -1099,6 +1111,10 @@ bool ActivitySoftButtonModel::removeButton(int row)
   uint32_t activityPos;
 
   config.data().getActivity(id, &activityPos);
+
+  if (rowCount() <= 1) {
+    config.modify().setActivityControlGroupSoftButtons(false, activityPos);
+  }
 
   //only remove from the end
   row = rowCount() - 1;

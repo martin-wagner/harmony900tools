@@ -66,14 +66,19 @@ Qt::ItemFlags ProtocolIrModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
   }
 
+  auto flags = QAbstractItemModel::flags(index);
   try {
     auto isConst = columnSetup.at(static_cast<Column>(index.column())).isConst;
     if (!isConst) {
-      return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+      flags = flags | Qt::ItemIsEditable;
+    }
+    auto dataType = columnSetup.at(static_cast<Column>(index.column())).dataType;
+    if (dataType == "bool") {
+      flags = flags | Qt::ItemIsUserCheckable;
     }
   } catch (...) {
   }
-  return QAbstractItemModel::flags(index);
+  return flags;
 }
 
 bool ProtocolIrModel::setData(const QModelIndex &index, const QVariant &value,

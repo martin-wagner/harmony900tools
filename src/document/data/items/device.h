@@ -105,21 +105,21 @@ class Device
     //other
     PropertyBool audioSwitch{false, Used::NO};
     PropertyBool dimmer{false, Used::NO};
-    PropertyBool hasBands{true, Used::NO};
-    PropertyBool hasPresets{true, Used::NO};
-    PropertyBool isNewDevice{true, Used::NO};
-    PropertyBool isDisplayDevice{true, Used::NO};
+    PropertyBool hasBands{false, Used::NO};
+    PropertyBool hasPresets{false, Used::NO};
+    PropertyBool isNewDevice{false, Used::NO};
+    PropertyBool isDisplayDevice{false, Used::NO};
     PropertyBool menuOnDevice{false, Used::NO};
     PropertyI32 numDiscs{1, Used::NO};
     PropertyI32 numLights{1, Used::NO};
     PropertyBool onScreenGuide{false, Used::NO};
     PropertyEnum<PvrType> pvrType{PvrType::Generic, Used::NO};
-    PropertyBool recordMediaFixedDisc{true, Used::NO};
-    PropertyBool recordMediaRemovableVideotape{true, Used::NO};
-    PropertyBool revertInput{true, Used::NO};
-    PropertyBool scart{true, Used::NO};
+    PropertyBool recordMediaFixedDisc{false, Used::NO};
+    PropertyBool recordMediaRemovableVideotape{false, Used::NO};
+    PropertyBool revertInput{false, Used::NO};
+    PropertyBool scart{false, Used::NO};
     PropertyEnum<TunerInput> tunerInput{TunerInput::Tuner, Used::NO};
-    PropertyBool videoSwitch{true, Used::NO};
+    PropertyBool videoSwitch{false, Used::NO};
 
     const std::vector<UnknownElement> &getUnknownProperties() const
     {

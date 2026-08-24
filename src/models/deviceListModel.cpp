@@ -62,20 +62,26 @@ Qt::ItemFlags DeviceModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
   }
 
+  auto flags = QAbstractItemModel::flags(index);
   try {
     auto isConst = columnSetup.at(static_cast<Column>(index.column())).isConst;
     if (!isConst) {
-      return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+      flags = flags | Qt::ItemIsEditable;
+    }
+    auto dataType = columnSetup.at(static_cast<Column>(index.column())).dataType;
+    if (dataType == "bool") {
+      flags = flags | Qt::ItemIsUserCheckable;
     }
   } catch (...) {
   }
-  return QAbstractItemModel::flags(index);
+  return flags;
 }
 
 bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
     int role)
 {
-  if (index.parent().isValid() || (role != Qt::EditRole)) {
+  if (index.parent().isValid()
+      || ((role != Qt::EditRole) && (role != Qt::CheckStateRole))) {
     return false;
   }
   auto row = index.row();
@@ -96,24 +102,14 @@ bool DeviceModel::setData(const QModelIndex &index, const QVariant &value,
     return true;
   }
 
-  auto &worker = config.modify();
-  switch (index.column()) {
-    case Column::DEVTYPE:
-      return worker.setDeviceType(
-          document::data::Enum<document::data::DeviceType>(value.toString()),
-          row);
-    case Column::MANUFACTURER:
-      return worker.setDeviceMnf(value.toString(), row);
-    case Column::MODEL:
-      return worker.setDeviceModel(value.toString(), row);
-    case Column::NAME:
-      return setDeviceName(worker, row, value);
+  switch (role) {
+    case Qt::EditRole:
+      return setDataValue(index, value);
+    case Qt::CheckStateRole:
+      return setDataCheck(index, value);
     default:
       return false;
   }
-
-  //don't emit dataChanged event, is done inside observers anyway
-  return true;
 }
 
 bool DeviceModel::insertRows(int position, int rows, const QModelIndex &parent)
@@ -212,12 +208,51 @@ QVariant DeviceModel::getEditData(const QModelIndex &index) const
         return QString::fromStdString(device.model.get());
       case Column::NAME:
         return QString::fromStdString(device.label.get());
+      case Column::DISPLAY:
+        return device.isDisplayDevice.get();
+      case Column::ALWAYS_ON:
+        return device.alwaysOn.get();
+      case Column::MANUAL_POWER:
+        return device.manualPower.get();
+      case Column::SCART:
+        return device.scart.get();
       default:
         break;
     }
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+QVariant DeviceModel::getCheckStateData(const QModelIndex &index) const
+{
+  bool value = false;
+
+  try {
+    auto &device = config.data().getDevices().at(index.row());
+    switch (index.column()) {
+      case Column::DISPLAY:
+        value = device.isDisplayDevice.get();
+        break;
+      case Column::ALWAYS_ON:
+        value = device.alwaysOn.get();
+        break;
+      case Column::MANUAL_POWER:
+        value = device.manualPower.get();
+        break;
+      case Column::SCART:
+        value = device.scart.get();
+        break;
+      default:
+        return {};
+    }
+  } catch (const out_of_range &ex) {
+    return {};
+  }
+  if (value == true) {
+    return Qt::Checked;
+  }
+  return Qt::Unchecked;
 }
 
 QVariant DeviceModel::getTooltipData(const QModelIndex &index) const
@@ -242,6 +277,79 @@ QVariant DeviceModel::getSelectionItemsData(const QModelIndex &index) const
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+bool DeviceModel::setDataValue(const QModelIndex &index, const QVariant &value)
+{
+  auto row = index.row();
+
+  auto &worker = config.modify();
+  switch (index.column()) {
+    case Column::DEVTYPE: {
+      config.beginMacro("Set device type");
+      auto deviceType = document::data::Enum<document::data::DeviceType>(
+          value.toString());
+      switch (deviceType.getValue()) {
+        case document::data::DeviceType::Projector:
+        case document::data::DeviceType::Television:
+          worker.setDeviceIsDisplayDevice(true, row);
+          break;
+        default:
+          worker.setDeviceIsDisplayDevice(false, row);
+          break;
+      }
+      auto ret = worker.setDeviceType(deviceType, row);
+      config.endMacro();
+      return ret;
+    }
+    case Column::MANUFACTURER:
+      return worker.setDeviceMnf(value.toString(), row);
+    case Column::MODEL:
+      return worker.setDeviceModel(value.toString(), row);
+    case Column::NAME:
+      return setDeviceName(worker, row, value);
+    case Column::DISPLAY:
+      return worker.setDeviceIsDisplayDevice(value.toBool(), row);
+    case Column::ALWAYS_ON:
+      return worker.setDeviceAlwaysOn(value.toBool(), row);
+    case Column::MANUAL_POWER:
+      return worker.setDeviceManualPower(value.toBool(), row);
+    case Column::SCART:
+      return worker.setDeviceScart(value.toBool(), row);
+    default:
+      return false;
+  }
+
+  //don't emit dataChanged event, is done inside observers anyway
+  return true;
+}
+
+bool DeviceModel::setDataCheck(const QModelIndex &index, const QVariant &value)
+{
+  auto row = index.row();
+  bool checkedState;
+
+  checkedState = false;
+  if (value.toInt() == Qt::Checked) {
+    checkedState = true;
+  }
+
+  auto &worker = config.modify();
+  switch (index.column()) {
+    case Column::DISPLAY:
+      return worker.setDeviceIsDisplayDevice(checkedState, row);
+    case Column::ALWAYS_ON:
+      return worker.setDeviceAlwaysOn(checkedState, row);
+    case Column::MANUAL_POWER:
+      return worker.setDeviceManualPower(checkedState, row);
+    case Column::SCART:
+      return worker.setDeviceScart(checkedState, row);
+    default:
+      return false;
+  }
+
+  //don't emit dataChanged event, is done inside observers anyway
+  return true;
 }
 
 bool DeviceModel::setDeviceName(document::data::CmdCatalogue &worker, int row,

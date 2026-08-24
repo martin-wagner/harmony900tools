@@ -62,14 +62,19 @@ Qt::ItemFlags ActivityModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
   }
 
+  auto flags = QAbstractItemModel::flags(index);
   try {
     auto isConst = columnSetup.at(static_cast<Column>(index.column())).isConst;
     if (!isConst) {
-      return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+      flags = flags | Qt::ItemIsEditable;
+    }
+    auto dataType = columnSetup.at(static_cast<Column>(index.column())).dataType;
+    if (dataType == "bool") {
+      flags = flags | Qt::ItemIsUserCheckable;
     }
   } catch (...) {
   }
-  return QAbstractItemModel::flags(index);
+  return flags;
 }
 
 bool ActivityModel::setData(const QModelIndex &index, const QVariant &value,
@@ -96,20 +101,14 @@ bool ActivityModel::setData(const QModelIndex &index, const QVariant &value,
     return true;
   }
 
-  auto &worker = config.modify();
-  switch (index.column()) {
-    case Column::ACTTYPE:
-      return worker.setActivityType(
-          document::data::Enum<document::data::ActivityType>(value.toString()),
-          row);
-    case Column::LABEL:
-      return setActivityName(worker, row, value);
+  switch (role) {
+    case Qt::EditRole:
+      return setDataValue(index, value);
+    case Qt::CheckStateRole:
+      return setDataCheck(index, value);
     default:
       return false;
   }
-
-  //don't emit dataChanged event, is done inside observers anyway
-  return true;
 }
 
 bool ActivityModel::insertRows(int position, int rows,
@@ -220,12 +219,46 @@ QVariant ActivityModel::getEditData(const QModelIndex &index) const
         return activity.type.get().getQString();
       case Column::LABEL:
         return QString::fromStdString(activity.label.get());
+      case Column::POWER_OFF:
+        return activity.powerOffUnusedDevices.get();
+      case Column::PLAY:
+        return activity.playOnEnter.get(); //ignore stop-on-exit
+      case Column::TRAINING:
+        return activity.trainingWheels.get();
       default:
         break;
     }
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+QVariant ActivityModel::getCheckStateData(const QModelIndex &index) const
+{
+  bool value = false;
+
+  try {
+    auto &activity = config.data().getActivities().at(index.row());
+    switch (index.column()) {
+      case Column::POWER_OFF:
+        value = activity.powerOffUnusedDevices.get();
+        break;
+      case Column::PLAY:
+        value = activity.playOnEnter.get(); //ignore stop-on-exit
+        break;
+      case Column::TRAINING:
+        value = activity.trainingWheels.get();
+        break;
+      default:
+        return {};
+    }
+  } catch (const out_of_range &ex) {
+    return {};
+  }
+  if (value == true) {
+    return Qt::Checked;
+  }
+  return Qt::Unchecked;
 }
 
 QVariant ActivityModel::getTooltipData(const QModelIndex &index) const
@@ -250,6 +283,67 @@ QVariant ActivityModel::getSelectionItemsData(const QModelIndex &index) const
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+
+bool ActivityModel::setDataValue(const QModelIndex &index, const QVariant &value)
+{
+  auto row = index.row();
+
+  auto &worker = config.modify();
+  switch (index.column()) {
+    case Column::ACTTYPE:
+      return worker.setActivityType(
+          document::data::Enum<document::data::ActivityType>(value.toString()),
+          row);
+    case Column::LABEL:
+      return setActivityName(worker, row, value);
+    case Column::POWER_OFF:
+      return worker.setActivityPowerOffUnusedDevices(value.toBool(), row);
+    case Column::PLAY:
+      config.beginMacro(QObject::tr("Set autoplay"));
+      worker.setActivityPlayOnEnter(value.toBool(), row);
+      worker.setActivityStopOnExit(value.toBool(), row);
+      config.endMacro();
+      return true;
+    case Column::TRAINING:
+      return worker.setActivityTrainingWheels(value.toBool(), row);
+    default:
+      return false;
+  }
+
+  //don't emit dataChanged event, is done inside observers anyway
+  return true;
+}
+
+bool ActivityModel::setDataCheck(const QModelIndex &index, const QVariant &value)
+{
+  auto row = index.row();
+  bool checkedState;
+
+  checkedState = false;
+  if (value.toInt() == Qt::Checked) {
+    checkedState = true;
+  }
+
+  auto &worker = config.modify();
+  switch (index.column()) {
+    case Column::POWER_OFF:
+      return worker.setActivityPowerOffUnusedDevices(checkedState, row);
+    case Column::PLAY:
+      config.beginMacro(QObject::tr("Set autoplay"));
+      worker.setActivityPlayOnEnter(checkedState, row);
+      worker.setActivityStopOnExit(checkedState, row);
+      config.endMacro();
+      return true;
+    case Column::TRAINING:
+      return worker.setActivityTrainingWheels(checkedState, row);
+    default:
+      return false;
+  }
+
+  //don't emit dataChanged event, is done inside observers anyway
+  return true;
 }
 
 bool ActivityModel::setActivityName(document::data::CmdCatalogue &worker, int row,
