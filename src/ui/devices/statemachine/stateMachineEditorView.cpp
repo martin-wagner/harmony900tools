@@ -108,7 +108,7 @@ void StateMachineEditorView::onStateMachineSelectionChanged(int row)
     detailPanel->showEmptyState();
     return;
   }
-  detailPanel->setStateMachine(statemachines.at(row)); //todo musn't use reference to memory!!
+  detailPanel->setStateMachine(devicePos, row);
 }
 
 void StateMachineEditorView::onStateMachineDataChanged(
@@ -122,6 +122,11 @@ void StateMachineEditorView::onStateMachineDataChanged(
     return;
   }
   detailPanel->updateData();
+}
+
+void StateMachineEditorView::onWizardRequested()
+{
+  //todo start wizard
 }
 
 void StateMachineEditorView::createView()
@@ -140,7 +145,7 @@ void StateMachineEditorView::createView()
   layout = new QHBoxLayout(this);
   baseLayout->addLayout(layout);
   layout->addWidget(tree);
-  detailPanel = new StateMachineDetailPanel(this);
+  detailPanel = new StateMachineDetailPanel(ctx, this);
   layout->addWidget(detailPanel);
 }
 
@@ -154,6 +159,8 @@ void StateMachineEditorView::createConnections()
       &StateMachineEditorView::onStateMachineDataChanged);
   connect(tree, &StateMachineTreeView::selectionChanged, this,
       &StateMachineEditorView::onStateMachineSelectionChanged);
+  connect(detailPanel, &StateMachineDetailPanel::rerunWizardRequested, this,
+      &StateMachineEditorView::onWizardRequested);
 }
 
 }

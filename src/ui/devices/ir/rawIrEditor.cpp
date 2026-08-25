@@ -55,6 +55,7 @@ RawIrEditor::RawIrEditor(const SerialStreamIr &stream, QWidget *parent) :
 
   clockBox = new QDoubleSpinBox(this);
   clockBox->setRange(31500.0, 250000.0);
+  clockBox->setSingleStep(100.0);
   clockBox->setSuffix(tr(" Hz"));
   clockBox->setValue(stream.getClock());
 

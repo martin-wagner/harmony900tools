@@ -233,6 +233,7 @@ QWidget* CodeEditor::createProprietaryPage()
 
   delayBox = new QSpinBox(page);
   delayBox->setRange(0, 100000);
+  delayBox->setSingleStep(100);
   delayBox->setSuffix(tr(" ms"));
   delayBox->setToolTip(
       tr("Yet another pause or delay (most likely). Not yet found "
@@ -303,6 +304,7 @@ QWidget* CodeEditor::createNecPage()
 
   necDelayBox = new QSpinBox(page);
   necDelayBox->setRange(0, 100000);
+  necDelayBox->setSingleStep(100);
   necDelayBox->setSuffix(tr(" ms"));
   necDelayBox->setToolTip(
       tr("Yet another pause or delay (most likely). Not yet found "
@@ -343,6 +345,7 @@ QWidget* CodeEditor::createKasPage()
 
   kasDelayBox = new QSpinBox(page);
   kasDelayBox->setRange(0, 100000);
+  kasDelayBox->setSingleStep(100);
   kasDelayBox->setSuffix(tr(" ms"));
   kasDelayBox->setToolTip(
       tr("Yet another pause or delay (most likely). Not yet found "
@@ -408,6 +411,7 @@ QWidget* CodeEditor::createS20Page()
 
   s20DelayBox = new QSpinBox(page);
   s20DelayBox->setRange(0, 100000);
+  s20DelayBox->setSingleStep(100);
   s20DelayBox->setSuffix(tr(" ms"));
   s20DelayBox->setToolTip(
       tr("Yet another pause or delay (most likely). Not yet found "
@@ -468,6 +472,7 @@ QWidget* CodeEditor::createACPage()
 
   acDelayBox = new QSpinBox(page);
   acDelayBox->setRange(0, 100000);
+  acDelayBox->setSingleStep(100);
   acDelayBox->setSuffix(tr(" ms"));
   acDelayBox->setToolTip(
       tr("Yet another pause or delay (most likely). Not yet found "

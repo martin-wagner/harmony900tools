@@ -315,6 +315,7 @@ void CommandEditorView::createView()
   pressPreSilenceSpinBox = new QSpinBox(delayGroupBox);
   pressPreSilenceSpinBox->setRange(document::data::item::Commands::SILENCE_MIN,
       document::data::item::Commands::SILENCE_MAX);
+  pressPreSilenceSpinBox->setSingleStep(50);
   pressPreSilenceSpinBox->setSuffix(" ms");
   pressPreSilenceSpinBox->setToolTip(tr("This pause is placed before sending "
       "a single command or a command sequence"));
@@ -327,6 +328,7 @@ void CommandEditorView::createView()
   interKeySpinBox = new QSpinBox(delayGroupBox);
   interKeySpinBox->setRange(document::data::item::Commands::SILENCE_MIN,
       document::data::item::Commands::SILENCE_MAX);
+  interKeySpinBox->setSingleStep(50);
   interKeySpinBox->setSuffix(" ms");
   interKeySpinBox->setToolTip(tr("This pause is placed between two "
       "comamnds for the same device. This overrides the previous setting"));
@@ -339,6 +341,7 @@ void CommandEditorView::createView()
   holdPreSilencSpinBox = new QSpinBox(delayGroupBox);
   holdPreSilencSpinBox->setRange(document::data::item::Commands::SILENCE_MIN,
       document::data::item::Commands::SILENCE_MAX);
+  holdPreSilencSpinBox->setSingleStep(50);
   holdPreSilencSpinBox->setSuffix(" ms");
   holdPreSilencSpinBox->setToolTip(tr("This pause is placed between two "
       "comamnds when holding the key down. This is the minimum, the actual "

@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 
+#include "document/config.h"
 #include "stateMachineDetailPanel.h"
 #include "discreteStateEditor.h"
 #include "relativeStateEditor.h"
@@ -22,86 +23,111 @@ constexpr int StackIndexEmpty = 0;
 constexpr int StackIndexDiscrete = 1;
 constexpr int StackIndexRelative = 2;
 
-StateMachineDetailPanel::StateMachineDetailPanel(QWidget *parent) :
-    QWidget(parent)
+StateMachineDetailPanel::StateMachineDetailPanel(Context &ctx, QWidget *parent) :
+    QWidget(parent), config(*ctx.config())
 {
-  buildUi();
+  createView(ctx);
+  createConnections();
 }
 
-void StateMachineDetailPanel::setStateMachine(const StateMachine &stateMachine)
+void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
+    uint32_t smPos)
 {
-  currentType =
-      stateMachine.discrete.empty() ?
-          StateMachineType::Relative : StateMachineType::Discrete;
+  this->devicePos = devicePos;
+  this->smPos = smPos;
 
-  smTypeLabel->setText(
-      QString::fromStdString(stateMachine.smType.get().getString()));
-  delaySpin->setValue(static_cast<int>(stateMachine.delayMs.get()));
+  auto &m = getMachine();
 
-  if (currentType == StateMachineType::Discrete) {
-    discreteEditor->setDiscreteActions(stateMachine.discrete);
+  if (!m.discrete.empty()) {
+    currentType = StateMachineType::Discrete;
+  } else if (!m.relative.empty()) {
+    currentType = StateMachineType::Relative;
   } else {
-    relativeEditor->setRelativeActions(stateMachine.relative);
+    currentType = StateMachineType::Unknown;
+  }
+  smTypeLabel->setText(m.smType.get().getQString());
+  delaySpinBox->setValue(static_cast<int>(m.delayMs.get()));
+  smTypeLabel->setEnabled(true);
+  delaySpinBox->setEnabled(true);
+
+  switch (currentType) {
+    case StateMachineType::Discrete:
+      discreteEditor->setDiscreteActions(m.discrete); //todo no pointers
+      break;
+    case StateMachineType::Relative:
+      relativeEditor->setRelativeActions(m.relative); //todo no pointers
+      break;
+    default:
+      showEmptyState();
+      break;
   }
 
   typeStack->setCurrentIndex(stackIndexForType(currentType));
 }
 
-StateMachine StateMachineDetailPanel::getStateMachine() const
+void StateMachineDetailPanel::updateData()
 {
-  StateMachine stateMachine;
+  auto &m = getMachine();
 
-  stateMachine.smType.set(
-      Enum<StateMachineDeviceType>(smTypeLabel->text().toStdString()));
-  stateMachine.delayMs.set(static_cast<uint32_t>(delaySpin->value()));
+  smTypeLabel->setText(m.smType.get().getQString());
+  delaySpinBox->setValue(static_cast<int>(m.delayMs.get()));
 
-  if (currentType == StateMachineType::Discrete) {
-    stateMachine.discrete = discreteEditor->getDiscreteActions();
-  } else if (currentType == StateMachineType::Relative) {
-    stateMachine.relative = relativeEditor->getRelativeActions();
-  }
-
-  return stateMachine;
+  //todo pass on to sub pages
 }
 
 void StateMachineDetailPanel::showEmptyState()
 {
+  devicePos = -1;
+  smPos = -1;
+  currentType = StateMachineType::Unknown;
+  smTypeLabel->setText("--<===>--");
+  smTypeLabel->setEnabled(false);
+  delaySpinBox->setValue(0);
+  delaySpinBox->setEnabled(false);
+
   typeStack->setCurrentIndex(StackIndexEmpty);
 }
 
-void StateMachineDetailPanel::buildUi()
+void StateMachineDetailPanel::onEditingDelayFinished()
+{
+  config.modify().setDeviceStatemachineDelay(delaySpinBox->value(), devicePos,
+      smPos);
+}
+
+const document::data::item::StateMachine& StateMachineDetailPanel::getMachine() const
+{
+  return config.data().getDevices().at(devicePos).getStateMachines().at(smPos);
+}
+
+void StateMachineDetailPanel::createView(Context &ctx)
 {
   smTypeLabel = new QLabel(this);
   smTypeLabel->setStyleSheet(QStringLiteral("font-weight: 600;"));
 
-  delaySpin = new QSpinBox(this);
-  delaySpin->setRange(0, 600000);
-  delaySpin->setSuffix(tr(" ms"));
+  delaySpinBox = new QSpinBox(this);
+  delaySpinBox->setRange(0, 120000);
+  delaySpinBox->setSingleStep(100);
+  delaySpinBox->setToolTip(tr("Wait for this amount of time to execute the\n"
+      "control command (e.g. Power On)"));
+  delaySpinBox->setSuffix(tr(" ms"));
 
   rerunWizardButton = new QToolButton(this);
   rerunWizardButton->setText(tr("Edit with wizard..."));
-  connect(rerunWizardButton, &QToolButton::clicked, this,
-      &StateMachineDetailPanel::rerunWizardRequested);
-
-  deleteButton = new QToolButton(this);
-  deleteButton->setText(tr("Delete"));
-  connect(deleteButton, &QToolButton::clicked, this,
-      &StateMachineDetailPanel::deleteRequested);
 
   QFormLayout *headerForm = new QFormLayout();
   headerForm->addRow(tr("Type"), smTypeLabel);
-  headerForm->addRow(tr("Delay"), delaySpin);
+  headerForm->addRow(tr("Delay"), delaySpinBox);
 
   QHBoxLayout *headerLayout = new QHBoxLayout();
   headerLayout->addLayout(headerForm);
   headerLayout->addStretch(1);
   headerLayout->addWidget(rerunWizardButton);
-  headerLayout->addWidget(deleteButton);
 
   emptyStatePage = new QWidget(this);
   QVBoxLayout *emptyLayout = new QVBoxLayout(emptyStatePage);
   QLabel *emptyLabel = new QLabel(
-      tr("Select a state machine on the left, or add a new one."),
+      tr("Select a state machine on the left, or add\n"
+          "a new one using the \"add\" button."),
       emptyStatePage);
   emptyLabel->setAlignment(Qt::AlignCenter);
   emptyLabel->setEnabled(false);
@@ -110,12 +136,8 @@ void StateMachineDetailPanel::buildUi()
   emptyLayout->addStretch(1);
 
   discreteEditor = new DiscreteStateEditor(this);
-  connect(discreteEditor, &DiscreteStateEditor::changed, this,
-      &StateMachineDetailPanel::changed);
 
   relativeEditor = new RelativeStateEditor(this);
-  connect(relativeEditor, &RelativeStateEditor::changed, this,
-      &StateMachineDetailPanel::changed);
 
   typeStack = new QStackedWidget(this);
   typeStack->insertWidget(StackIndexEmpty, emptyStatePage);
@@ -127,6 +149,14 @@ void StateMachineDetailPanel::buildUi()
   rootLayout->addWidget(typeStack, 1);
 
   showEmptyState();
+}
+
+void StateMachineDetailPanel::createConnections()
+{
+  connect(rerunWizardButton, &QToolButton::clicked, this,
+      &StateMachineDetailPanel::rerunWizardRequested);
+  connect(delaySpinBox, &QSpinBox::editingFinished, this,
+      &StateMachineDetailPanel::onEditingDelayFinished);
 }
 
 int StateMachineDetailPanel::stackIndexForType(StateMachineType type) const
