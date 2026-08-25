@@ -8,6 +8,7 @@
 #include <DockManager.h>
 
 #include "lib/icon.h"
+#include "document/files/sharing.h"
 #include "deviceEditor.h"
 #include "commandEditorView.h"
 #include "deviceTreeView.h"
@@ -59,9 +60,27 @@ void DeviceEditor::onSelectionChanged(int row)
   emit selectionChanged(row);
 }
 
+void DeviceEditor::onImportClicked()
+{
+  auto reader = document::files::DeviceStorage();
+  reader.import(*ctx.config());
+}
+
+void DeviceEditor::onExportClicked()
+{
+  auto deviceId =
+      reinterpret_cast<DeviceTreeView*>(mainView)->getCurrentDeviceId();
+
+  auto writer = document::files::DeviceStorage();
+  writer.write(ctx.config()->data(), deviceId);
+}
+
 void DeviceEditor::createView()
 {
   BaseEditor::createView();
+
+  actionExport->setVisible(true);
+  actionImport->setVisible(true);
 
   auto *splitter = new QSplitter(Qt::Vertical, this);
 

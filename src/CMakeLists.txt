@@ -84,6 +84,7 @@ set(sources ${sources}
   document/files/create.cpp
   document/files/h900.cpp
   document/files/protocols.cpp
+  document/files/sharing.cpp
   document/files/storage.cpp
   models/activityListModel.cpp
   models/baseListModel.cpp
@@ -181,6 +182,8 @@ set(${programName}_resource_files
     ${iconPath}/actions/edit-download.png
     ${iconPath}/actions/media-record.png
     ${iconPath}/actions/keyframe-record.png
+    ${iconPath}/actions/document-export.png
+    ${iconPath}/actions/document-import.png
     ${buttonIcons}
     ${h900platform}
 )

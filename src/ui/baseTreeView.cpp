@@ -23,6 +23,7 @@ BaseTreeView::BaseTreeView(Context &ctx, const QString &title, bool bold,
   createView(title, bold);
   createConnections();
   createEventFilter();
+  onSettingsChanged();
 }
 
 BaseTreeView::~BaseTreeView() = default;
@@ -210,6 +211,8 @@ void BaseTreeView::bindModel(QAbstractItemModel *model)
     connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
         this, &BaseTreeView::onViewSelectionChanged);
   }
+
+  onUserLevelChanged(ctx.userLevel().getLevel());
 
   emit availabilityChanged();
   emit selectionChanged(-1);

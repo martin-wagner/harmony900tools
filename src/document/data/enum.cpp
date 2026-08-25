@@ -113,6 +113,12 @@ QStringList Enum<T>::getQStringList() const
 }
 
 template<typename T>
+bool Enum<T>::isEnumValue()
+{
+  return isEnumValue(src);
+}
+
+template<typename T>
 string Enum<T>::getString() const
 {
   return src;

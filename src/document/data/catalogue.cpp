@@ -212,6 +212,26 @@ bool CmdCatalogue::addDeviceCommand(int pos, uint32_t *id)
   return true;
 }
 
+bool CmdCatalogue::addDeviceCommand(const item::Device &device, int pos,
+    uint32_t *id)
+{
+  auto *cmd = new AddDeviceCommand(device, c, pos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    if (id != nullptr) {
+      *id = cmd->getUid();
+    }
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("adding at device pos %1 failed, dropped").arg(pos),
+        ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
 bool CmdCatalogue::removeDeviceCommand(int pos)
 {
   auto *cmd = new RemoveDeviceCommand(c, pos);

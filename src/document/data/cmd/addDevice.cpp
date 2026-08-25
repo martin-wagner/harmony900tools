@@ -22,8 +22,7 @@ AddDeviceCommand::AddDeviceCommand(ConfigData &c, int pos, QUndoCommand *parent)
     reply = QMessageBox::question(nullptr, tr("Add device"),
         tr("According to the manual, you can have a max of %1 devices. "
             "By adding another one you will exceed this number. You've "
-            "been warned...").arg(
-            ConfigData::DEVICE_LIMIT),
+            "been warned...").arg(ConfigData::DEVICE_LIMIT),
         QMessageBox::Abort | QMessageBox::Ignore, QMessageBox::Abort);
     if (reply == QMessageBox::Abort) {
       return;
@@ -49,6 +48,17 @@ AddDeviceCommand::AddDeviceCommand(ConfigData &c, uint32_t id, int pos,
   setPos();
 }
 
+AddDeviceCommand::AddDeviceCommand(const item::Device &device, ConfigData &c,
+    int pos, QUndoCommand *parent) :
+    AddDeviceCommand(c, pos, parent)
+{
+  if (!isValid) {
+    return;
+  }
+
+  this->device.emplace(device, id); //assing new id
+}
+
 void AddDeviceCommand::redo()
 {
   if (!isValid) {
@@ -58,7 +68,11 @@ void AddDeviceCommand::redo()
   //todo newdevicefound property
 
   emit itemAboutToBeAdded(Item::DEVICE, pos);
-  c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
+  if (device.has_value()) {
+    c.getDevices().insert(c.getDevices().begin() + pos, *device);
+  } else {
+    c.getDevices().insert(c.getDevices().begin() + pos, item::Device(id));
+  }
   emit itemAdded(Item::DEVICE, pos);
   emit dirtyChanged(true);
 }

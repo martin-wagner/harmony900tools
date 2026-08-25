@@ -17,6 +17,8 @@ class AddDeviceCommand: public BaseCommand
     AddDeviceCommand(ConfigData &c, int pos = -1, QUndoCommand *parent = nullptr);
     //pos -1 = append
     AddDeviceCommand(ConfigData &c, uint32_t id, int pos = -1, QUndoCommand *parent = nullptr);
+    //pos -1 = append
+    AddDeviceCommand(const item::Device &device, ConfigData &c, int pos = -1, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -31,6 +33,7 @@ class AddDeviceCommand: public BaseCommand
     ConfigData &c;
     uint32_t id;
     int pos;
+    std::optional<item::Device> device;
 };
 
 }

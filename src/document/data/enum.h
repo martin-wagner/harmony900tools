@@ -78,6 +78,7 @@ class Enum
     std::vector<std::string> getStringList() const;
     QStringList getQStringList() const;
 
+    bool isEnumValue();
     std::string getString() const;
     QString getQString() const;
     T getValue() const;

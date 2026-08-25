@@ -105,6 +105,22 @@ void BaseEditor::setupToolbar()
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/go-down.png",
           "go-down"), tr("Move Down"));
   actionMoveDown->setToolTip(tr("Move the selected item one position down"));
+
+  toolbar->addSeparator();
+
+  actionImport = toolbar->addAction(
+      lib::getIcon(
+          ":/res/icons/BreezeConverted/64x64/actions/document-import.png"),
+      tr("Import device"));
+  actionImport->setToolTip(tr("Import an existing item"));
+  actionImport->setVisible(false);
+  actionExport = toolbar->addAction(
+      lib::getIcon(
+          ":/res/icons/BreezeConverted/64x64/actions/document-export.png"),
+      tr("Export device"));
+  actionExport->setToolTip(
+      tr("Export the selected item to a file for re-use / sharing"));
+  actionExport->setVisible(false);
 }
 
 void BaseEditor::createConnections()
@@ -116,6 +132,10 @@ void BaseEditor::createConnections()
       &BaseEditor::onMoveUpClicked);
   connect(actionMoveDown, &QAction::triggered, this,
       &BaseEditor::onMoveDownClicked);
+  connect(actionExport, &QAction::triggered, this,
+      &BaseEditor::onExportClicked);
+  connect(actionImport, &QAction::triggered, this,
+      &BaseEditor::onImportClicked);
 
   connect(mainView, &BaseTreeView::availabilityChanged, this,
       &BaseEditor::onAvailabilityChanged);
@@ -138,11 +158,13 @@ void BaseEditor::createConnections()
 void BaseEditor::updateActions()
 {
   actionAdd->setEnabled(true);
+  actionImport->setEnabled(true);
 
   if (lastActiveView == nullptr) {
     actionRemove->setEnabled(false);
     actionMoveUp->setEnabled(false);
     actionMoveDown->setEnabled(false);
+    actionExport->setEnabled(false);
     return;
   }
   actionRemove->setEnabled(lastActiveView->canRemove());
@@ -166,6 +188,13 @@ void BaseEditor::updateActions()
       actionMoveUp->setEnabled(true);
       actionMoveDown->setEnabled(true);
       break;
+  }
+
+  if (lastActiveView == mainView) {
+    actionExport->setEnabled(true);
+  } else {
+    actionExport->setEnabled(false);
+
   }
 }
 

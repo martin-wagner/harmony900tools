@@ -38,6 +38,13 @@ class Device
       return id;
     }
 
+    /** copy / new uid */
+    Device(const Device &other, uint32_t newId) :
+        Device(other)
+    {
+      id = newId;
+    }
+
     const std::vector<Button>& getSoftButtons() const
     {
       return softButtons;

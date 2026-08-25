@@ -179,8 +179,10 @@ void ProtoCommandTreeView::onUserLevelChanged(lib::UserLevel::Level l)
 
   if (lib::UserLevel::validate(l, lib::UserLevel::Level::Developer)) {
     treeView->showColumn(models::ProtocolIrModel::Column::IRBITS);
+    treeView->showColumn(models::ProtocolIrModel::Column::PROTO);
   } else {
     treeView->hideColumn(models::ProtocolIrModel::Column::IRBITS);
+    treeView->hideColumn(models::ProtocolIrModel::Column::PROTO);
   }
 }
 

@@ -45,7 +45,7 @@ class ProtocolIrModel: public BaseModel
         { Column::IRADDRESS,     { "IR Address", "IR Device Address", "int", false, {}, } },
         { Column::IRCOMMAND,     { "IR Command", "IR Device Command (=Button)", "int", false, {}, } },
         { Column::IRBITS,        { "IR Bits", "IR raw command bits", "int", false, {}, } },
-        { Column::PROTO,         { "Protocol Index", "Protocol index for proprietary / none / unknown", "int", true, {}, } },
+        { Column::PROTO,         { "Protocol Index", "Protocol index", "int", true, {}, } },
         { Column::DATA,          { "Data", "- Select cell to enable learning. Needs remote to be connected.\n- Double-click to edit manually\n\nVisual representation of IR data..", "Code", false, {}, } },
     };
 

@@ -45,6 +45,8 @@ class BaseEditor: public QWidget
     virtual void onRemoveClicked();
     virtual void onMoveUpClicked();
     virtual void onMoveDownClicked();
+    virtual void onImportClicked() {};
+    virtual void onExportClicked() {};
     virtual void onAvailabilityChanged();
     virtual void onSelectionChanged(int row) = 0;
 
@@ -64,6 +66,8 @@ class BaseEditor: public QWidget
     QAction *actionRemove = nullptr;
     QAction *actionMoveUp = nullptr;
     QAction *actionMoveDown = nullptr;
+    QAction *actionImport = nullptr;
+    QAction *actionExport = nullptr;
 
     virtual void createView();
     virtual void setupToolbar();

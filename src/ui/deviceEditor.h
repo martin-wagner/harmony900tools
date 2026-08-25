@@ -45,6 +45,8 @@ class DeviceEditor: public BaseEditor
 
   protected slots:
     virtual void onSelectionChanged(int row) override;
+    virtual void onImportClicked() override;
+    virtual void onExportClicked() override;
 
   private:
     /** all child views, in display order */

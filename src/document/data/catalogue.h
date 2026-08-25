@@ -53,6 +53,7 @@ class CmdCatalogue : public QObject
     //device
     bool addDeviceCommand(int pos, uint32_t id); //existing id
     bool addDeviceCommand(int pos, uint32_t *id = nullptr); //assign id
+    bool addDeviceCommand(const item::Device &device, int pos, uint32_t *id = nullptr); //assign id
     bool removeDeviceCommand(int pos);
     bool setDeviceType(const Enum<DeviceType> &v, uint32_t pos);
     bool setDeviceMnf(const QString &v, uint32_t pos);
