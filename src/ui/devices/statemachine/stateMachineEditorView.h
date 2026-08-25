@@ -14,46 +14,11 @@
 namespace editors
 {
 
-//class StateMachineListWidget;
-//class StateMachineDetailPanel;
-//
-///** top-level widget: list of a device's state machines on the left, detail
-// * editor on the right, "add" and "edit with wizard" both routed through
-// * AddStateMachineWizard.
-// */
-//class StateMachineEditorView : public QWidget
-//{
-//    Q_OBJECT
-//
-//  public:
-//    explicit StateMachineEditorView(Context &ctx, QWidget *parent = nullptr);
-//
-//    void setStateMachines(const QVector<StateMachine> &stateMachines);
-//    QVector<StateMachine> getStateMachines() const;
-//
-//  private slots:
-//    void onCurrentRowChanged(int row);
-//    void onAddRequested();
-//    void onRerunWizardRequested();
-//    void onDeleteRequested();
-//    void onDetailChanged();
-//
-//  private:
-//    void buildUi();
-//    void storeCurrentDetailEdits();
-//
-//    StateMachineListWidget *listWidget = nullptr;
-//    StateMachineDetailPanel *detailPanel = nullptr;
-//
-//    QVector<StateMachine> stateMachines;
-//    int currentRow = -1;
-//};
-
-
-
+class StateMachineDetailPanel;
 
 /**
- * @brief list tree view for protocol commands
+ * @brief list tree view for state machines
+ *
  */
 class StateMachineTreeView: public BaseTreeView
 {
@@ -71,18 +36,18 @@ class StateMachineTreeView: public BaseTreeView
 
 
 /**
- * @brief editor view for ir command editing (raw, proto, common params)
+ * @brief editor view for state machines
+ *
+ * top-level widget: tree of a device's state machines on the left, detail
+ * editor on the right.
  */
 class StateMachineEditorView: public QWidget
 {
   Q_OBJECT
 
   public:
-    explicit StateMachineEditorView(Context &ctx, QWidget *parent = nullptr);
+    explicit StateMachineEditorView(Context &ctx, StateMachineTreeView *stateTree, QWidget *parent = nullptr);
     ~StateMachineEditorView();
-
-    /** add tree views to the command editor */
-    void addTreeView(StateMachineTreeView *stateTree);
 
     /** load data, update model
      *
@@ -97,6 +62,7 @@ class StateMachineEditorView: public QWidget
 //    void onEditingPressPreSilenceFinished();
 //    void onEditingHoldPreSilenceFinished();
 //    void onEditingInterKeyFinished();
+    void onStateMachineSelectionChanged(int row);
     void onStateMachineDataChanged(document::data::Item item, uint32_t pos);
 
   protected:
@@ -111,6 +77,10 @@ class StateMachineEditorView: public QWidget
   private:
     QHBoxLayout *layout = nullptr;
     QLabel *header = nullptr;
+    StateMachineTreeView *tree;
+
+    StateMachineDetailPanel *detailPanel = nullptr;
+
 
 //    QSpinBox *pressPreSilenceSpinBox;
 //    QSpinBox *holdPreSilencSpinBox;

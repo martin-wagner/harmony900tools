@@ -8,50 +8,14 @@
 #include "ui/delegates/combobox.h"
 #include "stateMachineEditorView.h"
 
-//#include "stateMachineEditorView.h"
-//#include "stateMachineListWidget.h"
-//#include "stateMachineDetailPanel.h"
+#include "stateMachineDetailPanel.h"
 //#include "stateMachineWizard.h"
 
 using namespace std;
 
 namespace editors
 {
-//
-//StateMachineEditorView::StateMachineEditorView(QWidget *parent) :
-//    QWidget(parent)
-//{
-//  buildUi();
-//}
-//
-//void StateMachineEditorView::setStateMachines(
-//    const QVector<StateMachine> &newStateMachines)
-//{
-//  stateMachines = newStateMachines;
-//  currentRow = -1;
-//
-//  listWidget->setStateMachines(stateMachines);
-//  detailPanel->showEmptyState();
-//}
-//
-//QVector<StateMachine> StateMachineEditorView::getStateMachines() const
-//{
-//  return stateMachines;
-//}
-//
-//void StateMachineEditorView::onCurrentRowChanged(int row)
-//{
-//  storeCurrentDetailEdits();
-//
-//  currentRow = row;
-//
-//  if (row < 0 || row >= stateMachines.size()) {
-//    detailPanel->showEmptyState();
-//    return;
-//  }
-//
-//  detailPanel->setStateMachine(stateMachines.at(row));
-//}
+
 //
 //void StateMachineEditorView::onAddRequested()
 //{
@@ -79,62 +43,7 @@ namespace editors
 //    listWidget->setCurrentRow(currentRow);
 //  }
 //}
-//
-//void StateMachineEditorView::onDeleteRequested()
-//{
-//  if (currentRow < 0 || currentRow >= stateMachines.size()) {
-//    return;
-//  }
-//
-//  const QMessageBox::StandardButton answer = QMessageBox::question(this,
-//      tr("Delete state machine"),
-//      tr("Remove this state machine? This cannot be undone."));
-//
-//  if (answer != QMessageBox::Yes) {
-//    return;
-//  }
-//
-//  stateMachines.remove(currentRow);
-//  currentRow = -1;
-//
-//  listWidget->setStateMachines(stateMachines);
-//  detailPanel->showEmptyState();
-//}
-//
-//void StateMachineEditorView::onDetailChanged()
-//{
-//  storeCurrentDetailEdits();
-//}
-//
-//void StateMachineEditorView::buildUi()
-//{
-//  listWidget = new StateMachineListWidget(this);
-//  connect(listWidget, &StateMachineListWidget::currentChanged, this,
-//      &StateMachineEditorView::onCurrentRowChanged);
-//  connect(listWidget, &StateMachineListWidget::addRequested, this,
-//      &StateMachineEditorView::onAddRequested);
-//
-//  detailPanel = new StateMachineDetailPanel(this);
-//  connect(detailPanel, &StateMachineDetailPanel::changed, this,
-//      &StateMachineEditorView::onDetailChanged);
-//  connect(detailPanel, &StateMachineDetailPanel::deleteRequested, this,
-//      &StateMachineEditorView::onDeleteRequested);
-//  connect(detailPanel, &StateMachineDetailPanel::rerunWizardRequested, this,
-//      &StateMachineEditorView::onRerunWizardRequested);
-//
-//  QHBoxLayout *rootLayout = new QHBoxLayout(this);
-//  rootLayout->addWidget(listWidget, 0);
-//  rootLayout->addWidget(detailPanel, 1);
-//}
-//
-//void StateMachineEditorView::storeCurrentDetailEdits()
-//{
-//  if (currentRow < 0 || currentRow >= stateMachines.size()) {
-//    return;
-//  }
-//
-//  stateMachines[currentRow] = detailPanel->getStateMachine();
-//}
+// todo
 
 StateMachineTreeView::StateMachineTreeView(Context &ctx, QWidget *parent) :
     BaseTreeView(ctx, "", false, parent)
@@ -156,8 +65,9 @@ void StateMachineTreeView::setupDelegates()
       models::StateMachineModel::Column::CONTROL_TYPE, comboBoxDelegate);
 }
 
-StateMachineEditorView::StateMachineEditorView(Context &ctx, QWidget *parent) :
-    QWidget(parent), ctx(ctx)
+StateMachineEditorView::StateMachineEditorView(Context &ctx,
+    StateMachineTreeView *stateTree, QWidget *parent) :
+    QWidget(parent), ctx(ctx), tree(stateTree)
 {
   createView();
   setupTreeView();
@@ -166,13 +76,8 @@ StateMachineEditorView::StateMachineEditorView(Context &ctx, QWidget *parent) :
 
 StateMachineEditorView::~StateMachineEditorView() = default;
 
-void StateMachineEditorView::addTreeView(StateMachineTreeView *stateTree)
-{
-  layout->addWidget(stateTree, 0);
-  //rootLayout->addWidget(detailPanel, 1);
-}
-
-void StateMachineEditorView::setData(uint32_t deviceId, QAbstractItemModel *stateModel)
+void StateMachineEditorView::setData(uint32_t deviceId,
+    QAbstractItemModel *stateModel)
 {
   if (stateModel == nullptr) {
     this->deviceId = 0;
@@ -184,24 +89,39 @@ void StateMachineEditorView::setData(uint32_t deviceId, QAbstractItemModel *stat
   onStateMachineDataChanged(document::data::Item::DEVICE_STATEMACHINE, 0);
 }
 
-void StateMachineEditorView::onStateMachineDataChanged(document::data::Item item,
-    uint32_t pos)
+void StateMachineEditorView::onStateMachineSelectionChanged(int row)
+{
+  uint32_t devicePos;
+
+  if (row < 0) {
+    detailPanel->showEmptyState();
+    return;
+  }
+
+  auto *device = ctx.config()->data().getDevice(deviceId, &devicePos);
+  if (device == nullptr) {
+    detailPanel->showEmptyState();
+    return;
+  }
+  auto &statemachines = device->getStateMachines();
+  if (row >= statemachines.size()) {
+    detailPanel->showEmptyState();
+    return;
+  }
+  detailPanel->setStateMachine(statemachines.at(row)); //todo musn't use reference to memory!!
+}
+
+void StateMachineEditorView::onStateMachineDataChanged(
+    document::data::Item item, uint32_t pos)
 {
   if (item != document::data::Item::DEVICE_STATEMACHINE) {
     return;
   }
-
-  auto *device = ctx.config()->data().getDevice(deviceId);
-  if (device == nullptr) {
+  if (!tree->hasSelection()) {
+    detailPanel->showEmptyState();
     return;
   }
-
-//todo update non-model/view data
-//  auto &commands = device->getIrCommands();
-//  pressPreSilenceSpinBox->setValue(commands.pressPreSilenceMs.get());
-//  holdPreSilencSpinBox->setValue(commands.holdPreSilenceMs.get());
-//  interKeySpinBox->setValue(
-//      max(commands.pressInterKeyMs.get(), commands.holdInterKeyMs.get()));
+  detailPanel->updateData();
 }
 
 void StateMachineEditorView::createView()
@@ -218,9 +138,10 @@ void StateMachineEditorView::createView()
 
   //fixme use ads for this
   layout = new QHBoxLayout(this);
-//  layout->setContentsMargins(0, 0, 0, 0);
-//  layout->setSpacing(0); todo
   baseLayout->addLayout(layout);
+  layout->addWidget(tree);
+  detailPanel = new StateMachineDetailPanel(this);
+  layout->addWidget(detailPanel);
 }
 
 void StateMachineEditorView::setupTreeView()
@@ -231,6 +152,8 @@ void StateMachineEditorView::createConnections()
 {
   connect(ctx.config(), &document::Config::itemChanged, this,
       &StateMachineEditorView::onStateMachineDataChanged);
+  connect(tree, &StateMachineTreeView::selectionChanged, this,
+      &StateMachineEditorView::onStateMachineSelectionChanged);
 }
 
 }

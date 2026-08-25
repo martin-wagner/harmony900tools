@@ -32,6 +32,8 @@ class StateMachineDetailPanel : public QWidget
     void setStateMachine(const document::data::item::StateMachine &stateMachine);
     document::data::item::StateMachine getStateMachine() const;
 
+    void updateData() {};
+
     /** show an empty-state placeholder instead of an editor, e.g. when
      * nothing is selected in the state machine list */
     void showEmptyState();

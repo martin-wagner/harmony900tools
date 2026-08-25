@@ -108,10 +108,10 @@ void DeviceEditor::createView()
   childViews.append(softButtonView);
   splitter->addWidget(buttonSplitter);
 
-  stateMachineEditorView = new StateMachineEditorView(ctx, this);
-  splitter->addWidget(stateMachineEditorView);
   stateMachineView = new StateMachineTreeView(ctx, this);
-  stateMachineEditorView->addTreeView(stateMachineView);
+  stateMachineEditorView = new StateMachineEditorView(ctx, stateMachineView,
+      this);
+  splitter->addWidget(stateMachineEditorView);
   childViews.append(stateMachineView);
 
   layout->addWidget(splitter);
