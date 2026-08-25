@@ -11,8 +11,8 @@ namespace models
 
 StateMachineModel::StateMachineModel(document::Config &config,
     uint32_t deviceId, QObject *parent) :
-    BaseModel(document::data::Item::DEVICE_STATEMACHINE, parent), config(config), id(
-        deviceId)
+    BaseModel(document::data::Item::DEVICE_STATEMACHINE, parent), config(
+        config), id(deviceId)
 {
   createActions(&config);
 }
@@ -289,7 +289,8 @@ QVariant StateMachineModel::getTooltipData(const QModelIndex &index) const
   return {};
 }
 
-QVariant StateMachineModel::getSelectionItemsData(const QModelIndex &index) const
+QVariant StateMachineModel::getSelectionItemsData(
+    const QModelIndex &index) const
 {
   uint32_t devicePos;
 
@@ -297,13 +298,31 @@ QVariant StateMachineModel::getSelectionItemsData(const QModelIndex &index) cons
     auto &m = getMachines(&devicePos).at(index.row());
     switch (index.column()) {
       case Column::CONTROL_TYPE:
-        return m.smType.get().getQStringList();
+        return getUnusedMachineTypes(m.smType.get().getQString());
       default:
         break;
     }
   } catch (const out_of_range &ex) {
   }
   return {};
+}
+
+QStringList StateMachineModel::getUnusedMachineTypes(
+    const QString &current) const
+{
+  auto list =
+      document::data::Enum<document::data::StateMachineDeviceType>::toQStringList();
+
+  auto &machines = getMachines();
+  for (const auto &m : machines) {
+    auto type = m.smType.get().getQString();
+    list.removeAll(type);
+  }
+
+  if (!list.contains(current)) {
+    list.append(current);
+  }
+  return list;
 }
 
 }

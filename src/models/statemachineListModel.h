@@ -67,6 +67,8 @@ class StateMachineModel: public BaseModel
     QVariant getEditData(const QModelIndex &index) const override;
     QVariant getTooltipData(const QModelIndex &index) const override;
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
+
+    QStringList getUnusedMachineTypes(const QString &current) const;
 };
 
 }
