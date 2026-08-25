@@ -96,19 +96,19 @@ set(sources ${sources}
   ui/delegates/rawIr.cpp
   ui/delegates/protocolIr.cpp
   ui/delegates/uidCombobox.cpp
-  ui/editors/codeEditor.cpp
-  ui/editors/rawIrEditor.cpp
-  ui/activityButtonTreeView.cpp
-  ui/activityEditor.cpp
-  ui/activityTreeView.cpp
-  ui/activityEditor.cpp
+  ui/activities/activityButtonTreeView.cpp
+  ui/activities/activityEditor.cpp
+  ui/activities/activityTreeView.cpp
+  ui/activities/activityEditor.cpp
+  ui/devices/editors/codeEditor.cpp
+  ui/devices/editors/rawIrEditor.cpp
+  ui/devices/commandEditorView.cpp
+  ui/devices/deviceButtonTreeView.cpp
+  ui/devices/deviceEditor.cpp
+  ui/devices/deviceTreeView.cpp
   ui/baseEditor.cpp
   ui/baseTreeView.cpp
-  ui/commandEditorView.cpp
   ui/concordConnection.cpp
-  ui/deviceButtonTreeView.cpp
-  ui/deviceEditor.cpp
-  ui/deviceTreeView.cpp
   ui/logViewer.cpp
   ui/settings.cpp
   wrappers/concordWrapper.cpp

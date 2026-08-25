@@ -6,9 +6,9 @@
 #include "document/config.h"
 #include "bin/timing.h"
 #include "context.h"
-#include "logViewer.h"
-#include "baseTreeView.h"
-#include "concordConnection.h"
+#include "ui/logViewer.h"
+#include "ui/baseTreeView.h"
+#include "ui/concordConnection.h"
 
 namespace editors
 {

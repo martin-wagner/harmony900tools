@@ -3,7 +3,7 @@
 #include <QAbstractItemModel>
 
 #include "protocolIr.h"
-#include "ui/editors/codeEditor.h"
+#include "ui/devices/editors/codeEditor.h"
 #include "bin/irProto/code.h"
 #include "document/data/enum.h"
 #include "models/protocolIrListModel.h"

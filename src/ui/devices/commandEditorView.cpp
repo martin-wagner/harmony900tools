@@ -2,9 +2,9 @@
 
 #include "models/rawIrListModel.h"
 #include "models/protocolIrListModel.h"
-#include "delegates/protocolIr.h"
-#include "delegates/rawIr.h"
-#include "delegates/combobox.h"
+#include "ui/delegates/protocolIr.h"
+#include "ui/delegates/rawIr.h"
+#include "ui/delegates/combobox.h"
 #include "bin/codec/decode.h"
 #include "bin/codec/encode.h"
 #include "commandEditorView.h"

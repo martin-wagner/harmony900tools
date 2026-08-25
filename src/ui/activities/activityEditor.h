@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include "ui/baseEditor.h"
 #include "models/buttonListModel.h"
 #include "models/activityListModel.h"
-#include "baseEditor.h"
 
 namespace editors
 {

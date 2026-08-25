@@ -4,7 +4,7 @@
 
 #include "deviceTreeView.h"
 #include "models/deviceListModel.h"
-#include "delegates/combobox.h"
+#include "ui/delegates/combobox.h"
 
 using namespace std;
 

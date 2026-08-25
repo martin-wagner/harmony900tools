@@ -2,9 +2,9 @@
 
 #include <QTreeView>
 
+#include "ui/delegates/combobox.h"
 #include "deviceButtonTreeView.h"
 #include "models/buttonListModel.h"
-#include "delegates/combobox.h"
 
 using namespace std;
 

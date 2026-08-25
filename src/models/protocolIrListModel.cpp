@@ -4,7 +4,7 @@
 #include "protocolIrListModel.h"
 #include "bin/codec/encode.h"
 #include "lib/qtHelpers.h"
-#include "ui/editors/codeEditor.h" //default code generation, code serialiser
+#include "ui/devices/editors/codeEditor.h" //default code generation, code serialiser
 
 using namespace std;
 

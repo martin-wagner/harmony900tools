@@ -2,9 +2,9 @@
 
 #include <QTreeView>
 
+#include "ui/delegates/combobox.h"
 #include "activityTreeView.h"
 #include "models/activityListModel.h"
-#include "delegates/combobox.h"
 
 using namespace std;
 

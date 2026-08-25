@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "concordConnection.h"
+#include "ui/concordConnection.h"
+#include "ui/baseEditor.h"
 #include "models/buttonListModel.h"
 #include "models/deviceListModel.h"
 #include "models/protocolIrListModel.h"
 #include "models/rawIrListModel.h"
-#include "baseEditor.h"
 
 namespace editors
 {
