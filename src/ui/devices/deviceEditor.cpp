@@ -11,12 +11,9 @@
 #include "document/files/sharing.h"
 #include "deviceEditor.h"
 #include "ir/commandEditorView.h"
+#include "statemachine/stateMachineEditorView.h"
 #include "deviceTreeView.h"
 #include "deviceButtonTreeView.h"
-
-//todo
-#include "statemachine/stateMachineEditorWindow.h"
-#include "statemachine/addStateMachineWizard.h"
 
 using namespace std;
 
@@ -58,6 +55,7 @@ void DeviceEditor::onSelectionChanged(int row)
   updateCommandEditorView(deviceId);
   updateHardButtonView(deviceId);
   updateSoftButtonView(deviceId);
+  updateStateMachineView(deviceId);
 
   updateActions();
 
@@ -77,60 +75,6 @@ void DeviceEditor::onExportClicked()
 
   auto writer = document::files::DeviceStorage();
   writer.write(ctx.config()->data(), deviceId);
-}
-
-void DeviceEditor::onStateWizardClicked()
-{
-  using namespace document::data::item;
-
-  AddStateMachineWizard wizard(this);
-
-  if (wizard.exec() == QDialog::Accepted) {
-      StateMachine newStateMachine = wizard.getStateMachine();
-      // ... append to whatever device you're working with
-  }
-
-}
-
-void DeviceEditor::onStateEditClicked()
-{
-
-
-  using namespace document::data::item;
-
-  auto *editor = new StateMachineEditorWindow();
-
-  auto deviceId =
-      reinterpret_cast<DeviceTreeView*>(mainView)->getCurrentDeviceId();
-  auto *device = ctx.config()->data().getDevice(deviceId);
-  if (device == nullptr) {
-    return;
-  }
-
-  // Device doesn't expose stateMachines as QVector yet -- state.h has
-  // std::vector<StateMachine>. Convert at the boundary until that's
-  // changed, or add a QVector overload to Device later.
-  QVector<StateMachine> asQVector(device->getStateMachines().begin(),
-      device->getStateMachines().end());
-  editor->setStateMachines(asQVector);
-
-  editor->setAttribute(Qt::WA_DeleteOnClose);
-  editor->setWindowTitle(
-      QObject::tr("State machines - %1").arg(
-          QString::fromStdString(device->label.get())));
-  editor->resize(900, 600);
-
-
-  editor->show();
-
-//  // on save/apply:
-//  connect(saveButton, &QPushButton::clicked, this, [editor, &device]() {
-//      const QVector<StateMachine> result = editor->getStateMachines();
-//      device.getStateMachines().assign(result.begin(), result.end());
-//  });
-
-
-
 }
 
 void DeviceEditor::createView()
@@ -164,6 +108,12 @@ void DeviceEditor::createView()
   childViews.append(softButtonView);
   splitter->addWidget(buttonSplitter);
 
+  stateMachineEditorView = new StateMachineEditorView(ctx, this);
+  splitter->addWidget(stateMachineEditorView);
+  stateMachineView = new StateMachineTreeView(ctx, this);
+  stateMachineEditorView->addTreeView(stateMachineView);
+  childViews.append(stateMachineView);
+
   layout->addWidget(splitter);
 }
 
@@ -179,6 +129,11 @@ void DeviceEditor::createConnections()
   connect(commandEditorView, &CommandEditorView::writeLog, this,
       &DeviceEditor::writeLog);
   connect(commandEditorView, &CommandEditorView::writeMsg, this,
+      &DeviceEditor::writeMsg);
+
+  connect(stateMachineEditorView, &StateMachineEditorView::writeLog, this,
+      &DeviceEditor::writeLog);
+  connect(stateMachineEditorView, &StateMachineEditorView::writeMsg, this,
       &DeviceEditor::writeMsg);
 }
 
@@ -258,6 +213,28 @@ void DeviceEditor::updateSoftButtonView(uint32_t deviceId)
     connect(softButtonModel, &models::DeviceSoftButtonModel::writeMsg, this,
         &DeviceEditor::writeMsg);
     softButtonView->setModel(softButtonModel);
+  }
+}
+
+void DeviceEditor::updateStateMachineView(uint32_t deviceId)
+{
+  stateMachineEditorView->setData(0, nullptr);
+  stateMachineView->setModel(nullptr);
+  if (stateMachineModel != nullptr) {
+    stateMachineModel->deleteLater();
+    stateMachineModel = nullptr;
+  }
+
+  if (deviceId > 0) {
+    stateMachineModel = new models::StateMachineModel(*ctx.config(), deviceId,
+        this);
+    connect(stateMachineModel, &models::StateMachineModel::writeLog, this,
+        &DeviceEditor::writeLog);
+    connect(stateMachineModel, &models::StateMachineModel::writeMsg, this,
+        &DeviceEditor::writeMsg);
+    stateMachineView->setModel(stateMachineModel);
+
+    stateMachineEditorView->setData(deviceId, stateMachineModel);
   }
 }
 

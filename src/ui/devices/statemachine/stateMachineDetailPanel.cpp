@@ -12,19 +12,15 @@
 #include "discreteStateEditor.h"
 #include "relativeStateEditor.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data;
+using namespace document::data::item;
+
+namespace editors
 {
 
-namespace
-{
 constexpr int StackIndexEmpty = 0;
 constexpr int StackIndexDiscrete = 1;
 constexpr int StackIndexRelative = 2;
-}
 
 StateMachineDetailPanel::StateMachineDetailPanel(QWidget *parent) :
     QWidget(parent)
@@ -146,6 +142,4 @@ int StateMachineDetailPanel::stackIndexForType(StateMachineType type) const
   return StackIndexEmpty;
 }
 
-}
-}
 }

@@ -9,11 +9,7 @@
 class QListWidget;
 class QPushButton;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 class DeviceActionEditor;
@@ -29,8 +25,8 @@ class RelativeStateEditor : public QWidget
   public:
     explicit RelativeStateEditor(QWidget *parent = nullptr);
 
-    void setRelativeActions(const RelativeActions &relativeActions);
-    RelativeActions getRelativeActions() const;
+    void setRelativeActions(const document::data::item::RelativeActions &relativeActions);
+    document::data::item::RelativeActions getRelativeActions() const;
 
   signals:
     void changed();
@@ -47,7 +43,7 @@ class RelativeStateEditor : public QWidget
     void buildUi();
     void updatePrevSlotState();
     void updateResetSlotState();
-    void updateActionButtonLabel(QPushButton *button, const DeviceAction &deviceAction);
+    void updateActionButtonLabel(QPushButton *button, const document::data::item::DeviceAction &deviceAction);
 
     QListWidget *statesList = nullptr;
     QPushButton *addStateButton = nullptr;
@@ -60,11 +56,9 @@ class RelativeStateEditor : public QWidget
     QPushButton *resetActionButton = nullptr;
     QPushButton *resetActionClearButton = nullptr;
 
-    DeviceAction nextAction;
-    std::optional<DeviceAction> prevAction;
-    std::optional<DeviceAction> resetAction;
+    document::data::item::DeviceAction nextAction;
+    std::optional<document::data::item::DeviceAction> prevAction;
+    std::optional<document::data::item::DeviceAction> resetAction;
 };
 
-}
-}
 }

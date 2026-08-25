@@ -10,11 +10,7 @@
 class QListWidget;
 class QToolButton;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 /** left-hand list of a device's state machines, with an "add" toolbar
@@ -28,7 +24,7 @@ class StateMachineListWidget : public QWidget
   public:
     explicit StateMachineListWidget(QWidget *parent = nullptr);
 
-    void setStateMachines(const QVector<StateMachine> &stateMachines);
+    void setStateMachines(const QVector<document::data::item::StateMachine> &stateMachines);
     int currentRow() const;
     void setCurrentRow(int row);
 
@@ -38,12 +34,10 @@ class StateMachineListWidget : public QWidget
 
   private:
     void buildUi();
-    QString labelForType(StateMachineType type) const;
+    QString labelForType(document::data::item::StateMachineType type) const;
 
     QListWidget *listWidget = nullptr;
     QToolButton *addButton = nullptr;
 };
 
-}
-}
 }

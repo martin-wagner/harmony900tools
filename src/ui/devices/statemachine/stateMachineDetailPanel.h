@@ -12,11 +12,7 @@ class QStackedWidget;
 class QLabel;
 class QToolButton;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 class DiscreteStateEditor;
@@ -33,8 +29,8 @@ class StateMachineDetailPanel : public QWidget
   public:
     explicit StateMachineDetailPanel(QWidget *parent = nullptr);
 
-    void setStateMachine(const StateMachine &stateMachine);
-    StateMachine getStateMachine() const;
+    void setStateMachine(const document::data::item::StateMachine &stateMachine);
+    document::data::item::StateMachine getStateMachine() const;
 
     /** show an empty-state placeholder instead of an editor, e.g. when
      * nothing is selected in the state machine list */
@@ -47,7 +43,7 @@ class StateMachineDetailPanel : public QWidget
 
   private:
     void buildUi();
-    int stackIndexForType(StateMachineType type) const;
+    int stackIndexForType(document::data::item::StateMachineType type) const;
 
     QLabel *smTypeLabel = nullptr;
     QSpinBox *delaySpin = nullptr;
@@ -59,9 +55,7 @@ class StateMachineDetailPanel : public QWidget
     DiscreteStateEditor *discreteEditor = nullptr;
     RelativeStateEditor *relativeEditor = nullptr;
 
-    StateMachineType currentType = StateMachineType::Unknown;
+    document::data::item::StateMachineType currentType = document::data::item::StateMachineType::Unknown;
 };
 
-}
-}
 }

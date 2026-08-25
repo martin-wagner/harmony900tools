@@ -11,11 +11,9 @@
 
 #include "actionRowWidget.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data::item;
+
+namespace editors
 {
 
 ActionRowWidget::ActionRowWidget(QWidget *parent) :
@@ -254,6 +252,4 @@ QWidget* ActionRowWidget::buildForceValuePage()
   return page;
 }
 
-}
-}
 }

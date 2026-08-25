@@ -11,11 +11,7 @@ class QVBoxLayout;
 class QPushButton;
 class QLabel;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 class ActionRowWidget;
@@ -37,10 +33,10 @@ class DeviceActionEditor : public QWidget
     void setTitle(const QString &title);
 
     /** load rows from an existing DeviceAction */
-    void setDeviceAction(const DeviceAction &deviceAction);
+    void setDeviceAction(const document::data::item::DeviceAction &deviceAction);
 
     /** read the current rows back into a DeviceAction */
-    DeviceAction getDeviceAction() const;
+    document::data::item::DeviceAction getDeviceAction() const;
 
   signals:
     void changed();
@@ -51,7 +47,7 @@ class DeviceActionEditor : public QWidget
 
   private:
     void buildUi();
-    void addRow(const DeviceAction &action);
+    void addRow(const document::data::item::DeviceAction &action);
     void refreshDragHandles();
 
     QLabel *titleLabel = nullptr;
@@ -60,6 +56,4 @@ class DeviceActionEditor : public QWidget
     QList<ActionRowWidget*> rows;
 };
 
-}
-}
 }

@@ -9,11 +9,7 @@
 class QTableWidget;
 class QPushButton;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 /** editor for a DiscreteActions state machine -- one row per state, each
@@ -28,8 +24,8 @@ class DiscreteStateEditor : public QWidget
   public:
     explicit DiscreteStateEditor(QWidget *parent = nullptr);
 
-    void setDiscreteActions(const DiscreteActions &discreteActions);
-    DiscreteActions getDiscreteActions() const;
+    void setDiscreteActions(const document::data::item::DiscreteActions &discreteActions);
+    document::data::item::DiscreteActions getDiscreteActions() const;
 
   signals:
     void changed();
@@ -41,13 +37,11 @@ class DiscreteStateEditor : public QWidget
 
   private:
     void buildUi();
-    void addStateRow(const QString &stateName, const DeviceAction &enterAction);
-    void updateActionButtonLabel(QPushButton *button, const DeviceAction &deviceAction);
+    void addStateRow(const QString &stateName, const document::data::item::DeviceAction &enterAction);
+    void updateActionButtonLabel(QPushButton *button, const document::data::item::DeviceAction &deviceAction);
 
     QTableWidget *table = nullptr;
     QPushButton *addStateButton = nullptr;
 };
 
-}
-}
 }

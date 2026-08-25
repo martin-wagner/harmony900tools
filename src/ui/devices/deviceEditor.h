@@ -8,17 +8,19 @@
 #include "models/deviceListModel.h"
 #include "models/protocolIrListModel.h"
 #include "models/rawIrListModel.h"
+#include "models/statemachineListModel.h"
 
 namespace editors
 {
 
-class DeviceTreeView;
 class CommandEditorView;
+class StateMachineEditorView;
+class DeviceTreeView;
 class RawCommandTreeView;
 class ProtoCommandTreeView;
 class DeviceHardButtonTreeView;
 class DeviceSoftButtonTreeView;
-
+class StateMachineTreeView;
 /**
  * @brief Device editor
  *
@@ -48,10 +50,6 @@ class DeviceEditor: public BaseEditor
     virtual void onImportClicked() override;
     virtual void onExportClicked() override;
 
-
-    virtual void onStateWizardClicked() override;
-    virtual void onStateEditClicked() override;
-
   private:
     /** all child views, in display order */
     CommandEditorView *commandEditorView = nullptr;
@@ -59,11 +57,14 @@ class DeviceEditor: public BaseEditor
     RawCommandTreeView *rawCommandView = nullptr;
     DeviceHardButtonTreeView *hardButtonView = nullptr;
     DeviceSoftButtonTreeView *softButtonView = nullptr;
+    StateMachineEditorView *stateMachineEditorView = nullptr;
+    StateMachineTreeView *stateMachineView = nullptr;
     //models
     models::ProtocolIrModel *protoCommandModel = nullptr;
     models::RawIrModel *rawCommandModel = nullptr;
     models::DeviceHardButtonModel *hardButtonModel = nullptr;
     models::DeviceSoftButtonModel *softButtonModel = nullptr;
+    models::StateMachineModel *stateMachineModel = nullptr;
 
     virtual void createView() override;
     virtual void createConnections() override;
@@ -75,6 +76,7 @@ class DeviceEditor: public BaseEditor
     void updateCommandEditorView(uint32_t deviceId);
     void updateHardButtonView(uint32_t deviceId);
     void updateSoftButtonView(uint32_t deviceId);
+    void updateStateMachineView(uint32_t deviceId);
 };
 
 } // namespace editors

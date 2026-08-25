@@ -13,11 +13,7 @@ class QListWidget;
 class QPushButton;
 class QLabel;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 class DeviceActionEditor;
@@ -27,20 +23,20 @@ class DeviceActionEditor;
  * setStateMachine() pre-fills every page from the passed-in StateMachine,
  * and an empty StateMachine (the default) starts every page blank.
  */
-class AddStateMachineWizard : public QWizard
+class StateMachineWizard : public QWizard
 {
     Q_OBJECT
 
   public:
     enum PageId { PageChooseType, PageDefineStates, PageAssignActions, PageReview };
 
-    explicit AddStateMachineWizard(QWidget *parent = nullptr);
+    explicit StateMachineWizard(QWidget *parent = nullptr);
 
     /** pre-fill every page from an existing state machine, for re-running
      * the wizard as an edit flow rather than a fresh add */
-    void setStateMachine(const StateMachine &stateMachine);
+    void setStateMachine(const document::data::item::StateMachine &stateMachine);
 
-    StateMachine getStateMachine() const;
+    document::data::item::StateMachine getStateMachine() const;
 
   private slots:
     void onActionSlotChanged(int row);
@@ -70,12 +66,10 @@ class AddStateMachineWizard : public QWizard
     DeviceActionEditor *actionEditor = nullptr;
     //one DeviceAction per slot label ("Set: Off", "Next action", ...) --
     //rebuilt whenever the state list changes, preserved across page visits
-    QMap<QString, DeviceAction> actionsBySlot;
+    QMap<QString, document::data::item::DeviceAction> actionsBySlot;
     QString currentSlotKey;
 
     QLabel *reviewSummaryLabel = nullptr;
 };
 
-}
-}
 }

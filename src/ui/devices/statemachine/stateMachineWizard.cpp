@@ -11,17 +11,15 @@
 #include <QInputDialog>
 #include <QLineEdit>
 
-#include "addStateMachineWizard.h"
+#include "stateMachineWizard.h"
 #include "deviceActionEditor.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data::item;
+
+namespace editors
 {
 
-AddStateMachineWizard::AddStateMachineWizard(QWidget *parent) :
+StateMachineWizard::StateMachineWizard(QWidget *parent) :
     QWizard(parent)
 {
   setWindowTitle(tr("State machine"));
@@ -31,10 +29,10 @@ AddStateMachineWizard::AddStateMachineWizard(QWidget *parent) :
   buildReviewPage();
 
   connect(this, &QWizard::currentIdChanged, this,
-      &AddStateMachineWizard::onPageChanged);
+      &StateMachineWizard::onPageChanged);
 }
 
-void AddStateMachineWizard::setStateMachine(const StateMachine &stateMachine)
+void StateMachineWizard::setStateMachine(const StateMachine &stateMachine)
 {
   statesList->clear();
   actionsBySlot.clear();
@@ -74,7 +72,7 @@ void AddStateMachineWizard::setStateMachine(const StateMachine &stateMachine)
   rebuildActionSlots();
 }
 
-StateMachine AddStateMachineWizard::getStateMachine() const
+StateMachine StateMachineWizard::getStateMachine() const
 {
   StateMachine stateMachine;
 
@@ -105,7 +103,7 @@ StateMachine AddStateMachineWizard::getStateMachine() const
   return stateMachine;
 }
 
-void AddStateMachineWizard::onActionSlotChanged(int row)
+void StateMachineWizard::onActionSlotChanged(int row)
 {
   storeCurrentSlotEdits();
 
@@ -121,7 +119,7 @@ void AddStateMachineWizard::onActionSlotChanged(int row)
   actionEditor->setDeviceAction(actionsBySlot.value(currentSlotKey));
 }
 
-void AddStateMachineWizard::onAddStateClicked()
+void StateMachineWizard::onAddStateClicked()
 {
   bool ok = false;
   const QString stateName = QInputDialog::getText(this, tr("Add state"),
@@ -135,7 +133,7 @@ void AddStateMachineWizard::onAddStateClicked()
   rebuildActionSlots();
 }
 
-void AddStateMachineWizard::onRemoveStateClicked()
+void StateMachineWizard::onRemoveStateClicked()
 {
   QListWidgetItem *item = statesList->currentItem();
   if (item == nullptr) {
@@ -146,7 +144,7 @@ void AddStateMachineWizard::onRemoveStateClicked()
   rebuildActionSlots();
 }
 
-void AddStateMachineWizard::onPageChanged(int id)
+void StateMachineWizard::onPageChanged(int id)
 {
   if (id == PageAssignActions) {
     rebuildActionSlots();
@@ -156,7 +154,7 @@ void AddStateMachineWizard::onPageChanged(int id)
   }
 }
 
-void AddStateMachineWizard::buildChooseTypePage()
+void StateMachineWizard::buildChooseTypePage()
 {
   QWizardPage *page = new QWizardPage(this);
   page->setTitle(tr("Choose type"));
@@ -185,7 +183,7 @@ void AddStateMachineWizard::buildChooseTypePage()
   setPage(PageChooseType, page);
 }
 
-void AddStateMachineWizard::buildDefineStatesPage()
+void StateMachineWizard::buildDefineStatesPage()
 {
   QWizardPage *page = new QWizardPage(this);
   page->setTitle(tr("Define states"));
@@ -198,11 +196,11 @@ void AddStateMachineWizard::buildDefineStatesPage()
 
   addStateButton = new QPushButton(tr("Add"), page);
   connect(addStateButton, &QPushButton::clicked, this,
-      &AddStateMachineWizard::onAddStateClicked);
+      &StateMachineWizard::onAddStateClicked);
 
   removeStateButton = new QPushButton(tr("Remove"), page);
   connect(removeStateButton, &QPushButton::clicked, this,
-      &AddStateMachineWizard::onRemoveStateClicked);
+      &StateMachineWizard::onRemoveStateClicked);
 
   QVBoxLayout *buttonsLayout = new QVBoxLayout();
   buttonsLayout->addWidget(addStateButton);
@@ -219,7 +217,7 @@ void AddStateMachineWizard::buildDefineStatesPage()
   setPage(PageDefineStates, page);
 }
 
-void AddStateMachineWizard::buildAssignActionsPage()
+void StateMachineWizard::buildAssignActionsPage()
 {
   QWizardPage *page = new QWizardPage(this);
   page->setTitle(tr("Assign actions"));
@@ -229,7 +227,7 @@ void AddStateMachineWizard::buildAssignActionsPage()
 
   actionSlotsList = new QListWidget(page);
   connect(actionSlotsList, &QListWidget::currentRowChanged, this,
-      &AddStateMachineWizard::onActionSlotChanged);
+      &StateMachineWizard::onActionSlotChanged);
 
   actionEditor = new DeviceActionEditor(page);
   actionEditor->setEnabled(false);
@@ -241,7 +239,7 @@ void AddStateMachineWizard::buildAssignActionsPage()
   setPage(PageAssignActions, page);
 }
 
-void AddStateMachineWizard::buildReviewPage()
+void StateMachineWizard::buildReviewPage()
 {
   QWizardPage *page = new QWizardPage(this);
   page->setTitle(tr("Review and finish"));
@@ -256,7 +254,7 @@ void AddStateMachineWizard::buildReviewPage()
   setPage(PageReview, page);
 }
 
-void AddStateMachineWizard::rebuildActionSlots()
+void StateMachineWizard::rebuildActionSlots()
 {
   storeCurrentSlotEdits();
 
@@ -284,7 +282,7 @@ void AddStateMachineWizard::rebuildActionSlots()
   }
 }
 
-void AddStateMachineWizard::storeCurrentSlotEdits()
+void StateMachineWizard::storeCurrentSlotEdits()
 {
   if (currentSlotKey.isEmpty() || !actionEditor->isEnabled()) {
     return;
@@ -293,7 +291,7 @@ void AddStateMachineWizard::storeCurrentSlotEdits()
   actionsBySlot.insert(currentSlotKey, actionEditor->getDeviceAction());
 }
 
-QString AddStateMachineWizard::reviewSummaryText() const
+QString StateMachineWizard::reviewSummaryText() const
 {
   const QString typeName =
       discreteRadio->isChecked() ? tr("Discrete") : tr("Relative");
@@ -316,6 +314,4 @@ QString AddStateMachineWizard::reviewSummaryText() const
       actionSlotsList->count());
 }
 
-}
-}
 }

@@ -8,11 +8,9 @@
 
 #include "stateMachineListWidget.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data::item;
+
+namespace editors
 {
 
 StateMachineListWidget::StateMachineListWidget(QWidget *parent) :
@@ -81,6 +79,4 @@ QString StateMachineListWidget::labelForType(StateMachineType type) const
   return tr("Unknown");
 }
 
-}
-}
 }

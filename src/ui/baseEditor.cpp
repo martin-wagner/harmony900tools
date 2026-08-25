@@ -121,19 +121,6 @@ void BaseEditor::setupToolbar()
   actionExport->setToolTip(
       tr("Export the selected item to a file for re-use / sharing"));
   actionExport->setVisible(false);
-
-
-
-
-
-
-  toolbar->addSeparator();
-
-  stateWizard = toolbar->addAction(tr("state wizard"));
-  //stateWizard->setVisible(false);
-  stateEdit = toolbar->addAction(tr("state edit"));
-  //stateEdit->setVisible(false);
-
 }
 
 void BaseEditor::createConnections()
@@ -149,14 +136,6 @@ void BaseEditor::createConnections()
       &BaseEditor::onExportClicked);
   connect(actionImport, &QAction::triggered, this,
       &BaseEditor::onImportClicked);
-
-
-  connect(stateWizard, &QAction::triggered, this,
-      &BaseEditor::onStateWizardClicked);
-  connect(stateEdit, &QAction::triggered, this,
-      &BaseEditor::onStateEditClicked);
-
-
 
   connect(mainView, &BaseTreeView::availabilityChanged, this,
       &BaseEditor::onAvailabilityChanged);

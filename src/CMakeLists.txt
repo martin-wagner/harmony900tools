@@ -92,6 +92,7 @@ set(sources ${sources}
   models/buttonListModel.cpp
   models/protocolIrListModel.cpp
   models/rawIrListModel.cpp
+  models/statemachineListModel.cpp
   ui/delegates/combobox.cpp
   ui/delegates/rawIr.cpp
   ui/delegates/protocolIr.cpp
@@ -104,9 +105,9 @@ set(sources ${sources}
   ui/devices/ir/rawIrEditor.cpp
   ui/devices/ir/commandEditorView.cpp
   ui/devices/statemachine/actionRowWidget.cpp
-  ui/devices/statemachine/addStateMachineWizard.cpp
+  ui/devices/statemachine/stateMachineWizard.cpp
   ui/devices/statemachine/stateMachineDetailPanel.cpp
-  ui/devices/statemachine/stateMachineEditorWindow.cpp
+  ui/devices/statemachine/stateMachineEditorView.cpp
   ui/devices/statemachine/stateMachineListWidget.cpp
   ui/devices/statemachine/deviceActionEditor.cpp
   ui/devices/statemachine/discreteStateEditor.cpp

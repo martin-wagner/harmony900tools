@@ -236,7 +236,7 @@ void CommandEditorView::setData(uint32_t deviceId,
     pressPreSilenceSpinBox->setValue(0);
     holdPreSilencSpinBox->setValue(0);
     interKeySpinBox->setValue(0);
-
+    return;
   }
   this->deviceId = deviceId;
 

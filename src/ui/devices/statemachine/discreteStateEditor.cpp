@@ -11,21 +11,16 @@
 #include "discreteStateEditor.h"
 #include "deviceActionEditor.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data::item;
+
+namespace editors
 {
 
-namespace
-{
 constexpr int ColumnStateName = 0;
 constexpr int ColumnAction = 1;
 constexpr int ColumnRemove = 2;
 
 const char *PropertyDeviceAction = "deviceAction";
-}
 
 DiscreteStateEditor::DiscreteStateEditor(QWidget *parent) :
     QWidget(parent)
@@ -194,6 +189,4 @@ void DiscreteStateEditor::updateActionButtonLabel(QPushButton *button,
   //button->setText(tr("%n step(s)", "", static_cast<int>(deviceAction.size())));
 }
 
-}
-}
 }

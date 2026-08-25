@@ -79,7 +79,7 @@ void RemoveStatemachineCommand::undo()
   if (!isValid) {
     return;
   }
-  emit itemAdded(Item::DEVICE_STATEMACHINE, smPos);
+  emit itemAboutToBeAdded(Item::DEVICE_STATEMACHINE, smPos);
   auto &sms = c.getDevices()[devicePos].getStateMachines();
   sms.insert(sms.begin() + smPos, sm);
   QUndoCommand::undo();

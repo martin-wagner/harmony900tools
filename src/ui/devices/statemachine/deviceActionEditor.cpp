@@ -8,11 +8,9 @@
 #include "deviceActionEditor.h"
 #include "actionRowWidget.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data::item;
+
+namespace editors
 {
 
 DeviceActionEditor::DeviceActionEditor(QWidget *parent) :
@@ -129,6 +127,4 @@ void DeviceActionEditor::refreshDragHandles()
   }
 }
 
-}
-}
 }

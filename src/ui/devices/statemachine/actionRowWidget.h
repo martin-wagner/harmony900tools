@@ -12,11 +12,7 @@ class QToolButton;
 class QLineEdit;
 class QLabel;
 
-namespace document
-{
-namespace data
-{
-namespace item
+namespace editors
 {
 
 /** editor for a single Action (one step inside a DeviceAction sequence).
@@ -35,10 +31,10 @@ class ActionRowWidget : public QWidget
     explicit ActionRowWidget(QWidget *parent = nullptr);
 
     /** load this row's controls from an existing Action */
-    void setAction(const DeviceAction &action);
+    void setAction(const document::data::item::DeviceAction &action);
 
     /** read the row's controls back into an Action */
-    DeviceAction getAction() const;
+    document::data::item::DeviceAction getAction() const;
 
     /** show/hide the drag handle (list end rows may not need one) */
     void setDragHandleVisible(bool visible);
@@ -86,6 +82,4 @@ class ActionRowWidget : public QWidget
     QLineEdit *forceValueEdit = nullptr;
 };
 
-}
-}
 }

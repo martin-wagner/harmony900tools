@@ -13,11 +13,9 @@
 #include "relativeStateEditor.h"
 #include "deviceActionEditor.h"
 
-namespace document
-{
-namespace data
-{
-namespace item
+using namespace document::data::item;
+
+namespace editors
 {
 
 RelativeStateEditor::RelativeStateEditor(QWidget *parent) :
@@ -255,6 +253,4 @@ void RelativeStateEditor::updateActionButtonLabel(QPushButton *button,
 //  button->setText(tr("%n step(s)", "", static_cast<int>(deviceAction.size())));
 }
 
-}
-}
 }
