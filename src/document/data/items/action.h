@@ -7,6 +7,7 @@
 
 #include "document/data/enum.h"
 #include "document/data/property.h"
+#include "unknown.h"
 
 namespace document
 {

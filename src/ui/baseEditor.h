@@ -50,6 +50,11 @@ class BaseEditor: public QWidget
     virtual void onAvailabilityChanged();
     virtual void onSelectionChanged(int row) = 0;
 
+
+    virtual void onStateWizardClicked() {};
+    virtual void onStateEditClicked() {};
+
+
   protected:
     Context &ctx;
 
@@ -68,6 +73,11 @@ class BaseEditor: public QWidget
     QAction *actionMoveDown = nullptr;
     QAction *actionImport = nullptr;
     QAction *actionExport = nullptr;
+
+
+
+    QAction *stateWizard = nullptr;
+    QAction *stateEdit = nullptr;
 
     virtual void createView();
     virtual void setupToolbar();

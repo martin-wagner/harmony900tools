@@ -10,9 +10,13 @@
 #include "lib/icon.h"
 #include "document/files/sharing.h"
 #include "deviceEditor.h"
-#include "commandEditorView.h"
+#include "ir/commandEditorView.h"
 #include "deviceTreeView.h"
 #include "deviceButtonTreeView.h"
+
+//todo
+#include "statemachine/stateMachineEditorWindow.h"
+#include "statemachine/addStateMachineWizard.h"
 
 using namespace std;
 
@@ -73,6 +77,60 @@ void DeviceEditor::onExportClicked()
 
   auto writer = document::files::DeviceStorage();
   writer.write(ctx.config()->data(), deviceId);
+}
+
+void DeviceEditor::onStateWizardClicked()
+{
+  using namespace document::data::item;
+
+  AddStateMachineWizard wizard(this);
+
+  if (wizard.exec() == QDialog::Accepted) {
+      StateMachine newStateMachine = wizard.getStateMachine();
+      // ... append to whatever device you're working with
+  }
+
+}
+
+void DeviceEditor::onStateEditClicked()
+{
+
+
+  using namespace document::data::item;
+
+  auto *editor = new StateMachineEditorWindow();
+
+  auto deviceId =
+      reinterpret_cast<DeviceTreeView*>(mainView)->getCurrentDeviceId();
+  auto *device = ctx.config()->data().getDevice(deviceId);
+  if (device == nullptr) {
+    return;
+  }
+
+  // Device doesn't expose stateMachines as QVector yet -- state.h has
+  // std::vector<StateMachine>. Convert at the boundary until that's
+  // changed, or add a QVector overload to Device later.
+  QVector<StateMachine> asQVector(device->getStateMachines().begin(),
+      device->getStateMachines().end());
+  editor->setStateMachines(asQVector);
+
+  editor->setAttribute(Qt::WA_DeleteOnClose);
+  editor->setWindowTitle(
+      QObject::tr("State machines - %1").arg(
+          QString::fromStdString(device->label.get())));
+  editor->resize(900, 600);
+
+
+  editor->show();
+
+//  // on save/apply:
+//  connect(saveButton, &QPushButton::clicked, this, [editor, &device]() {
+//      const QVector<StateMachine> result = editor->getStateMachines();
+//      device.getStateMachines().assign(result.begin(), result.end());
+//  });
+
+
+
 }
 
 void DeviceEditor::createView()

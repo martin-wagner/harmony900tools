@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "rawIr.h"
-#include "ui/devices/editors/rawIrEditor.h"
+#include "ui/devices/ir/rawIrEditor.h"
 
 #include <QAbstractItemModel>
 

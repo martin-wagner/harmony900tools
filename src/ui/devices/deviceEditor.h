@@ -48,6 +48,10 @@ class DeviceEditor: public BaseEditor
     virtual void onImportClicked() override;
     virtual void onExportClicked() override;
 
+
+    virtual void onStateWizardClicked() override;
+    virtual void onStateEditClicked() override;
+
   private:
     /** all child views, in display order */
     CommandEditorView *commandEditorView = nullptr;

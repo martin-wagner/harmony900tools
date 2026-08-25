@@ -100,9 +100,17 @@ set(sources ${sources}
   ui/activities/activityEditor.cpp
   ui/activities/activityTreeView.cpp
   ui/activities/activityEditor.cpp
-  ui/devices/editors/codeEditor.cpp
-  ui/devices/editors/rawIrEditor.cpp
-  ui/devices/commandEditorView.cpp
+  ui/devices/ir/codeEditor.cpp
+  ui/devices/ir/rawIrEditor.cpp
+  ui/devices/ir/commandEditorView.cpp
+  ui/devices/statemachine/actionRowWidget.cpp
+  ui/devices/statemachine/addStateMachineWizard.cpp
+  ui/devices/statemachine/stateMachineDetailPanel.cpp
+  ui/devices/statemachine/stateMachineEditorWindow.cpp
+  ui/devices/statemachine/stateMachineListWidget.cpp
+  ui/devices/statemachine/deviceActionEditor.cpp
+  ui/devices/statemachine/discreteStateEditor.cpp
+  ui/devices/statemachine/relativeStateEditor.cpp
   ui/devices/deviceButtonTreeView.cpp
   ui/devices/deviceEditor.cpp
   ui/devices/deviceTreeView.cpp
