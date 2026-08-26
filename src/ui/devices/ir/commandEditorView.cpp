@@ -2,6 +2,7 @@
 
 #include "models/rawIrListModel.h"
 #include "models/protocolIrListModel.h"
+#include "lib/qtHelpers.h"
 #include "ui/delegates/protocolIr.h"
 #include "ui/delegates/rawIr.h"
 #include "ui/delegates/combobox.h"
@@ -79,7 +80,7 @@ void ProtoCommandTreeView::setLearnedCommand(
 
   auto decoder = binary::codec::Decode(t, carrier);
   auto &data = decoder.getData();
-  auto codeStr = QString::fromStdString(data.codeString);
+  auto codeStr = qstr(data.codeString);
   switch (data.decoded) {
     case binary::codec::Status::OK:
       break;
@@ -91,14 +92,13 @@ void ProtoCommandTreeView::setLearnedCommand(
     case binary::codec::Status::ERROR_SIZE:
       msgBox.setText(
           tr("Learning failed (data to short). Try again.").arg(
-              QString::fromStdString(data.codeString)));
+              qstr(data.codeString)));
       msgBox.exec();
       return;
     default:
       msgBox.setText(
           tr("Learning failed or IR protocol not supported in typed IR mode. "
-              "Try again or use Raw IR mode.").arg(
-              QString::fromStdString(data.codeString)));
+              "Try again or use Raw IR mode.").arg(qstr(data.codeString)));
       msgBox.exec();
       return;
   }
@@ -156,7 +156,7 @@ void ProtoCommandTreeView::setLearnedCommand(
   //step 5: we have created a valid command. set all the data to the model
   protocolModel->setData(
       index.siblingAtColumn(models::ProtocolIrModel::Column::VERBOSE),
-      QString::fromStdString(data.codeString), Qt::EditRole);
+      qstr(data.codeString), Qt::EditRole);
   protocolModel->setData(
       index.siblingAtColumn(models::ProtocolIrModel::Column::IRADDRESS),
       data.address, Qt::EditRole);

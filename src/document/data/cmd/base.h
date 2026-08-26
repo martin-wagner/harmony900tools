@@ -7,6 +7,7 @@
 
 #include "lib/undo.h"
 #include "lib/uid.h"
+#include "lib/qtHelpers.h"
 #include "document/data/data.h"
 #include "ui/logViewer.h"
 

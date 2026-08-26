@@ -236,14 +236,14 @@ QVariant ProtocolIrModel::getDisplayData(const QModelIndex &index) const
     auto &cmd = getCmds(&devicePos).at(index.row());
     switch (index.column()) {
       case Column::NAME:
-        return QString::fromStdString(cmd.name.get());
+        return qstr(cmd.name.get());
       case Column::TYPE:
         return cmd.codeType.get().getQString();
       case Column::PROTO:
         return cmd.protocolIndex.get();
       case Column::VERBOSE:
         if (printData(cmd)) {
-          return QString::fromStdString(cmd.libName.get());
+          return qstr(cmd.libName.get());
         }
         return tr("Not available");
       case Column::IRADDRESS:
@@ -281,13 +281,13 @@ QVariant ProtocolIrModel::getEditData(const QModelIndex &index) const
     auto &cmd = getCmds(&devicePos).at(index.row());
     switch (index.column()) {
       case Column::NAME:
-        return QString::fromStdString(cmd.name.get());
+        return qstr(cmd.name.get());
       case Column::TYPE:
         return cmd.codeType.get().getQString();
       case Column::PROTO:
         return cmd.protocolIndex.get();
       case Column::VERBOSE:
-        return QString::fromStdString(cmd.libName.get());
+        return qstr(cmd.libName.get());
       case Column::IRADDRESS:
         return cmd.irAddress.get();
       case Column::IRCOMMAND:
@@ -393,7 +393,7 @@ QVariant ProtocolIrModel::visualiseData(
   while (!str.empty() && str.back() == '\n') {
     str.pop_back();
   }
-  return QString::fromStdString(str);
+  return qstr(str);
 }
 
 bool ProtocolIrModel::setCommandName(document::data::CmdCatalogue &worker,
@@ -404,12 +404,12 @@ bool ProtocolIrModel::setCommandName(document::data::CmdCatalogue &worker,
 
   auto &cmds = getCmds(&devicePos);
   for (const auto &cmd : cmds) {
-    usedNames.push_back(QString::fromStdString(cmd.name.get()));
+    usedNames.push_back(qstr(cmd.name.get()));
   }
   auto &rawCmds =
       config.data().getDevices()[devicePos].getIrCommands().getRawCommands();
   for (const auto &cmd : rawCmds) {
-    usedNames.push_back(QString::fromStdString(cmd.name.get()));
+    usedNames.push_back(qstr(cmd.name.get()));
   }
 
   auto name = makeStringUnique(usedNames, value.toString());

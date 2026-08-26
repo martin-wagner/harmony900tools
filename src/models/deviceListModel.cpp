@@ -180,11 +180,11 @@ QVariant DeviceModel::getDisplayData(const QModelIndex &index) const
       case Column::DEVTYPE:
         return device.type.get().getQString();
       case Column::MANUFACTURER:
-        return QString::fromStdString(device.mnf.get());
+        return qstr(device.mnf.get());
       case Column::MODEL:
-        return QString::fromStdString(device.model.get());
+        return qstr(device.model.get());
       case Column::NAME:
-        return QString::fromStdString(device.label.get());
+        return qstr(device.label.get());
       default:
         break;
     }
@@ -203,11 +203,11 @@ QVariant DeviceModel::getEditData(const QModelIndex &index) const
       case Column::DEVTYPE:
         return device.type.get().getQString();
       case Column::MANUFACTURER:
-        return QString::fromStdString(device.mnf.get());
+        return qstr(device.mnf.get());
       case Column::MODEL:
-        return QString::fromStdString(device.model.get());
+        return qstr(device.model.get());
       case Column::NAME:
-        return QString::fromStdString(device.label.get());
+        return qstr(device.label.get());
       case Column::DISPLAY:
         return device.isDisplayDevice.get();
       case Column::ALWAYS_ON:
@@ -359,7 +359,7 @@ bool DeviceModel::setDeviceName(document::data::CmdCatalogue &worker, int row,
 
   auto &devices = config.data().getDevices();
   for (const auto &activity : devices) {
-    usedNames.push_back(QString::fromStdString(activity.label.get()));
+    usedNames.push_back(qstr(activity.label.get()));
   }
 
   auto name = makeStringUnique(usedNames, value.toString());

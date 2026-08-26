@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 
 #include "lib/uid.h"
+#include "lib/qtHelpers.h"
 #include "document/data/data.h"
 #include "document/config.h"
 #include "document/data/catalogue.h"
@@ -134,8 +135,7 @@ bool DeviceStorage::importDeviceJson(Config &c)
     }
   }
   //...and now add them
-  c.beginMacro(
-      tr("Import Device %1").arg(QString::fromStdString(d.model.get())));
+  c.beginMacro(tr("Import Device %1").arg(qstr(d.model.get())));
 
   for (auto &cmd : d.getIrCommands().getProtoCommands()) {
     auto protocolIndex = worker.appendIrProtoLibItem(cmd.codeType.get());
@@ -175,8 +175,7 @@ bool DeviceStorage::writeDeviceJson(const data::ConfigData &c, int deviceId)
     switch (cmd.codeType.get().getValue()) {
       case data::CodeType::Proprietary:
       case data::CodeType::Unknown:
-        proprietary = proprietary
-            + QString::fromStdString(cmd.name.get() + "; ");
+        proprietary = proprietary + qstr(cmd.name.get() + "; ");
         break;
       default:
         break;
@@ -198,8 +197,8 @@ bool DeviceStorage::writeDeviceJson(const data::ConfigData &c, int deviceId)
 
   data::serialiser::toJson(j["Device"], *device);
 
-  deviceName = QString::fromStdString(device->mnf.get()) + "-"
-      + QString::fromStdString(device->model.get()) + ".json";
+  deviceName = qstr(device->mnf.get()) + "-" + qstr(device->model.get())
+      + ".json";
 
   auto file = QFileDialog::getSaveFileName(nullptr, tr("Save device as json"),
       QDir::homePath() + "/" + deviceName,

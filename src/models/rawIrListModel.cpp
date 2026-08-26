@@ -238,7 +238,7 @@ QVariant RawIrModel::getDisplayData(const QModelIndex &index) const
     auto &cmd = getCmds(&devicePos).at(index.row());
     switch (index.column()) {
       case Column::NAME:
-        return QString::fromStdString(cmd.name.get());
+        return qstr(cmd.name.get());
       case Column::DATACLOCK:
         return cmd.stream.getClock();
       case Column::DATA: {
@@ -246,7 +246,7 @@ QVariant RawIrModel::getDisplayData(const QModelIndex &index) const
         while (!str.empty() && str.back() == '\n') {
           str.pop_back();
         }
-        return QString::fromStdString(str);
+        return qstr(str);
       }
       default:
         break;
@@ -264,7 +264,7 @@ QVariant RawIrModel::getEditData(const QModelIndex &index) const
     auto &cmd = getCmds(&devicePos).at(index.row());
     switch (index.column()) {
       case Column::NAME:
-        return QString::fromStdString(cmd.name.get());
+        return qstr(cmd.name.get());
       case Column::DATACLOCK:
         return cmd.stream.getClock();
       case Column::DATA: {
@@ -295,12 +295,12 @@ bool RawIrModel::setCommandName(document::data::CmdCatalogue &worker, int row,
 
   auto &cmds = getCmds(&devicePos);
   for (const auto &cmd : cmds) {
-    usedNames.push_back(QString::fromStdString(cmd.name.get()));
+    usedNames.push_back(qstr(cmd.name.get()));
   }
   auto &protoCmds =
       config.data().getDevices()[devicePos].getIrCommands().getProtoCommands();
   for (const auto &cmd : protoCmds) {
-    usedNames.push_back(QString::fromStdString(cmd.name.get()));
+    usedNames.push_back(qstr(cmd.name.get()));
   }
 
   auto name = makeStringUnique(usedNames, value.toString());

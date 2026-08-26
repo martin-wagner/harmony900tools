@@ -4,6 +4,7 @@
 #include <pugixml.hpp>
 
 #include "version.h"
+#include "lib/qtHelpers.h"
 #include "lib/consthash.h"
 #include "lib/uid.h"
 #include "lib/timestamp.h"
@@ -212,9 +213,9 @@ bool H900userconfig::readUser(pugi::xml_node &root)
   addId(id);
   worker->setUserId(id);
   auto firstName = user.child("Presentation").child("FirstName").child_value();
-  worker->setUserFirstName(QString::fromStdString(firstName));
+  worker->setUserFirstName(qstr(firstName));
   auto lastName = user.child("Presentation").child("LastName").child_value();
-  worker->setUserLastName(QString::fromStdString(lastName));
+  worker->setUserLastName(qstr(lastName));
   worker->setUserMetadata();
 
   for (pugi::xml_node prop : user.child("Properties").children("Property")) {
@@ -247,8 +248,7 @@ bool H900userconfig::readUser(pugi::xml_node &root)
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import user: unknown property (name = %1, value = %2)").arg(
-                QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
         worker->setUserUnknownProperty(unknown);
         break;
       }
@@ -276,7 +276,7 @@ bool H900userconfig::readController(pugi::xml_node &root)
     auto unknown = toUnknownElement(prop);
     emit writeLog(LogLevel::Debug,
         tr("import user: unknown property (value = %1)").arg(
-            QString::fromStdString(unknown.text)), ContentType::PlainText);
+            qstr(unknown.text)), ContentType::PlainText);
     worker->setControllerUnknownProperty(unknown);
   }
   return true;
@@ -428,8 +428,7 @@ bool H900userconfig::readDevice(pugi::xml_node &device)
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import device: unknown property (name = %1, value = %2)").arg(
-                QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
         worker->setDeviceUnknownProperty(unknown, pos);
         break;
       }
@@ -603,8 +602,7 @@ bool H900userconfig::readStatemachine(pugi::xml_node &state)
     emit writeLog(LogLevel::Error,
         tr("xml: have DiscreteActions and RelativeActions "
             "at the same time in %1. This is not supported").arg(
-            QString::fromStdString(c->getDevices().back().label.get())),
-        ContentType::PlainText);
+            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
     return false;
   }
   ret &= readDiscreteActions(discreteActions);
@@ -668,8 +666,7 @@ bool H900userconfig::readDiscreteAction(pugi::xml_node &action)
   if (name.isEmpty()) {
     emit writeLog(LogLevel::Error,
         tr("xml: state name is empty in %1").arg(
-            QString::fromStdString(c->getDevices().back().label.get())),
-        ContentType::PlainText);
+            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
     return false;
   }
 
@@ -833,8 +830,7 @@ bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
   if (string(target) != "Device") {
     emit writeLog(LogLevel::Warning,
         tr("xml: Action Target != Device in %1. This is not supported").arg(
-            QString::fromStdString(c->getDevices().back().label.get())),
-        ContentType::PlainText);
+            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
     return false;
   }
   auto operation = sequence.child("Operation");
@@ -884,8 +880,7 @@ bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import device action: unknown property (name = %1, value = %2)").arg(
-                QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
         worker->setDeviceStateActionUnknownParam(unknown, devicePos, smPos, t,
             actPos, seqPos);
         break;
@@ -973,8 +968,7 @@ bool H900userconfig::readNumericActions(pugi::xml_node &actions,
       != item::Digits().size()) {
     emit writeLog(LogLevel::Error,
         tr("xml: numpad items != %1 in %2").arg(item::Digits().size()).arg(
-            QString::fromStdString(c->getDevices().back().label.get())),
-        ContentType::PlainText);
+            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
     return false;
   }
 
@@ -1029,8 +1023,7 @@ bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
   if (string(target) != "Device") {
     emit writeLog(LogLevel::Warning,
         tr("xml: Action Target != Device in %1. This is not supported").arg(
-            QString::fromStdString(c->getDevices().back().label.get())),
-        ContentType::PlainText);
+            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
     return false;
   }
   auto operation = sequence.child("Operation");
@@ -1079,8 +1072,7 @@ bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import device action: unknown property (name = %1, value = %2)").arg(
-                QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
         worker->setDeviceNumpadActionUnknownParam(unknown, devicePos, s, digit,
             seqPos);
         break;
@@ -1122,8 +1114,7 @@ bool H900userconfig::readIrList(pugi::xml_node &commands)
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import device: unknown property (name = %1, value = %2)").arg(
-                QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
         worker->setIrUnknownProperty(unknown, devicePos);
         break;
       }
@@ -1167,9 +1158,8 @@ bool H900userconfig::readIr(pugi::xml_node &command)
     if (cmd.getStatus() != binary::irProto::Status::OK) {
       emit writeLog(LogLevel::Debug,
           tr("import device: device %1 cmd %2 decode failed (%3). "
-              "Using copy-trough)").arg(devicePos).arg(
-              QString::fromStdString(name)).arg((int) cmd.getStatus()),
-          ContentType::PlainText);
+              "Using copy-trough)").arg(devicePos).arg(qstr(name)).arg(
+              (int) cmd.getStatus()), ContentType::PlainText);
     }
     cmd.name.set(name);
     return worker->setIrCommand(devicePos, cmd);
@@ -1355,8 +1345,7 @@ bool H900userconfig::readActivitiy(pugi::xml_node &activity, uint32_t id)
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import activity: unknown property (name = %1, value = %2)").arg(
-                QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
         worker->setDeviceUnknownProperty(unknown, pos);
         break;
       }
@@ -1381,7 +1370,7 @@ bool H900userconfig::readActivitiy(pugi::xml_node &activity, uint32_t id)
       default:
         emit writeLog(LogLevel::Debug,
             tr("import activity: unknown button type (name = %1)").arg(
-                QString::fromStdString(name)), ContentType::PlainText);
+                qstr(name)), ContentType::PlainText);
         break;
     }
   }
@@ -1602,8 +1591,7 @@ bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
   if (string(target) != "Device") {
     emit writeLog(LogLevel::Warning,
         tr("xml: Action Target != Device in %1. This is not supported").arg(
-            QString::fromStdString(c->getDevices().back().label.get())),
-        ContentType::PlainText);
+            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
     return false;
   }
   auto operation = sequence.child("Operation");
@@ -1655,8 +1643,8 @@ bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
         auto unknown = toUnknownElement(prop);
         emit writeLog(LogLevel::Debug,
             tr("import activity action: unknown property (name = %1, "
-                "value = %2)").arg(QString::fromStdString(name)).arg(
-                QString::fromStdString(unknown.text)), ContentType::PlainText);
+                "value = %2)").arg(qstr(name)).arg(qstr(unknown.text)),
+            ContentType::PlainText);
         worker->setActivityActionUnknownParam(unknown, activityPos, t,
             actionPos, seqPos);
         break;

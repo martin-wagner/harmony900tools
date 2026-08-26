@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include "lib/qtHelpers.h"
 #include "document/config.h"
 #include "baseListModel.h"
 
@@ -123,42 +124,26 @@ QVariant BaseModel::getSelectionItemsData(const QModelIndex &index) const
   return {};
 }
 
-QString BaseModel::makeStringUnique(const QStringList &input, QString str)
+QString BaseModel::makeStringUnique(const QStringList &input,
+    const QString &str)
 {
-  auto baseStr = str;
+  QString msg;
 
-  int suffix = 1;
-  while (input.contains(str)) {
-    str = baseStr + QString::number(suffix);
-    suffix++;
+  auto ret = lib::makeStringUnique(input, str, &msg);
+  if (!msg.isEmpty()) {
+    emit writeMsg(msg);
   }
-  if (suffix > 1) {
-    emit writeMsg(tr("%1 already used. Names must be unique").arg(baseStr));
-  }
-
-  return str;
+  return ret;
 }
 
 QStringList BaseModel::toQStringList(const vector<string> &list)
 {
-  QStringList qlist;
-  qlist.reserve(static_cast<qsizetype>(list.size()));
-
-  for (const auto &i : list) {
-    qlist.push_back(QString::fromStdString(i));
-  }
-  return qlist;
+  return lib::toQStringList(list);
 }
 
 vector<string> BaseModel::toStringList(const QStringList &qlist)
 {
-  vector<string> list;
-  list.reserve(static_cast<size_t>(qlist.size()));
-
-  for (const auto &i : qlist) {
-    list.push_back(i.toStdString());
-  }
-  return list;
+  return lib::toStdVector(qlist);
 }
 
 void BaseModel::itemChangedObserver(document::data::Item item, int pos)

@@ -182,7 +182,8 @@ bool ActivityModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
     return false;
   }
   auto &activities = config.data().getActivities();
-  if ((sourceRow > activities.size()) || (destinationChild > activities.size())) {
+  if ((sourceRow > activities.size())
+      || (destinationChild > activities.size())) {
     return false;
   }
   auto &worker = config.modify();
@@ -199,7 +200,7 @@ QVariant ActivityModel::getDisplayData(const QModelIndex &index) const
       case Column::ACTTYPE:
         return activity.type.get().getQString();
       case Column::LABEL:
-        return QString::fromStdString(activity.label.get());
+        return qstr(activity.label.get());
       default:
         break;
     }
@@ -218,7 +219,7 @@ QVariant ActivityModel::getEditData(const QModelIndex &index) const
       case Column::ACTTYPE:
         return activity.type.get().getQString();
       case Column::LABEL:
-        return QString::fromStdString(activity.label.get());
+        return qstr(activity.label.get());
       case Column::POWER_OFF:
         return activity.powerOffUnusedDevices.get();
       case Column::PLAY:
@@ -285,8 +286,8 @@ QVariant ActivityModel::getSelectionItemsData(const QModelIndex &index) const
   return {};
 }
 
-
-bool ActivityModel::setDataValue(const QModelIndex &index, const QVariant &value)
+bool ActivityModel::setDataValue(const QModelIndex &index,
+    const QVariant &value)
 {
   auto row = index.row();
 
@@ -316,7 +317,8 @@ bool ActivityModel::setDataValue(const QModelIndex &index, const QVariant &value
   return true;
 }
 
-bool ActivityModel::setDataCheck(const QModelIndex &index, const QVariant &value)
+bool ActivityModel::setDataCheck(const QModelIndex &index,
+    const QVariant &value)
 {
   auto row = index.row();
   bool checkedState;
@@ -346,14 +348,14 @@ bool ActivityModel::setDataCheck(const QModelIndex &index, const QVariant &value
   return true;
 }
 
-bool ActivityModel::setActivityName(document::data::CmdCatalogue &worker, int row,
-    const QVariant &value)
+bool ActivityModel::setActivityName(document::data::CmdCatalogue &worker,
+    int row, const QVariant &value)
 {
   QStringList usedNames;
 
   auto &activities = config.data().getActivities();
   for (const auto &activity : activities) {
-    usedNames.push_back(QString::fromStdString(activity.label.get()));
+    usedNames.push_back(qstr(activity.label.get()));
   }
 
   auto name = makeStringUnique(usedNames, value.toString());

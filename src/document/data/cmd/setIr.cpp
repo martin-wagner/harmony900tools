@@ -23,9 +23,7 @@ SetIrCommand::SetIrCommand(ConfigData &c, uint32_t devicePos,
   }
   auto &cmds = c.getDevices()[devicePos].getIrCommands();
   if (!overwrite && cmds.nameExists(cmd.name.get())) {
-    emit writeMsg(
-        tr("Command %1 already exists").arg(
-            QString::fromStdString(cmd.name.get())));
+    emit writeMsg(tr("Command %1 already exists").arg(qstr(cmd.name.get())));
     return;
   }
 
@@ -62,9 +60,7 @@ SetIrCommand::SetIrCommand(ConfigData &c, uint32_t devicePos,
   }
   auto &cmds = c.getDevices()[devicePos].getIrCommands();
   if (!overwrite && cmds.nameExists(cmd.name.get())) {
-    emit writeMsg(
-        tr("Command %1 already exists").arg(
-            QString::fromStdString(cmd.name.get())));
+    emit writeMsg(tr("Command %1 already exists").arg(qstr(cmd.name.get())));
     return;
   }
 

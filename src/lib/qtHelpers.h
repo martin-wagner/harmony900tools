@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <QStringList>
 #include <QString>
 #include <string>
@@ -34,4 +35,34 @@ inline std::vector<std::string> toStdVector(const QStringList &strings)
   return result;
 }
 
+inline QString makeStringUnique(const QStringList &input, QString str,
+    QString *msg = nullptr)
+{
+  auto baseStr = str;
+
+  int suffix = 1;
+  while (input.contains(str)) {
+    str = baseStr + QString::number(suffix);
+    suffix++;
+  }
+  if ((msg != nullptr) && (suffix > 1)) {
+    *msg = QObject::tr("%1 already used. Names must be unique").arg(baseStr);
+  }
+
+  return str;
 }
+
+}
+
+//outside namespace -> shorter
+
+inline QString qstr(const std::string &str)
+{
+  return QString::fromStdString(str);
+}
+
+inline std::string strq(const QString &str)
+{
+  return str.toStdString();
+}
+

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include "lib/qtHelpers.h"
+
 #ifndef UNIT_TEST
 #define IRREMOTEESP8266_DEFINED_UNIT_TEST
 #define UNIT_TEST 1 //make IRemoteESP8266 run without the ESP8266...
@@ -335,31 +337,28 @@ QStringList getSubTypes(document::data::CodeType codeType)
 
   switch (codeType) {
     case document::data::CodeType::NEC:
-      ret.push_back(QString::fromStdString(typeToString(decode_type_t::NEC)));
-      ret.push_back(
-          QString::fromStdString(typeToString(decode_type_t::NEC_LIKE)));
+      ret.push_back(qstr(typeToString(decode_type_t::NEC)));
+      ret.push_back(qstr(typeToString(decode_type_t::NEC_LIKE)));
       break;
     case document::data::CodeType::KASEIKYO:
-      ret.push_back(
-          QString::fromStdString(typeToString(decode_type_t::PANASONIC)));
-      ret.push_back(QString::fromStdString(typeToString(decode_type_t::DENON)));
+      ret.push_back(qstr(typeToString(decode_type_t::PANASONIC)));
+      ret.push_back(qstr(typeToString(decode_type_t::DENON)));
       break;
     case document::data::CodeType::SIRCS12:
     case document::data::CodeType::SIRCS15:
     case document::data::CodeType::SIRCS20:
-      ret.push_back(QString::fromStdString(typeToString(decode_type_t::SONY)));
+      ret.push_back(qstr(typeToString(decode_type_t::SONY)));
       break;
     case document::data::CodeType::Samsung32:
-      ret.push_back(
-          QString::fromStdString(typeToString(decode_type_t::SAMSUNG)));
+      ret.push_back(qstr(typeToString(decode_type_t::SAMSUNG)));
       break;
     case document::data::CodeType::PhilipsRC5:
-      ret.push_back(QString::fromStdString(typeToString(decode_type_t::RC5)));
-      ret.push_back(QString::fromStdString(typeToString(decode_type_t::RC5X)));
+      ret.push_back(qstr(typeToString(decode_type_t::RC5)));
+      ret.push_back(qstr(typeToString(decode_type_t::RC5X)));
       break;
     case document::data::CodeType::PhilipsRC6:
     case document::data::CodeType::PhilipsRC6A:
-      ret.push_back(QString::fromStdString(typeToString(decode_type_t::RC6)));
+      ret.push_back(qstr(typeToString(decode_type_t::RC6)));
       break;
     default:
       break;

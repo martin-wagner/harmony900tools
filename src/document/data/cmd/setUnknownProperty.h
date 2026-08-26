@@ -23,7 +23,7 @@ class SetUnknownPropertyCommand: public BaseCommand
         const UnknownElement &value, QUndoCommand *parent = nullptr) :
         BaseCommand(
             QObject::tr("Unknown property (%1)").arg(
-                QString::fromStdString(value.tag)), parent), value(value), get(
+                qstr(value.tag)), parent), value(value), get(
             getter), set(setter)
     {
     }
@@ -114,8 +114,6 @@ class SetActivityUnknownPropertyCommand: public SetUnknownPropertyCommand
         const UnknownElement& value, uint32_t pos,
         QUndoCommand* parent = nullptr);
 };
-
-
 
 }
 }

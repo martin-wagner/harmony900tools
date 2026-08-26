@@ -4,6 +4,7 @@
 #include <magic_enum/magic_enum.hpp>
 #include <magic_enum/magic_enum_utility.hpp>
 
+#include "lib/qtHelpers.h"
 #include "enum.h"
 
 using namespace std;
@@ -55,7 +56,7 @@ string Enum<T>::toString(T v)
 template<typename T>
 QString Enum<T>::toQString(T v)
 {
-  return QString::fromStdString(toString(v));
+  return qstr(toString(v));
 }
 
 template<typename T>
@@ -106,7 +107,7 @@ QStringList Enum<T>::getQStringList() const
 
   //we always want to have the current value available
   if (!isEnumValue(src)) {
-    ret.push_back(QString::fromStdString(src));
+    ret.push_back(qstr(src));
   }
 
   return ret;
@@ -127,7 +128,7 @@ string Enum<T>::getString() const
 template<typename T>
 QString Enum<T>::getQString() const
 {
-  return QString::fromStdString(src);
+  return qstr(src);
 }
 
 template<typename T>

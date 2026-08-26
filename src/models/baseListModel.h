@@ -3,6 +3,7 @@
 #pragma once
 
 #include "base.h"
+#include "lib/qtHelpers.h"
 #include "document/data/catalogue.h"
 
 namespace document
@@ -49,7 +50,7 @@ class BaseModel: public QAbstractItemModel
     virtual QVariant getFontData(const QModelIndex &index) const;
     virtual QVariant getSelectionItemsData(const QModelIndex &index) const;
 
-    QString makeStringUnique(const QStringList &input, QString str);
+    QString makeStringUnique(const QStringList &input, const QString &str);
     static QStringList toQStringList(const std::vector<std::string> &list);
     static std::vector<std::string> toStringList(const QStringList &qlist);
 

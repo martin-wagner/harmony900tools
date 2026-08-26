@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "codeJson.h"
-
 #include <QByteArray>
+
+#include "codeJson.h"
+#include "lib/qtHelpers.h"
 
 using namespace std;
 
@@ -77,8 +78,7 @@ void fromJson(const ordered_json &in, binary::irProto::Section &section)
   auto dataIt = in.find("Data");
   if (dataIt != in.end()) {
     auto bitCount = in.value("DataBitCount", size_t(0));
-    auto bits = QString::fromStdString(dataIt->get<string>()).toULongLong(
-        nullptr, 16);
+    auto bits = qstr(dataIt->get<string>()).toULongLong(nullptr, 16);
     data = binary::irProto::Code::u64tobits(bitCount, bits);
   }
   section = binary::irProto::Section(index, data);

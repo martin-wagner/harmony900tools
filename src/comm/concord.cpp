@@ -5,6 +5,7 @@
 #include <memory>
 //plain c functions -- never use outside cpp file (->global namespace)
 #include "wrappers/concordWrapper.h"
+#include "lib/qtHelpers.h"
 
 using namespace std;
 
@@ -392,7 +393,7 @@ class Worker: public QObject
       auto visual = stream.convertAsciiPlot(250);
 
       emit writeLog(LogLevel::Debug,
-          tr("libconcord IR Data: %1").arg(QString::fromStdString(visual)),
+          tr("libconcord IR Data: %1").arg(qstr(visual)),
           ContentType::PlainText);
 
       emit done(true, tr("OK"));

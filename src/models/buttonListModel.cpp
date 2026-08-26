@@ -139,7 +139,7 @@ QStringList ButtonBaseModel::getUnusedButtons() const
   auto list =
       document::data::Enum<document::data::HardButtons>::toQStringList();
   for (const auto &button : getButtons()) {
-    auto name = QString::fromStdString(button.name.get());
+    auto name = qstr(button.name.get());
     list.removeAll(name);
   }
   return list;
@@ -149,7 +149,7 @@ QStringList ButtonBaseModel::getUnusedButtons(
     const document::data::item::Button &button) const
 {
   auto list = getUnusedButtons();
-  auto current = QString::fromStdString(button.name.get());
+  auto current = qstr(button.name.get());
 
   if (!list.contains(current)) {
     list.append(current);
@@ -179,8 +179,7 @@ QList<QPair<uint32_t, QString>> ButtonBaseModel::getAvailableDevices() const
 
   auto &devices = config.data().getDevices();
   for (const auto &device : devices) {
-    list.push_back(
-        { device.getId(), QString::fromStdString(device.label.get()) });
+    list.push_back( { device.getId(), qstr(device.label.get()) });
   }
   return list;
 }
@@ -368,9 +367,9 @@ QVariant DeviceHardButtonModel::getDisplayData(const QModelIndex &index) const
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::BUTTON:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       default:
         break;
     }
@@ -385,9 +384,9 @@ QVariant DeviceHardButtonModel::getEditData(const QModelIndex &index) const
     auto &button = getButtons().at(index.row());
     switch (static_cast<Column>(index.column())) {
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::BUTTON:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       default:
         break;
     }
@@ -402,8 +401,7 @@ QVariant DeviceHardButtonModel::getTooltipData(const QModelIndex &index) const
     auto text = columnSetup.at(mapColumn(index.column())).context;
     switch (static_cast<Column>(index.column())) {
       case Column::BUTTON: {
-        auto name = QString::fromStdString(
-            getButtons().at(index.row()).name.get());
+        auto name = qstr(getButtons().at(index.row()).name.get());
         text = tr("<b>%1</b><br>"
             "You can find it here:<br><br>"
             "<img src=':/res/buttons/%2.jpg' width='180' height='138'>").arg(
@@ -577,9 +575,9 @@ QVariant DeviceSoftButtonModel::getDisplayData(const QModelIndex &index) const
       case Column::POSITION:
         return toPositionString(button.position.get());
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::NAME:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       default:
         break;
     }
@@ -596,9 +594,9 @@ QVariant DeviceSoftButtonModel::getEditData(const QModelIndex &index) const
       case Column::POSITION:
         return toPositionString(button.position.get());
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::NAME:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       default:
         break;
     }
@@ -642,10 +640,10 @@ QStringList models::DeviceSoftButtonModel::getUnusedCommands(
   QStringList usedCommands;
 
   for (const auto &button : device->getHardButtons()) {
-    usedCommands.push_back(QString::fromStdString(button.action.get()));
+    usedCommands.push_back(qstr(button.action.get()));
   }
   for (const auto &button : device->getSoftButtons()) {
-    usedCommands.push_back(QString::fromStdString(button.action.get()));
+    usedCommands.push_back(qstr(button.action.get()));
   }
   auto availableCommands = getAvailableCommands(device);
 
@@ -821,12 +819,12 @@ QVariant ActivityHardButtonModel::getDisplayData(const QModelIndex &index) const
         if (device == nullptr) {
           return deviceId; //error
         }
-        return QString::fromStdString(device->label.get());
+        return qstr(device->label.get());
       }
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::BUTTON:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       default:
         break;
     }
@@ -843,9 +841,9 @@ QVariant ActivityHardButtonModel::getEditData(const QModelIndex &index) const
       case Column::DEVICE:
         return button.device.get();
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::BUTTON:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       default:
         break;
     }
@@ -860,8 +858,7 @@ QVariant ActivityHardButtonModel::getTooltipData(const QModelIndex &index) const
     auto text = columnSetup.at(mapColumn(index.column())).context;
     switch (static_cast<Column>(index.column())) {
       case Column::BUTTON: {
-        auto name = QString::fromStdString(
-            getButtons().at(index.row()).name.get());
+        auto name = qstr(getButtons().at(index.row()).name.get());
         text = tr("<b>%1</b><br>"
             "You can find it here:<br><br>"
             "<img src=':/res/buttons/%2.jpg' width='180' height='138'>").arg(
@@ -929,8 +926,7 @@ bool ActivityHardButtonModel::setDeviceData(uint32_t activityPos, int row,
     return false;
   }
   try {
-    auto currentCommand = QString::fromStdString(
-        getButtons().at(row).action.get());
+    auto currentCommand = qstr(getButtons().at(row).action.get());
     auto availableCommands = getAvailableCommands(device);
     if (availableCommands.contains(currentCommand)) {
       //we are fine, just keep the command
@@ -1135,14 +1131,14 @@ QVariant ActivitySoftButtonModel::getDisplayData(const QModelIndex &index) const
         if (device == nullptr) {
           return ""; //entriy unused
         }
-        return QString::fromStdString(device->label.get());
+        return qstr(device->label.get());
       }
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::NAME:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       case Column::ICON:
-        return QString::fromStdString(button.file.get());
+        return qstr(button.file.get());
       default:
         break;
     }
@@ -1161,11 +1157,11 @@ QVariant ActivitySoftButtonModel::getEditData(const QModelIndex &index) const
       case Column::DEVICE:
         return button.device.get();
       case Column::COMMAND:
-        return QString::fromStdString(button.action.get());
+        return qstr(button.action.get());
       case Column::NAME:
-        return QString::fromStdString(button.name.get());
+        return qstr(button.name.get());
       case Column::ICON:
-        return QString::fromStdString(button.file.get());
+        return qstr(button.file.get());
       default:
         break;
     }
@@ -1238,8 +1234,7 @@ bool ActivitySoftButtonModel::setDeviceData(uint32_t activityPos, int row,
     return false;
   }
   try {
-    auto currentCommand = QString::fromStdString(
-        getButtons().at(row).action.get());
+    auto currentCommand = qstr(getButtons().at(row).action.get());
     auto availableCommands = getAvailableCommands(device);
     if (availableCommands.contains(currentCommand)) {
       //we are fine, just keep the command
@@ -1282,10 +1277,10 @@ QStringList models::ActivitySoftButtonModel::getUnusedCommands(
   QStringList usedCommands;
 
   for (const auto &button : activity->getHardButtons()) {
-    usedCommands.push_back(QString::fromStdString(button.action.get()));
+    usedCommands.push_back(qstr(button.action.get()));
   }
   for (const auto &button : activity->getSoftButtons()) {
-    usedCommands.push_back(QString::fromStdString(button.action.get()));
+    usedCommands.push_back(qstr(button.action.get()));
   }
   auto availableCommands = getAvailableCommands(device);
 
