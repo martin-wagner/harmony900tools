@@ -12,8 +12,8 @@ namespace data
 {
 
 AddStateCommand::AddStateCommand(ConfigData &c, uint32_t devicePos,
-    uint32_t smPos, const QString &name, item::StateMachineType t,
-    int actPos, QUndoCommand *parent) :
+    uint32_t smPos, const QString &name, item::StateMachineType t, int actPos,
+    QUndoCommand *parent) :
     BaseCommand(QObject::tr("Add DeviceState (to device: %1)").arg(devicePos),
         parent), c(c), devicePos(devicePos), smPos(smPos), t(t), name(
         name.toStdString())
@@ -110,6 +110,82 @@ void AddStateCommand::undo()
 }
 
 bool AddStateCommand::valid() const
+{
+  return isValid;
+}
+
+EditStateNameCommand::EditStateNameCommand(ConfigData &c, uint32_t devicePos,
+    uint32_t smPos, const QString &name, item::StateMachineType t,
+    uint32_t statePos, QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Edit state name").arg(devicePos), parent), c(c), devicePos(
+        devicePos), smPos(smPos), statePos(statePos), t(t), name(
+        name.toStdString())
+{
+  if (name.isEmpty()) {
+    return;
+  }
+
+  try {
+    auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
+    switch (t) {
+      case item::StateMachineType::Discrete:
+        oldName = sm.discrete.states.at(statePos);
+        break;
+      case item::StateMachineType::Relative:
+        oldName = sm.relative.states.at(statePos);
+        break;
+      default:
+        return;
+    }
+
+    isValid = true;
+  } catch (std::out_of_range&) {
+  }
+}
+
+void EditStateNameCommand::redo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
+  switch (t) {
+    case item::StateMachineType::Discrete:
+      sm.discrete.states[statePos] = name;
+      break;
+    case item::StateMachineType::Relative:
+      sm.relative.states[statePos] = name;
+      break;
+    default:
+      return;
+  }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
+  emit dirtyChanged(true);
+}
+
+void EditStateNameCommand::undo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  auto &sm = c.getDevices()[devicePos].getStateMachines()[smPos];
+  switch (t) {
+    case item::StateMachineType::Discrete:
+      sm.discrete.states[statePos] = oldName;
+      break;
+    case item::StateMachineType::Relative:
+      sm.relative.states[statePos] = oldName;
+      break;
+    default:
+      return;
+  }
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
+  emit dirtyChanged(true);
+}
+
+bool EditStateNameCommand::valid() const
 {
   return isValid;
 }

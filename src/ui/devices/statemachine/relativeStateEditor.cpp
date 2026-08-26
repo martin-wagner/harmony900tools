@@ -10,69 +10,74 @@
 #include <QDialogButtonBox>
 #include <QInputDialog>
 
+#include "lib/icon.h"
+#include "lib/qtHelpers.h"
+#include "document/config.h"
 #include "relativeStateEditor.h"
 #include "deviceActionEditor.h"
 
+using namespace std;
 using namespace document::data::item;
 
 namespace editors
 {
 
-RelativeStateEditor::RelativeStateEditor(QWidget *parent) :
-    QWidget(parent)
+RelativeStateEditor::RelativeStateEditor(Context &ctx, QWidget *parent) :
+    QWidget(parent), config(*ctx.config())
 {
-  buildUi();
+  createView(ctx);
+  createConnections();
 }
 
-void RelativeStateEditor::setRelativeActions(
-    const RelativeActions &relativeActions)
+void RelativeStateEditor::setRelativeActions(uint32_t devicePos, uint32_t smPos)
 {
+  this->devicePos = devicePos;
+  this->smPos = smPos;
+
+  updateData();
+}
+
+void RelativeStateEditor::updateData()
+{
+  auto &actions = getActions();
+
   statesList->clear();
-  for (const std::string &state : relativeActions.states) {
-    QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(state),
-        statesList);
+
+  if ((devicePos == 0xffffffff) || (smPos == 0xffffffff)) {
+    return;
+  }
+
+  for (const string &state : actions.states) {
+    QListWidgetItem *item = new QListWidgetItem(qstr(state), statesList);
     item->setFlags(item->flags() | Qt::ItemIsEditable);
   }
 
-  nextAction = relativeActions.nextStateAction.value_or(DeviceAction { });
+  //todo nextAction = relativeActions.nextStateAction.value_or(DeviceAction { });
   updateActionButtonLabel(nextActionButton, nextAction);
 
-  prevAction = relativeActions.prevStateAction;
+  //todo prevAction = relativeActions.prevStateAction;
   updatePrevSlotState();
 
-  resetAction = relativeActions.resetAction;
+  //todo resetAction = relativeActions.resetAction;
   updateResetSlotState();
-}
-
-RelativeActions RelativeStateEditor::getRelativeActions() const
-{
-  RelativeActions relativeActions;
-
-  for (int i = 0; i < statesList->count(); ++i) {
-    relativeActions.states.push_back(statesList->item(i)->text().toStdString());
-  }
-
-  relativeActions.nextStateAction = nextAction;
-  relativeActions.prevStateAction = prevAction;
-  relativeActions.resetAction = resetAction;
-
-  return relativeActions;
 }
 
 void RelativeStateEditor::onAddStateClicked()
 {
-  bool ok = false;
-  const QString stateName = QInputDialog::getText(this, tr("Add state"),
-      tr("State value"), QLineEdit::Normal, tr("NewValue"), &ok);
+  config.modify().addDeviceSmStateCommand(devicePos, smPos,
+      StateMachineType::Relative, makeStateNameUnique(tr("New State")), -1);
+}
 
-  if (!ok || stateName.isEmpty()) {
+void RelativeStateEditor::onRemoveStateClicked()
+{
+  auto &actions = getActions();
+
+  auto item = statesList->currentRow();
+  if ((item < 0) || (item >= actions.states.size())) {
     return;
   }
-
-  QListWidgetItem *item = new QListWidgetItem(stateName, statesList);
-  item->setFlags(item->flags() | Qt::ItemIsEditable);
-
-  emit changed();
+  config.modify().removeDeviceSmStateCommand(devicePos, smPos,
+      StateMachineType::Relative, item);
 }
 
 void RelativeStateEditor::onEditNextActionClicked()
@@ -96,7 +101,6 @@ void RelativeStateEditor::onEditNextActionClicked()
   if (dialog.exec() == QDialog::Accepted) {
     nextAction = editor->getDeviceAction();
     updateActionButtonLabel(nextActionButton, nextAction);
-    emit changed();
   }
 }
 
@@ -121,7 +125,6 @@ void RelativeStateEditor::onEditPrevActionClicked()
   if (dialog.exec() == QDialog::Accepted) {
     prevAction = editor->getDeviceAction();
     updatePrevSlotState();
-    emit changed();
   }
 }
 
@@ -146,25 +149,66 @@ void RelativeStateEditor::onEditResetActionClicked()
   if (dialog.exec() == QDialog::Accepted) {
     resetAction = editor->getDeviceAction();
     updateResetSlotState();
-    emit changed();
   }
 }
 
 void RelativeStateEditor::onClearPrevActionClicked()
 {
-  prevAction = std::nullopt;
+  prevAction = nullopt;
   updatePrevSlotState();
-  emit changed();
 }
 
 void RelativeStateEditor::onClearResetActionClicked()
 {
-  resetAction = std::nullopt;
+  resetAction = nullopt;
   updateResetSlotState();
-  emit changed();
 }
 
-void RelativeStateEditor::buildUi()
+void RelativeStateEditor::onStateNameChanged(int row, const QString &text)
+{
+  if (text.toStdString() == getActions().states.at(row)) {
+    return; //not changed
+  }
+  auto name = makeStateNameUnique(text);
+  config.modify().setDeviceSmStateName(name, devicePos, smPos,
+      StateMachineType::Relative, row);
+}
+
+void RelativeStateEditor::onStateNameMoved(int start, int destinationRow)
+{
+  int i;
+
+  if (destinationRow > start) {
+    destinationRow--;
+  }
+  auto states = getActions().states;
+  if (start < destinationRow) {
+    rotate(states.begin() + start, states.begin() + start + 1,
+        states.begin() + destinationRow + 1);
+  } else if (start > destinationRow) {
+    rotate(states.begin() + destinationRow, states.begin() + start,
+        states.begin() + start + 1);
+  } else {
+    //nothing to do
+    return;
+  }
+
+  config.beginMacro(tr("Move State"));
+
+  for (i = 0; i < states.size(); i++) {
+    config.modify().setDeviceSmStateName(qstr(states[i]), devicePos, smPos,
+        StateMachineType::Relative, i);
+  }
+
+  config.endMacro();
+}
+
+const document::data::item::RelativeActions& RelativeStateEditor::getActions() const
+{
+  return config.data().getDevices().at(devicePos).getStateMachines().at(smPos).relative;
+}
+
+void RelativeStateEditor::createView(Context &ctx)
 {
   statesList = new QListWidget(this);
   statesList->setFlow(QListView::LeftToRight);
@@ -172,9 +216,12 @@ void RelativeStateEditor::buildUi()
   statesList->setDragDropMode(QAbstractItemView::InternalMove);
   statesList->setMaximumHeight(80);
 
-  addStateButton = new QPushButton(tr("Add state"), this);
-  connect(addStateButton, &QPushButton::clicked, this,
-      &RelativeStateEditor::onAddStateClicked);
+  addStateButton = new QPushButton(
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
+          "list-add"), "", this);
+  removeStateButton = new QPushButton(
+      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
+          "edit-delete"), "", this);
 
   QVBoxLayout *statesLayout = new QVBoxLayout();
   QLabel *statesLabel = new QLabel(
@@ -183,7 +230,10 @@ void RelativeStateEditor::buildUi()
 
   QHBoxLayout *statesRowLayout = new QHBoxLayout();
   statesRowLayout->addWidget(statesList, 1);
-  statesRowLayout->addWidget(addStateButton, 0, Qt::AlignTop);
+  QVBoxLayout *buttonAddDeleteLayout = new QVBoxLayout();
+  buttonAddDeleteLayout->addWidget(addStateButton, 0, Qt::AlignTop);
+  buttonAddDeleteLayout->addWidget(removeStateButton, 0, Qt::AlignTop);
+  statesRowLayout->addLayout(buttonAddDeleteLayout);
   statesLayout->addLayout(statesRowLayout);
 
   nextActionButton = new QPushButton(this);
@@ -227,6 +277,25 @@ void RelativeStateEditor::buildUi()
   rootLayout->addStretch(1);
 }
 
+void RelativeStateEditor::createConnections()
+{
+  connect(addStateButton, &QPushButton::clicked, this,
+      &RelativeStateEditor::onAddStateClicked);
+  connect(removeStateButton, &QPushButton::clicked, this,
+      &RelativeStateEditor::onRemoveStateClicked);
+  connect(statesList, &QListWidget::itemChanged, this,
+      [this](QListWidgetItem *item) {
+        if (item != nullptr) {
+          onStateNameChanged(statesList->row(item), item->text());
+        }
+      });
+  connect(statesList->model(), &QAbstractItemModel::rowsMoved, this,
+      [this](const QModelIndex&, int start, int, const QModelIndex&,
+          int destinationRow) {
+            onStateNameMoved(start, destinationRow);
+          });
+}
+
 void RelativeStateEditor::updatePrevSlotState()
 {
 //  const bool hasAction = prevAction.has_value();
@@ -251,6 +320,12 @@ void RelativeStateEditor::updateActionButtonLabel(QPushButton *button,
     const DeviceAction &deviceAction)
 {
 //  button->setText(tr("%n step(s)", "", static_cast<int>(deviceAction.size())));
+}
+
+QString RelativeStateEditor::makeStateNameUnique(const QString &name)
+{
+  auto usedNames = lib::toQStringList(getActions().states);
+  return lib::makeStringUnique(usedNames, name);
 }
 
 }

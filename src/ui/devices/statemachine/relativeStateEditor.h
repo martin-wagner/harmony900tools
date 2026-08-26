@@ -4,6 +4,7 @@
 
 #include <QWidget>
 
+#include "context.h"
 #include "document/data/items/state.h"
 
 class QListWidget;
@@ -23,30 +24,41 @@ class RelativeStateEditor : public QWidget
     Q_OBJECT
 
   public:
-    explicit RelativeStateEditor(QWidget *parent = nullptr);
+    explicit RelativeStateEditor(Context &ctx, QWidget *parent = nullptr);
 
-    void setRelativeActions(const document::data::item::RelativeActions &relativeActions);
-    document::data::item::RelativeActions getRelativeActions() const;
+    void setRelativeActions(uint32_t devicePos, uint32_t smPos);
 
-  signals:
-    void changed();
+    void updateData();
 
   private slots:
     void onAddStateClicked();
+    void onRemoveStateClicked();
     void onEditNextActionClicked();
     void onEditPrevActionClicked();
     void onEditResetActionClicked();
     void onClearPrevActionClicked();
     void onClearResetActionClicked();
+    void onStateNameChanged(int row, const QString &text);
+    void onStateNameMoved(int start, int destinationRow);
 
   private:
-    void buildUi();
+    document::Config &config;
+    uint32_t devicePos = 0xffffffff;
+    uint32_t smPos = 0xffffffff;
+
+    const document::data::item::RelativeActions &getActions() const;
+    void createView(Context &ctx);
+    void createConnections();
+
     void updatePrevSlotState();
     void updateResetSlotState();
     void updateActionButtonLabel(QPushButton *button, const document::data::item::DeviceAction &deviceAction);
 
+    QString makeStateNameUnique(const QString &name);
+
     QListWidget *statesList = nullptr;
     QPushButton *addStateButton = nullptr;
+    QPushButton *removeStateButton = nullptr;
 
     QPushButton *nextActionButton = nullptr;
 

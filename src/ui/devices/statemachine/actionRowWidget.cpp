@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 
+#include "lib/qtHelpers.h"
 #include "actionRowWidget.h"
 
 using namespace document::data::item;
@@ -32,14 +33,14 @@ void ActionRowWidget::setAction(const DeviceAction &action)
 //
 //  const std::string operationName = action.operation.getString();
 //  const int operationIndex = operationCombo->findData(
-//      QString::fromStdString(operationName));
+//      qstr(operationName));
 //  if (operationIndex >= 0) {
 //    operationCombo->setCurrentIndex(operationIndex);
 //  }
 //
 //  for (const auto &parameter : action.parameters) {
-//    const QString name = QString::fromStdString(parameter.first);
-//    const QString value = QString::fromStdString(parameter.second);
+//    const QString name = qstr(parameter.first);
+//    const QString value = qstr(parameter.second);
 //
 //    if (name == "Command") {
 //      commandCombo->setCurrentText(value);

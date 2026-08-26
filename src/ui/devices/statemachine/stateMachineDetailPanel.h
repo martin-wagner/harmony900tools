@@ -19,8 +19,8 @@ namespace editors
 class DiscreteStateEditor;
 class RelativeStateEditor;
 
-/** header (state machine type, delay) plus the type-specific editor for a
- * single StateMachine. The type-specific editor is chosen via a
+/** Type-specific editor for a single StateMachine.
+ * The type-specific editor is chosen via a
  * QStackedWidget indexed by StateMachineType.
  */
 class StateMachineDetailPanel : public QWidget
@@ -46,8 +46,8 @@ class StateMachineDetailPanel : public QWidget
 
   private:
     document::Config &config;
-    uint32_t devicePos = -1;
-    uint32_t smPos = -1;
+    uint32_t devicePos = 0xffffffff;
+    uint32_t smPos = 0xffffffff;
 
     const document::data::item::StateMachine &getMachine() const;
 

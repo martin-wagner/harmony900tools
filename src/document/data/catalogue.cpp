@@ -818,6 +818,22 @@ bool CmdCatalogue::removeDeviceSmActionCommand(uint32_t devicePos,
   return ret;
 }
 
+bool CmdCatalogue::setDeviceSmStateName(const QString &v, uint32_t devicePos,
+    uint32_t smPos, item::StateMachineType t, uint32_t statePos)
+{
+  auto *cmd = new EditStateNameCommand(c, devicePos, smPos, v, t, statePos);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: edit state name failed, dropped"), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
 bool CmdCatalogue::setDeviceSmActionType(const Enum<ActionType> &v,
     uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
     uint32_t actPos)

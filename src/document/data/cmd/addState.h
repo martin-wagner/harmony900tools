@@ -29,7 +29,30 @@ class AddStateCommand: public BaseCommand
     uint32_t smPos;
     item::StateMachineType t;
     int actPos;
-    std::string name = "";
+    std::string name;
+};
+
+class EditStateNameCommand: public BaseCommand
+{
+  Q_OBJECT
+  public:
+    EditStateNameCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, const QString &name, item::StateMachineType t, uint32_t statePos, QUndoCommand *parent = nullptr);
+
+    void redo() override;
+    void undo() override;
+
+    bool valid() const;
+
+  protected:
+    bool isValid = false;
+
+    ConfigData &c;
+    uint32_t devicePos;
+    uint32_t smPos;
+    uint32_t statePos;
+    item::StateMachineType t;
+    std::string name;
+    std::string oldName;
 };
 
 class AddActionCommand: public BaseCommand

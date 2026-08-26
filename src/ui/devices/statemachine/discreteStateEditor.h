@@ -4,6 +4,7 @@
 
 #include <QWidget>
 
+#include "context.h"
 #include "document/data/items/state.h"
 
 class QTableWidget;
@@ -22,23 +23,31 @@ class DiscreteStateEditor : public QWidget
     Q_OBJECT
 
   public:
-    explicit DiscreteStateEditor(QWidget *parent = nullptr);
+    explicit DiscreteStateEditor(Context &ctx, QWidget *parent = nullptr);
 
-    void setDiscreteActions(const document::data::item::DiscreteActions &discreteActions);
-    document::data::item::DiscreteActions getDiscreteActions() const;
+    void setDiscreteActions(uint32_t devicePos, uint32_t smPos);
 
-  signals:
-    void changed();
+    void updateData();
 
   private slots:
     void onAddStateClicked();
     void onRemoveStateClicked();
     void onActionButtonClicked();
+    void onStateNameChanged(int row, const QString &text);
 
   private:
-    void buildUi();
+    document::Config &config;
+    uint32_t devicePos = 0xffffffff;
+    uint32_t smPos = 0xffffffff;
+
+    const document::data::item::DiscreteActions &getActions() const;
+
+    void createView(Context &ctx);
+    void createConnections();
     void addStateRow(const QString &stateName, const document::data::item::DeviceAction &enterAction);
     void updateActionButtonLabel(QPushButton *button, const document::data::item::DeviceAction &deviceAction);
+
+    QString makeStateNameUnique(const QString &name);
 
     QTableWidget *table = nullptr;
     QPushButton *addStateButton = nullptr;

@@ -97,6 +97,7 @@ class CmdCatalogue : public QObject
     bool addDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineAction t);
     bool removeDeviceSmStateCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineType t, int actPos);
     bool removeDeviceSmActionCommand(uint32_t devicePos, uint32_t smPos, item::StateMachineAction t);
+    bool setDeviceSmStateName(const QString &v, uint32_t devicePos, uint32_t smPos, item::StateMachineType t, uint32_t statePos);
     bool setDeviceSmActionType(const Enum<ActionType> &v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos);
     bool setDeviceSmActionRepeatWillNotHarm(bool v, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos);
     //state machine action list items

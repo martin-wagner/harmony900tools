@@ -13,7 +13,6 @@
 #include "discreteStateEditor.h"
 #include "relativeStateEditor.h"
 
-using namespace document::data;
 using namespace document::data::item;
 
 namespace editors
@@ -52,10 +51,10 @@ void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
 
   switch (currentType) {
     case StateMachineType::Discrete:
-      discreteEditor->setDiscreteActions(m.discrete); //todo no pointers
+      discreteEditor->setDiscreteActions(devicePos, smPos);
       break;
     case StateMachineType::Relative:
-      relativeEditor->setRelativeActions(m.relative); //todo no pointers
+      relativeEditor->setRelativeActions(devicePos, smPos);
       break;
     default:
       showEmptyState();
@@ -72,7 +71,8 @@ void StateMachineDetailPanel::updateData()
   smTypeLabel->setText(m.smType.get().getQString());
   delaySpinBox->setValue(static_cast<int>(m.delayMs.get()));
 
-  //todo pass on to sub pages
+  discreteEditor->updateData();
+  relativeEditor->updateData();
 }
 
 void StateMachineDetailPanel::showEmptyState()
@@ -135,9 +135,9 @@ void StateMachineDetailPanel::createView(Context &ctx)
   emptyLayout->addWidget(emptyLabel);
   emptyLayout->addStretch(1);
 
-  discreteEditor = new DiscreteStateEditor(this);
+  discreteEditor = new DiscreteStateEditor(ctx, this);
 
-  relativeEditor = new RelativeStateEditor(this);
+  relativeEditor = new RelativeStateEditor(ctx, this);
 
   typeStack = new QStackedWidget(this);
   typeStack->insertWidget(StackIndexEmpty, emptyStatePage);

@@ -108,7 +108,6 @@ set(sources ${sources}
   ui/devices/statemachine/stateMachineWizard.cpp
   ui/devices/statemachine/stateMachineDetailPanel.cpp
   ui/devices/statemachine/stateMachineEditorView.cpp
-  #ui/devices/statemachine/stateMachineListWidget.cpp
   ui/devices/statemachine/deviceActionEditor.cpp
   ui/devices/statemachine/discreteStateEditor.cpp
   ui/devices/statemachine/relativeStateEditor.cpp
@@ -193,6 +192,7 @@ set(${programName}_resource_files
     ${iconPath}/actions/keyframe-record.png
     ${iconPath}/actions/document-export.png
     ${iconPath}/actions/document-import.png
+    ${iconPath}/actions/text-field.png
     ${buttonIcons}
     ${h900platform}
 )
