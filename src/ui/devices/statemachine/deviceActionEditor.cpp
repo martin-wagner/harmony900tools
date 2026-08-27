@@ -85,8 +85,6 @@ void DeviceActionEditor::setDeviceAction(const DeviceAction &deviceAction,
   for (i = 0; i < deviceAction.sequence.size(); i++) {
     addRow(deviceAction.sequence[i]);
   }
-
-  refreshDragHandles();
 }
 
 DeviceAction DeviceActionEditor::getDeviceAction() const
@@ -107,7 +105,6 @@ DeviceAction DeviceActionEditor::getDeviceAction() const
 void DeviceActionEditor::onAddStepClicked()
 {
   addRow(SequenceItem());
-  refreshDragHandles();
   emit changed();
 }
 
@@ -122,7 +119,6 @@ void DeviceActionEditor::onRowRemoveRequested()
   rowsLayout->removeWidget(row);
   row->deleteLater();
 
-  refreshDragHandles();
   emit changed();
 }
 
@@ -191,15 +187,6 @@ void DeviceActionEditor::addRow(const SequenceItem &sequenceItem)
 
   rowsLayout->addWidget(row);
   rows.append(row);
-}
-
-void DeviceActionEditor::refreshDragHandles()
-{
-  //dragging only makes sense with more than one row
-  const bool showHandles = rows.size() > 1;
-  for (SequenceItemWidget *row : rows) {
-    row->setDragHandleVisible(showHandles);
-  }
 }
 
 }

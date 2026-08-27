@@ -38,9 +38,6 @@ class SequenceItemWidget : public QWidget
     /** read the row's controls back into an Action */
     document::data::item::SequenceItem getSequenceItem() const;
 
-    /** show/hide the drag handle (list end rows may not need one) */
-    void setDragHandleVisible(bool visible);
-
   signals:
     void removeRequested();
     void changed();
@@ -71,7 +68,6 @@ class SequenceItemWidget : public QWidget
     QWidget* buildSetValuePage();
     QWidget* buildForceValuePage();
 
-    QLabel *dragHandle = nullptr;
     QComboBox *targetCombo = nullptr; //hidden by default, see buildUi()
     QComboBox *opcodeCombo = nullptr;
     QStackedWidget *parameterStack = nullptr;

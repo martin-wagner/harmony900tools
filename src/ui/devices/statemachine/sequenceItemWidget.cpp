@@ -118,11 +118,6 @@ SequenceItem SequenceItemWidget::getSequenceItem() const
   return ret;
 }
 
-void SequenceItemWidget::setDragHandleVisible(bool visible)
-{
-  dragHandle->setVisible(visible);
-}
-
 void SequenceItemWidget::onOperationChanged(const QString &text)
 {
   auto opcode = Enum<Operation>(text).getValue();
@@ -209,9 +204,6 @@ const StateMachine& SequenceItemWidget::getMachine() const
 
 void SequenceItemWidget::createView(ParentType t)
 {
-  dragHandle = new QLabel(QStringLiteral("::"), this);
-  dragHandle->setToolTip(tr("Drag to reorder"));
-
   targetCombo = new QComboBox(this);
   targetCombo->addItem("Device");
   targetCombo->addItem("Activity");
@@ -239,7 +231,6 @@ void SequenceItemWidget::createView(ParentType t)
   removeButton->setAutoRaise(true);
 
   QHBoxLayout *headerLayout = new QHBoxLayout();
-  headerLayout->addWidget(dragHandle);
   headerLayout->addWidget(targetCombo);
   headerLayout->addWidget(opcodeCombo);
   headerLayout->addStretch(1);

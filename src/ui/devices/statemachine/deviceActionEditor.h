@@ -60,7 +60,6 @@ class DeviceActionEditor : public QWidget
     void createView();
     void createConnections();
     void addRow(const document::data::item::SequenceItem &sequenceItem);
-    void refreshDragHandles();
 
     QLabel *titleLabel = nullptr;
     QComboBox *typeBox = nullptr;
