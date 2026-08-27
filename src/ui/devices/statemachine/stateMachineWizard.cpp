@@ -116,7 +116,7 @@ void StateMachineWizard::onActionSlotChanged(int row)
   currentSlotKey = actionSlotsList->item(row)->text();
   actionEditor->setEnabled(true);
   actionEditor->setTitle(currentSlotKey);
-  actionEditor->setDeviceAction(actionsBySlot.value(currentSlotKey));
+  //actionEditor->setDeviceAction(actionsBySlot.value(currentSlotKey));
 }
 
 void StateMachineWizard::onAddStateClicked()
@@ -229,12 +229,12 @@ void StateMachineWizard::buildAssignActionsPage()
   connect(actionSlotsList, &QListWidget::currentRowChanged, this,
       &StateMachineWizard::onActionSlotChanged);
 
-  actionEditor = new DeviceActionEditor(page);
-  actionEditor->setEnabled(false);
-
-  QHBoxLayout *layout = new QHBoxLayout(page);
-  layout->addWidget(actionSlotsList, 0);
-  layout->addWidget(actionEditor, 1);
+//  actionEditor = new DeviceActionEditor(page);
+//  actionEditor->setEnabled(false);
+//
+//  QHBoxLayout *layout = new QHBoxLayout(page);
+//  layout->addWidget(actionSlotsList, 0);
+//  layout->addWidget(actionEditor, 1);
 
   setPage(PageAssignActions, page);
 }
@@ -288,7 +288,7 @@ void StateMachineWizard::storeCurrentSlotEdits()
     return;
   }
 
-  actionsBySlot.insert(currentSlotKey, actionEditor->getDeviceAction());
+//  actionsBySlot.insert(currentSlotKey, actionEditor->getDeviceAction());
 }
 
 QString StateMachineWizard::reviewSummaryText() const

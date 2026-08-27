@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "setActionData.h"
 #include "addState.h"
 
 using namespace std;
@@ -114,10 +115,10 @@ bool AddStateCommand::valid() const
   return isValid;
 }
 
-EditStateNameCommand::EditStateNameCommand(ConfigData &c, uint32_t devicePos,
-    uint32_t smPos, const QString &name, item::StateMachineType t,
-    uint32_t statePos, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Edit state name").arg(devicePos), parent), c(c), devicePos(
+SetStateNameCommand::SetStateNameCommand(ConfigData &c, uint32_t devicePos,
+    uint32_t smPos, item::StateMachineType t, uint32_t statePos,
+    const QString &name, QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Edit state name"), parent), c(c), devicePos(
         devicePos), smPos(smPos), statePos(statePos), t(t), name(
         name.toStdString())
 {
@@ -143,7 +144,7 @@ EditStateNameCommand::EditStateNameCommand(ConfigData &c, uint32_t devicePos,
   }
 }
 
-void EditStateNameCommand::redo()
+void SetStateNameCommand::redo()
 {
   if (!isValid) {
     return;
@@ -164,7 +165,7 @@ void EditStateNameCommand::redo()
   emit dirtyChanged(true);
 }
 
-void EditStateNameCommand::undo()
+void SetStateNameCommand::undo()
 {
   if (!isValid) {
     return;
@@ -185,7 +186,51 @@ void EditStateNameCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool EditStateNameCommand::valid() const
+bool SetStateNameCommand::valid() const
+{
+  return isValid;
+}
+
+SetStateDeviceActionCommand::SetStateDeviceActionCommand(ConfigData &c,
+    uint32_t devicePos, uint32_t smPos, item::StateMachineAction t,
+    uint32_t actPos, const item::DeviceAction &act, QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Edit DeviceState action"), parent), c(c), devicePos(
+        devicePos), smPos(smPos), actPos(actPos), t(t), act(act)
+{
+  auto *action = getActionFromSmRef(c, devicePos, smPos, t, actPos);
+  if (action == nullptr) {
+    return;
+  }
+  oldAct = *action;
+
+  isValid = true;
+}
+
+void SetStateDeviceActionCommand::redo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  auto *action = getActionFromSmRef(c, devicePos, smPos, t, actPos);
+  *action = act;
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
+  emit dirtyChanged(true);
+}
+
+void SetStateDeviceActionCommand::undo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  auto *action = getActionFromSmRef(c, devicePos, smPos, t, actPos);
+  *action = oldAct;
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
+  emit dirtyChanged(true);
+}
+
+bool SetStateDeviceActionCommand::valid() const
 {
   return isValid;
 }

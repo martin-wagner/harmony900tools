@@ -38,12 +38,9 @@ RawIrEditor::RawIrEditor(const SerialStreamIr &stream, QWidget *parent) :
 
   connect(table, &QTableWidget::itemChanged, this, &RawIrEditor::itemChanged);
 
-  auto *addButton = new QPushButton(
-      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
-          "list-add"), tr("Add row"), this);
-  auto *removeButton = new QPushButton(
-      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
-          "edit-delete"), tr("Remove row"), this);
+  auto *addButton = new QPushButton(lib::getAddIcon(), tr("Add row"), this);
+  auto *removeButton = new QPushButton(lib::getDeleteIcon(), tr("Remove row"),
+      this);
   connect(addButton, &QPushButton::clicked, this, &RawIrEditor::addRowClicked);
   connect(removeButton, &QPushButton::clicked, this,
       &RawIrEditor::removeRowClicked);

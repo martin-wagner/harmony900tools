@@ -9,9 +9,11 @@
 
 class QComboBox;
 class QSpinBox;
+class QPushButton;
 class QStackedWidget;
 class QLabel;
 class QToolButton;
+class QGroupBox;
 
 namespace editors
 {
@@ -44,6 +46,11 @@ class StateMachineDetailPanel : public QWidget
   protected slots:
     void onEditingDelayFinished();
 
+    void onEditStartActionClicked();
+    void onEditFinishActionClicked();
+    void onClearStartActionClicked();
+    void onClearFinishActionClicked();
+
   private:
     document::Config &config;
     uint32_t devicePos = 0xffffffff;
@@ -58,6 +65,14 @@ class StateMachineDetailPanel : public QWidget
     QLabel *smTypeLabel = nullptr;
     QSpinBox *delaySpinBox = nullptr;
     QToolButton *rerunWizardButton = nullptr;
+
+    QGroupBox *startGroup;
+    QPushButton *startActionButton = nullptr;
+    QPushButton *startActionClearButton = nullptr;
+
+    QGroupBox *finishGroup;
+    QPushButton *finishActionButton = nullptr;
+    QPushButton *finishActionClearButton = nullptr;
 
     QStackedWidget *typeStack = nullptr;
     QWidget *emptyStatePage = nullptr;

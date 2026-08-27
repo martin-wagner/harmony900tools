@@ -14,4 +14,23 @@ inline QIcon getIcon(const QString &icon, const QString &fromTheme = "")
   //return QIcon(icon);
 }
 
+inline QIcon getDeleteIcon()
+{
+  return lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
+      "edit-delete");
+}
+
+inline QIcon getAddIcon()
+{
+  return lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
+      "list-add");
+}
+
+inline QIcon getEditIcon()
+{
+  return lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/text-field.png",
+      "accessories-text-editor");
+}
+
 }

@@ -36,6 +36,7 @@ class RelativeStateEditor : public QWidget
     void onEditNextActionClicked();
     void onEditPrevActionClicked();
     void onEditResetActionClicked();
+    void onClearNextActionClicked();
     void onClearPrevActionClicked();
     void onClearResetActionClicked();
     void onStateNameChanged(int row, const QString &text);
@@ -50,10 +51,6 @@ class RelativeStateEditor : public QWidget
     void createView(Context &ctx);
     void createConnections();
 
-    void updatePrevSlotState();
-    void updateResetSlotState();
-    void updateActionButtonLabel(QPushButton *button, const document::data::item::DeviceAction &deviceAction);
-
     QString makeStateNameUnique(const QString &name);
 
     QListWidget *statesList = nullptr;
@@ -61,16 +58,13 @@ class RelativeStateEditor : public QWidget
     QPushButton *removeStateButton = nullptr;
 
     QPushButton *nextActionButton = nullptr;
+    QPushButton *nextActionClearButton = nullptr;
 
     QPushButton *prevActionButton = nullptr;
     QPushButton *prevActionClearButton = nullptr;
 
     QPushButton *resetActionButton = nullptr;
     QPushButton *resetActionClearButton = nullptr;
-
-    document::data::item::DeviceAction nextAction;
-    std::optional<document::data::item::DeviceAction> prevAction;
-    std::optional<document::data::item::DeviceAction> resetAction;
 };
 
 }

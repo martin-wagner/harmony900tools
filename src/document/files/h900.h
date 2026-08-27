@@ -70,13 +70,10 @@ class H900userconfig : public QObject
     bool readGeneralAction(pugi::xml_node &action, data::item::StateMachineAction t);
     bool readDiscreteActions(pugi::xml_node &actions);
     bool readDiscreteAction(pugi::xml_node &action);
-    bool readDiscreteActionSequences(pugi::xml_node &action);
-    bool readDiscreteActionSequence(pugi::xml_node &sequence);
     bool readRelativeActions(pugi::xml_node &state);
     bool readRelativeAction(pugi::xml_node &action);
-    bool readRelativeActionSequences(pugi::xml_node &action, data::item::StateMachineAction t);
-    bool readRelativeActionSequence(pugi::xml_node &sequence, data::item::StateMachineAction t);
-    bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, uint32_t smPos, uint32_t actPos, data::item::StateMachineAction t, uint32_t seqPos);
+    bool readActionSequences(pugi::xml_node &action, data::item::DeviceAction &out);
+    bool readActionSequence(pugi::xml_node &sequence, data::item::DeviceAction &out);
     bool readNumeric(pugi::xml_node &numeric);
     bool readNumericActions(pugi::xml_node &actions, data::item::DigitSection s);
     bool readNumericActionSequences(pugi::xml_node &action, uint32_t devicePos, data::item::DigitSection s, uint32_t digit);

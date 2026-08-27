@@ -32,11 +32,11 @@ class AddStateCommand: public BaseCommand
     std::string name;
 };
 
-class EditStateNameCommand: public BaseCommand
+class SetStateNameCommand: public BaseCommand
 {
   Q_OBJECT
   public:
-    EditStateNameCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, const QString &name, item::StateMachineType t, uint32_t statePos, QUndoCommand *parent = nullptr);
+    SetStateNameCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateMachineType t, uint32_t statePos, const QString &name, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -53,6 +53,29 @@ class EditStateNameCommand: public BaseCommand
     item::StateMachineType t;
     std::string name;
     std::string oldName;
+};
+
+class SetStateDeviceActionCommand: public BaseCommand
+{
+  Q_OBJECT
+  public:
+    SetStateDeviceActionCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, item::StateMachineAction t, uint32_t actPos, const item::DeviceAction &act, QUndoCommand *parent = nullptr);
+
+    void redo() override;
+    void undo() override;
+
+    bool valid() const;
+
+  protected:
+    bool isValid = false;
+
+    ConfigData &c;
+    uint32_t devicePos;
+    uint32_t smPos;
+    uint32_t actPos;
+    item::StateMachineAction t;
+    item::DeviceAction act;
+    item::DeviceAction oldAct;
 };
 
 class AddActionCommand: public BaseCommand

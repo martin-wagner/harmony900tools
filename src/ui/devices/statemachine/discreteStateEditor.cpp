@@ -5,8 +5,6 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QLineEdit>
-#include <QDialog>
-#include <QDialogButtonBox>
 
 #include "lib/icon.h"
 #include "lib/qtHelpers.h"
@@ -43,8 +41,6 @@ void DiscreteStateEditor::setDiscreteActions(uint32_t devicePos, uint32_t smPos)
     //invalid
     return;
   }
-
-  updateData();
 }
 
 void DiscreteStateEditor::updateData()
@@ -58,8 +54,8 @@ void DiscreteStateEditor::updateData()
   if ((devicePos == 0xffffffff) || (smPos == 0xffffffff)) {
     return;
   }
-
   auto &actions = getActions();
+
   for (i = 0; i < actions.states.size(); i++) {
     auto stateName = qstr(actions.states[i]);
     addStateRow(stateName, actions.enterStateAction[i]);
@@ -92,15 +88,14 @@ void DiscreteStateEditor::onRemoveStateClicked()
 
 void DiscreteStateEditor::onActionButtonClicked()
 {
+  int row = -1;
+  QString stateName = "Unknown";
+
   QPushButton *actionButton = qobject_cast<QPushButton*>(sender());
   if (actionButton == nullptr) {
     return;
   }
-
-  //todo use action editor
-
-  int row = -1;
-  for (int r = 0; r < table->rowCount(); ++r) {
+  for (int r = 0; r < table->rowCount(); r++) {
     if (table->cellWidget(r, ColumnAction) == actionButton) {
       row = r;
       break;
@@ -112,31 +107,18 @@ void DiscreteStateEditor::onActionButtonClicked()
 
   QLineEdit *nameEdit = qobject_cast<QLineEdit*>(
       table->cellWidget(row, ColumnStateName));
-  const QString stateName = nameEdit != nullptr ? nameEdit->text() : QString();
-
-  QDialog dialog(this);
-  dialog.setWindowTitle(tr("Edit action"));
-
-  DeviceActionEditor *editor = new DeviceActionEditor(&dialog);
-  editor->setTitle(tr("Enter action - state %1").arg(stateName));
-  editor->setDeviceAction(
-      actionButton->property(PropertyDeviceAction).value<DeviceAction>());
-
-  QDialogButtonBox *buttonBox = new QDialogButtonBox(
-      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-  connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-  connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-  QVBoxLayout *layout = new QVBoxLayout(&dialog);
-  layout->addWidget(editor);
-  layout->addWidget(buttonBox);
-
-  if (dialog.exec() == QDialog::Accepted) {
-    const DeviceAction deviceAction = editor->getDeviceAction();
-    actionButton->setProperty(PropertyDeviceAction,
-        QVariant::fromValue(deviceAction));
-    updateActionButtonLabel(actionButton, deviceAction);
+  if (nameEdit != nullptr) {
+    stateName = nameEdit->text();
   }
+
+  auto data = DeviceActionEditor::openEditor(getActions().enterStateAction[row],
+      document::data::ActionType::SetAction,
+      tr("Actions for setting \"%1\"").arg(stateName), this);
+  if (!data.has_value()) {
+    return;
+  }
+  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+      StateMachineAction::Discrete_Enter, row);
 }
 
 void DiscreteStateEditor::onStateNameChanged(int row, const QString &text)
@@ -149,7 +131,7 @@ void DiscreteStateEditor::onStateNameChanged(int row, const QString &text)
       StateMachineType::Discrete, row);
 }
 
-const document::data::item::DiscreteActions& DiscreteStateEditor::getActions() const
+const DiscreteActions& DiscreteStateEditor::getActions() const
 {
   return config.data().getDevices().at(devicePos).getStateMachines().at(smPos).discrete;
 }
@@ -194,9 +176,7 @@ void DiscreteStateEditor::addStateRow(const QString &stateName,
     onStateNameChanged(row, nameEdit->text());
   });
 
-  QPushButton *actionButton = new QPushButton(
-      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/text-field.png",
-          "accessories-text-editor"), "", table);
+  QPushButton *actionButton = new QPushButton(lib::getEditIcon(), "", table);
   actionButton->setProperty(PropertyDeviceAction,
       QVariant::fromValue(enterAction));
   updateActionButtonLabel(actionButton, enterAction);
@@ -204,9 +184,7 @@ void DiscreteStateEditor::addStateRow(const QString &stateName,
       &DiscreteStateEditor::onActionButtonClicked);
   table->setCellWidget(row, ColumnAction, actionButton);
 
-  QPushButton *removeButton = new QPushButton(
-      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
-          "edit-delete"), "", table);
+  QPushButton *removeButton = new QPushButton(lib::getDeleteIcon(), "", table);
   removeButton->setToolTip(tr("Remove this value"));
   connect(removeButton, &QPushButton::clicked, this,
       &DiscreteStateEditor::onRemoveStateClicked);

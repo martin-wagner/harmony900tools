@@ -7,11 +7,15 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QFormLayout>
+#include <QGroupBox>
+#include <QPushButton>
 
+#include "lib/icon.h"
 #include "document/config.h"
 #include "stateMachineDetailPanel.h"
 #include "discreteStateEditor.h"
 #include "relativeStateEditor.h"
+#include "deviceActionEditor.h"
 
 using namespace document::data::item;
 
@@ -44,10 +48,10 @@ void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
   } else {
     currentType = StateMachineType::Unknown;
   }
-  smTypeLabel->setText(m.smType.get().getQString());
-  delaySpinBox->setValue(static_cast<int>(m.delayMs.get()));
   smTypeLabel->setEnabled(true);
   delaySpinBox->setEnabled(true);
+  startGroup->setEnabled(true);
+  finishGroup->setEnabled(true);
 
   switch (currentType) {
     case StateMachineType::Discrete:
@@ -62,6 +66,8 @@ void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
   }
 
   typeStack->setCurrentIndex(stackIndexForType(currentType));
+
+  updateData();
 }
 
 void StateMachineDetailPanel::updateData()
@@ -70,6 +76,19 @@ void StateMachineDetailPanel::updateData()
 
   smTypeLabel->setText(m.smType.get().getQString());
   delaySpinBox->setValue(static_cast<int>(m.delayMs.get()));
+  if (m.startAction.has_value()) {
+    startActionButton->setText(
+        tr("%n step(s)", "", static_cast<int>(m.startAction->sequence.size())));
+  } else {
+    startActionButton->setText(tr("Add"));
+  }
+  if (m.finishAction.has_value()) {
+    finishActionButton->setText(
+        tr("%n step(s)", "",
+            static_cast<int>(m.finishAction->sequence.size())));
+  } else {
+    finishActionButton->setText(tr("Add"));
+  }
 
   discreteEditor->updateData();
   relativeEditor->updateData();
@@ -84,6 +103,10 @@ void StateMachineDetailPanel::showEmptyState()
   smTypeLabel->setEnabled(false);
   delaySpinBox->setValue(0);
   delaySpinBox->setEnabled(false);
+  startGroup->setEnabled(false);
+  startActionButton->setText(tr("Add"));
+  finishGroup->setEnabled(false);
+  finishActionButton->setText(tr("Add"));
 
   typeStack->setCurrentIndex(StackIndexEmpty);
 }
@@ -92,6 +115,74 @@ void StateMachineDetailPanel::onEditingDelayFinished()
 {
   config.modify().setDeviceStatemachineDelay(delaySpinBox->value(), devicePos,
       smPos);
+}
+
+void StateMachineDetailPanel::onEditStartActionClicked()
+{
+  auto &m = getMachine();
+  auto a = m.startAction.value_or(DeviceAction());
+
+  auto data = DeviceActionEditor::openEditor(a,
+      document::data::ActionType::StartAction, tr("Actions for starting"),
+      this);
+  if (!data.has_value()) {
+    return;
+  }
+
+  config.beginMacro("Edit Start Action");
+
+  if (!m.startAction.has_value()) {
+    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+        StateMachineAction::Start);
+  }
+  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+      StateMachineAction::Start, 0);
+
+  config.endMacro();
+}
+
+void StateMachineDetailPanel::onEditFinishActionClicked()
+{
+  auto &m = getMachine();
+  auto a = m.finishAction.value_or(DeviceAction());
+
+  auto data = DeviceActionEditor::openEditor(a,
+      document::data::ActionType::FinishAction, tr("Actions for finishing"),
+      this);
+  if (!data.has_value()) {
+    return;
+  }
+
+  config.beginMacro("Edit Finish Action");
+
+  if (!m.finishAction.has_value()) {
+    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+        StateMachineAction::Finish);
+  }
+  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+      StateMachineAction::Finish, 0);
+
+  config.endMacro();
+}
+
+void StateMachineDetailPanel::onClearStartActionClicked()
+{
+  if (getMachine().startAction.has_value()) {
+    config.beginMacro("Remove Start Action");
+    config.modify().removeDeviceSmActionCommand(devicePos, smPos,
+        StateMachineAction::Start);
+    config.endMacro();
+  }
+}
+
+void StateMachineDetailPanel::onClearFinishActionClicked()
+{
+  if (getMachine().finishAction.has_value()) {
+    config.beginMacro("Remove Finish Action");
+    config.modify().removeDeviceSmActionCommand(devicePos, smPos,
+        StateMachineAction::Finish);
+    config.endMacro();
+  }
 }
 
 const document::data::item::StateMachine& StateMachineDetailPanel::getMachine() const
@@ -123,12 +214,33 @@ void StateMachineDetailPanel::createView(Context &ctx)
   headerLayout->addStretch(1);
   headerLayout->addWidget(rerunWizardButton);
 
+  startActionButton = new QPushButton(lib::getEditIcon(), tr("Add"), this);
+  startActionClearButton = new QPushButton(lib::getDeleteIcon(), "", this);
+  startGroup = new QGroupBox(tr("Start action (optional)"), this);
+  startGroup->setToolTip("This is done first (e.g. open selection menu)");
+  QHBoxLayout *startLayout = new QHBoxLayout(startGroup);
+  startLayout->addWidget(startActionButton, 1);
+  startLayout->addWidget(startActionClearButton, 0);
+  startGroup->setEnabled(false);
+
+  finishActionButton = new QPushButton(lib::getEditIcon(), tr("Add"), this);
+  finishActionClearButton = new QPushButton(lib::getDeleteIcon(), "", this);
+  finishGroup = new QGroupBox(tr("Finish action (optional)"), this);
+  finishGroup->setToolTip("This is done at the end (e.g. confirm selection)");
+  QHBoxLayout *finishLayout = new QHBoxLayout(finishGroup);
+  finishLayout->addWidget(finishActionButton, 1);
+  finishLayout->addWidget(finishActionClearButton, 0);
+  finishGroup->setEnabled(false);
+
+  QHBoxLayout *actionLayout = new QHBoxLayout();
+  actionLayout->addWidget(startGroup, 1);
+  actionLayout->addWidget(finishGroup, 1);
+
   emptyStatePage = new QWidget(this);
   QVBoxLayout *emptyLayout = new QVBoxLayout(emptyStatePage);
   QLabel *emptyLabel = new QLabel(
       tr("Select a state machine on the left, or add\n"
-          "a new one using the \"add\" button."),
-      emptyStatePage);
+          "a new one using the \"add\" button."), emptyStatePage);
   emptyLabel->setAlignment(Qt::AlignCenter);
   emptyLabel->setEnabled(false);
   emptyLayout->addStretch(1);
@@ -146,6 +258,7 @@ void StateMachineDetailPanel::createView(Context &ctx)
 
   QVBoxLayout *rootLayout = new QVBoxLayout(this);
   rootLayout->addLayout(headerLayout);
+  rootLayout->addLayout(actionLayout);
   rootLayout->addWidget(typeStack, 1);
 
   showEmptyState();
@@ -153,6 +266,14 @@ void StateMachineDetailPanel::createView(Context &ctx)
 
 void StateMachineDetailPanel::createConnections()
 {
+  connect(startActionButton, &QPushButton::clicked, this,
+      &StateMachineDetailPanel::onEditStartActionClicked);
+  connect(startActionClearButton, &QPushButton::clicked, this,
+      &StateMachineDetailPanel::onClearStartActionClicked);
+  connect(finishActionButton, &QPushButton::clicked, this,
+      &StateMachineDetailPanel::onEditFinishActionClicked);
+  connect(finishActionClearButton, &QPushButton::clicked, this,
+      &StateMachineDetailPanel::onClearFinishActionClicked);
   connect(rerunWizardButton, &QToolButton::clicked, this,
       &StateMachineDetailPanel::rerunWizardRequested);
   connect(delaySpinBox, &QSpinBox::editingFinished, this,

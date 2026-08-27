@@ -81,15 +81,11 @@ void BaseEditor::setupToolbar()
   toolbar->setFloatable(false);
   toolbar->setMovable(false);
 
-  actionAdd = toolbar->addAction(
-      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/list-add.png",
-          "list-add"), tr("Add"));
+  actionAdd = toolbar->addAction(lib::getAddIcon(), tr("Add"));
   actionAdd->setToolTip(tr("Add a new item to the selected list. Click into\n"
       "the empty space to select for adding the first item."));
 
-  actionRemove = toolbar->addAction(
-      lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-delete.png",
-          "edit-delete"), tr("Remove"));
+  actionRemove = toolbar->addAction(lib::getDeleteIcon(), tr("Remove"));
   actionRemove->setToolTip(tr("Remove the selected item"));
   actionRemove->setShortcut(QKeySequence::Delete);
   actionRemove->setShortcutContext(Qt::ApplicationShortcut);
