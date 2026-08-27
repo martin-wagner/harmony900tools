@@ -792,6 +792,9 @@ bool H900userconfig::readActionSequence(pugi::xml_node &sequence,
     auto name = string(prop.attribute("name").as_string());
     auto h = lib::hash_fnv1a(name.data(), name.size());
     switch (h) {
+      case "Id"_hash:
+        seq.deviceId.set(prop.text().as_uint()).setIncluded(Used::YES);
+        break;
       case "DeviceId"_hash:
         //don't store redundant data
         break;
@@ -809,7 +812,7 @@ bool H900userconfig::readActionSequence(pugi::xml_node &sequence,
         seq.stateName.set(prop.text().as_string()).setIncluded(Used::YES);
         break;
       case "Value"_hash:
-        seq.stateValue.set(prop.text().as_string()).setIncluded(Used::YES);
+        seq.value.set(prop.text().as_string()).setIncluded(Used::YES);
         break;
       default: {
         auto unknown = toUnknownElement(prop);
@@ -999,7 +1002,7 @@ bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setDeviceNumpadActionSequenceStateValue(val, devicePos, s,
+        worker->setDeviceNumpadActionSequenceValue(val, devicePos, s,
             digit, seqPos);
         break;
       }
@@ -1561,7 +1564,8 @@ bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
             seqPos);
         break;
       }
-      case "State"_hash: {
+      case "State"_hash:
+      case "StateName"_hash: {
         auto val = prop.text().as_string();
         worker->setActivityActionSequenceStateName(
             Enum<StateMachineDeviceType>(val), activityPos, t, actionPos,
@@ -1570,7 +1574,7 @@ bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setActivityActionSequenceStateValue(val, activityPos, t,
+        worker->setActivityActionSequenceValue(val, activityPos, t,
             actionPos, seqPos);
         break;
       }
@@ -2033,19 +2037,18 @@ bool H900userconfig::writeDeviceAction(pugi::xml_node &actionType,
     auto operation = sequence.append_child("Operation");
     operation.append_child("Name").text().set(s.opcode.get().getString());
     auto id = operation.append_child("Parameter");
-    id.append_attribute("name").set_value("DeviceId");
+    id.append_attribute("name").set_value("Id");
     id.text().set(deviceId);
     writeProperty(operation, "Command", s.cmd, "Parameter");
     writeProperty(operation, "Modifier", s.mod, "Parameter");
     writeProperty(operation, "DelayValue", s.delayMs, "Parameter");
-    if (t != item::StateMachineType::Relative)
-      writeProperty(operation, "State", s.stateName, "Parameter");
-    else {
-      //fixme we have exactly one sample for this. no idea if this is correct.
+    if (s.opcode.get().getValue() == Operation::ForceValue) {
       writeProperty(operation, "StateName", s.stateName, "Parameter");
+    } else {
+      writeProperty(operation, "State", s.stateName, "Parameter");
     }
-    if (s.stateValue.isIncluded() == Used::YES) {
-      writeProperty(operation, "Value", s.stateValue, "Parameter");
+    if (s.value.isIncluded() == Used::YES) {
+      writeProperty(operation, "Value", s.value, "Parameter");
     }
     for (const auto &prop : s.getUnknownParams()) {
       writeUnknownElement(operation, prop);
@@ -2405,8 +2408,12 @@ bool H900userconfig::writeActivityAction(pugi::xml_node &actionType,
     writeProperty(operation, "Command", s.cmd, "Parameter");
     writeProperty(operation, "Modifier", s.mod, "Parameter");
     writeProperty(operation, "DelayValue", s.delayMs, "Parameter");
-    writeProperty(operation, "State", s.stateName, "Parameter");
-    writeProperty(operation, "Value", s.stateValue, "Parameter");
+    if (s.opcode.get().getValue() == Operation::ForceValue) {
+      writeProperty(operation, "StateName", s.stateName, "Parameter");
+    } else {
+      writeProperty(operation, "State", s.stateName, "Parameter");
+    }
+    writeProperty(operation, "Value", s.value, "Parameter");
     for (const auto &prop : s.getUnknownParams()) {
       writeUnknownElement(operation, prop);
     }

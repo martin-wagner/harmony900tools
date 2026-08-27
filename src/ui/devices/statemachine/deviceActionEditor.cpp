@@ -10,7 +10,7 @@
 #include <QDialogButtonBox>
 
 #include "deviceActionEditor.h"
-#include "actionRowWidget.h"
+#include "sequenceItemWidget.h"
 
 using namespace std;
 using namespace document::data::item;
@@ -19,23 +19,24 @@ using namespace document::data;
 namespace editors
 {
 
-DeviceActionEditor::DeviceActionEditor(QWidget *parent) :
-    QWidget(parent)
+DeviceActionEditor::DeviceActionEditor(Context &ctx, uint32_t devicePos,
+    uint32_t smPos, QWidget *parent) :
+    QWidget(parent), ctx(ctx), devicePos(devicePos), smPos(smPos)
 {
   createView();
   createConnections();
 }
 
-optional<DeviceAction> DeviceActionEditor::openEditor(
-    const DeviceAction &deviceAction, ActionType type, const QString &title,
-    QWidget *parent)
+optional<DeviceAction> DeviceActionEditor::openEditor(Context &ctx,
+    uint32_t devicePos, uint32_t smPos, const DeviceAction &deviceAction,
+    ActionType type, const QString &title, QWidget *parent)
 {
   bool dataChanged = false;
 
   QDialog dialog(parent);
   dialog.setWindowTitle(tr("Edit action"));
 
-  auto editor = new DeviceActionEditor(&dialog);
+  auto editor = new DeviceActionEditor(ctx, devicePos, smPos, &dialog);
   editor->setTitle(title);
   editor->setDeviceAction(deviceAction, type);
   connect(editor, &DeviceActionEditor::changed, [&dataChanged]() {
@@ -65,7 +66,7 @@ void DeviceActionEditor::setTitle(const QString &title)
 void DeviceActionEditor::setDeviceAction(const DeviceAction &deviceAction,
     ActionType type)
 {
-  this->deviceAction = deviceAction;
+  int i;
 
   //prefer current value
   if (deviceAction.actionType.get().getValue() != ActionType::Unknown) {
@@ -75,56 +76,45 @@ void DeviceActionEditor::setDeviceAction(const DeviceAction &deviceAction,
   }
   repeatBox->setChecked(deviceAction.repeatWillNotHarm.get());
 
-  for (ActionRowWidget *row : rows) {
+  for (SequenceItemWidget *row : rows) {
+    rowsLayout->removeWidget(row);
     row->deleteLater();
   }
   rows.clear();
-//
-//  for (const Action &action : deviceAction) {
-//    addRow(action);
-//  }
-//
-//  if (rows.isEmpty()) {
-//    addRow(Action { });
-//  }
+
+  for (i = 0; i < deviceAction.sequence.size(); i++) {
+    addRow(deviceAction.sequence[i]);
+  }
 
   refreshDragHandles();
 }
 
 DeviceAction DeviceActionEditor::getDeviceAction() const
 {
-  auto a = deviceAction; //copy trough
+  DeviceAction deviceAction;
 
-  a.actionType.set(Enum<ActionType>(typeBox->currentText()).getValue());
-  a.repeatWillNotHarm.set(repeatBox->isChecked());
+  deviceAction.actionType.set(
+      Enum<ActionType>(typeBox->currentText()).getValue());
+  deviceAction.repeatWillNotHarm.set(repeatBox->isChecked());
 
-  //todo properties
-
-  for (const ActionRowWidget *row : rows) {
-    //deviceAction.sequence.push_back(row->getAction());
+  for (const SequenceItemWidget *row : rows) {
+    deviceAction.sequence.push_back(row->getSequenceItem());
   }
 
-  return a;
+  return deviceAction;
 }
 
 void DeviceActionEditor::onAddStepClicked()
 {
-  addRow(DeviceAction());
+  addRow(SequenceItem());
   refreshDragHandles();
   emit changed();
 }
 
 void DeviceActionEditor::onRowRemoveRequested()
 {
-  ActionRowWidget *row = qobject_cast<ActionRowWidget*>(sender());
+  SequenceItemWidget *row = qobject_cast<SequenceItemWidget*>(sender());
   if (row == nullptr) {
-    return;
-  }
-
-  //keep at least one row -- an empty DeviceAction slot reads as "nothing
-  //configured yet", which the caller (discrete/relative editor) treats
-  //differently from "one no-op step"
-  if (rows.size() <= 1) {
     return;
   }
 
@@ -188,14 +178,16 @@ void DeviceActionEditor::createConnections()
       &DeviceActionEditor::onAddStepClicked);
 }
 
-void DeviceActionEditor::addRow(const DeviceAction &action)
+void DeviceActionEditor::addRow(const SequenceItem &sequenceItem)
 {
-  ActionRowWidget *row = new ActionRowWidget(this);
-  row->setAction(action);
+  SequenceItemWidget *row = new SequenceItemWidget(ctx, devicePos, smPos,
+      SequenceItemWidget::ParentType::DEVICE, this);
+  row->setSequenceItem(sequenceItem);
 
-  connect(row, &ActionRowWidget::removeRequested, this,
+  connect(row, &SequenceItemWidget::removeRequested, this,
       &DeviceActionEditor::onRowRemoveRequested);
-  connect(row, &ActionRowWidget::changed, this, &DeviceActionEditor::changed);
+  connect(row, &SequenceItemWidget::changed, this,
+      &DeviceActionEditor::changed);
 
   rowsLayout->addWidget(row);
   rows.append(row);
@@ -205,7 +197,7 @@ void DeviceActionEditor::refreshDragHandles()
 {
   //dragging only makes sense with more than one row
   const bool showHandles = rows.size() > 1;
-  for (ActionRowWidget *row : rows) {
+  for (SequenceItemWidget *row : rows) {
     row->setDragHandleVisible(showHandles);
   }
 }

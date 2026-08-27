@@ -1039,15 +1039,15 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceStateName(
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
-bool CmdCatalogue::setDeviceNumpadActionSequenceStateValue(const std::string &v,
+bool CmdCatalogue::setDeviceNumpadActionSequenceValue(const std::string &v,
     uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
 {
   PropertyAccess<string> access =
       {
         tr("set device action sequence state value"),
-        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.get();},
+        [this, devicePos, s, digit, seqPos]() {return getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].value.get();},
         [this, devicePos, s, digit, seqPos](
-            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].stateValue.set(v).setIncluded(Used::YES);},
+            const string &v) {getActionFromNumpadRef(c, devicePos, s, digit)->sequence[seqPos].value.set(v).setIncluded(Used::YES);},
         v,
         Item::DEVICE_NUMPAD };
   return setProperty<string>(access);
@@ -2045,16 +2045,16 @@ bool CmdCatalogue::setActivityActionSequenceStateName(
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
-bool CmdCatalogue::setActivityActionSequenceStateValue(const std::string &v,
+bool CmdCatalogue::setActivityActionSequenceValue(const std::string &v,
     uint32_t activityPos, item::ActivityAction t, int actionPos,
     uint32_t seqPos)
 {
   PropertyAccess<string> access =
       {
         tr("set activity action state value"),
-        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.get();},
+        [this, activityPos, t, actionPos, seqPos]() {return getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].value.get();},
         [this, activityPos, t, actionPos, seqPos](
-            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].stateValue.set(v).setIncluded(Used::YES);},
+            const string &v) {getActionFromActivity(c, activityPos, t, actionPos)->sequence[seqPos].value.set(v).setIncluded(Used::YES);},
         v,
         Item::ACTIVITY_ACTION,
         activityPos };

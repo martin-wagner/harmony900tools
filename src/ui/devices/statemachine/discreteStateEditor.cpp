@@ -25,7 +25,7 @@ constexpr int ColumnRemove = 2;
 const char *PropertyDeviceAction = "deviceAction";
 
 DiscreteStateEditor::DiscreteStateEditor(Context &ctx, QWidget *parent) :
-    QWidget(parent), config(*ctx.config())
+    QWidget(parent), ctx(ctx), config(*ctx.config())
 {
   createView(ctx);
   createConnections();
@@ -111,8 +111,8 @@ void DiscreteStateEditor::onActionButtonClicked()
     stateName = nameEdit->text();
   }
 
-  auto data = DeviceActionEditor::openEditor(getActions().enterStateAction[row],
-      document::data::ActionType::SetAction,
+  auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos,
+      getActions().enterStateAction[row], document::data::ActionType::SetAction,
       tr("Actions for setting \"%1\"").arg(stateName), this);
   if (!data.has_value()) {
     return;

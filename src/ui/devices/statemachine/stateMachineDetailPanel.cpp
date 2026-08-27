@@ -27,7 +27,7 @@ constexpr int StackIndexDiscrete = 1;
 constexpr int StackIndexRelative = 2;
 
 StateMachineDetailPanel::StateMachineDetailPanel(Context &ctx, QWidget *parent) :
-    QWidget(parent), config(*ctx.config())
+    QWidget(parent), ctx(ctx), config(*ctx.config())
 {
   createView(ctx);
   createConnections();
@@ -122,7 +122,7 @@ void StateMachineDetailPanel::onEditStartActionClicked()
   auto &m = getMachine();
   auto a = m.startAction.value_or(DeviceAction());
 
-  auto data = DeviceActionEditor::openEditor(a,
+  auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
       document::data::ActionType::StartAction, tr("Actions for starting"),
       this);
   if (!data.has_value()) {
@@ -146,7 +146,7 @@ void StateMachineDetailPanel::onEditFinishActionClicked()
   auto &m = getMachine();
   auto a = m.finishAction.value_or(DeviceAction());
 
-  auto data = DeviceActionEditor::openEditor(a,
+  auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
       document::data::ActionType::FinishAction, tr("Actions for finishing"),
       this);
   if (!data.has_value()) {
@@ -185,7 +185,7 @@ void StateMachineDetailPanel::onClearFinishActionClicked()
   }
 }
 
-const document::data::item::StateMachine& StateMachineDetailPanel::getMachine() const
+const StateMachine& StateMachineDetailPanel::getMachine() const
 {
   return config.data().getDevices().at(devicePos).getStateMachines().at(smPos);
 }

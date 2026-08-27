@@ -67,7 +67,7 @@ void toJson(ordered_json &out, const item::SequenceItem &seqItem)
   toJson(out, "DeviceId", seqItem.deviceId);
   toJson(out, "DelayMs", seqItem.delayMs);
   toJson(out, "StateName", seqItem.stateName);
-  toJson(out, "StateValue", seqItem.stateValue);
+  toJson(out, "Value", seqItem.value);
   toJson(out, "Modifier", seqItem.mod);
 
   toJson(out, "UnknownParams", seqItem.getUnknownParams());
@@ -80,7 +80,7 @@ void fromJson(const ordered_json &in, item::SequenceItem &seqItem)
   fromJson(in, "DeviceId", seqItem.deviceId);
   fromJson(in, "DelayMs", seqItem.delayMs);
   fromJson(in, "StateName", seqItem.stateName);
-  fromJson(in, "StateValue", seqItem.stateValue);
+  fromJson(in, "Value", seqItem.value);
   fromJson(in, "Modifier", seqItem.mod);
 
   fromJson(in, "UnknownParams", seqItem.getUnknownParams());

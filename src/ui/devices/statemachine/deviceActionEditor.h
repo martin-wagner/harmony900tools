@@ -13,11 +13,12 @@ class QPushButton;
 class QLabel;
 class QCheckBox;
 class QComboBox;
+class Context;
 
 namespace editors
 {
 
-class ActionRowWidget;
+class SequenceItemWidget;
 
 /** editor for a whole DeviceAction (an ordered list of Action steps).
  *
@@ -30,10 +31,10 @@ class DeviceActionEditor : public QWidget
     Q_OBJECT
 
   public:
-    explicit DeviceActionEditor(QWidget *parent = nullptr);
+    explicit DeviceActionEditor(Context &ctx, uint32_t devicePos, uint32_t smPos, QWidget *parent = nullptr);
 
     /** create editor, open it in box */
-    static std::optional<document::data::item::DeviceAction> openEditor(const document::data::item::DeviceAction &deviceAction, document::data::ActionType type, const QString &title, QWidget *parent = nullptr);
+    static std::optional<document::data::item::DeviceAction> openEditor(Context &ctx, uint32_t devicePos, uint32_t smPos, const document::data::item::DeviceAction &deviceAction, document::data::ActionType type, const QString &title, QWidget *parent = nullptr);
 
     /** heading shown above the step list, e.g. "Set action - state Off" */
     void setTitle(const QString &title);
@@ -52,19 +53,21 @@ class DeviceActionEditor : public QWidget
     void onRowRemoveRequested();
 
   private:
-    document::data::item::DeviceAction deviceAction;
+    Context &ctx;
+    uint32_t devicePos = 0xffffffff;
+    uint32_t smPos = 0xffffffff;
 
     void createView();
     void createConnections();
-    void addRow(const document::data::item::DeviceAction &action);
+    void addRow(const document::data::item::SequenceItem &sequenceItem);
     void refreshDragHandles();
 
     QLabel *titleLabel = nullptr;
-    QComboBox *typeBox;
+    QComboBox *typeBox = nullptr;
     QCheckBox *repeatBox = nullptr;
     QVBoxLayout *rowsLayout = nullptr;
     QPushButton *addStepButton = nullptr;
-    QList<ActionRowWidget*> rows;
+    QList<SequenceItemWidget*> rows;
 };
 
 }

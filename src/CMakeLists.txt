@@ -104,13 +104,13 @@ set(sources ${sources}
   ui/devices/ir/codeEditor.cpp
   ui/devices/ir/rawIrEditor.cpp
   ui/devices/ir/commandEditorView.cpp
-  ui/devices/statemachine/actionRowWidget.cpp
   ui/devices/statemachine/stateMachineWizard.cpp
   ui/devices/statemachine/stateMachineDetailPanel.cpp
   ui/devices/statemachine/stateMachineEditorView.cpp
   ui/devices/statemachine/deviceActionEditor.cpp
   ui/devices/statemachine/discreteStateEditor.cpp
   ui/devices/statemachine/relativeStateEditor.cpp
+  ui/devices/statemachine/sequenceItemWidget.cpp
   ui/devices/deviceButtonTreeView.cpp
   ui/devices/deviceEditor.cpp
   ui/devices/deviceTreeView.cpp

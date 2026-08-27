@@ -114,7 +114,7 @@ class CmdCatalogue : public QObject
     bool setDeviceNumpadActionSequenceCmd(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceDelayMs(uint32_t v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceStateValue(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadActionSequenceValue(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionSequenceMod(const Enum<Modifier> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool setDeviceNumpadActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
     //commands
@@ -187,7 +187,7 @@ class CmdCatalogue : public QObject
     bool setActivityActionSequenceDeviceId(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceDelayMs(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceStateValue(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityActionSequenceValue(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionSequenceMod(const Enum<Modifier> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     bool setActivityActionUnknownParam(const data::item::UnknownElement& v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
     //activity roles

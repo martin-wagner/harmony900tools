@@ -23,7 +23,7 @@ namespace editors
 {
 
 RelativeStateEditor::RelativeStateEditor(Context &ctx, QWidget *parent) :
-    QWidget(parent), config(*ctx.config())
+    QWidget(parent), ctx(ctx), config(*ctx.config())
 {
   createView(ctx);
   createConnections();
@@ -99,7 +99,7 @@ void RelativeStateEditor::onEditNextActionClicked()
 {
   auto a = getActions().nextStateAction.value_or(DeviceAction());
 
-  auto data = DeviceActionEditor::openEditor(a,
+  auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
       document::data::ActionType::NextAction, tr("Transition to next state"),
       this);
   if (!data.has_value()) {
@@ -122,7 +122,7 @@ void RelativeStateEditor::onEditPrevActionClicked()
 {
   auto a = getActions().prevStateAction.value_or(DeviceAction());
 
-  auto data = DeviceActionEditor::openEditor(a,
+  auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
       document::data::ActionType::PrevAction,
       tr("Transition to previous state"), this);
   if (!data.has_value()) {
@@ -145,7 +145,7 @@ void RelativeStateEditor::onEditResetActionClicked()
 {
   auto a = getActions().resetAction.value_or(DeviceAction());
 
-  auto data = DeviceActionEditor::openEditor(a,
+  auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
       document::data::ActionType::ResetAction,
       tr("Transition to initial state"), this);
   if (!data.has_value()) {

@@ -52,6 +52,7 @@ class StateMachineDetailPanel : public QWidget
     void onClearFinishActionClicked();
 
   private:
+    Context &ctx;
     document::Config &config;
     uint32_t devicePos = 0xffffffff;
     uint32_t smPos = 0xffffffff;
