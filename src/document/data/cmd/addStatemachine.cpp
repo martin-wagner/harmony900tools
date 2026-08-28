@@ -11,7 +11,7 @@ namespace data
 
 AddStatemachineCommand::AddStatemachineCommand(ConfigData &c,
     uint32_t devicePos, int smPos, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Add Button (to device: %1)").arg(devicePos),
+    BaseCommand(QObject::tr("Add Statemachine (to device: %1)").arg(devicePos),
         parent), c(c), devicePos(devicePos)
 {
   uint32_t smCount;
@@ -58,6 +58,49 @@ void AddStatemachineCommand::undo()
 }
 
 bool AddStatemachineCommand::valid() const
+{
+  return isValid;
+}
+
+SetStatemachineCommand::SetStatemachineCommand(ConfigData &c,
+    uint32_t devicePos, uint32_t smPos, const item::StateMachine &sm,
+    QUndoCommand *parent) :
+    BaseCommand(
+        QObject::tr("Update Statemachine (in device: %1)").arg(devicePos),
+        parent), c(c), devicePos(devicePos), smPos(smPos), sm(sm)
+{
+  try {
+    oldSm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
+    isValid = true;
+  } catch (std::out_of_range&) {
+  }
+}
+
+void SetStatemachineCommand::redo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  c.getDevices()[devicePos].getStateMachines()[smPos] = sm;
+
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
+  emit dirtyChanged(true);
+}
+
+void SetStatemachineCommand::undo()
+{
+  if (!isValid) {
+    return;
+  }
+
+  c.getDevices()[devicePos].getStateMachines()[smPos] = oldSm;
+
+  emit itemChanged(Item::DEVICE_STATEMACHINE, smPos);
+  emit dirtyChanged(true);
+}
+
+bool SetStatemachineCommand::valid() const
 {
   return isValid;
 }

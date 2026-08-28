@@ -90,6 +90,7 @@ class CmdCatalogue : public QObject
     //state machines
     bool addDeviceStatemachineCommand(uint32_t devicePos, int smPos);
     bool removeDeviceStatemachineCommand(uint32_t devicePos, int smPos);
+    bool setDeviceStatemachine(const item::StateMachine &v,  uint32_t devicePos, uint32_t smPos);
     bool setDeviceStatemachineType(const Enum<StateMachineDeviceType> &type,  uint32_t devicePos, int smPos);
     bool setDeviceStatemachineDelay(uint32_t delayMs, uint32_t devicePos, int smPos);
     //state machine states/actions

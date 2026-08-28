@@ -9,6 +9,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QPushButton>
+#include <QMessageBox>
 
 #include "lib/icon.h"
 #include "document/config.h"
@@ -16,6 +17,7 @@
 #include "discreteStateEditor.h"
 #include "relativeStateEditor.h"
 #include "deviceActionEditor.h"
+#include "stateMachineWizard.h"
 
 using namespace document::data::item;
 
@@ -62,7 +64,7 @@ void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
       break;
     default:
       showEmptyState();
-      break;
+      return;
   }
 
   typeStack->setCurrentIndex(stackIndexForType(currentType));
@@ -115,6 +117,35 @@ void StateMachineDetailPanel::onEditingDelayFinished()
 {
   config.modify().setDeviceStatemachineDelay(delaySpinBox->value(), devicePos,
       smPos);
+}
+
+void StateMachineDetailPanel::onRerunWizardClicked()
+{
+  auto machine = getMachine();
+
+  auto wizard = StateMachineWizard(ctx, devicePos, this);
+  auto editable = wizard.setStateMachine(machine);
+  if (!editable) {
+    QMessageBox msgBox(QMessageBox::Warning, tr("No magic"),
+        tr("Control \"%1\" not supported in wizard. Edit manually.").arg(
+            machine.smType.get().getQString()), QMessageBox::Ok);
+    msgBox.exec();
+    return;
+  }
+  if (wizard.exec() == QDialog::Accepted) {
+    auto newMachine = wizard.getStateMachine();
+    if (newMachine.relative.empty() && newMachine.discrete.empty()) {
+      QMessageBox msgBox(QMessageBox::Warning, tr("No magic"),
+          tr("Oops, something went wrong. Your Control is empty."),
+          QMessageBox::Ok);
+      msgBox.exec();
+      return;
+    }
+
+    config.beginMacro("Change device control");
+    config.modify().setDeviceStatemachine(newMachine, devicePos, smPos);
+    config.endMacro();
+  }
 }
 
 void StateMachineDetailPanel::onEditStartActionClicked()
@@ -203,7 +234,7 @@ void StateMachineDetailPanel::createView(Context &ctx)
   delaySpinBox->setSuffix(tr(" ms"));
 
   rerunWizardButton = new QToolButton(this);
-  rerunWizardButton->setText(tr("Edit with wizard..."));
+  rerunWizardButton->setText(tr("Re-run wizard..."));
 
   QFormLayout *headerForm = new QFormLayout();
   headerForm->addRow(tr("Type"), smTypeLabel);
@@ -275,7 +306,7 @@ void StateMachineDetailPanel::createConnections()
   connect(finishActionClearButton, &QPushButton::clicked, this,
       &StateMachineDetailPanel::onClearFinishActionClicked);
   connect(rerunWizardButton, &QToolButton::clicked, this,
-      &StateMachineDetailPanel::rerunWizardRequested);
+      &StateMachineDetailPanel::onRerunWizardClicked);
   connect(delaySpinBox, &QSpinBox::editingFinished, this,
       &StateMachineDetailPanel::onEditingDelayFinished);
 }

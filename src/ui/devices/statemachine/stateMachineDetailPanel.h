@@ -40,12 +40,9 @@ class StateMachineDetailPanel : public QWidget
      * nothing is selected in the state machine list */
     void showEmptyState();
 
-  signals:
-    void rerunWizardRequested();
-
   protected slots:
     void onEditingDelayFinished();
-
+    void onRerunWizardClicked();
     void onEditStartActionClicked();
     void onEditFinishActionClicked();
     void onClearStartActionClicked();

@@ -168,6 +168,7 @@ set(${programName}_resource_files
     ${resourcePath}/splash.png
     ${resourcePath}/harmony-900-color-screen.png
     ${resourcePath}/ir_protocols.json
+    ${resourcePath}/wizard.jpeg
     ${iconPath}/actions/edit-copy.png
     ${iconPath}/actions/edit-paste.png
     ${iconPath}/actions/edit-cut.png

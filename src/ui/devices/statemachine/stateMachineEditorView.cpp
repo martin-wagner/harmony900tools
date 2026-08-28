@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include <QMessageBox>
 #include <QTreeView>
 #include <QLabel>
 
@@ -9,7 +8,6 @@
 #include "stateMachineEditorView.h"
 
 #include "stateMachineDetailPanel.h"
-//#include "stateMachineWizard.h"
 
 using namespace std;
 
@@ -124,11 +122,6 @@ void StateMachineEditorView::onStateMachineDataChanged(
   detailPanel->updateData();
 }
 
-void StateMachineEditorView::onWizardRequested()
-{
-  //todo start wizard
-}
-
 void StateMachineEditorView::createView()
 {
   auto baseLayout = new QVBoxLayout(this);
@@ -159,8 +152,6 @@ void StateMachineEditorView::createConnections()
       &StateMachineEditorView::onStateMachineDataChanged);
   connect(tree, &StateMachineTreeView::selectionChanged, this,
       &StateMachineEditorView::onStateMachineSelectionChanged);
-  connect(detailPanel, &StateMachineDetailPanel::rerunWizardRequested, this,
-      &StateMachineEditorView::onWizardRequested);
 }
 
 }

@@ -5,6 +5,8 @@
 #include <QWizard>
 #include <QMap>
 
+#include "context.h"
+#include "document/data/items/device.h"
 #include "document/data/items/state.h"
 
 class QRadioButton;
@@ -12,6 +14,7 @@ class QSpinBox;
 class QListWidget;
 class QPushButton;
 class QLabel;
+class QTableWidget;
 
 namespace editors
 {
@@ -25,51 +28,118 @@ class DeviceActionEditor;
  */
 class StateMachineWizard : public QWizard
 {
-    Q_OBJECT
+  friend class ChooseFunctionPage;
+  friend class DefineInputsPage;
+  friend class AssignCommandsPage;
+  Q_OBJECT
 
   public:
-    enum PageId { PageChooseType, PageDefineStates, PageAssignActions, PageReview };
+    static constexpr int POWER_ON_DELAY_ms = 10000;
+    static constexpr int INPUT_SWITCH_DELAY_ms = 1000;
 
-    explicit StateMachineWizard(QWidget *parent = nullptr);
+    enum PageId { PageChooseType, PageChooseFunction, PageDefineInputStates, PageAssignCommands, PageSetupCommands, PageReview };
 
-    /** pre-fill every page from an existing state machine, for re-running
-     * the wizard as an edit flow rather than a fresh add */
-    void setStateMachine(const document::data::item::StateMachine &stateMachine);
+    explicit StateMachineWizard(Context &ctx, uint32_t devicePos, QWidget *parent = nullptr);
+
+    /** pre-fill from an existing state machine, for re-running
+     * the wizard as an edit flow rather than a fresh add
+     * @return false -- statemachine can't be edited using wizard*/
+    bool setStateMachine(const document::data::item::StateMachine &stateMachine);
 
     document::data::item::StateMachine getStateMachine() const;
 
   private slots:
-    void onActionSlotChanged(int row);
     void onAddStateClicked();
     void onRemoveStateClicked();
     void onPageChanged(int id);
 
   private:
+    const document::data::item::Device &device;
+    QStringList availableCommands;
+
     void buildChooseTypePage();
-    void buildDefineStatesPage();
-    void buildAssignActionsPage();
+    void buildChooseFunctionPage();
+    void buildDefineInputStatesPage();
+    void buildAssignCommandsPage();
+    void buildSetupCommandsPage();
     void buildReviewPage();
 
-    void rebuildActionSlots();
-    void storeCurrentSlotEdits();
+    void fillComboBox(QComboBox *box, QString text);
+
     QString reviewSummaryText() const;
 
     QRadioButton *discreteRadio = nullptr;
     QRadioButton *relativeRadio = nullptr;
     QRadioButton *rangeRadio = nullptr; //disabled placeholder, see class comment in .cpp
 
+    QRadioButton *powerRadio = nullptr;
+    QRadioButton *inputRadio = nullptr;
+    QSpinBox *delaySpinBox = nullptr;
+
+    QWizardPage *pageInputStates = nullptr;
     QListWidget *statesList = nullptr;
     QPushButton *addStateButton = nullptr;
     QPushButton *removeStateButton = nullptr;
 
-    QListWidget *actionSlotsList = nullptr;
-    DeviceActionEditor *actionEditor = nullptr;
-    //one DeviceAction per slot label ("Set: Off", "Next action", ...) --
-    //rebuilt whenever the state list changes, preserved across page visits
-    QMap<QString, document::data::item::DeviceAction> actionsBySlot;
-    QString currentSlotKey;
+    QTableWidget *commandsTable = nullptr;
+
+    QCheckBox *startCommandEnabled = nullptr;
+    QComboBox *startCommandCombo = nullptr;
+    QComboBox *nextStateCombo = nullptr;
+    QCheckBox *previousStateEnabled = nullptr;
+    QComboBox *previousStateCombo = nullptr;
+    QCheckBox *finishCommandEnabled = nullptr;
+    QComboBox *finishCommandCombo = nullptr;
 
     QLabel *reviewSummaryLabel = nullptr;
+};
+
+class ChooseFunctionPage: public QWizardPage
+{
+  Q_OBJECT
+
+  public:
+    //fixed labels for power
+    inline static const QStringList powerItems = { "On", "Off" };
+
+    ChooseFunctionPage(StateMachineWizard &w, QWidget *parent = nullptr) :
+        QWizardPage(parent), w(w) {};
+
+    int nextId() const override;
+
+  private:
+    StateMachineWizard &w;
+
+};
+
+class DefineInputsPage: public QWizardPage
+{
+  Q_OBJECT
+
+  public:
+    DefineInputsPage(StateMachineWizard &w, QWidget *parent = nullptr) :
+        QWizardPage(parent), w(w) {};
+
+    int nextId() const override;
+
+  private:
+    StateMachineWizard &w;
+
+};
+
+class AssignCommandsPage: public QWizardPage
+{
+  Q_OBJECT
+
+  public:
+      AssignCommandsPage(StateMachineWizard &w, QWidget *parent = nullptr) :
+        QWizardPage(parent), w(w) {};
+
+    int nextId() const override;
+
+  private:
+    StateMachineWizard &w;
+
 };
 
 }

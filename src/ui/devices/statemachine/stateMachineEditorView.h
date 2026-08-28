@@ -64,7 +64,6 @@ class StateMachineEditorView: public QWidget
 //    void onEditingInterKeyFinished();
     void onStateMachineSelectionChanged(int row);
     void onStateMachineDataChanged(document::data::Item item, uint32_t pos);
-    void onWizardRequested();
 
   protected:
     void createView();

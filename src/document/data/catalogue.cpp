@@ -720,6 +720,23 @@ bool CmdCatalogue::removeDeviceStatemachineCommand(uint32_t devicePos,
   return ret;
 }
 
+bool CmdCatalogue::setDeviceStatemachine(const item::StateMachine &v,
+    uint32_t devicePos, uint32_t smPos)
+{
+  auto *cmd = new SetStatemachineCommand(c, devicePos, smPos, v);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: statemachine pos %1/%2 doesn't exist, dropped").arg(
+            devicePos).arg(smPos), ContentType::PlainText);
+    delete cmd;
+  }
+  return ret;
+}
+
 bool CmdCatalogue::setDeviceStatemachineType(
     const Enum<StateMachineDeviceType> &type, uint32_t devicePos, int smPos)
 {

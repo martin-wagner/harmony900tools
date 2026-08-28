@@ -2,121 +2,185 @@
 
 #include <QWizardPage>
 #include <QRadioButton>
+#include <QComboBox>
+#include <QCheckBox>
 #include <QButtonGroup>
 #include <QListWidget>
+#include <QSpinBox>
 #include <QPushButton>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QInputDialog>
+#include <QTableWidget>
 #include <QLineEdit>
+#include <QGroupBox>
+#include <QHeaderView>
+#include <QMessageBox>
 
+#include "lib/keywordMatcher.h"
+#include "lib/qtHelpers.h"
+#include "document/config.h"
 #include "stateMachineWizard.h"
 #include "deviceActionEditor.h"
 
+using namespace std;
+using namespace document::data;
 using namespace document::data::item;
 
 namespace editors
 {
 
-StateMachineWizard::StateMachineWizard(QWidget *parent) :
-    QWizard(parent)
+StateMachineWizard::StateMachineWizard(Context &ctx, uint32_t devicePos,
+    QWidget *parent) :
+    QWizard(parent), device(ctx.config()->data().getDevices().at(devicePos))
 {
-  setWindowTitle(tr("State machine"));
+  availableCommands = lib::toQStringList(
+      device.getIrCommands().getAvailableCommands());
+
   buildChooseTypePage();
-  buildDefineStatesPage();
-  buildAssignActionsPage();
+  buildChooseFunctionPage();
+  buildDefineInputStatesPage();
+  buildAssignCommandsPage();
+  buildSetupCommandsPage();
   buildReviewPage();
 
   connect(this, &QWizard::currentIdChanged, this,
       &StateMachineWizard::onPageChanged);
+
+  QPixmap logo(":/res/wizard.jpeg");
+  logo = logo.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  setPixmap(QWizard::LogoPixmap, logo);
+  setStartId(PageChooseType);
+  setWizardStyle(ModernStyle);
+  setWindowTitle(tr("Setup device control"));
 }
 
-void StateMachineWizard::setStateMachine(const StateMachine &stateMachine)
+bool StateMachineWizard::setStateMachine(const StateMachine &stateMachine)
 {
   statesList->clear();
-  actionsBySlot.clear();
 
   if (!stateMachine.discrete.empty()) {
     discreteRadio->setChecked(true);
 
     for (std::size_t i = 0; i < stateMachine.discrete.states.size(); ++i) {
-      const QString stateName = QString::fromStdString(
-          stateMachine.discrete.states[i]);
-      statesList->addItem(stateName);
-
-      const DeviceAction action =
-          i < stateMachine.discrete.enterStateAction.size() ?
-              stateMachine.discrete.enterStateAction[i] : DeviceAction { };
-      actionsBySlot.insert(tr("Set: %1").arg(stateName), action);
+      const QString stateName = qstr(stateMachine.discrete.states[i]);
+      QListWidgetItem *item = new QListWidgetItem(stateName, statesList);
+      item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
   } else {
     relativeRadio->setChecked(true);
-
     for (const std::string &state : stateMachine.relative.states) {
-      statesList->addItem(QString::fromStdString(state));
-    }
-
-    actionsBySlot.insert(tr("Next action"),
-        stateMachine.relative.nextStateAction.value_or(DeviceAction { }));
-    if (stateMachine.relative.prevStateAction.has_value()) {
-      actionsBySlot.insert(tr("Prev action"),
-          stateMachine.relative.prevStateAction.value());
-    }
-    if (stateMachine.relative.resetAction.has_value()) {
-      actionsBySlot.insert(tr("Reset action"),
-          stateMachine.relative.resetAction.value());
+      QListWidgetItem *item = new QListWidgetItem(qstr(state), statesList);
+      item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
   }
+  switch (stateMachine.smType.get().getValue()) {
+    case StateMachineDeviceType::Power:
+      powerRadio->setChecked(true);
+      break;
+    case StateMachineDeviceType::Input:
+      inputRadio->setChecked(true);
+      break;
+    default:
+      return false;
+  }
+  delaySpinBox->setValue(stateMachine.delayMs.get());
 
-  rebuildActionSlots();
+  return true;
 }
 
 StateMachine StateMachineWizard::getStateMachine() const
 {
-  StateMachine stateMachine;
+  int i;
+  StateMachine sm;
 
-  if (discreteRadio->isChecked()) {
-    for (int i = 0; i < statesList->count(); ++i) {
-      const QString stateName = statesList->item(i)->text();
-      stateMachine.discrete.states.push_back(stateName.toStdString());
-      stateMachine.discrete.enterStateAction.push_back(
-          actionsBySlot.value(tr("Set: %1").arg(stateName)));
-    }
+  //common
+  if (powerRadio->isChecked()) {
+    sm.smType.set(Enum(StateMachineDeviceType::Power));
+  } else if (inputRadio->isChecked()) {
+    sm.smType.set(Enum(StateMachineDeviceType::Input));
   } else {
-    for (int i = 0; i < statesList->count(); ++i) {
-      stateMachine.relative.states.push_back(
-          statesList->item(i)->text().toStdString());
+    sm.smType.set(Enum(StateMachineDeviceType::Unknown));
+    return sm;
+  }
+  sm.delayMs.set(delaySpinBox->value());
+
+  //type dependend
+  if (discreteRadio->isChecked()) {
+    for (int row = 0; row < commandsTable->rowCount(); row++) {
+      SequenceItem s;
+      DeviceAction d;
+      auto *stateItem = commandsTable->item(row, 0);
+      auto state = stateItem->text();
+      auto *comboBox = qobject_cast<QComboBox*>(
+              commandsTable->cellWidget(row, 1));
+      s.opcode.set(Enum(Operation::SendCommand));
+      s.cmd.set(comboBox->currentText().toStdString()).setIncluded(
+          Used::YES);
+      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+      d.actionType.set(Enum(ActionType::SetAction));
+      d.sequence.push_back(s);
+      //append state/action pair
+      sm.discrete.states.push_back(state.toStdString());
+      sm.discrete.enterStateAction.push_back(d);
     }
-    stateMachine.relative.nextStateAction = actionsBySlot.value(
-        tr("Next action"));
-    if (actionsBySlot.contains(tr("Prev action"))) {
-      stateMachine.relative.prevStateAction = actionsBySlot.value(
-          tr("Prev action"));
+  } else if (relativeRadio->isChecked()) {
+    //states
+    for (i = 0; i < statesList->count(); i++) {
+      const QString stateName = statesList->item(i)->text();
+      sm.relative.states.push_back(stateName.toStdString());
     }
-    if (actionsBySlot.contains(tr("Reset action"))) {
-      stateMachine.relative.resetAction = actionsBySlot.value(
-          tr("Reset action"));
+    //actions
+    if (startCommandEnabled->isChecked()) {
+      SequenceItem s;
+      s.opcode.set(Enum(Operation::SendCommand));
+      s.cmd.set(startCommandCombo->currentText().toStdString()).setIncluded(
+          Used::YES);
+      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+      DeviceAction d;
+      d.actionType.set(Enum(ActionType::StartAction));
+      d.sequence.push_back(s);
+      sm.startAction = d;
+    }
+    if (!nextStateCombo->currentText().isEmpty()) {
+      SequenceItem s;
+      s.opcode.set(Enum(Operation::SendCommand));
+      s.cmd.set(nextStateCombo->currentText().toStdString()).setIncluded(
+          Used::YES);
+      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+      DeviceAction d;
+      d.actionType.set(Enum(ActionType::NextAction));
+      d.sequence.push_back(s);
+      sm.relative.nextStateAction = d;
+    } else {
+      return StateMachine();
+    }
+    if (previousStateEnabled->isChecked()) {
+      SequenceItem s;
+      s.opcode.set(Enum(Operation::SendCommand));
+      s.cmd.set(previousStateCombo->currentText().toStdString()).setIncluded(
+          Used::YES);
+      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+      DeviceAction d;
+      d.actionType.set(Enum(ActionType::PrevAction));
+      d.sequence.push_back(s);
+      sm.relative.prevStateAction = d;
+    }
+    if (finishCommandEnabled->isChecked()) {
+      SequenceItem s;
+      s.opcode.set(Enum(Operation::SendCommand));
+      s.cmd.set(finishCommandCombo->currentText().toStdString()).setIncluded(
+          Used::YES);
+      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+      DeviceAction d;
+      d.actionType.set(Enum(ActionType::FinishAction));
+      d.sequence.push_back(s);
+      sm.finishAction = d;
     }
   }
 
-  return stateMachine;
-}
-
-void StateMachineWizard::onActionSlotChanged(int row)
-{
-  storeCurrentSlotEdits();
-
-  if (row < 0 || row >= actionSlotsList->count()) {
-    currentSlotKey.clear();
-    actionEditor->setEnabled(false);
-    return;
-  }
-
-  currentSlotKey = actionSlotsList->item(row)->text();
-  actionEditor->setEnabled(true);
-  actionEditor->setTitle(currentSlotKey);
-  //actionEditor->setDeviceAction(actionsBySlot.value(currentSlotKey));
+  return sm;
 }
 
 void StateMachineWizard::onAddStateClicked()
@@ -129,8 +193,8 @@ void StateMachineWizard::onAddStateClicked()
     return;
   }
 
-  statesList->addItem(stateName);
-  rebuildActionSlots();
+  QListWidgetItem *item = new QListWidgetItem(stateName, statesList);
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
 }
 
 void StateMachineWizard::onRemoveStateClicked()
@@ -141,16 +205,50 @@ void StateMachineWizard::onRemoveStateClicked()
   }
 
   delete statesList->takeItem(statesList->row(item));
-  rebuildActionSlots();
 }
 
 void StateMachineWizard::onPageChanged(int id)
 {
-  if (id == PageAssignActions) {
-    rebuildActionSlots();
-  } else if (id == PageReview) {
-    storeCurrentSlotEdits();
-    reviewSummaryLabel->setText(reviewSummaryText());
+  switch (id) {
+    case PageDefineInputStates:
+      if (discreteRadio->isChecked()) {
+        pageInputStates->setSubTitle(tr("List the inputs your device has.\n"
+            "It is recommended to add all available inputs to simplify "
+            "changing your setup in the future. The order doesn't matter.\n"
+            "If you run this for the first time, the list below  will contain "
+            "all IR commands with \"input\" in the name"));
+      } else if (relativeRadio->isChecked()) {
+        pageInputStates->setSubTitle(tr("List the inputs your device has.\nFor "
+            "cycle control to work correctly, you need to add all available "
+            "inputs in the order given by your device.\nIf you run this for"
+            "the first time, the list below  will contain all IR commands with "
+            "\"input\" in the name"));
+      } else {
+        pageInputStates->setSubTitle(tr("List the inputs your device has."));
+      }
+      break;
+    case PageAssignCommands:
+      commandsTable->setHorizontalHeaderLabels( { tr("State"), tr("Command") });
+      commandsTable->setRowCount(statesList->count());
+      for (int i = 0; i < statesList->count(); i++) {
+        QListWidgetItem *stateItem = statesList->item(i);
+
+        if (stateItem != nullptr) {
+          auto text = stateItem->text();
+          QTableWidgetItem *nameItem = new QTableWidgetItem(text);
+          nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+          commandsTable->setItem(i, 0, nameItem);
+          QComboBox *commandCombo = new QComboBox(commandsTable);
+          fillComboBox(commandCombo, text);
+          commandsTable->setCellWidget(i, 1, commandCombo);
+        }
+      }
+      break;
+    case PageReview:
+      reviewSummaryLabel->setText(reviewSummaryText());
+      break;
+    default:
+      break;
   }
 }
 
@@ -158,12 +256,14 @@ void StateMachineWizard::buildChooseTypePage()
 {
   QWizardPage *page = new QWizardPage(this);
   page->setTitle(tr("Choose type"));
-  page->setSubTitle(tr("This determines every following step."));
+  page->setSubTitle(tr("This determines how your device is controlled."));
 
-  discreteRadio = new QRadioButton(
-      tr("Discrete -- fixed command per state (e.g. On/Off buttons)"), page);
-  relativeRadio = new QRadioButton(
-      tr("Relative -- only next/prev commands (e.g. power toggle)"), page);
+  discreteRadio = new QRadioButton(tr("Direct selection -- a button on "
+      "the remote for each function, e.g. one button for \"On\" and a "
+      "different button for \"Off\""), page);
+  relativeRadio = new QRadioButton(tr("Cycle -- one button on the "
+      "remote to toggle functions, e.g. power button for \"On\" and \"Off\"."),
+      page);
   rangeRadio = new QRadioButton(tr("Range -- typed number (not available yet)"),
       page);
   rangeRadio->setEnabled(false);
@@ -183,16 +283,73 @@ void StateMachineWizard::buildChooseTypePage()
   setPage(PageChooseType, page);
 }
 
-void StateMachineWizard::buildDefineStatesPage()
+void StateMachineWizard::buildChooseFunctionPage()
 {
-  QWizardPage *page = new QWizardPage(this);
-  page->setTitle(tr("Define states"));
-  page->setSubTitle(
-      tr(
-          "Discrete: value names. Relative: values in cycle order, drag to reorder."));
+  QWizardPage *page = new ChooseFunctionPage(*this, this);
+
+  page->setTitle(tr("Choose function"));
+  page->setSubTitle(tr("This determines what will be controlled."));
+
+  powerRadio = new QRadioButton(
+      tr("Power -- this will turn your device on and off"), page);
+  inputRadio = new QRadioButton(
+      tr("Input -- this will switch between the inputs"), page);
+
+  powerRadio->setChecked(true);
+
+  QButtonGroup *group = new QButtonGroup(page);
+  group->addButton(powerRadio);
+  group->addButton(inputRadio);
+
+  QLabel *delayLabel = new QLabel(tr("Time needed to complete (ms):"), page);
+  delaySpinBox = new QSpinBox(page);
+  delaySpinBox->setRange(0, 120000);
+  delaySpinBox->setSingleStep(100);
+  delaySpinBox->setValue(POWER_ON_DELAY_ms);
+  delaySpinBox->setSuffix(tr(" ms"));
+
+  connect(powerRadio, &QRadioButton::toggled, [this](bool checked) {
+    if (checked) {
+      delaySpinBox->setValue(POWER_ON_DELAY_ms);
+    }
+  });
+  connect(inputRadio, &QRadioButton::toggled, [this](bool checked) {
+    if (checked) {
+      delaySpinBox->setValue(INPUT_SWITCH_DELAY_ms);
+    }
+  });
+
+  QLabel *otherFunctions = new QLabel("\nFor other functions, no wizard is "
+      "available yet. Use manual config.\n", page);
+  otherFunctions->setEnabled(false);
+
+  QVBoxLayout *layout = new QVBoxLayout(page);
+  layout->addWidget(powerRadio);
+  layout->addWidget(inputRadio);
+  layout->addWidget(delayLabel);
+  layout->addWidget(delaySpinBox);
+  layout->addWidget(otherFunctions);
+  layout->addStretch(1);
+
+  setPage(PageChooseFunction, page);
+}
+
+void StateMachineWizard::buildDefineInputStatesPage()
+{
+  QWizardPage *page = new DefineInputsPage(*this, this);
+  page->setTitle(tr("Define inputs"));
+  //set in "onPageChanged"
 
   statesList = new QListWidget(page);
   statesList->setDragDropMode(QAbstractItemView::InternalMove);
+  statesList->setEditTriggers(
+      QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
+  //best guess at pre-selection
+  auto preSelection = lib::InputKeywordMatcher().filter(availableCommands);
+  for (const auto &state : preSelection) {
+    QListWidgetItem *item = new QListWidgetItem(state, statesList);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+  }
 
   addStateButton = new QPushButton(tr("Add"), page);
   connect(addStateButton, &QPushButton::clicked, this,
@@ -214,29 +371,115 @@ void StateMachineWizard::buildDefineStatesPage()
   QVBoxLayout *layout = new QVBoxLayout(page);
   layout->addLayout(rowLayout);
 
-  setPage(PageDefineStates, page);
+  setPage(PageDefineInputStates, page);
+  pageInputStates = page;
 }
 
-void StateMachineWizard::buildAssignActionsPage()
+void StateMachineWizard::buildAssignCommandsPage()
+{
+  QWizardPage *page = new AssignCommandsPage(*this, this);
+  page->setTitle(tr("Assign command"));
+  page->setSubTitle(tr("Select the IR commands that will be used"));
+
+  commandsTable = new QTableWidget(page);
+  commandsTable->setColumnCount(2);
+  commandsTable->horizontalHeader()->setStretchLastSection(true);
+  commandsTable->verticalHeader()->setVisible(false);
+
+  QVBoxLayout *layout = new QVBoxLayout(page);
+  layout->addWidget(commandsTable);
+  page->setLayout(layout);
+
+  setPage(PageAssignCommands, page);
+}
+
+void StateMachineWizard::buildSetupCommandsPage()
 {
   QWizardPage *page = new QWizardPage(this);
-  page->setTitle(tr("Assign actions"));
-  page->setSubTitle(
-      tr(
-          "Pick a slot on the left, then edit its steps on the right. Can be skipped and filled in later."));
 
-  actionSlotsList = new QListWidget(page);
-  connect(actionSlotsList, &QListWidget::currentRowChanged, this,
-      &StateMachineWizard::onActionSlotChanged);
+  page->setTitle(tr("Setup commands"));
+  page->setSubTitle(tr("Select the IR commands used for switching between "
+      "the states"));
 
-//  actionEditor = new DeviceActionEditor(page);
-//  actionEditor->setEnabled(false);
-//
-//  QHBoxLayout *layout = new QHBoxLayout(page);
-//  layout->addWidget(actionSlotsList, 0);
-//  layout->addWidget(actionEditor, 1);
+  // Start command
+  QGroupBox *startCommandGroup = new QGroupBox(tr("Start command. Optional, "
+      "a button you need to press to open the selection, like \"Inputs\"."),
+      page);
+  startCommandEnabled = new QCheckBox(tr("Enabled"), startCommandGroup);
+  QLabel *startCommandLabel = new QLabel(tr("Command"), startCommandGroup);
+  startCommandCombo = new QComboBox(startCommandGroup);
+  fillComboBox(startCommandCombo, "select input");
+  startCommandCombo->setEnabled(false);
 
-  setPage(PageAssignActions, page);
+  QHBoxLayout *startCommandLayout = new QHBoxLayout(startCommandGroup);
+  startCommandLayout->addWidget(startCommandEnabled);
+  startCommandLayout->addWidget(startCommandLabel);
+  startCommandLayout->addWidget(startCommandCombo);
+  startCommandLayout->addStretch();
+
+  connect(startCommandEnabled, &QCheckBox::toggled, startCommandCombo,
+      &QComboBox::setEnabled);
+
+  // Next state
+  QGroupBox *nextStateGroup = new QGroupBox(tr("Next. Switches to next state"),
+      page);
+  QLabel *nextStateLabel = new QLabel(tr("Command"), nextStateGroup);
+  nextStateCombo = new QComboBox(nextStateGroup);
+  fillComboBox(nextStateCombo, "power toggle");
+
+  QHBoxLayout *nextStateLayout = new QHBoxLayout(nextStateGroup);
+  nextStateLayout->addWidget(nextStateLabel);
+  nextStateLayout->addWidget(nextStateCombo);
+  nextStateLayout->addStretch();
+
+  // Previous state
+  QGroupBox *previousStateGroup = new QGroupBox(
+      tr("Previous. Optional, Switches to previous state"), page);
+  previousStateEnabled = new QCheckBox(tr("Enabled"), previousStateGroup);
+  QLabel *previousStateLabel = new QLabel(tr("Command"), previousStateGroup);
+  previousStateCombo = new QComboBox(previousStateGroup);
+  fillComboBox(previousStateCombo, "previous");
+  previousStateCombo->setEnabled(false);
+
+  QHBoxLayout *previousStateLayout = new QHBoxLayout(previousStateGroup);
+  previousStateLayout->addWidget(previousStateEnabled);
+  previousStateLayout->addWidget(previousStateLabel);
+  previousStateLayout->addWidget(previousStateCombo);
+  previousStateLayout->addStretch();
+
+  connect(previousStateEnabled, &QCheckBox::toggled, previousStateCombo,
+      &QComboBox::setEnabled);
+
+  // Finish command
+  QGroupBox *finishCommandGroup = new QGroupBox(tr("Finish command. Optional, "
+      "a button you need to press to confirm the selection, like \"OK\"."),
+      page);
+  finishCommandEnabled = new QCheckBox(tr("Enabled"), finishCommandGroup);
+  QLabel *finishCommandLabel = new QLabel(tr("Command"), finishCommandGroup);
+  finishCommandCombo = new QComboBox(finishCommandGroup);
+  fillComboBox(finishCommandCombo, "ok");
+  finishCommandCombo->setEnabled(false);
+
+  QHBoxLayout *finishCommandLayout = new QHBoxLayout(finishCommandGroup);
+  finishCommandLayout->addWidget(finishCommandEnabled);
+  finishCommandLayout->addWidget(finishCommandLabel);
+  finishCommandLayout->addWidget(finishCommandCombo);
+  finishCommandLayout->addStretch();
+
+  connect(finishCommandEnabled, &QCheckBox::toggled, finishCommandCombo,
+      &QComboBox::setEnabled);
+
+  // Page layout
+  QVBoxLayout *layout = new QVBoxLayout(page);
+  layout->addWidget(startCommandGroup);
+  layout->addWidget(nextStateGroup);
+  layout->addWidget(previousStateGroup);
+  layout->addWidget(finishCommandGroup);
+  layout->addStretch();
+
+  page->setLayout(layout);
+
+  setPage(PageSetupCommands, page);
 }
 
 void StateMachineWizard::buildReviewPage()
@@ -254,64 +497,105 @@ void StateMachineWizard::buildReviewPage()
   setPage(PageReview, page);
 }
 
-void StateMachineWizard::rebuildActionSlots()
-{
-  storeCurrentSlotEdits();
-
-  actionSlotsList->clear();
-
-  if (discreteRadio->isChecked()) {
-    for (int i = 0; i < statesList->count(); ++i) {
-      const QString slotKey = tr("Set: %1").arg(statesList->item(i)->text());
-      actionSlotsList->addItem(slotKey);
-      if (!actionsBySlot.contains(slotKey)) {
-        actionsBySlot.insert(slotKey, DeviceAction { });
-      }
-    }
-  } else {
-    actionSlotsList->addItem(tr("Next action"));
-    actionSlotsList->addItem(tr("Prev action"));
-    actionSlotsList->addItem(tr("Reset action"));
-    if (!actionsBySlot.contains(tr("Next action"))) {
-      actionsBySlot.insert(tr("Next action"), DeviceAction { });
-    }
-  }
-
-  if (actionSlotsList->count() > 0) {
-    actionSlotsList->setCurrentRow(0);
-  }
-}
-
-void StateMachineWizard::storeCurrentSlotEdits()
-{
-  if (currentSlotKey.isEmpty() || !actionEditor->isEnabled()) {
-    return;
-  }
-
-//  actionsBySlot.insert(currentSlotKey, actionEditor->getDeviceAction());
-}
-
 QString StateMachineWizard::reviewSummaryText() const
 {
-  const QString typeName =
-      discreteRadio->isChecked() ? tr("Discrete") : tr("Relative");
+  QString typeName;
+  QString smName;
+  QString stateNames;
 
-  QStringList stateNames;
-  for (int i = 0; i < statesList->count(); ++i) {
-    stateNames.append(statesList->item(i)->text());
+  if (discreteRadio->isCheckable()) {
+    typeName = tr("Direct Selection");
+  } else if (relativeRadio->isChecked()) {
+    typeName = tr("Cycle based");
+  } else {
+    typeName = tr("Number based");
+  }
+  if (inputRadio->isChecked()) {
+    smName = tr("Input selection");
+  } else if (powerRadio->isChecked()) {
+    smName = tr("Power handling");
+  } else {
+    smName = tr("something else");
+  }
+  for (int i = 0; i < statesList->count(); i++) {
+    stateNames.push_back(statesList->item(i)->text() + " ");
+  }
+  if (stateNames.isEmpty()) {
+    stateNames.push_back(tr("None"));
   }
 
-  int configuredSlots = 0;
-//  for (auto it = actionsBySlot.constBegin(); it != actionsBySlot.constEnd();
-//      ++it) {
-//    if (!it.value().empty()) {
-//      ++configuredSlots;
-//    }
-//  }
+  return tr("You've set up a \"%1\" device control state machine for %2. You "
+      "have the following states:\n\n  %3\n\nClick \"Finish\" to "
+      "apply the data. Any previously existing data will be overwritten!\n\n"
+      "If additional button presses and/or delay times are needed for your "
+      "device, you can manually add them after the data has been applied.").arg(
+      typeName).arg(smName).arg(stateNames);
+}
 
-  return tr("Type: %1\nStates: %2\nAction slots configured: %3 of %4").arg(
-      typeName, stateNames.join(QStringLiteral(", "))).arg(configuredSlots).arg(
-      actionSlotsList->count());
+void StateMachineWizard::fillComboBox(QComboBox *box, QString text)
+{
+  box->clear();
+  box->addItems(availableCommands);
+  text = lib::BestMatchFinder().findBestMatch(text, availableCommands);
+  if (text.isEmpty()) {
+    box->addItem("");
+  }
+  box->setCurrentText(text);
+}
+
+//the following functions implement the "wizard state machine"
+// --start--+--discrete--+--power---------------+--assigncmd-+-finish
+//          |            +--input----addstates--+            |
+//          |                                                |
+//          +--relative--+--power---------------+--setupcmd--+
+//                       +--input----addstates--+
+
+int ChooseFunctionPage::nextId() const
+{
+  if (w.powerRadio->isChecked()) {
+    //power uses fixed labels, assign and skip step
+    w.statesList->clear();
+    w.statesList->addItems(powerItems);
+    if (w.discreteRadio->isChecked()) {
+      return StateMachineWizard::PageId::PageAssignCommands;
+    } else {
+      return StateMachineWizard::PageId::PageSetupCommands;
+    }
+  } else {
+    return StateMachineWizard::PageId::PageDefineInputStates;
+  }
+}
+
+int DefineInputsPage::nextId() const
+{
+  if (w.discreteRadio->isChecked()) {
+    return StateMachineWizard::PageId::PageAssignCommands;
+  } else {
+    return StateMachineWizard::PageId::PageSetupCommands;
+  }
+}
+
+int AssignCommandsPage::nextId() const
+{
+  bool allCommandsSelected = true;
+
+  for (int row = 0; row < w.commandsTable->rowCount(); row++) {
+    QComboBox *comboBox = qobject_cast<QComboBox*>(
+        w.commandsTable->cellWidget(row, 1));
+    if ((comboBox != nullptr) && comboBox->currentText().isEmpty()) {
+      allCommandsSelected = false;
+      break;
+    }
+  }
+  if (allCommandsSelected) {
+    return StateMachineWizard::PageId::PageReview;
+  } else {
+    QMessageBox msgBox(QMessageBox::Warning, tr("Missing selection"),
+        tr("At least one state has no command assigned. Can't continue."),
+        QMessageBox::Ok);
+    msgBox.exec();
+    return StateMachineWizard::PageId::PageAssignCommands;
+  }
 }
 
 }

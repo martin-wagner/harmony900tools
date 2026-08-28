@@ -30,5 +30,26 @@ class AddStatemachineCommand: public BaseCommand
     int smPos = -1;
 };
 
+class SetStatemachineCommand: public BaseCommand
+{
+  Q_OBJECT
+  public:
+    SetStatemachineCommand(ConfigData &c, uint32_t devicePos, uint32_t smPos, const item::StateMachine &sm, QUndoCommand *parent = nullptr);
+
+    void redo() override;
+    void undo() override;
+
+    bool valid() const;
+
+  protected:
+    bool isValid = false;
+
+    ConfigData &c;
+    uint32_t devicePos;
+    uint32_t smPos;
+    item::StateMachine sm;
+    item::StateMachine oldSm;
+};
+
 }
 }
