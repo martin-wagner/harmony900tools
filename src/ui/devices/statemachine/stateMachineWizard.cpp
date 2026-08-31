@@ -49,33 +49,38 @@ StateMachineWizard::StateMachineWizard(Context &ctx, uint32_t devicePos,
       &StateMachineWizard::onPageChanged);
 
   QPixmap logo(":/res/wizard.jpeg");
-  logo = logo.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  logo = logo.scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation);
   setPixmap(QWizard::LogoPixmap, logo);
   setStartId(PageChooseType);
   setWizardStyle(ModernStyle);
   setWindowTitle(tr("Setup device control"));
+  resize(400, 600);
 }
 
-bool StateMachineWizard::setStateMachine(const StateMachine &stateMachine)
+void StateMachineWizard::setStateMachine(const StateMachine &stateMachine)
 {
-  statesList->clear();
-
   if (!stateMachine.discrete.empty()) {
+    statesList->clear();
     discreteRadio->setChecked(true);
+    delaySpinBox->setValue(stateMachine.delayMs.get());
 
     for (std::size_t i = 0; i < stateMachine.discrete.states.size(); ++i) {
       const QString stateName = qstr(stateMachine.discrete.states[i]);
       QListWidgetItem *item = new QListWidgetItem(stateName, statesList);
       item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
-  } else {
+  } else if (!stateMachine.relative.empty()) {
+    statesList->clear();
     relativeRadio->setChecked(true);
+    delaySpinBox->setValue(stateMachine.delayMs.get());
+
     for (const std::string &state : stateMachine.relative.states) {
       QListWidgetItem *item = new QListWidgetItem(qstr(state), statesList);
       item->setFlags(item->flags() | Qt::ItemIsEditable);
     }
   }
-  switch (stateMachine.smType.get().getValue()) {
+  startType = stateMachine.smType.get();
+  switch (startType.getValue()) {
     case StateMachineDeviceType::Power:
       powerRadio->setChecked(true);
       break;
@@ -83,11 +88,12 @@ bool StateMachineWizard::setStateMachine(const StateMachine &stateMachine)
       inputRadio->setChecked(true);
       break;
     default:
-      return false;
+      elseRadio->setChecked(true);
+      break;
   }
-  delaySpinBox->setValue(stateMachine.delayMs.get());
-
-  return true;
+  if (!unusedDeviceTypes.contains(startType.getQString())) {
+    unusedDeviceTypes.push_back(startType.getQString());
+  }
 }
 
 StateMachine StateMachineWizard::getStateMachine() const
@@ -101,82 +107,91 @@ StateMachine StateMachineWizard::getStateMachine() const
   } else if (inputRadio->isChecked()) {
     sm.smType.set(Enum(StateMachineDeviceType::Input));
   } else {
-    sm.smType.set(Enum(StateMachineDeviceType::Unknown));
-    return sm;
+    sm.smType.set(startType);
   }
   sm.delayMs.set(delaySpinBox->value());
 
   //type dependend
   if (discreteRadio->isChecked()) {
-    for (int row = 0; row < commandsTable->rowCount(); row++) {
-      SequenceItem s;
-      DeviceAction d;
-      auto *stateItem = commandsTable->item(row, 0);
-      auto state = stateItem->text();
-      auto *comboBox = qobject_cast<QComboBox*>(
-              commandsTable->cellWidget(row, 1));
-      s.opcode.set(Enum(Operation::SendCommand));
-      s.cmd.set(comboBox->currentText().toStdString()).setIncluded(
-          Used::YES);
-      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
-      d.actionType.set(Enum(ActionType::SetAction));
-      d.sequence.push_back(s);
-      //append state/action pair
-      sm.discrete.states.push_back(state.toStdString());
-      sm.discrete.enterStateAction.push_back(d);
+    if (elseRadio->isChecked()) {
+      //append empty pair
+      sm.discrete.states.push_back(tr("Start here!").toStdString());
+      sm.discrete.enterStateAction.push_back(DeviceAction());
+    } else {
+      for (int row = 0; row < commandsTable->rowCount(); row++) {
+        SequenceItem s;
+        DeviceAction d;
+        auto *stateItem = commandsTable->item(row, 0);
+        auto state = stateItem->text();
+        auto *comboBox = qobject_cast<QComboBox*>(
+            commandsTable->cellWidget(row, 1));
+        s.opcode.set(Enum(Operation::SendCommand));
+        s.cmd.set(comboBox->currentText().toStdString()).setIncluded(Used::YES);
+        s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+        d.actionType.set(Enum(ActionType::SetAction));
+        d.sequence.push_back(s);
+        //append state/action pair
+        sm.discrete.states.push_back(state.toStdString());
+        sm.discrete.enterStateAction.push_back(d);
+      }
     }
   } else if (relativeRadio->isChecked()) {
-    //states
-    for (i = 0; i < statesList->count(); i++) {
-      const QString stateName = statesList->item(i)->text();
-      sm.relative.states.push_back(stateName.toStdString());
-    }
-    //actions
-    if (startCommandEnabled->isChecked()) {
-      SequenceItem s;
-      s.opcode.set(Enum(Operation::SendCommand));
-      s.cmd.set(startCommandCombo->currentText().toStdString()).setIncluded(
-          Used::YES);
-      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
-      DeviceAction d;
-      d.actionType.set(Enum(ActionType::StartAction));
-      d.sequence.push_back(s);
-      sm.startAction = d;
-    }
-    if (!nextStateCombo->currentText().isEmpty()) {
-      SequenceItem s;
-      s.opcode.set(Enum(Operation::SendCommand));
-      s.cmd.set(nextStateCombo->currentText().toStdString()).setIncluded(
-          Used::YES);
-      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
-      DeviceAction d;
-      d.actionType.set(Enum(ActionType::NextAction));
-      d.sequence.push_back(s);
-      sm.relative.nextStateAction = d;
+    if (elseRadio->isChecked()) {
+      //append empty state, no actions
+      sm.relative.states.push_back(tr("Edit me!").toStdString());
     } else {
-      return StateMachine();
-    }
-    if (previousStateEnabled->isChecked()) {
-      SequenceItem s;
-      s.opcode.set(Enum(Operation::SendCommand));
-      s.cmd.set(previousStateCombo->currentText().toStdString()).setIncluded(
-          Used::YES);
-      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
-      DeviceAction d;
-      d.actionType.set(Enum(ActionType::PrevAction));
-      d.sequence.push_back(s);
-      sm.relative.prevStateAction = d;
-    }
-    if (finishCommandEnabled->isChecked()) {
-      SequenceItem s;
-      s.opcode.set(Enum(Operation::SendCommand));
-      s.cmd.set(finishCommandCombo->currentText().toStdString()).setIncluded(
-          Used::YES);
-      s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
-      DeviceAction d;
-      d.actionType.set(Enum(ActionType::FinishAction));
-      d.sequence.push_back(s);
-      sm.finishAction = d;
+      //states
+      for (i = 0; i < statesList->count(); i++) {
+        const QString stateName = statesList->item(i)->text();
+        sm.relative.states.push_back(stateName.toStdString());
+      }
+      //actions
+      if (startCommandEnabled->isChecked()) {
+        SequenceItem s;
+        s.opcode.set(Enum(Operation::SendCommand));
+        s.cmd.set(startCommandCombo->currentText().toStdString()).setIncluded(
+            Used::YES);
+        s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+        DeviceAction d;
+        d.actionType.set(Enum(ActionType::StartAction));
+        d.sequence.push_back(s);
+        sm.startAction = d;
+      }
+      if (!nextStateCombo->currentText().isEmpty()) {
+        SequenceItem s;
+        s.opcode.set(Enum(Operation::SendCommand));
+        s.cmd.set(nextStateCombo->currentText().toStdString()).setIncluded(
+            Used::YES);
+        s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+        DeviceAction d;
+        d.actionType.set(Enum(ActionType::NextAction));
+        d.sequence.push_back(s);
+        sm.relative.nextStateAction = d;
+      } else {
+        return StateMachine();
+      }
+      if (previousStateEnabled->isChecked()) {
+        SequenceItem s;
+        s.opcode.set(Enum(Operation::SendCommand));
+        s.cmd.set(previousStateCombo->currentText().toStdString()).setIncluded(
+            Used::YES);
+        s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+        DeviceAction d;
+        d.actionType.set(Enum(ActionType::PrevAction));
+        d.sequence.push_back(s);
+        sm.relative.prevStateAction = d;
+      }
+      if (finishCommandEnabled->isChecked()) {
+        SequenceItem s;
+        s.opcode.set(Enum(Operation::SendCommand));
+        s.cmd.set(finishCommandCombo->currentText().toStdString()).setIncluded(
+            Used::YES);
+        s.mod.set(Enum(Modifier::Press)).setIncluded(Used::YES);
+        DeviceAction d;
+        d.actionType.set(Enum(ActionType::FinishAction));
+        d.sequence.push_back(s);
+        sm.finishAction = d;
+      }
     }
   }
 
@@ -185,14 +200,22 @@ StateMachine StateMachineWizard::getStateMachine() const
 
 void StateMachineWizard::onAddStateClicked()
 {
+  int i;
+  QStringList states;
   bool ok = false;
-  const QString stateName = QInputDialog::getText(this, tr("Add state"),
+
+  auto stateName = QInputDialog::getText(this, tr("Add state"),
       tr("State value"), QLineEdit::Normal, tr("NewValue"), &ok);
 
   if (!ok || stateName.isEmpty()) {
     return;
   }
 
+  for (i = 0; i < statesList->count(); i++) {
+    const QString stateName = statesList->item(i)->text();
+    states.push_back(stateName);
+  }
+  stateName = lib::makeStringUnique(states, stateName);
   QListWidgetItem *item = new QListWidgetItem(stateName, statesList);
   item->setFlags(item->flags() | Qt::ItemIsEditable);
 }
@@ -210,17 +233,28 @@ void StateMachineWizard::onRemoveStateClicked()
 void StateMachineWizard::onPageChanged(int id)
 {
   switch (id) {
+    case PageChooseFunction:
+      powerRadio->setVisible(
+          unusedDeviceTypes.contains(
+              Enum<StateMachineDeviceType>::toQString(
+                  StateMachineDeviceType::Power)));
+      inputRadio->setVisible(
+          unusedDeviceTypes.contains(
+              Enum<StateMachineDeviceType>::toQString(
+                  StateMachineDeviceType::Input)));
+      elseRadio->setVisible(!unusedDeviceTypes.isEmpty());
+      break;
     case PageDefineInputStates:
       if (discreteRadio->isChecked()) {
         pageInputStates->setSubTitle(tr("List the inputs your device has.\n"
             "It is recommended to add all available inputs to simplify "
-            "changing your setup in the future. The order doesn't matter.\n"
+            "changing your setup in the future. The order doesn't matter.\n\n"
             "If you run this for the first time, the list below  will contain "
             "all IR commands with \"input\" in the name"));
       } else if (relativeRadio->isChecked()) {
         pageInputStates->setSubTitle(tr("List the inputs your device has.\nFor "
             "cycle control to work correctly, you need to add all available "
-            "inputs in the order given by your device.\nIf you run this for"
+            "inputs in the order given by your device.\n\nIf you run this for"
             "the first time, the list below  will contain all IR commands with "
             "\"input\" in the name"));
       } else {
@@ -287,6 +321,12 @@ void StateMachineWizard::buildChooseFunctionPage()
 {
   QWizardPage *page = new ChooseFunctionPage(*this, this);
 
+  unusedDeviceTypes = Enum<StateMachineDeviceType>::toQStringList();
+  for (const auto &sm : device.getStateMachines()) {
+    unusedDeviceTypes.removeAll(sm.smType.get().getQString());
+  }
+  //list might be empty!
+
   page->setTitle(tr("Choose function"));
   page->setSubTitle(tr("This determines what will be controlled."));
 
@@ -294,12 +334,16 @@ void StateMachineWizard::buildChooseFunctionPage()
       tr("Power -- this will turn your device on and off"), page);
   inputRadio = new QRadioButton(
       tr("Input -- this will switch between the inputs"), page);
+  elseRadio = new QRadioButton(
+      tr("Something else -- this will create an empty control allowing "
+          "manual config"), page);
 
   powerRadio->setChecked(true);
 
   QButtonGroup *group = new QButtonGroup(page);
   group->addButton(powerRadio);
   group->addButton(inputRadio);
+  group->addButton(elseRadio);
 
   QLabel *delayLabel = new QLabel(tr("Time needed to complete (ms):"), page);
   delaySpinBox = new QSpinBox(page);
@@ -318,17 +362,18 @@ void StateMachineWizard::buildChooseFunctionPage()
       delaySpinBox->setValue(INPUT_SWITCH_DELAY_ms);
     }
   });
-
-  QLabel *otherFunctions = new QLabel("\nFor other functions, no wizard is "
-      "available yet. Use manual config.\n", page);
-  otherFunctions->setEnabled(false);
+  connect(elseRadio, &QRadioButton::toggled, [this](bool checked) {
+    if (checked) {
+      delaySpinBox->setValue(INPUT_SWITCH_DELAY_ms); //use same as input
+    }
+  });
 
   QVBoxLayout *layout = new QVBoxLayout(page);
   layout->addWidget(powerRadio);
   layout->addWidget(inputRadio);
+  layout->addWidget(elseRadio);
   layout->addWidget(delayLabel);
   layout->addWidget(delaySpinBox);
-  layout->addWidget(otherFunctions);
   layout->addStretch(1);
 
   setPage(PageChooseFunction, page);
@@ -345,6 +390,7 @@ void StateMachineWizard::buildDefineInputStatesPage()
   statesList->setEditTriggers(
       QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
   //best guess at pre-selection
+
   auto preSelection = lib::InputKeywordMatcher().filter(availableCommands);
   for (const auto &state : preSelection) {
     QListWidgetItem *item = new QListWidgetItem(state, statesList);
@@ -503,7 +549,7 @@ QString StateMachineWizard::reviewSummaryText() const
   QString smName;
   QString stateNames;
 
-  if (discreteRadio->isCheckable()) {
+  if (discreteRadio->isChecked()) {
     typeName = tr("Direct Selection");
   } else if (relativeRadio->isChecked()) {
     typeName = tr("Cycle based");
@@ -515,7 +561,9 @@ QString StateMachineWizard::reviewSummaryText() const
   } else if (powerRadio->isChecked()) {
     smName = tr("Power handling");
   } else {
-    smName = tr("something else");
+    return tr("You've set up a \"%1\" device control state machine for manual "
+        "setup. \n\nClick \"Finish\" to apply the data. Any previously "
+        "existing data will be overwritten!").arg(typeName);
   }
   for (int i = 0; i < statesList->count(); i++) {
     stateNames.push_back(statesList->item(i)->text() + " ");
@@ -546,24 +594,35 @@ void StateMachineWizard::fillComboBox(QComboBox *box, QString text)
 //the following functions implement the "wizard state machine"
 // --start--+--discrete--+--power---------------+--assigncmd-+-finish
 //          |            +--input----addstates--+            |
+//          |            +--else-----------------------------+
 //          |                                                |
 //          +--relative--+--power---------------+--setupcmd--+
-//                       +--input----addstates--+
+//                       +--input----addstates--+            |
+//          |            +--else-----------------------------+
 
 int ChooseFunctionPage::nextId() const
 {
   if (w.powerRadio->isChecked()) {
-    //power uses fixed labels, assign and skip step
-    w.statesList->clear();
-    w.statesList->addItems(powerItems);
     if (w.discreteRadio->isChecked()) {
       return StateMachineWizard::PageId::PageAssignCommands;
     } else {
       return StateMachineWizard::PageId::PageSetupCommands;
     }
-  } else {
+  } else if (w.inputRadio->isChecked()) {
     return StateMachineWizard::PageId::PageDefineInputStates;
+  } else {
+    return StateMachineWizard::PageId::PageReview;
   }
+}
+
+bool editors::ChooseFunctionPage::validatePage()
+{
+  if (w.powerRadio->isChecked()) {
+    //power uses fixed labels, assign those
+    w.statesList->clear();
+    w.statesList->addItems(powerItems);
+  }
+  return true;
 }
 
 int DefineInputsPage::nextId() const
@@ -575,7 +634,12 @@ int DefineInputsPage::nextId() const
   }
 }
 
-int AssignCommandsPage::nextId() const
+int editors::AssignCommandsPage::nextId() const
+{
+  return StateMachineWizard::PageId::PageReview;
+}
+
+bool editors::AssignCommandsPage::validatePage()
 {
   bool allCommandsSelected = true;
 
@@ -588,13 +652,13 @@ int AssignCommandsPage::nextId() const
     }
   }
   if (allCommandsSelected) {
-    return StateMachineWizard::PageId::PageReview;
+    return true;
   } else {
     QMessageBox msgBox(QMessageBox::Warning, tr("Missing selection"),
         tr("At least one state has no command assigned. Can't continue."),
         QMessageBox::Ok);
     msgBox.exec();
-    return StateMachineWizard::PageId::PageAssignCommands;
+    return false;
   }
 }
 

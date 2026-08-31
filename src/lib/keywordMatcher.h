@@ -14,125 +14,98 @@ namespace lib
  * \brief Filters IR command names for those referring to "input" (as in signal
  *        input / Eingang / entrada), based on a static multilingual keyword list.
  *
- * Matching is done on whole, normalized tokens only (no substring matching),
- * to keep false positives low.
+ * A command name matches if any keyword occurs anywhere in the normalized
+ * name (substring containment), not by exact token comparison.
  */
 class InputKeywordMatcher
 {
-  public:
+public:
     InputKeywordMatcher();
 
     QStringList filter(const QStringList &commandNames) const;
 
-  private:
+private:
     static QString normalize(const QString &text);
-    static QStringList tokenize(const QString &normalized);
-    bool containsInputKeyword(const QStringList &tokens) const;
+    bool containsInputKeyword(const QString &normalizedName) const;
 
     QSet<QString> keywords;
 };
 
 inline InputKeywordMatcher::InputKeywordMatcher()
 {
-  keywords = {
-  // English
-    "input",
-    "inputs",
-    // German (diacritics stripped, plus common ascii "ae" spelling)
-    "eingang",
-    "eingange",
-    "eingaenge",
-    // French
-    "entree",
-    "entrees",
-    // Spanish / Portuguese
-    "entrada",
-    "entradas",
-    // Italian
-    "ingresso",
-    "ingressi",
-    // Dutch
-    "ingang",
-    "ingangen",
-    // Polish
-    "wejscie",
-    "wejscia",
-    // Czech / Slovak
-    "vstup",
-    "vstupy",
-    // Swedish
-    "ingang",
-    "ingangar",
-    // Norwegian / Danish
-    "indgang",
-    "indgange",
-    "inngang",
-    "innganger",
-    // Finnish
-    "tulo",
-    "tulot",
-    // Russian (transliterated)
-    "vhod",
-    "vhody",
-    // Turkish
-    "girdi",
-    "girdiler",
-    // Hungarian
-    "bemenet",
-    "bemenetek",
-    // Romanian
-    "intrare",
-    "intrari", };
+    keywords = {
+        // English
+        "input", "inputs",
+        // German (diacritics stripped, plus common ascii "ae" spelling)
+        "eingang", "eingange", "eingaenge",
+        // French
+        "entree", "entrees",
+        // Spanish / Portuguese
+        "entrada", "entradas",
+        // Italian
+        "ingresso", "ingressi",
+        // Dutch
+        "ingang", "ingangen",
+        // Polish
+        "wejscie", "wejscia",
+        // Czech / Slovak
+        "vstup", "vstupy",
+        // Swedish
+        "ingang", "ingangar",
+        // Norwegian / Danish
+        "indgang", "indgange", "inngang", "innganger",
+        // Finnish
+        "tulo", "tulot",
+        // Russian (transliterated)
+        "vhod", "vhody",
+        // Turkish
+        "girdi", "girdiler",
+        // Hungarian
+        "bemenet", "bemenetek",
+        // Romanian
+        "intrare", "intrari",
+    };
 }
 
 inline QString InputKeywordMatcher::normalize(const QString &text)
 {
-  QString lowered = text.toLower();
-  QString decomposed = lowered.normalized(QString::NormalizationForm_KD);
+    QString lowered = text.toLower();
+    QString decomposed = lowered.normalized(QString::NormalizationForm_KD);
 
-  QString result;
-  for (const QChar &ch : decomposed) {
-    if (ch.category() != QChar::Mark_NonSpacing) {
-      result.append(ch);
+    QString result;
+    for (const QChar &ch : decomposed) {
+        if (ch.category() != QChar::Mark_NonSpacing && ch.isLetterOrNumber()) {
+            result.append(ch);
+        }
     }
-  }
 
-  return result;
+    return result;
 }
 
-inline QStringList InputKeywordMatcher::tokenize(const QString &normalized)
+inline bool InputKeywordMatcher::containsInputKeyword(const QString &normalizedName) const
 {
-  static const QRegularExpression separator("[^a-z0-9]+");
-  return normalized.split(separator, Qt::SkipEmptyParts);
+    for (const QString &keyword : keywords) {
+        if (normalizedName.contains(keyword)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-inline bool InputKeywordMatcher::containsInputKeyword(
-    const QStringList &tokens) const
+inline QStringList InputKeywordMatcher::filter(const QStringList &commandNames) const
 {
-  for (const QString &token : tokens) {
-    if (keywords.contains(token)) {
-      return true;
+    QStringList result;
+
+    for (const QString &name : commandNames) {
+        QString normalized = normalize(name);
+
+        if (containsInputKeyword(normalized)) {
+            result.append(name);
+        }
     }
-  }
 
-  return false;
-}
-
-inline QStringList InputKeywordMatcher::filter(
-    const QStringList &commandNames) const
-{
-  QStringList result;
-
-  for (const QString &name : commandNames) {
-    QString normalized = normalize(name);
-    QStringList tokens = tokenize(normalized);
-
-    if (containsInputKeyword(tokens)) {
-      result.append(name);
-    }
-  }
-
-  return result;
+    return result;
 }
 
 /*!

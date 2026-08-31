@@ -31,7 +31,7 @@ class StateMachineModel: public BaseModel
         { Column::MACHINE_TYPE, { "How", "The \"system\" that will be used.\n "
             "- Direct select: You have one separate button for each function\n"
             "- Cycle: You have one button to cycle trough a selection, e.g. \"next\" or \"plus\" and \"minus\"\n"
-            "  When powering up your remote, you need to synchronise the remote and device states!", "QString", false, {}, } },
+            "  When powering up your remote, you need to synchronise the remote and device states!", "QString", true, {}, } },
     };
 
   public:

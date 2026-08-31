@@ -19,6 +19,7 @@
 #include "deviceActionEditor.h"
 #include "stateMachineWizard.h"
 
+using namespace std;
 using namespace document::data::item;
 
 namespace editors
@@ -40,7 +41,10 @@ void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
 {
   this->devicePos = devicePos;
   this->smPos = smPos;
-
+  if (!machineIsValid()) {
+    showEmptyState();
+    return;
+  }
   auto &m = getMachine();
 
   if (!m.discrete.empty()) {
@@ -74,6 +78,10 @@ void StateMachineDetailPanel::setStateMachine(uint32_t devicePos,
 
 void StateMachineDetailPanel::updateData()
 {
+  if (!machineIsValid()) {
+    showEmptyState();
+    return;
+  }
   auto &m = getMachine();
 
   smTypeLabel->setText(m.smType.get().getQString());
@@ -92,14 +100,20 @@ void StateMachineDetailPanel::updateData()
     finishActionButton->setText(tr("Add"));
   }
 
-  discreteEditor->updateData();
-  relativeEditor->updateData();
+  switch (currentType) {
+    case StateMachineType::Discrete:
+      discreteEditor->updateData();
+      break;
+    case StateMachineType::Relative:
+      relativeEditor->updateData();
+      break;
+    default:
+      break;
+  }
 }
 
 void StateMachineDetailPanel::showEmptyState()
 {
-  devicePos = -1;
-  smPos = -1;
   currentType = StateMachineType::Unknown;
   smTypeLabel->setText("--<===>--");
   smTypeLabel->setEnabled(false);
@@ -119,19 +133,15 @@ void StateMachineDetailPanel::onEditingDelayFinished()
       smPos);
 }
 
-void StateMachineDetailPanel::onRerunWizardClicked()
+void StateMachineDetailPanel::onRunWizardClicked()
 {
+  if (!machineIsValid()) {
+    return;
+  }
   auto machine = getMachine();
 
   auto wizard = StateMachineWizard(ctx, devicePos, this);
-  auto editable = wizard.setStateMachine(machine);
-  if (!editable) {
-    QMessageBox msgBox(QMessageBox::Warning, tr("No magic"),
-        tr("Control \"%1\" not supported in wizard. Edit manually.").arg(
-            machine.smType.get().getQString()), QMessageBox::Ok);
-    msgBox.exec();
-    return;
-  }
+  wizard.setStateMachine(machine);
   if (wizard.exec() == QDialog::Accepted) {
     auto newMachine = wizard.getStateMachine();
     if (newMachine.relative.empty() && newMachine.discrete.empty()) {
@@ -146,6 +156,7 @@ void StateMachineDetailPanel::onRerunWizardClicked()
     config.modify().setDeviceStatemachine(newMachine, devicePos, smPos);
     config.endMacro();
   }
+  setStateMachine(devicePos, smPos); //trigger update "this" with new data
 }
 
 void StateMachineDetailPanel::onEditStartActionClicked()
@@ -233,8 +244,8 @@ void StateMachineDetailPanel::createView(Context &ctx)
       "control command (e.g. Power On)"));
   delaySpinBox->setSuffix(tr(" ms"));
 
-  rerunWizardButton = new QToolButton(this);
-  rerunWizardButton->setText(tr("Re-run wizard..."));
+  wizardButton = new QToolButton(this);
+  wizardButton->setText(tr("Create with wizard..."));
 
   QFormLayout *headerForm = new QFormLayout();
   headerForm->addRow(tr("Type"), smTypeLabel);
@@ -243,7 +254,7 @@ void StateMachineDetailPanel::createView(Context &ctx)
   QHBoxLayout *headerLayout = new QHBoxLayout();
   headerLayout->addLayout(headerForm);
   headerLayout->addStretch(1);
-  headerLayout->addWidget(rerunWizardButton);
+  headerLayout->addWidget(wizardButton);
 
   startActionButton = new QPushButton(lib::getEditIcon(), tr("Add"), this);
   startActionClearButton = new QPushButton(lib::getDeleteIcon(), "", this);
@@ -271,7 +282,7 @@ void StateMachineDetailPanel::createView(Context &ctx)
   QVBoxLayout *emptyLayout = new QVBoxLayout(emptyStatePage);
   QLabel *emptyLabel = new QLabel(
       tr("Select a state machine on the left, or add\n"
-          "a new one using the \"add\" button."), emptyStatePage);
+          "a new one using the \"wizard\" button."), emptyStatePage);
   emptyLabel->setAlignment(Qt::AlignCenter);
   emptyLabel->setEnabled(false);
   emptyLayout->addStretch(1);
@@ -305,8 +316,8 @@ void StateMachineDetailPanel::createConnections()
       &StateMachineDetailPanel::onEditFinishActionClicked);
   connect(finishActionClearButton, &QPushButton::clicked, this,
       &StateMachineDetailPanel::onClearFinishActionClicked);
-  connect(rerunWizardButton, &QToolButton::clicked, this,
-      &StateMachineDetailPanel::onRerunWizardClicked);
+  connect(wizardButton, &QToolButton::clicked, this,
+      &StateMachineDetailPanel::onRunWizardClicked);
   connect(delaySpinBox, &QSpinBox::editingFinished, this,
       &StateMachineDetailPanel::onEditingDelayFinished);
 }

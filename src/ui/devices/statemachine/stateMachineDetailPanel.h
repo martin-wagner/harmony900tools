@@ -35,6 +35,7 @@ class StateMachineDetailPanel : public QWidget
     void setStateMachine(uint32_t devicePos, uint32_t smPos);
 
     void updateData();
+    bool machineIsValid() { return ((devicePos != 0xffffffff) && (smPos != 0xffffffff)); };
 
     /** show an empty-state placeholder instead of an editor, e.g. when
      * nothing is selected in the state machine list */
@@ -42,7 +43,7 @@ class StateMachineDetailPanel : public QWidget
 
   protected slots:
     void onEditingDelayFinished();
-    void onRerunWizardClicked();
+    void onRunWizardClicked();
     void onEditStartActionClicked();
     void onEditFinishActionClicked();
     void onClearStartActionClicked();
@@ -62,7 +63,7 @@ class StateMachineDetailPanel : public QWidget
 
     QLabel *smTypeLabel = nullptr;
     QSpinBox *delaySpinBox = nullptr;
-    QToolButton *rerunWizardButton = nullptr;
+    QToolButton *wizardButton = nullptr;
 
     QGroupBox *startGroup;
     QPushButton *startActionButton = nullptr;

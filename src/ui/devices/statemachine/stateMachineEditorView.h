@@ -59,9 +59,6 @@ class StateMachineEditorView: public QWidget
     void writeMsg(const QString &message);
 
   protected slots:
-//    void onEditingPressPreSilenceFinished();
-//    void onEditingHoldPreSilenceFinished();
-//    void onEditingInterKeyFinished();
     void onStateMachineSelectionChanged(int row);
     void onStateMachineDataChanged(document::data::Item item, uint32_t pos);
 
@@ -80,11 +77,6 @@ class StateMachineEditorView: public QWidget
     StateMachineTreeView *tree;
 
     StateMachineDetailPanel *detailPanel = nullptr;
-
-
-//    QSpinBox *pressPreSilenceSpinBox;
-//    QSpinBox *holdPreSilencSpinBox;
-//    QSpinBox *interKeySpinBox; //combines both inter-key from the data set
 };
 
 

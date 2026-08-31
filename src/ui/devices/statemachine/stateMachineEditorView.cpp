@@ -6,42 +6,12 @@
 #include "models/statemachineListModel.h"
 #include "ui/delegates/combobox.h"
 #include "stateMachineEditorView.h"
-
 #include "stateMachineDetailPanel.h"
 
 using namespace std;
 
 namespace editors
 {
-
-//
-//void StateMachineEditorView::onAddRequested()
-//{
-//  StateMachineWizard wizard(this);
-//
-//  if (wizard.exec() == QDialog::Accepted) {
-//    stateMachines.append(wizard.getStateMachine());
-//    listWidget->setStateMachines(stateMachines);
-//    listWidget->setCurrentRow(stateMachines.size() - 1);
-//  }
-//}
-//
-//void StateMachineEditorView::onRerunWizardRequested()
-//{
-//  if (currentRow < 0 || currentRow >= stateMachines.size()) {
-//    return;
-//  }
-//
-//  StateMachineWizard wizard(this);
-//  wizard.setStateMachine(stateMachines.at(currentRow));
-//
-//  if (wizard.exec() == QDialog::Accepted) {
-//    stateMachines[currentRow] = wizard.getStateMachine();
-//    listWidget->setStateMachines(stateMachines);
-//    listWidget->setCurrentRow(currentRow);
-//  }
-//}
-// todo
 
 StateMachineTreeView::StateMachineTreeView(Context &ctx, QWidget *parent) :
     BaseTreeView(ctx, "", false, parent)
@@ -113,10 +83,6 @@ void StateMachineEditorView::onStateMachineDataChanged(
     document::data::Item item, uint32_t pos)
 {
   if (item != document::data::Item::DEVICE_STATEMACHINE) {
-    return;
-  }
-  if (!tree->hasSelection()) {
-    detailPanel->showEmptyState();
     return;
   }
   detailPanel->updateData();

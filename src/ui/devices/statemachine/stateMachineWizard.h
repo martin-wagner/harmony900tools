@@ -44,7 +44,7 @@ class StateMachineWizard : public QWizard
     /** pre-fill from an existing state machine, for re-running
      * the wizard as an edit flow rather than a fresh add
      * @return false -- statemachine can't be edited using wizard*/
-    bool setStateMachine(const document::data::item::StateMachine &stateMachine);
+    void setStateMachine(const document::data::item::StateMachine &stateMachine);
 
     document::data::item::StateMachine getStateMachine() const;
 
@@ -55,7 +55,9 @@ class StateMachineWizard : public QWizard
 
   private:
     const document::data::item::Device &device;
+    document::data::Enum<document::data::StateMachineDeviceType> startType = document::data::StateMachineDeviceType::Unknown;
     QStringList availableCommands;
+    QStringList unusedDeviceTypes;
 
     void buildChooseTypePage();
     void buildChooseFunctionPage();
@@ -74,6 +76,7 @@ class StateMachineWizard : public QWizard
 
     QRadioButton *powerRadio = nullptr;
     QRadioButton *inputRadio = nullptr;
+    QRadioButton *elseRadio = nullptr;
     QSpinBox *delaySpinBox = nullptr;
 
     QWizardPage *pageInputStates = nullptr;
@@ -106,6 +109,7 @@ class ChooseFunctionPage: public QWizardPage
         QWizardPage(parent), w(w) {};
 
     int nextId() const override;
+    bool validatePage() override;
 
   private:
     StateMachineWizard &w;
@@ -136,6 +140,7 @@ class AssignCommandsPage: public QWizardPage
         QWizardPage(parent), w(w) {};
 
     int nextId() const override;
+    bool validatePage() override;
 
   private:
     StateMachineWizard &w;

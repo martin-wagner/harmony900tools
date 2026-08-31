@@ -244,7 +244,7 @@ QVariant StateMachineModel::getDisplayData(const QModelIndex &index) const
         } else if (!m.relative.empty()) {
           return tr("Cycle");
         } else {
-          return tr("Start Wizard");
+          return tr("Empty");
         }
         break;
       default:
