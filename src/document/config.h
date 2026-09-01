@@ -94,6 +94,9 @@ class Config : public QObject
       QString exportPath;
       std::unique_ptr<QTemporaryDir> tempDir;
 
+  private:
+      void copyIcons() const;
+
 };
 
 

@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QDirIterator>
 #include <QTemporaryFile>
 
 #include "lib/zip.h"
@@ -275,6 +276,9 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
       connect(&platformcfgWriter, &files::H900platformconfig::writeMsg, this,
           &Config::writeMsg);
       ret = platformcfgWriter.dump(configData.get());
+      //todo those should be part of the config
+      //copy station icons, if they exist
+      copyIcons();
       //dump actual userconfig
       auto usercfgWriter = files::H900userconfig(exportPath);
       connect(&usercfgWriter, &files::H900userconfig::writeLog, this,
@@ -353,6 +357,43 @@ void Config::beginMacro(const QString &text)
 void Config::endMacro()
 {
   stack.endMacro();
+}
+
+void Config::copyIcons() const
+{
+  const QString sourceDirPath = importPath + "/userconfig/image";
+  const QString destinationDirPath = exportPath + "/userconfig/image";
+  QDir sourceSubDir(sourceDirPath);
+
+  if (!sourceSubDir.exists()) {
+    return;
+  }
+
+  QDirIterator it(sourceDirPath, QDir::Files, QDirIterator::Subdirectories);
+
+  while (it.hasNext()) {
+    const QString sourcePath = it.next();
+    const QString relativePath = sourceSubDir.relativeFilePath(sourcePath);
+    const QString destinationPath = destinationDirPath + "/" + relativePath;
+    QFileInfo sourceInfo(sourcePath);
+
+    if (QFile::exists(destinationPath)) {
+      QFile::remove(destinationPath);
+    }
+    QDir destinationParent(QFileInfo(destinationPath).path());
+
+    if (!destinationParent.exists()) {
+      if (!destinationParent.mkpath(".")) {
+        return;
+      }
+    }
+
+    if (!QFile::copy(sourcePath, destinationPath)) {
+      return;
+    }
+    QFile destinationFile(destinationPath);
+    destinationFile.setPermissions(sourceInfo.permissions());
+  }
 }
 
 }
