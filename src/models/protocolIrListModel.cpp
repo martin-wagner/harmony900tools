@@ -204,6 +204,7 @@ bool models::ProtocolIrModel::addItem(int row)
   for (const auto &name : names) {
     if (!usedNames.contains(name)) {
       suggestName = name;
+      break;
     }
   }
   suggestName = makeStringUnique(usedNames, suggestName);

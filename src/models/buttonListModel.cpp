@@ -755,7 +755,14 @@ bool ActivityHardButtonModel::addButton(int row)
     //just assume we want the same device again
     deviceId = getButtons().at(row - 1).device.get();
   } catch (const out_of_range &ex) {
-    deviceId = devices[0].first;
+    deviceId = 0;
+    for (const auto &device : config.data().getDevices()) {
+      if (!device.getHardButtons().empty()
+          || !device.getSoftButtons().empty()) {
+        deviceId = device.getId();
+        break;
+      }
+    }
   }
   auto *device = config.data().getDevice(deviceId);
   if (device == nullptr) {
@@ -1059,7 +1066,14 @@ bool ActivitySoftButtonModel::addButton(int row)
     //just assume we want the same device again
     deviceId = getButtons().at(row - 1).device.get();
   } catch (const out_of_range &ex) {
-    deviceId = devices[0].first;
+    deviceId = 0;
+    for (const auto &device : config.data().getDevices()) {
+      if (!device.getHardButtons().empty()
+          || !device.getSoftButtons().empty()) {
+        deviceId = device.getId();
+        break;
+      }
+    }
   }
   auto *device = config.data().getDevice(deviceId);
   if (device == nullptr) {

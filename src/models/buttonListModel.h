@@ -55,7 +55,7 @@ class ButtonBaseModel: public BaseModel
         { Column::COMMAND,       { "Command",  "The IR command you want to send", "Enum", false, {}, } },
         { Column::BUTTON,        { "Button",   "Link to this button on the remote", "Enum", false, {}, } },
         { Column::NAME,          { "Name",     "Name on the screen", "QString", false, {}, } },
-        { Column::ICON,          { "Icon",     "Use this icon instead of name. \nYou can download the icons from the remote using ftp,\nuser >>root<<, pass >>ethanol<<, go to the folder \n\"/usr/local/app/assets/placeables/large\"", "Enum", false, {QVariant::fromValue(icons)}, } },
+        { Column::ICON,          { "Icon",     "Use this icon instead of name. \nYou can download the icons from the remote using ftp,\nIP >>169.254.1.1<<, user >>root<<, pass >>ethanol<<, go to the folder \n\"/usr/local/app/assets/placeables/large\"", "Enum", false, {QVariant::fromValue(icons)}, } },
         { Column::POSITION,      { "Position", "Where to place the button on the screen", "Enum", true, {}, } },
     };
 
