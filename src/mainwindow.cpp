@@ -230,6 +230,8 @@ void MainWindow::createWidgets()
   auto docks = qsettings.value("dock");
   if (docks.isValid() && (docks.toString() != "")) {
     dockManager->restoreState(docks.toByteArray());
+  } else {
+    onLoadDefaultView();
   }
 }
 
@@ -724,6 +726,7 @@ void MainWindow::onLoadView()
 void MainWindow::onLoadDefaultView()
 {
   dockManager->restoreState(defaults::adsDock);
+  resize(1400, 900);
 }
 
 void MainWindow::onDeleteView()

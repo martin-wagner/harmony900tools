@@ -8,7 +8,7 @@
 namespace defaults
 {
 
-inline static const QByteArray adsDock = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?><QtAdvancedDockingSystem Version=\"1\" UserVersion=\"0\" Containers=\"1\"><Container Floating=\"0\"><Splitter Orientation=\"|\" Count=\"2\"><Area Tabs=\"1\" Current=\"Left Panel\"><Widget Name=\"Left Panel\" Closed=\"0\"/></Area><Area Tabs=\"1\" Current=\"Right Panel\"><Widget Name=\"Right Panel\" Closed=\"0\"/></Area><Sizes>715 524 </Sizes></Splitter></Container></QtAdvancedDockingSystem>"};
+inline static const QByteArray adsDock = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?><QtAdvancedDockingSystem Version=\"1\" UserVersion=\"0\" Containers=\"1\"><Container Floating=\"0\"><Splitter Orientation=\"|\" Count=\"2\"><Area Tabs=\"1\" Current=\"Edit Devices\"><Widget Name=\"Edit Devices\" Closed=\"0\"/></Area><Splitter Orientation=\"-\" Count=\"2\"><Area Tabs=\"1\" Current=\"Test LibConcord\"><Widget Name=\"Test LibConcord\" Closed=\"1\"/></Area><Splitter Orientation=\"-\" Count=\"2\"><Area Tabs=\"1\" Current=\"Edit Activities\"><Widget Name=\"Edit Activities\" Closed=\"0\"/></Area><Splitter Orientation=\"|\" Count=\"2\"><Area Tabs=\"1\" Current=\"Log Viewer\"><Widget Name=\"Log Viewer\" Closed=\"0\"/></Area><Area Tabs=\"1\" Current=\"Undo History\"><Widget Name=\"Undo History\" Closed=\"1\"/></Area><Sizes>625 0 </Sizes></Splitter><Sizes>539 92 </Sizes></Splitter><Sizes>0 635 </Sizes></Splitter><Sizes>628 625 </Sizes></Splitter></Container></QtAdvancedDockingSystem>"};
 
 inline const SettingDef loglevel()
 {
