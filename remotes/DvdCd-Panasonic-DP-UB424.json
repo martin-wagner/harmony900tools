@@ -1,0 +1,1522 @@
+{
+    "Version": 1,
+    "Device": {
+        "Id": 92828560,
+        "Type": "DvdCd",
+        "Mnf": "Panasonic",
+        "Model": "DP-UB424",
+        "Label": "4k bd",
+        "ManualPower": false,
+        "AlwaysOn": false,
+        "IsNewDevice": true,
+        "MenuOnDevice": false,
+        "NumDiscs": 1,
+        "Buttons": {
+            "Hard": [
+                {
+                    "Action": "Menu",
+                    "Name": "Menu"
+                },
+                {
+                    "Action": "Exit",
+                    "Name": "Exit"
+                },
+                {
+                    "Action": "Red",
+                    "Name": "Red"
+                },
+                {
+                    "Action": "Green",
+                    "Name": "Green"
+                },
+                {
+                    "Action": "Yellow",
+                    "Name": "Yellow"
+                },
+                {
+                    "Action": "Blue",
+                    "Name": "Blue"
+                },
+                {
+                    "Action": "DirectionUp",
+                    "Name": "DirectionUp"
+                },
+                {
+                    "Action": "DirectionDown",
+                    "Name": "DirectionDown"
+                },
+                {
+                    "Action": "DirectionLeft",
+                    "Name": "DirectionLeft"
+                },
+                {
+                    "Action": "DirectionRight",
+                    "Name": "DirectionRight"
+                },
+                {
+                    "Action": "OK",
+                    "Name": "Select"
+                },
+                {
+                    "Action": "Rewind",
+                    "Name": "Rewind"
+                },
+                {
+                    "Action": "SkipBack",
+                    "Name": "SkipBack"
+                },
+                {
+                    "Action": "Play",
+                    "Name": "Play"
+                },
+                {
+                    "Action": "Pause",
+                    "Name": "Pause"
+                },
+                {
+                    "Action": "FastForward",
+                    "Name": "FastForward"
+                },
+                {
+                    "Action": "SkipForward",
+                    "Name": "SkipForward"
+                },
+                {
+                    "Action": "Stop",
+                    "Name": "Stop"
+                },
+                {
+                    "Action": "1",
+                    "Name": "Number1"
+                },
+                {
+                    "Action": "2",
+                    "Name": "Number2"
+                },
+                {
+                    "Action": "3",
+                    "Name": "Number3"
+                },
+                {
+                    "Action": "4",
+                    "Name": "Number4"
+                },
+                {
+                    "Action": "5",
+                    "Name": "Number5"
+                },
+                {
+                    "Action": "6",
+                    "Name": "Number6"
+                },
+                {
+                    "Action": "7",
+                    "Name": "Number7"
+                },
+                {
+                    "Action": "8",
+                    "Name": "Number8"
+                },
+                {
+                    "Action": "9",
+                    "Name": "Number9"
+                },
+                {
+                    "Action": "0",
+                    "Name": "Number0"
+                }
+            ],
+            "Soft": [
+                {
+                    "Action": "PowerToggle",
+                    "Name": "Power",
+                    "Position": 0
+                },
+                {
+                    "Action": "PowerOn",
+                    "Name": "On",
+                    "Position": 1
+                },
+                {
+                    "Action": "PowerOff",
+                    "Name": "Off",
+                    "Position": 2
+                },
+                {
+                    "Action": "Audio",
+                    "Name": "Audio",
+                    "Position": 4
+                },
+                {
+                    "Action": "Cancel",
+                    "Name": "Cancel",
+                    "Position": 5
+                },
+                {
+                    "Action": "FrameAdvance",
+                    "Name": "FrameAdvance",
+                    "Position": 6
+                },
+                {
+                    "Action": "HDRSetting",
+                    "Name": "HDRSetting",
+                    "Position": 7
+                },
+                {
+                    "Action": "Home",
+                    "Name": "Home",
+                    "Position": 8
+                },
+                {
+                    "Action": "Internet",
+                    "Name": "Internet",
+                    "Position": 9
+                },
+                {
+                    "Action": "Netflix",
+                    "Name": "Netflix",
+                    "Position": 10
+                },
+                {
+                    "Action": "Open/Close",
+                    "Name": "Open/Close",
+                    "Position": 11
+                },
+                {
+                    "Action": "Option",
+                    "Name": "Option",
+                    "Position": 12
+                },
+                {
+                    "Action": "PlaybackInfo",
+                    "Name": "PlaybackInfo",
+                    "Position": 13
+                },
+                {
+                    "Action": "PopUpMenu",
+                    "Name": "PopUpMenu",
+                    "Position": 14
+                },
+                {
+                    "Action": "Return",
+                    "Name": "Return",
+                    "Position": 15
+                },
+                {
+                    "Action": "Status",
+                    "Name": "Status",
+                    "Position": 16
+                },
+                {
+                    "Action": "TopMenu",
+                    "Name": "Top Menu",
+                    "Position": 17
+                },
+                {
+                    "Action": "Subtitle",
+                    "Name": "Sub Title",
+                    "Position": 18
+                }
+            ]
+        },
+        "StateMachines": [
+            {
+                "SmType": "Power",
+                "DelayMs": 30000,
+                "Discrete": {
+                    "States": [
+                        "Off",
+                        "On"
+                    ],
+                    "EnterStateAction": [
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "PowerOff",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "ChangeAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "PowerOn",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ],
+        "Numpad": {
+            "FixedDigits": 0,
+            "First": [
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "0",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "1",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "2",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "3",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "4",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "5",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "6",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "7",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "8",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "9",
+                            "Modifier": "Press"
+                        }
+                    ]
+                }
+            ]
+        },
+        "IrCommands": {
+            "PressPreSilenceMs": 500,
+            "PressInterKeyMs": 100,
+            "HoldPreSilenceMs": 50,
+            "HoldInterKeyMs": 100,
+            "ProtoCommands": [
+                {
+                    "Name": "0",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142189717,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d009895",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "1",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142152709,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d000805",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "2",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142185605,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d008885",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "3",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142169157,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d004845",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "4",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142202053,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00c8c5",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "5",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142160933,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d002825",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "6",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142193829,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00a8a5",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "7",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142177381,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d006865",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "8",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142210277,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00e8e5",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "9",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142156821,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d001815",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Audio",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142203073,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00ccc1",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Blue",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150539919,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d80028f",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Cancel",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142200268,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00c1cc",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionDown",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142175596,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00616c",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionLeft",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142208492,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00e1ec",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionRight",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142155036,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00111c",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionUp",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142192044,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00a1ac",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Exit",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150574599,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d808a07",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "FastForward",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142191789,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00a0ad",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "FrameAdvance",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142155036,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00111c",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Green",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150556367,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d8042cf",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "HDRSetting",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150577177,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d809419",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Home",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142210791,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00eae7",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Internet",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150578711,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d809a17",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Menu",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150541959,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d800a87",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Netflix",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150545051,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d80169b",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "OK",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142167372,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00414c",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Open/Close",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142183565,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00808d",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Option",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142150924,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00010c",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Pause",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142175341,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00606d",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Play",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142171229,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00505d",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PlaybackInfo",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150581289,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d80a429",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PopUpMenu",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150541959,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d800a87",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerOff",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142182513,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d007c71",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerOn",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142215409,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00fcf1",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerToggle",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142198961,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00bcb1",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Red",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150572559,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d80820f",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Return",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142183820,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00818c",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Rewind",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142158893,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00202d",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "SkipBack",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142188191,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00929f",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "SkipForward",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142171743,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00525f",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Status",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142214903,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00faf7",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Stop",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142150669,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00000d",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Subtitle",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142202308,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00c9c4",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TopMenu",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386142206420,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d00d9d4",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Yellow",
+                    "CodeType": "KASEIKYO",
+                    "ProtocolIndex": 12,
+                    "Decoder": true,
+                    "LibName": "PANASONIC",
+                    "IrAddress": 16388,
+                    "IrCommand": 0,
+                    "IrBitCount": 48,
+                    "IrBitData": 70386150589007,
+                    "Command": {
+                        "Index": 12,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x40040d80c24f",
+                                "DataBitCount": 48
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,2406 @@
+{
+    "Version": 1,
+    "Device": {
+        "Id": 88420232,
+        "Type": "Receiver",
+        "Mnf": "Onkyo",
+        "Model": "TX-NR414",
+        "Label": "AV Receiver-Room 1",
+        "ManualPower": false,
+        "AlwaysOn": false,
+        "HasBands": true,
+        "HasPresets": true,
+        "TunerInput": "Tuner",
+        "Buttons": {
+            "Hard": [
+                {
+                    "Action": "VolumeUp",
+                    "Name": "VolumeUp"
+                },
+                {
+                    "Action": "VolumeDown",
+                    "Name": "VolumeDown"
+                },
+                {
+                    "Action": "Mute",
+                    "Name": "VolumeMute"
+                },
+                {
+                    "Action": "DirectionUp",
+                    "Name": "DirectionUp"
+                },
+                {
+                    "Action": "DirectionDown",
+                    "Name": "DirectionDown"
+                },
+                {
+                    "Action": "DirectionLeft",
+                    "Name": "DirectionLeft"
+                },
+                {
+                    "Action": "DirectionRight",
+                    "Name": "DirectionRight"
+                },
+                {
+                    "Action": "Select",
+                    "Name": "Select"
+                },
+                {
+                    "Action": "TuneUp",
+                    "Name": "ChannelUp"
+                },
+                {
+                    "Action": "TuneDown",
+                    "Name": "ChannelDown"
+                },
+                {
+                    "Action": "Rewind",
+                    "Name": "Rewind"
+                },
+                {
+                    "Action": "PresetPrev",
+                    "Name": "SkipBack"
+                },
+                {
+                    "Action": "Play",
+                    "Name": "Play"
+                },
+                {
+                    "Action": "Pause",
+                    "Name": "Pause"
+                },
+                {
+                    "Action": "FastForward",
+                    "Name": "FastForward"
+                },
+                {
+                    "Action": "PresetNext",
+                    "Name": "SkipForward"
+                },
+                {
+                    "Action": "Stop",
+                    "Name": "Stop"
+                },
+                {
+                    "Action": "1",
+                    "Name": "Number1"
+                },
+                {
+                    "Action": "2",
+                    "Name": "Number2"
+                },
+                {
+                    "Action": "3",
+                    "Name": "Number3"
+                },
+                {
+                    "Action": "4",
+                    "Name": "Number4"
+                },
+                {
+                    "Action": "5",
+                    "Name": "Number5"
+                },
+                {
+                    "Action": "6",
+                    "Name": "Number6"
+                },
+                {
+                    "Action": "7",
+                    "Name": "Number7"
+                },
+                {
+                    "Action": "8",
+                    "Name": "Number8"
+                },
+                {
+                    "Action": "9",
+                    "Name": "Number9"
+                },
+                {
+                    "Action": "0",
+                    "Name": "Number0"
+                },
+                {
+                    "Action": "Blue",
+                    "Name": "Blue"
+                },
+                {
+                    "Action": "Green",
+                    "Name": "Green"
+                },
+                {
+                    "Action": "Yellow",
+                    "Name": "Yellow"
+                },
+                {
+                    "Action": "Red",
+                    "Name": "Red"
+                }
+            ],
+            "Soft": [
+                {
+                    "Action": "PowerToggle",
+                    "Name": "Power",
+                    "Position": 0
+                },
+                {
+                    "Action": "PowerOn",
+                    "Name": "On",
+                    "Position": 1
+                },
+                {
+                    "Action": "PowerOff",
+                    "Name": "Off",
+                    "Position": 2
+                },
+                {
+                    "Action": "AM",
+                    "Name": "AM",
+                    "Position": 3
+                },
+                {
+                    "Action": "ChannelSelect",
+                    "Name": "ChannelSelect",
+                    "Position": 4
+                },
+                {
+                    "Action": "Dimmer",
+                    "Name": "Dimmer",
+                    "Position": 5
+                },
+                {
+                    "Action": "DirectTune",
+                    "Name": "Direct Tune",
+                    "Position": 6
+                },
+                {
+                    "Action": "Display",
+                    "Name": "Display",
+                    "Position": 7
+                },
+                {
+                    "Action": "Enter",
+                    "Name": "Enter",
+                    "Position": 8
+                },
+                {
+                    "Action": "FM",
+                    "Name": "FM",
+                    "Position": 9
+                },
+                {
+                    "Action": "HdmiOut1",
+                    "Name": "HdmiOut1",
+                    "Position": 10
+                },
+                {
+                    "Action": "HdmiOut2",
+                    "Name": "HdmiOut2",
+                    "Position": 11
+                },
+                {
+                    "Action": "HdmiOutBoth",
+                    "Name": "HdmiOutBoth",
+                    "Position": 12
+                },
+                {
+                    "Action": "HdmiOutWrap",
+                    "Name": "HdmiOutWrap",
+                    "Position": 13
+                },
+                {
+                    "Action": "Home",
+                    "Name": "Home",
+                    "Position": 14
+                },
+                {
+                    "Action": "InputAux",
+                    "Name": "Aux Input",
+                    "Position": 15
+                },
+                {
+                    "Action": "InputBd/Dvd",
+                    "Name": "InputBd/Dvd",
+                    "Position": 16
+                },
+                {
+                    "Action": "InputCbl/Sat",
+                    "Name": "InputCbl/Sat",
+                    "Position": 17
+                },
+                {
+                    "Action": "InputExtra1",
+                    "Name": "InputExtra1",
+                    "Position": 18
+                },
+                {
+                    "Action": "InputExtra2",
+                    "Name": "InputExtra2",
+                    "Position": 19
+                },
+                {
+                    "Action": "InputGame",
+                    "Name": "InputGame",
+                    "Position": 20
+                },
+                {
+                    "Action": "InputInternetRadio",
+                    "Name": "InputInternetRadio",
+                    "Position": 21
+                },
+                {
+                    "Action": "InputMusicServer",
+                    "Name": "InputMusicServer",
+                    "Position": 22
+                },
+                {
+                    "Action": "InputNet",
+                    "Name": "InputNet",
+                    "Position": 23
+                },
+                {
+                    "Action": "InputPc",
+                    "Name": "PC Input",
+                    "Position": 24
+                },
+                {
+                    "Action": "InputTv/Cd",
+                    "Name": "InputTv/Cd",
+                    "Position": 25
+                },
+                {
+                    "Action": "InputUsb",
+                    "Name": "InputUsb",
+                    "Position": 26
+                },
+                {
+                    "Action": "ModeGame",
+                    "Name": "ModeGame",
+                    "Position": 27
+                },
+                {
+                    "Action": "ModeMovie/Tv",
+                    "Name": "ModeMovie/Tv",
+                    "Position": 28
+                },
+                {
+                    "Action": "ModeMusic",
+                    "Name": "ModeMusic",
+                    "Position": 29
+                },
+                {
+                    "Action": "ModeStereo",
+                    "Name": "ModeStereo",
+                    "Position": 30
+                },
+                {
+                    "Action": "PresetNext",
+                    "Name": "Next Preset",
+                    "Position": 31
+                },
+                {
+                    "Action": "PresetPrev",
+                    "Name": "Prev Preset",
+                    "Position": 32
+                },
+                {
+                    "Action": "QSetup",
+                    "Name": "QSetup",
+                    "Position": 33
+                },
+                {
+                    "Action": "Return",
+                    "Name": "Return",
+                    "Position": 34
+                },
+                {
+                    "Action": "Setup",
+                    "Name": "Setup",
+                    "Position": 35
+                },
+                {
+                    "Action": "Sleep",
+                    "Name": "Sleep",
+                    "Position": 36
+                },
+                {
+                    "Action": "TuningMode",
+                    "Name": "TuningMode",
+                    "Position": 37
+                },
+                {
+                    "Action": "UsbDown",
+                    "Name": "UsbDown",
+                    "Position": 39
+                },
+                {
+                    "Action": "UsbLeft",
+                    "Name": "UsbLeft",
+                    "Position": 40
+                },
+                {
+                    "Action": "UsbMenu",
+                    "Name": "UsbMenu",
+                    "Position": 41
+                },
+                {
+                    "Action": "UsbRight",
+                    "Name": "UsbRight",
+                    "Position": 46
+                },
+                {
+                    "Action": "UsbSetup",
+                    "Name": "UsbSetup",
+                    "Position": 49
+                },
+                {
+                    "Action": "UsbTopMenu",
+                    "Name": "UsbTopMenu",
+                    "Position": 50
+                },
+                {
+                    "Action": "UsbUp",
+                    "Name": "UsbUp",
+                    "Position": 51
+                }
+            ]
+        },
+        "StateMachines": [
+            {
+                "SmType": "Power",
+                "DelayMs": 1500,
+                "Discrete": {
+                    "States": [
+                        "Off",
+                        "On"
+                    ],
+                    "EnterStateAction": [
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "PowerOff",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "PowerOn",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "SmType": "Input",
+                "DelayMs": 1000,
+                "Discrete": {
+                    "States": [
+                        "BD/DVD",
+                        "CBL/SAT",
+                        "Game",
+                        "PC",
+                        "AUX",
+                        "AM",
+                        "FM",
+                        "TV/CD",
+                        "Music Server",
+                        "Internet Radio",
+                        "USB"
+                    ],
+                    "EnterStateAction": [
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputBd/Dvd",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputCbl/Sat",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputGame",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputPc",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputAux",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "AM",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "FM",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputTv/Cd",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputMusicServer",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputInternetRadio",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        },
+                        {
+                            "ActionType": "SetAction",
+                            "RepeatWillNotHarm": false,
+                            "Sequence": [
+                                {
+                                    "Opcode": "SendCommand",
+                                    "Cmd": "InputUsb",
+                                    "Modifier": "Press"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ],
+        "IrCommands": {
+            "PressPreSilenceMs": 200,
+            "PressInterKeyMs": 100,
+            "HoldPreSilenceMs": 50,
+            "HoldInterKeyMs": 100,
+            "ProtoCommands": [
+                {
+                    "Name": "0",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 213,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262529364,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40ab54",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "1",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 213,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262529364,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40ab54",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "2",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 214,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262513044,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b406b94",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "3",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 215,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262545684,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40eb14",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "4",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 216,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262492644,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b401be4",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "5",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 217,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262525284,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b409b64",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "6",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 218,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262508964,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b405ba4",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "7",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 219,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262541604,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40db24",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "8",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 220,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262500804,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b403bc4",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "9",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 221,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262533444,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40bb44",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "AM",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 71,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270276637,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6e21d",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ChannelSelect",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 68,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261839069,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b3622dd",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Dimmer",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 149,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270262102,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6a956",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectTune",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 223,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262549764,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40fb04",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionDown",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 131,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270268222,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6c13e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionLeft",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 132,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270227422,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb621de",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionRight",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 133,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270260062,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6a15e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionUp",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 130,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270235582,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb641be",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Display",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 85,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261873749,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36aa55",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Enter",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 151,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270278422,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6e916",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "FM",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 70,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270243997,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6629d",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "HdmiOut1",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 44242,
+                    "IrCommand": 212,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261775828,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b352bd4",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "HdmiOut2",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 44242,
+                    "IrCommand": 213,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261808468,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b35ab54",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "HdmiOutBoth",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC_LIKE",
+                    "IrAddress": 19320,
+                    "IrCommand": 2601,
+                    "IrBitCount": 32,
+                    "IrBitData": 1266158121,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b780a29",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "HdmiOutWrap",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 210,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261849524,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b364bb4",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Home",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 6610,
+                    "IrCommand": 192,
+                    "IrBitCount": 32,
+                    "IrBitData": 1268253692,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b9803fc",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputAux",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 159,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270282502,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6f906",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputBd/Dvd",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 140,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261842894,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b3631ce",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputCbl/Sat",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 14,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270247567,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6708f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputExtra1",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 205,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261876044,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36b34c",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputExtra2",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 206,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261859724,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36738c",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputGame",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 13,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270263887,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6b04f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputInternetRadio",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 137,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262522734,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40916e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputMusicServer",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 136,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262490094,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4011ee",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputNet",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 135,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262543134,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40e11e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputPc",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 156,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270233542,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb639c6",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputTv/Cd",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 9,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270255727,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6906f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputUsb",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 44242,
+                    "IrCommand": 158,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261795718,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b357986",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ModeGame",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 147,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262537014,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40c936",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ModeMovie/Tv",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 151,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262545174,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40e916",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ModeMusic",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 146,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262504374,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4049b6",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ModeStereo",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 150,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262512534,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b406996",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Mute",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 5,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270259807,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb6a05f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerOff",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 71,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261888029,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36e21d",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerOn",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 28114,
+                    "IrCommand": 4,
+                    "IrBitCount": 32,
+                    "IrBitData": 1270227167,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4bb620df",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerToggle",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 203,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261884204,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36d32c",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PresetNext",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 143,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262547214,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40f10e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PresetPrev",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 144,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262488054,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4009f6",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "QSetup",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 159,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262549254,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40f906",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Return",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 134,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262510494,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40619e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Select",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 196,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262494684,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4023dc",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Setup",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 83,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261881909,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36ca35",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Sleep",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 209,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262521204,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b408b74",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TuneDown",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 65,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261863549,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b36827d",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TuneUp",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 27858,
+                    "IrCommand": 64,
+                    "IrBitCount": 32,
+                    "IrBitData": 1261830909,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b3602fd",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TuningMode",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 211,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262537524,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40cb34",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbDown",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 193,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262519164,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40837c",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbLeft",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 194,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262502844,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4043bc",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbMenu",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 149,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262528854,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40a956",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbRight",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 195,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262535484,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40c33c",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbSetup",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 159,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262549254,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40f906",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbTopMenu",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 148,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262496214,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4029d6",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "UsbUp",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 192,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262486524,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4003fc",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "VolumeDown",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 6610,
+                    "IrCommand": 131,
+                    "IrBitCount": 32,
+                    "IrBitData": 1268302142,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b98c13e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "VolumeUp",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 6610,
+                    "IrCommand": 130,
+                    "IrBitCount": 32,
+                    "IrBitData": 1268269502,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b9841be",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Red",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 151,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262545174,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40e916",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Green",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 146,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262504374,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4049b6",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Yellow",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 147,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262537014,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40c936",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Blue",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 150,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262512534,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b406996",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Rewind",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 129,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262518654,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40817e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Play",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 141,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262530894,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40b14e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Pause",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 145,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262520694,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b408976",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "FastForward",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 128,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262486014,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b4001fe",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Stop",
+                    "CodeType": "NEC",
+                    "ProtocolIndex": 9,
+                    "Decoder": true,
+                    "LibName": "NEC",
+                    "IrAddress": 722,
+                    "IrCommand": 142,
+                    "IrBitCount": 32,
+                    "IrBitData": 1262514574,
+                    "Command": {
+                        "Index": 9,
+                        "Delay": 500,
+                        "RepeatFrame": 1,
+                        "DataFrameTxCount": 1,
+                        "Control": 0,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0x4b40718e",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

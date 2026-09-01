@@ -1,0 +1,1987 @@
+{
+    "Version": 1,
+    "Device": {
+        "Id": 86989740,
+        "Type": "Vcr",
+        "Mnf": "Samsung",
+        "Model": "SV-6332X",
+        "Label": "Videorekorder",
+        "ManualPower": false,
+        "AlwaysOn": false,
+        "RecordMediaRemovableVideotape": true,
+        "TunerInput": "Tuner",
+        "Buttons": {
+            "Hard": [
+                {
+                    "Action": "Menu",
+                    "Name": "Menu"
+                },
+                {
+                    "Action": "DirectionUp",
+                    "Name": "DirectionUp"
+                },
+                {
+                    "Action": "DirectionDown",
+                    "Name": "DirectionDown"
+                },
+                {
+                    "Action": "DirectionLeft",
+                    "Name": "DirectionLeft"
+                },
+                {
+                    "Action": "DirectionRight",
+                    "Name": "DirectionRight"
+                },
+                {
+                    "Action": "Select",
+                    "Name": "Select"
+                },
+                {
+                    "Action": "ChannelUp",
+                    "Name": "ChannelUp"
+                },
+                {
+                    "Action": "ChannelDown",
+                    "Name": "ChannelDown"
+                },
+                {
+                    "Action": "Rewind",
+                    "Name": "Rewind"
+                },
+                {
+                    "Action": "Record",
+                    "Name": "Record"
+                },
+                {
+                    "Action": "Play",
+                    "Name": "Play"
+                },
+                {
+                    "Action": "Pause",
+                    "Name": "Pause"
+                },
+                {
+                    "Action": "FastForward",
+                    "Name": "FastForward"
+                },
+                {
+                    "Action": "Stop",
+                    "Name": "Stop"
+                },
+                {
+                    "Action": "1",
+                    "Name": "Number1"
+                },
+                {
+                    "Action": "2",
+                    "Name": "Number2"
+                },
+                {
+                    "Action": "3",
+                    "Name": "Number3"
+                },
+                {
+                    "Action": "4",
+                    "Name": "Number4"
+                },
+                {
+                    "Action": "5",
+                    "Name": "Number5"
+                },
+                {
+                    "Action": "6",
+                    "Name": "Number6"
+                },
+                {
+                    "Action": "7",
+                    "Name": "Number7"
+                },
+                {
+                    "Action": "8",
+                    "Name": "Number8"
+                },
+                {
+                    "Action": "9",
+                    "Name": "Number9"
+                },
+                {
+                    "Action": "0",
+                    "Name": "Number0"
+                }
+            ],
+            "Soft": [
+                {
+                    "Action": "PowerToggle",
+                    "Name": "Power",
+                    "Position": 0
+                },
+                {
+                    "Action": "Eject",
+                    "Name": "Eject",
+                    "Position": 1
+                },
+                {
+                    "Action": "Tracking+",
+                    "Name": "Tracking+",
+                    "Position": 2
+                },
+                {
+                    "Action": "Tracking-",
+                    "Name": "Tracking-",
+                    "Position": 3
+                },
+                {
+                    "Action": "TrackingAuto",
+                    "Name": "TrackingAuto",
+                    "Position": 4
+                },
+                {
+                    "Action": "Greater100",
+                    "Name": "100+",
+                    "Position": 5
+                },
+                {
+                    "Action": "Cancel",
+                    "Name": "Cancel",
+                    "Position": 6
+                },
+                {
+                    "Action": "Program",
+                    "Name": "Program",
+                    "Position": 7
+                },
+                {
+                    "Action": "InputSystem",
+                    "Name": "InputSystem",
+                    "Position": 8
+                },
+                {
+                    "Action": "OutputSystem",
+                    "Name": "OutputSystem",
+                    "Position": 9
+                },
+                {
+                    "Action": "Slow-",
+                    "Name": "Slow-",
+                    "Position": 10
+                },
+                {
+                    "Action": "Slow+",
+                    "Name": "Slow+",
+                    "Position": 11
+                },
+                {
+                    "Action": "Strobe",
+                    "Name": "Strobe",
+                    "Position": 12
+                },
+                {
+                    "Action": "Art",
+                    "Name": "Art",
+                    "Position": 13
+                },
+                {
+                    "Action": "Strobe/Art +",
+                    "Name": "Strobe/Art +",
+                    "Position": 14
+                },
+                {
+                    "Action": "Strobe/Art -",
+                    "Name": "Strobe/Art -",
+                    "Position": 15
+                },
+                {
+                    "Action": "RecSpeed",
+                    "Name": "RecSpeed",
+                    "Position": 16
+                },
+                {
+                    "Action": "MonitorRawInput",
+                    "Name": "MonitorRawInput",
+                    "Position": 17
+                },
+                {
+                    "Action": "Picture",
+                    "Name": "Picture",
+                    "Position": 18
+                },
+                {
+                    "Action": "Audio",
+                    "Name": "Audio",
+                    "Position": 19
+                },
+                {
+                    "Action": "Display",
+                    "Name": "Display",
+                    "Position": 20
+                },
+                {
+                    "Action": "Index",
+                    "Name": "Index",
+                    "Position": 21
+                },
+                {
+                    "Action": "InputNext",
+                    "Name": "Next Input",
+                    "Position": 22
+                },
+                {
+                    "Action": "Clk/Count",
+                    "Name": "Clk/Count",
+                    "Position": 23
+                },
+                {
+                    "Action": "System",
+                    "Name": "System",
+                    "Position": 24
+                },
+                {
+                    "Action": "TvVcr",
+                    "Name": "Tv Vcr",
+                    "Position": 25
+                },
+                {
+                    "Action": "ShuttleBack",
+                    "Name": "ShuttleBack",
+                    "Position": 26
+                },
+                {
+                    "Action": "ShuttleForward",
+                    "Name": "ShuttleForward",
+                    "Position": 27
+                },
+                {
+                    "Action": "TvVideo",
+                    "Name": "Tv Video",
+                    "Position": 28
+                },
+                {
+                    "Action": "AudioDub",
+                    "Name": "AudioDub",
+                    "Position": 29
+                }
+            ]
+        },
+        "StateMachines": [
+            {
+                "SmType": "Power",
+                "DelayMs": 1500,
+                "Relative": {
+                    "ResetAction": {
+                        "ActionType": "ResetAction",
+                        "RepeatWillNotHarm": false,
+                        "Sequence": [
+                            {
+                                "Opcode": "ForceValue",
+                                "StateName": "AntennaOutput",
+                                "Value": "Antenna"
+                            }
+                        ]
+                    },
+                    "States": [
+                        "Off",
+                        "On"
+                    ],
+                    "NextStateAction": {
+                        "ActionType": "NextAction",
+                        "RepeatWillNotHarm": false,
+                        "Sequence": [
+                            {
+                                "Opcode": "SendCommand",
+                                "Cmd": "PowerToggle",
+                                "Modifier": "Press"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "SmType": "AntennaOutput",
+                "Relative": {
+                    "States": [
+                        "Antenna",
+                        "Vcr"
+                    ],
+                    "NextStateAction": {
+                        "ActionType": "NextAction",
+                        "RepeatWillNotHarm": false,
+                        "Sequence": [
+                            {
+                                "Opcode": "SendCommand",
+                                "Cmd": "TvVcr",
+                                "Modifier": "Press"
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "Numpad": {
+            "FixedDigits": 2,
+            "First": [
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "0",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "1",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "2",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "3",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "4",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "5",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "6",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "7",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "8",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "9",
+                            "Modifier": "Press"
+                        }
+                    ]
+                }
+            ],
+            "Middle": [
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "0",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "1",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "2",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "3",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "4",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "5",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "6",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "7",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "8",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "9",
+                            "Modifier": "Press"
+                        }
+                    ]
+                }
+            ],
+            "Last": [
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "0",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "1",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "2",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "3",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "4",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "5",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "6",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "7",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "8",
+                            "Modifier": "Press"
+                        }
+                    ]
+                },
+                {
+                    "RepeatWillNotHarm": false,
+                    "Sequence": [
+                        {
+                            "Opcode": "SendCommand",
+                            "Cmd": "9",
+                            "Modifier": "Press"
+                        }
+                    ]
+                }
+            ]
+        },
+        "IrCommands": {
+            "PressPreSilenceMs": 500,
+            "PressInterKeyMs": 500,
+            "HoldPreSilenceMs": 50,
+            "HoldInterKeyMs": 100,
+            "ProtoCommands": [
+                {
+                    "Name": "0",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 17,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694875255,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a08877",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "1",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 4,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694848735,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a020df",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "2",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 5,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694881375,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0a05f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "3",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 6,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694865055,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0609f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "4",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 8,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694844655,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a010ef",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "5",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 9,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694877295,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0906f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "6",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 10,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694860975,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a050af",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "7",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 12,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694852815,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a030cf",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "8",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 13,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694885455,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0b04f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "9",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 14,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694869135,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0708f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Art",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 62,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694872195,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a07c83",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Audio",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 34,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694857915,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a044bb",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "AudioDub",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 46,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694870155,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0748b",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Cancel",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 29,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694887495,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0b847",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ChannelDown",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 16,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694842615,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a008f7",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ChannelUp",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 18,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694858935,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a048b7",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Clk/Count",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 51,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694892595,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0cc33",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionDown",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 80,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694843125,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a00af5",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionLeft",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 115,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694893105,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0ce31",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionRight",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 119,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694901265,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0ee11",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "DirectionUp",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 82,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694859445,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a04ab5",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Display",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 30,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694871175,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a07887",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Eject",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 32,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694841595,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a004fb",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "FastForward",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 26,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694863015,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a058a7",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Greater100",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 103,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694899225,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0e619",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Index",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 43,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694894635,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0d42b",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputNext",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 36,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694849755,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a024db",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "InputSystem",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 110,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694870665,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a07689",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Menu",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 31,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694903815,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0f807",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "MonitorRawInput",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 113,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694876785,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a08e71",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "OutputSystem",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 111,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694903305,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0f609",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Pause",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 22,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694867095,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a06897",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Picture",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 117,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694884945,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0ae51",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Play",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 25,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694879335,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a09867",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "PowerToggle",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 2,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694856895,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a040bf",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Program",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 61,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694888515,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0bc43",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "RecSpeed",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 58,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694864035,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a05ca3",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Record",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 20,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694850775,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a028d7",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Rewind",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 24,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694846695,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a018e7",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Select",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 92,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694855365,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a03ac5",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ShuttleBack",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 125,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694889025,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0be41",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "ShuttleForward",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 126,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694872705,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a07e81",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Slow+",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 19,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694891575,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0c837",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Slow-",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 23,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694899735,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0e817",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Stop",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 21,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694883415,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0a857",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Strobe",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 89,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694879845,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a09a65",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Strobe/Art +",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 118,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694868625,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a06e91",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Strobe/Art -",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 120,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694848225,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a01ee1",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "System",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 50,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694859955,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a04cb3",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Tracking+",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 44,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694853835,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a034cb",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "Tracking-",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 45,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694886475,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0b44b",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TrackingAuto",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 33,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694874235,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0847b",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TvVcr",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 1,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694873215,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a0807f",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Name": "TvVideo",
+                    "CodeType": "Samsung32",
+                    "ProtocolIndex": 10,
+                    "Decoder": true,
+                    "LibName": "SAMSUNG",
+                    "IrAddress": 5,
+                    "IrCommand": 48,
+                    "IrBitCount": 32,
+                    "IrBitData": 2694843635,
+                    "Command": {
+                        "Index": 10,
+                        "Delay": 500,
+                        "RepeatFrame": 0,
+                        "DataFrameTxCount": 3,
+                        "Control": 1,
+                        "Sections": [
+                            {
+                                "Index": 0,
+                                "Data": "0xa0a00cf3",
+                                "DataBitCount": 32
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
