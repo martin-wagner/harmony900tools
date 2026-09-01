@@ -79,8 +79,11 @@ void RelativeStateEditor::updateData()
 
 void RelativeStateEditor::onAddStateClicked()
 {
-  config.modify().addDeviceSmStateCommand(devicePos, smPos,
+  auto res = config.modify().addDeviceSmStateCommand(devicePos, smPos,
       StateMachineType::Relative, makeStateNameUnique(tr("New State")), -1);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void RelativeStateEditor::onRemoveStateClicked()
@@ -91,12 +94,17 @@ void RelativeStateEditor::onRemoveStateClicked()
   if ((item < 0) || (item >= actions.states.size())) {
     return;
   }
-  config.modify().removeDeviceSmStateCommand(devicePos, smPos,
+  auto res = config.modify().removeDeviceSmStateCommand(devicePos, smPos,
       StateMachineType::Relative, item);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void RelativeStateEditor::onEditNextActionClicked()
 {
+  bool res = true;
+
   auto a = getActions().nextStateAction.value_or(DeviceAction());
 
   auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
@@ -109,17 +117,23 @@ void RelativeStateEditor::onEditNextActionClicked()
   config.beginMacro("Edit Next Action");
 
   if (!getActions().nextStateAction.has_value()) {
-    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+    res &= config.modify().addDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Relative_Next);
   }
-  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+  res &= config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
       StateMachineAction::Relative_Next, 0);
 
   config.endMacro();
+
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void RelativeStateEditor::onEditPrevActionClicked()
 {
+  bool res = true;
+
   auto a = getActions().prevStateAction.value_or(DeviceAction());
 
   auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
@@ -132,17 +146,23 @@ void RelativeStateEditor::onEditPrevActionClicked()
   config.beginMacro("Edit Previous Action");
 
   if (!getActions().prevStateAction.has_value()) {
-    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+    res &= config.modify().addDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Relative_Prev);
   }
-  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+  res &= config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
       StateMachineAction::Relative_Prev, 0);
 
   config.endMacro();
+
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void RelativeStateEditor::onEditResetActionClicked()
 {
+  bool res = true;
+
   auto a = getActions().resetAction.value_or(DeviceAction());
 
   auto data = DeviceActionEditor::openEditor(ctx, devicePos, smPos, a,
@@ -155,22 +175,30 @@ void RelativeStateEditor::onEditResetActionClicked()
   config.beginMacro("Edit Reset Action");
 
   if (!getActions().resetAction.has_value()) {
-    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+    res &= config.modify().addDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Relative_Reset);
   }
-  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+  res &= config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
       StateMachineAction::Relative_Reset, 0);
 
   config.endMacro();
+
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void RelativeStateEditor::onClearNextActionClicked()
 {
   if (getActions().nextStateAction.has_value()) {
     config.beginMacro("Remove Next Action");
-    config.modify().removeDeviceSmActionCommand(devicePos, smPos,
+    auto res = config.modify().removeDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Relative_Next);
     config.endMacro();
+
+    if (res != true) {
+      updateData(); //revert
+    }
   }
 }
 
@@ -178,9 +206,13 @@ void RelativeStateEditor::onClearPrevActionClicked()
 {
   if (getActions().prevStateAction.has_value()) {
     config.beginMacro("Remove Previous Action");
-    config.modify().removeDeviceSmActionCommand(devicePos, smPos,
+    auto res = config.modify().removeDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Relative_Prev);
     config.endMacro();
+
+    if (res != true) {
+      updateData(); //revert
+    }
   }
 }
 
@@ -200,13 +232,17 @@ void RelativeStateEditor::onStateNameChanged(int row, const QString &text)
     return; //not changed
   }
   auto name = makeStateNameUnique(text);
-  config.modify().setDeviceSmStateName(name, devicePos, smPos,
+  auto res = config.modify().setDeviceSmStateName(name, devicePos, smPos,
       StateMachineType::Relative, row);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void RelativeStateEditor::onStateNameMoved(int start, int destinationRow)
 {
   int i;
+  bool res = true;
 
   if (destinationRow > start) {
     destinationRow--;
@@ -226,11 +262,15 @@ void RelativeStateEditor::onStateNameMoved(int start, int destinationRow)
   config.beginMacro(tr("Move State"));
 
   for (i = 0; i < states.size(); i++) {
-    config.modify().setDeviceSmStateName(qstr(states[i]), devicePos, smPos,
+    res &= config.modify().setDeviceSmStateName(qstr(states[i]), devicePos, smPos,
         StateMachineType::Relative, i);
   }
 
   config.endMacro();
+
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 const RelativeActions& RelativeStateEditor::getActions() const

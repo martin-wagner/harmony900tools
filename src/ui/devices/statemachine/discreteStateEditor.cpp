@@ -64,13 +64,17 @@ void DiscreteStateEditor::updateData()
 
 void DiscreteStateEditor::onAddStateClicked()
 {
-  config.modify().addDeviceSmStateCommand(devicePos, smPos,
+  auto res = config.modify().addDeviceSmStateCommand(devicePos, smPos,
       StateMachineType::Discrete, makeStateNameUnique(tr("New State")), -1);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void DiscreteStateEditor::onRemoveStateClicked()
 {
   int row;
+  bool res = true;
 
   QPushButton *button = qobject_cast<QPushButton*>(sender());
   if (button == nullptr) {
@@ -79,10 +83,13 @@ void DiscreteStateEditor::onRemoveStateClicked()
 
   for (row = 0; row < table->rowCount(); row++) {
     if (table->cellWidget(row, ColumnRemove) == button) {
-      config.modify().removeDeviceSmStateCommand(devicePos, smPos,
+      res &= config.modify().removeDeviceSmStateCommand(devicePos, smPos,
           StateMachineType::Discrete, row);
       break;
     }
+  }
+  if (res != true) {
+    updateData(); //revert
   }
 }
 
@@ -117,8 +124,11 @@ void DiscreteStateEditor::onActionButtonClicked()
   if (!data.has_value()) {
     return;
   }
-  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+  auto res = config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
       StateMachineAction::Discrete_Enter, row);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void DiscreteStateEditor::onStateNameChanged(int row, const QString &text)
@@ -127,8 +137,11 @@ void DiscreteStateEditor::onStateNameChanged(int row, const QString &text)
     return; //not changed
   }
   auto name = makeStateNameUnique(text);
-  config.modify().setDeviceSmStateName(name, devicePos, smPos,
+  auto res = config.modify().setDeviceSmStateName(name, devicePos, smPos,
       StateMachineType::Discrete, row);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 const DiscreteActions& DiscreteStateEditor::getActions() const

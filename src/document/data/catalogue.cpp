@@ -5,14 +5,12 @@
 #include "document/config.h"
 #include "cmd/addDevice.h"
 #include "cmd/removeDevice.h"
-#include "cmd/removeState.h"
 #include "cmd/removeActionSequence.h"
 #include "cmd/addButton.h"
 #include "cmd/removeButton.h"
-#include "cmd/addState.h"
+#include "cmd/state.h"
 #include "cmd/addActionSequence.h"
-#include "cmd/addStatemachine.h"
-#include "cmd/removeStatemachine.h"
+#include "cmd/statemachine.h"
 #include "cmd/setId.h"
 #include "cmd/setUserData.h"
 #include "cmd/setControllerMetadata.h"
@@ -696,7 +694,7 @@ bool CmdCatalogue::addDeviceStatemachineCommand(uint32_t devicePos, int smPos)
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: statemachine pos %1/%2 failed, dropped").arg(devicePos).arg(
+        tr("modify: statemachine pos %1/%2 add failed, dropped").arg(devicePos).arg(
             smPos), ContentType::PlainText);
     delete cmd;
   }
@@ -713,7 +711,7 @@ bool CmdCatalogue::removeDeviceStatemachineCommand(uint32_t devicePos,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: statemachine pos %1/%2 doesn't exist, dropped").arg(
+        tr("modify: statemachine pos %1/%2 remove failed, dropped").arg(
             devicePos).arg(smPos), ContentType::PlainText);
     delete cmd;
   }
@@ -730,7 +728,7 @@ bool CmdCatalogue::setDeviceStatemachine(const item::StateMachine &v,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: statemachine pos %1/%2 doesn't exist, dropped").arg(
+        tr("modify: statemachine pos %1/%2 edit failed, dropped").arg(
             devicePos).arg(smPos), ContentType::PlainText);
     delete cmd;
   }

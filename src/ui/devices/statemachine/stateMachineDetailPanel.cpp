@@ -129,8 +129,11 @@ void StateMachineDetailPanel::showEmptyState()
 
 void StateMachineDetailPanel::onEditingDelayFinished()
 {
-  config.modify().setDeviceStatemachineDelay(delaySpinBox->value(), devicePos,
-      smPos);
+  auto res = config.modify().setDeviceStatemachineDelay(delaySpinBox->value(),
+      devicePos, smPos);
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void StateMachineDetailPanel::onRunWizardClicked()
@@ -156,11 +159,12 @@ void StateMachineDetailPanel::onRunWizardClicked()
     config.modify().setDeviceStatemachine(newMachine, devicePos, smPos);
     config.endMacro();
   }
-  setStateMachine(devicePos, smPos); //trigger update "this" with new data
+  setStateMachine(devicePos, smPos); //trigger update "this" with new data (or old data if setting failed)
 }
 
 void StateMachineDetailPanel::onEditStartActionClicked()
 {
+  auto res = true;
   auto &m = getMachine();
   auto a = m.startAction.value_or(DeviceAction());
 
@@ -174,17 +178,22 @@ void StateMachineDetailPanel::onEditStartActionClicked()
   config.beginMacro("Edit Start Action");
 
   if (!m.startAction.has_value()) {
-    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+    res &= config.modify().addDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Start);
   }
-  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+  res &= config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
       StateMachineAction::Start, 0);
 
   config.endMacro();
+
+  if (res != true) {
+    updateData(); //revert
+  }
 }
 
 void StateMachineDetailPanel::onEditFinishActionClicked()
 {
+  bool res = true;
   auto &m = getMachine();
   auto a = m.finishAction.value_or(DeviceAction());
 
@@ -198,10 +207,10 @@ void StateMachineDetailPanel::onEditFinishActionClicked()
   config.beginMacro("Edit Finish Action");
 
   if (!m.finishAction.has_value()) {
-    config.modify().addDeviceSmActionCommand(devicePos, smPos,
+    res &= config.modify().addDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Finish);
   }
-  config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
+  res &= config.modify().setDeviceSmAction(data.value(), devicePos, smPos,
       StateMachineAction::Finish, 0);
 
   config.endMacro();
@@ -211,9 +220,13 @@ void StateMachineDetailPanel::onClearStartActionClicked()
 {
   if (getMachine().startAction.has_value()) {
     config.beginMacro("Remove Start Action");
-    config.modify().removeDeviceSmActionCommand(devicePos, smPos,
+    auto res = config.modify().removeDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Start);
     config.endMacro();
+
+    if (res != true) {
+      updateData(); //revert
+    }
   }
 }
 
@@ -221,9 +234,13 @@ void StateMachineDetailPanel::onClearFinishActionClicked()
 {
   if (getMachine().finishAction.has_value()) {
     config.beginMacro("Remove Finish Action");
-    config.modify().removeDeviceSmActionCommand(devicePos, smPos,
+    auto res = config.modify().removeDeviceSmActionCommand(devicePos, smPos,
         StateMachineAction::Finish);
     config.endMacro();
+
+    if (res != true) {
+      updateData(); //revert
+    }
   }
 }
 

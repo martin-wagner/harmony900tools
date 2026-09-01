@@ -71,7 +71,7 @@ enum class StateMachineAction {
 class StateMachine
 {
   public:
-    PropertyEnum<StateMachineDeviceType> smType{StateMachineDeviceType::Power, Used::YES};
+    PropertyEnum<StateMachineDeviceType> smType{StateMachineDeviceType::Unknown, Used::YES};
     PropertyU32 delayMs{100, Used::NO};
 
     std::optional<DeviceAction> startAction = std::nullopt;

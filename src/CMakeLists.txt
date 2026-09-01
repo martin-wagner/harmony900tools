@@ -44,6 +44,8 @@ set(sources ${sources}
   document/data/data.cpp
   document/data/enum.cpp
   document/data/cmd/base.cpp
+  document/data/cmd/statemachine.cpp
+  document/data/cmd/state.cpp
   document/data/cmd/addActionSequence.cpp
   document/data/cmd/addActivity.cpp
   document/data/cmd/addActivityAction.cpp
@@ -52,8 +54,6 @@ set(sources ${sources}
   document/data/cmd/addDevice.cpp
   document/data/cmd/addNumpad.cpp
   document/data/cmd/addPowerOnDevice.cpp
-  document/data/cmd/addState.cpp
-  document/data/cmd/addStatemachine.cpp
   document/data/cmd/moveActivity.cpp
   document/data/cmd/setIr.cpp
   document/data/cmd/setIrProto.cpp
@@ -69,8 +69,6 @@ set(sources ${sources}
   document/data/cmd/removeNumpad.cpp
   document/data/cmd/removePowerOnDevice.cpp
   document/data/cmd/removeRole.cpp
-  document/data/cmd/removeState.cpp
-  document/data/cmd/removeStatemachine.cpp
   document/data/cmd/setControllerMetadata.cpp
   document/data/cmd/setUnknownProperty.cpp
   document/data/cmd/setUserData.cpp

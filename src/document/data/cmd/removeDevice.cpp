@@ -103,6 +103,7 @@ bool RemoveDeviceCommand::checkRemove()
     }
     if (reject || query) {
       activityStr = qstr(activities[i].label.get());
+      break;
     }
   }
   if (reject) {
