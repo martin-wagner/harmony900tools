@@ -101,7 +101,7 @@ void StateMachineEditorView::createView()
   baseLayout->addWidget(header);
 
   //fixme use ads for this
-  layout = new QHBoxLayout(this);
+  layout = new QHBoxLayout();
   baseLayout->addLayout(layout);
   layout->addWidget(tree);
   detailPanel = new StateMachineDetailPanel(ctx, this);

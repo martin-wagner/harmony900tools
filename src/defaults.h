@@ -84,7 +84,7 @@ inline const SettingDef loadLastUsed()
   return s;
 };
 
-static constexpr int DEFAULT_COLUMN_WIDTH = 150;
+static constexpr int DEFAULT_COLUMN_WIDTH = 100;
 inline const SettingDef columWithFactor()
 {
   QList<QPair<QString, QVariant>> options;
@@ -98,6 +98,25 @@ inline const SettingDef columWithFactor()
   s.tab = "";
   s.minValue = QVariant { 0.5 };
   s.maxValue = QVariant { 5.0 };
+
+  return s;
+};
+
+inline const SettingDef stackedView()
+{
+  QList<QPair<QString, QVariant>> options;
+  SettingDef s;
+
+  s.key = "stackedView";
+  s.label = QObject::tr("View mode (needs restart)");
+  s.helpText = QObject::tr("Device / Activity detail view.\n\nUse stacked view for large display or tabs for small display. Needs restart to apply.");
+  s.type = SettingType::MultiSelection;
+  s.defaultValue = 1;
+  s.tab = "";
+  s.minValue = QVariant { };
+  s.maxValue = QVariant { };
+  s.options = options = { { QObject::tr("Stacked"), 0 }, { QObject::tr("Tabs"),
+      1 } };
 
   return s;
 };

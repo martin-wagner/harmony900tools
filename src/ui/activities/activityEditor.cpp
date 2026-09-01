@@ -4,6 +4,7 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QSplitter>
+#include <QTabWidget>
 
 #include <DockManager.h>
 
@@ -50,20 +51,29 @@ void ActivityEditor::createView()
 {
   BaseEditor::createView();
 
+  auto useTabs = ctx.settings().value(defaults::stackedView().key).toUInt();
+
   auto *splitter = new QSplitter(Qt::Vertical, this);
 
   mainView = new ActivityTreeView(ctx, this);
   splitter->addWidget(mainView);
   addHLine(splitter);
 
-  auto *buttonSplitter = new QSplitter(Qt::Horizontal, splitter);
+  auto *buttonSplitter = new QSplitter(Qt::Horizontal);
   hardButtonView = new ActivityHardButtonTreeView(ctx, this);
   buttonSplitter->addWidget(hardButtonView);
   childViews.append(hardButtonView);
   softButtonView = new ActivitySoftButtonTreeView(ctx, this);
   buttonSplitter->addWidget(softButtonView);
   childViews.append(softButtonView);
-  splitter->addWidget(buttonSplitter);
+
+  if (useTabs == 1) {
+    auto *tabWidget = new QTabWidget(splitter);
+    tabWidget->addTab(buttonSplitter, "Buttons");
+    splitter->addWidget(tabWidget);
+  } else {
+    splitter->addWidget(buttonSplitter);
+  }
 
   layout->addWidget(splitter);
 }

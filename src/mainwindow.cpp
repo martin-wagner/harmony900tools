@@ -465,6 +465,7 @@ void MainWindow::readSettings()
   }
 
   settings->addSetting(defaults::columWithFactor());
+  settings->addSetting(defaults::stackedView());
 
   const QByteArray geometry =
       qsettings.value("geometry", QByteArray()).toByteArray();

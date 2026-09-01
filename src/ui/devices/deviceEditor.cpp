@@ -4,6 +4,7 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QSplitter>
+#include <QTabWidget>
 
 #include <DockManager.h>
 
@@ -84,6 +85,8 @@ void DeviceEditor::createView()
   actionExport->setVisible(true);
   actionImport->setVisible(true);
 
+  auto useTabs = ctx.settings().value(defaults::stackedView().key).toUInt();
+
   auto *splitter = new QSplitter(Qt::Vertical, this);
 
   mainView = new DeviceTreeView(ctx, this);
@@ -91,28 +94,37 @@ void DeviceEditor::createView()
   addHLine(splitter);
 
   commandEditorView = new CommandEditorView(ctx, this);
-  splitter->addWidget(commandEditorView);
   protoCommandView = new ProtoCommandTreeView(ctx, this);
   rawCommandView = new RawCommandTreeView(ctx, this);
   commandEditorView->addTreeViews(protoCommandView, rawCommandView);
   childViews.append(protoCommandView);
   childViews.append(rawCommandView);
-  addHLine(splitter);
 
-  auto *buttonSplitter = new QSplitter(Qt::Horizontal, splitter);
+  auto *buttonSplitter = new QSplitter(Qt::Horizontal);
   hardButtonView = new DeviceHardButtonTreeView(ctx, this);
   buttonSplitter->addWidget(hardButtonView);
   childViews.append(hardButtonView);
   softButtonView = new DeviceSoftButtonTreeView(ctx, this);
   buttonSplitter->addWidget(softButtonView);
   childViews.append(softButtonView);
-  splitter->addWidget(buttonSplitter);
 
   stateMachineView = new StateMachineTreeView(ctx, this);
   stateMachineEditorView = new StateMachineEditorView(ctx, stateMachineView,
       this);
-  splitter->addWidget(stateMachineEditorView);
   childViews.append(stateMachineView);
+
+  if (useTabs == 1) {
+    auto *tabWidget = new QTabWidget(splitter);
+    tabWidget->addTab(commandEditorView, "Commands");
+    tabWidget->addTab(buttonSplitter, "Buttons");
+    tabWidget->addTab(stateMachineEditorView, "Control");
+    splitter->addWidget(tabWidget);
+  } else {
+    splitter->addWidget(commandEditorView);
+    addHLine(splitter);
+    splitter->addWidget(buttonSplitter);
+    splitter->addWidget(stateMachineEditorView);
+  }
 
   layout->addWidget(splitter);
 }
