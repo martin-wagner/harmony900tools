@@ -197,8 +197,8 @@ bool DeviceStorage::writeDeviceJson(const data::ConfigData &c, int deviceId)
 
   data::serialiser::toJson(j["Device"], *device);
 
-  deviceName = qstr(device->mnf.get()) + "-" + qstr(device->model.get())
-      + ".json";
+  deviceName = device->type.get().getQString() + "-" + qstr(device->mnf.get())
+      + "-" + qstr(device->model.get()) + ".json";
 
   auto file = QFileDialog::getSaveFileName(nullptr, tr("Save device as json"),
       QDir::homePath() + "/" + deviceName,
