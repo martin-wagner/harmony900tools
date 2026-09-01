@@ -710,7 +710,7 @@ bool H900userconfig::readRelativeActions(pugi::xml_node &state)
 {
   auto ret = true;
 
-  if (state.child("RelativeActions").children().empty()) {
+  if (!state.child("RelativeActions")) {
     return true;
   }
 
@@ -2047,7 +2047,7 @@ bool H900userconfig::writeDeviceAction(pugi::xml_node &actionType,
     auto operation = sequence.append_child("Operation");
     operation.append_child("Name").text().set(s.opcode.get().getString());
     auto id = operation.append_child("Parameter");
-    id.append_attribute("name").set_value("Id");
+    id.append_attribute("name").set_value("DeviceId");
     id.text().set(deviceId);
     writeProperty(operation, "Command", s.cmd, "Parameter");
     writeProperty(operation, "Modifier", s.mod, "Parameter");
