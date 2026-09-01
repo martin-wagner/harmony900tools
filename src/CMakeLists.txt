@@ -233,9 +233,9 @@ if(WIN32)
       $<TARGET_FILE:Qt6::Gui>
       $<TARGET_FILE:Qt6::Widgets>
       $<TARGET_FILE:Qt6::Svg>
-      ${mxeSourcePath}/bin/icudt74.dll
-      ${mxeSourcePath}/bin/icuin74.dll
-      ${mxeSourcePath}/bin/icuuc74.dll
+      ${mxeSourcePath}/bin/icudt78.dll
+      ${mxeSourcePath}/bin/icuin78.dll
+      ${mxeSourcePath}/bin/icuuc78.dll
       ${mxeSourcePath}/bin/libbrotlicommon.dll
       ${mxeSourcePath}/bin/libbrotlidec.dll
       ${mxeSourcePath}/bin/libbz2.dll
