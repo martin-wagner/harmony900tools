@@ -132,6 +132,8 @@ bool ActivityModel::insertRows(int position, int rows,
       success = false;
       continue;
     }
+    worker.setActivityPowerOffUnusedDevices(true, i);
+    worker.setActivityStopOnExit(true, i);
   }
 
   config.endMacro();
@@ -223,8 +225,10 @@ QVariant ActivityModel::getEditData(const QModelIndex &index) const
         return qstr(activity.label.get());
       case Column::POWER_OFF:
         return activity.powerOffUnusedDevices.get();
-      case Column::PLAY:
-        return activity.playOnEnter.get(); //ignore stop-on-exit
+      case Column::AUTO_PLAY:
+        return activity.playOnEnter.get();
+      case Column::AUTO_STOP:
+        return activity.stopOnExit.get();
       case Column::TRAINING:
         return activity.trainingWheels.get();
       default:
@@ -245,8 +249,11 @@ QVariant ActivityModel::getCheckStateData(const QModelIndex &index) const
       case Column::POWER_OFF:
         value = activity.powerOffUnusedDevices.get();
         break;
-      case Column::PLAY:
-        value = activity.playOnEnter.get(); //ignore stop-on-exit
+      case Column::AUTO_PLAY:
+        value = activity.playOnEnter.get();
+        break;
+      case Column::AUTO_STOP:
+        value = activity.stopOnExit.get();
         break;
       case Column::TRAINING:
         value = activity.trainingWheels.get();
@@ -302,12 +309,10 @@ bool ActivityModel::setDataValue(const QModelIndex &index,
       return setActivityName(worker, row, value);
     case Column::POWER_OFF:
       return worker.setActivityPowerOffUnusedDevices(value.toBool(), row);
-    case Column::PLAY:
-      config.beginMacro(QObject::tr("Set autoplay"));
-      worker.setActivityPlayOnEnter(value.toBool(), row);
-      worker.setActivityStopOnExit(value.toBool(), row);
-      config.endMacro();
-      return true;
+    case Column::AUTO_PLAY:
+      return worker.setActivityPlayOnEnter(value.toBool(), row);
+    case Column::AUTO_STOP:
+      return worker.setActivityStopOnExit(value.toBool(), row);
     case Column::TRAINING:
       return worker.setActivityTrainingWheels(value.toBool(), row);
     default:
@@ -333,12 +338,10 @@ bool ActivityModel::setDataCheck(const QModelIndex &index,
   switch (index.column()) {
     case Column::POWER_OFF:
       return worker.setActivityPowerOffUnusedDevices(checkedState, row);
-    case Column::PLAY:
-      config.beginMacro(QObject::tr("Set autoplay"));
-      worker.setActivityPlayOnEnter(checkedState, row);
-      worker.setActivityStopOnExit(checkedState, row);
-      config.endMacro();
-      return true;
+    case Column::AUTO_PLAY:
+      return worker.setActivityPlayOnEnter(checkedState, row);
+    case Column::AUTO_STOP:
+      return worker.setActivityStopOnExit(checkedState, row);
     case Column::TRAINING:
       return worker.setActivityTrainingWheels(checkedState, row);
     default:

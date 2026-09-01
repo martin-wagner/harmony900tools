@@ -23,7 +23,8 @@ class ActivityModel: public BaseModel
       ACTTYPE,
       LABEL,
       POWER_OFF,
-      PLAY,
+      AUTO_PLAY,
+      AUTO_STOP,
       TRAINING,
 
       COUNT
@@ -34,7 +35,8 @@ class ActivityModel: public BaseModel
         { Column::ACTTYPE,       { "Type", "What kind of Activity you have", "Enum", false, {}, } },
         { Column::LABEL,         { "Name", "Activity Name (displayed on \"My Activities\" screen)", "QString", false, {}, } },
         { Column::POWER_OFF,     { "Auto off", "Power off unused devices when starting this activity", "bool", false, {}, } },
-        { Column::PLAY,          { "Auto play", "Auto start/stop playing content when starting/leaving this activity", "bool", false, {}, } },
+        { Column::AUTO_PLAY,     { "Auto play", "Start playing content when starting this activity", "bool", false, {}, } },
+        { Column::AUTO_STOP,     { "Auto stop", "Stop playing content when leaving this activity", "bool", false, {}, } },
         { Column::TRAINING,      { "Training", "Start \"testing mode\" on the remote for this activity. Useful when you add/change a activity", "bool", false, {}, } },
     };
 
