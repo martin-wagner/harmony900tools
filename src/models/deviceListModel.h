@@ -25,8 +25,8 @@ class DeviceModel: public BaseModel
       MANUFACTURER,
       MODEL,
       DISPLAY,
-      ALWAYS_ON,
       MANUAL_POWER,
+      ALWAYS_ON,
       SCART,
 
       COUNT
@@ -39,8 +39,8 @@ class DeviceModel: public BaseModel
         { Column::MANUFACTURER,  { "Manufacturer", "Device manufacturer", "QString", false, {}, } },
         { Column::MODEL,         { "Model", "Device model", "QString", false, {}, } },
         { Column::DISPLAY,       { "Display", "This is a display device (e.g. TV, monitor, projector)", "bool", false, {}, } },
-        { Column::ALWAYS_ON,     { "Always on", "Can't control power on/off for this device (e.g. no power switch, hard power switch only)", "bool", false, {}, } },
-        { Column::MANUAL_POWER,  { "Manual power", "Don't control power on/off for this device", "bool", false, {}, } },
+        { Column::MANUAL_POWER,  { "Manual power", "Can't control power on/off for this device (e.g. no power switch, hard power switch only)", "bool", false, {}, } },
+        { Column::ALWAYS_ON,     { "Always on", "Don't control power on/off for this device", "bool", false, {}, } },
         { Column::SCART,         { "SCART", "This device triggers auto input selection (e.g. SCART)", "bool", false, {}, } }
     };
 
