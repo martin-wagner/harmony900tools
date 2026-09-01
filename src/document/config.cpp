@@ -7,6 +7,7 @@
 
 #include "lib/zip.h"
 #include "lib/uid.h"
+#include "ui/settings.h"
 #include "config.h"
 #include "files/h900.h"
 #include "files/create.h"
@@ -18,7 +19,7 @@ namespace document
 {
 
 Config::Config(Context &ctx, bool init, QObject *parent) :
-    QObject(parent), stack(ctx.undoStack())
+    QObject(parent), stack(ctx.undoStack()), settings(ctx.settings())
 {
   reset();
 
@@ -281,6 +282,8 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
       copyIcons();
       //dump actual userconfig
       auto usercfgWriter = files::H900userconfig(exportPath);
+      usercfgWriter.usePrettyPrinting(
+          settings.value(defaults::xmPretty().key).toBool());
       connect(&usercfgWriter, &files::H900userconfig::writeLog, this,
           &Config::writeLog);
       connect(&usercfgWriter, &files::H900userconfig::writeMsg, this,

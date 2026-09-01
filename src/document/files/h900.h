@@ -36,6 +36,8 @@ class H900userconfig : public QObject
   public:
     H900userconfig(const QString &workPath);
 
+    void usePrettyPrinting(bool v);
+
     /** write files to disk at _workPath_ */
     bool dump(const data::ConfigData *c);
     /** read files fom disk at _workPath_, use cmd (undo) catalogue for additional data verification */
@@ -105,7 +107,7 @@ class H900userconfig : public QObject
     bool readIrStream();
 
   protected:
-    bool dumpUserConfigXml();
+    bool dumpUserConfigXml(int pugiFormat);
     bool writeProperties(pugi::xml_node &root);
     bool writeUser(pugi::xml_node &root);
     bool writeController(pugi::xml_node &root);
@@ -138,7 +140,7 @@ class H900userconfig : public QObject
     bool writeProtocols(pugi::xml_node &root);
     bool writeProtocol(pugi::xml_node &protocols, int idx, const binary::irProto::IrProto &irProto);
     void writeUnknownElement(pugi::xml_node& parent, const data::item::UnknownElement& element);
-    bool dumpActionListXml();
+    bool dumpActionListXml(int pugiFormat);
     bool exportDevices(pugi::xml_node &root);
     bool exportDevice(pugi::xml_node &root, const data::item::Device &data);
     bool exportButtons(pugi::xml_node &root, uint32_t deviceId, const std::vector<data::item::Button> &data);
@@ -156,6 +158,7 @@ class H900userconfig : public QObject
     std::string writerTime;
     std::string hash;
     binary::ssIr::File streams;
+    bool prettyPrinting = false;
 };
 
 //the rest -- platformconfig dir, meta-inf, scripts

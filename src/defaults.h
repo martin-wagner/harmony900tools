@@ -67,6 +67,23 @@ inline const SettingDef undoMacros()
   return s;
 };
 
+inline const SettingDef xmPretty()
+{
+  QList<QPair<QString, QVariant>> options;
+  SettingDef s;
+
+  s.key = "xmlPretty";
+  s.label = QObject::tr("XML pretty printing");
+  s.helpText = QObject::tr("writes pretty printing xml (lines, indentation)");
+  s.type = SettingType::Bool;
+  s.defaultValue = false;
+  s.tab = "Debug";
+  s.minValue = QVariant { };
+  s.maxValue = QVariant { };
+
+  return s;
+};
+
 inline const SettingDef loadLastUsed()
 {
   QList<QPair<QString, QVariant>> options;

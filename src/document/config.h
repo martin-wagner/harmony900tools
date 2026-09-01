@@ -82,6 +82,7 @@ class Config : public QObject
   protected:
     std::unique_ptr<data::ConfigData> configData;
     lib::UndoStack &stack;
+    Settings &settings;
     data::CmdCatalogue *worker = nullptr;
 
     bool dirty = false;

@@ -53,9 +53,15 @@ H900userconfig::H900userconfig(const QString &workPath) :
 {
 }
 
+void H900userconfig::usePrettyPrinting(bool v)
+{
+  prettyPrinting = v;
+}
+
 bool H900userconfig::dump(const ConfigData *c)
 {
   bool ret = true;
+  int pugiFormat = pugi::format_raw;
   vector<uint8_t> tmp;
 
   this->c = c;
@@ -63,14 +69,18 @@ bool H900userconfig::dump(const ConfigData *c)
   writerTime = lib::writeTimeH900Xml();
   streams = binary::ssIr::File();
 
+  if (prettyPrinting) {
+    pugiFormat = pugi::format_default;
+  }
+
   emit writeLog(LogLevel::Info, tr("Exporting data..."),
       ContentType::PlainText);
 
   QDir().mkpath(wp + "/" + QFileInfo(userConfigPath).path());
   try {
     ret &= writeIrProto(); //side effect: creates hash for xml files
-    ret &= dumpUserConfigXml();
-    ret &= dumpActionListXml();
+    ret &= dumpUserConfigXml(pugiFormat);
+    ret &= dumpActionListXml(pugiFormat);
     ret &= writeIrStream();
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
@@ -1002,8 +1012,8 @@ bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setDeviceNumpadActionSequenceValue(val, devicePos, s,
-            digit, seqPos);
+        worker->setDeviceNumpadActionSequenceValue(val, devicePos, s, digit,
+            seqPos);
         break;
       }
       default: {
@@ -1574,8 +1584,8 @@ bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
       }
       case "Value"_hash: {
         auto val = prop.text().as_string();
-        worker->setActivityActionSequenceValue(val, activityPos, t,
-            actionPos, seqPos);
+        worker->setActivityActionSequenceValue(val, activityPos, t, actionPos,
+            seqPos);
         break;
       }
       default: {
@@ -1711,7 +1721,7 @@ bool H900userconfig::readIrStream()
   return true;
 }
 
-bool H900userconfig::dumpUserConfigXml()
+bool H900userconfig::dumpUserConfigXml(int pugiFormat)
 {
   pugi::xml_document xml;
 
@@ -1754,10 +1764,10 @@ bool H900userconfig::dumpUserConfigXml()
 
 #ifdef _WIN32
   ret = xml.save_file(QString(wp + "/" + userConfigPath).toStdWString().c_str(),
-      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+      PUGIXML_TEXT("  "), pugiFormat, pugi::encoding_utf8);
 #else
   ret = xml.save_file(QString(wp + "/" + userConfigPath).toUtf8(),
-      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+      PUGIXML_TEXT("  "), pugiFormat, pugi::encoding_utf8);
 #endif
   return true;
 }
@@ -2509,7 +2519,7 @@ void H900userconfig::writeUnknownElement(pugi::xml_node &parent,
   }
 }
 
-bool H900userconfig::dumpActionListXml()
+bool H900userconfig::dumpActionListXml(int pugiFormat)
 {
   pugi::xml_document xml;
 
@@ -2535,10 +2545,10 @@ bool H900userconfig::dumpActionListXml()
 
 #ifdef _WIN32
   ret = xml.save_file(QString(wp + "/" + actionListPath).toStdWString().c_str(),
-      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+      PUGIXML_TEXT("  "), pugiFormat, pugi::encoding_utf8);
 #else
   ret = xml.save_file(QString(wp + "/" + actionListPath).toUtf8(),
-      PUGIXML_TEXT("  "), pugi::format_default, pugi::encoding_utf8);
+      PUGIXML_TEXT("  "), pugiFormat, pugi::encoding_utf8);
 #endif
   return true;
 }

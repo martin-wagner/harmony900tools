@@ -459,6 +459,7 @@ void MainWindow::readSettings()
   }
 
   settings->addSetting(defaults::undoMacros());
+  settings->addSetting(defaults::xmPretty());
 
   settings->addSetting(defaults::loadLastUsed());
   auto load = settings->value(defaults::loadLastUsed().key).toBool();
