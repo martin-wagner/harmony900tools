@@ -15,8 +15,7 @@ namespace data
 
 EditStateMachineCommand::EditStateMachineCommand(ConfigData &c,
     uint32_t devicePos, const QString &desc, QUndoCommand *parent) :
-    BaseCommand(QObject::tr("Add Statemachine (to device: %1)").arg(devicePos),
-        parent), c(c), devicePos(devicePos)
+    BaseCommand(desc, parent), c(c), devicePos(devicePos)
 {
 }
 

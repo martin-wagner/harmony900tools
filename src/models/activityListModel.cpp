@@ -80,7 +80,8 @@ Qt::ItemFlags ActivityModel::flags(const QModelIndex &index) const
 bool ActivityModel::setData(const QModelIndex &index, const QVariant &value,
     int role)
 {
-  if (index.parent().isValid() || (role != Qt::EditRole)) {
+  if (index.parent().isValid()
+      || ((role != Qt::EditRole) && (role != Qt::CheckStateRole))) {
     return false;
   }
   auto row = index.row();
@@ -182,7 +183,7 @@ bool ActivityModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
     return false;
   }
   auto &activities = config.data().getActivities();
-  if ((sourceRow > activities.size())
+  if ((sourceRow >= activities.size())
       || (destinationChild > activities.size())) {
     return false;
   }

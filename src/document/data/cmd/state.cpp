@@ -136,6 +136,7 @@ AddStateCommand::AddStateCommand(ConfigData &c, uint32_t devicePos,
         name.toStdString())
 {
   uint32_t actCount;
+  vector<string> states;
 
   if (name.isEmpty()) {
     return;
@@ -145,19 +146,21 @@ AddStateCommand::AddStateCommand(ConfigData &c, uint32_t devicePos,
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
     switch (t) {
       case item::StateMachineType::Discrete: {
+        states = sm.relative.states;
         actCount = sm.discrete.states.size();
         break;
       }
       case item::StateMachineType::Relative: {
-        auto &states = sm.relative.states;
-        if (find(states.begin(), states.end(), this->name) != states.end()) {
-          return;
-        }
+        states = sm.relative.states;
         actCount = states.size();
         break;
       }
       default:
         return;
+    }
+    if (find(states.begin(), states.end(), this->name) != states.end()) {
+      //must be unique
+      return;
     }
 
     if (actPos < 0) {
@@ -345,24 +348,37 @@ AddActionCommand::AddActionCommand(ConfigData &c, uint32_t devicePos,
     BaseCommand(QObject::tr("Add DeviceAction (to device: %1)").arg(devicePos),
         parent), c(c), devicePos(devicePos), smPos(smPos), t(t)
 {
-  switch (t) {
-    case item::StateMachineAction::Start:
-    case item::StateMachineAction::Finish:
-    case item::StateMachineAction::Relative_Reset:
-    case item::StateMachineAction::Relative_Next:
-    case item::StateMachineAction::Relative_Prev:
-      break;
-    default:
-      return;
-  }
-  if (devicePos >= c.getDevices().size()) {
-    return;
-  }
-  if (smPos >= c.getDevices()[devicePos].getStateMachines().size()) {
-    return;
-  }
+  optional<item::DeviceAction> *action = nullptr;
 
-  isValid = true;
+  try {
+    auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
+    switch (t) {
+      case item::StateMachineAction::Start:
+        action = &sm.startAction;
+        break;
+      case item::StateMachineAction::Finish:
+        action = &sm.finishAction;
+        break;
+      case item::StateMachineAction::Relative_Reset:
+        action = &sm.relative.resetAction;
+        break;
+      case item::StateMachineAction::Relative_Next:
+        action = &sm.relative.nextStateAction;
+        break;
+      case item::StateMachineAction::Relative_Prev:
+        action = &sm.relative.prevStateAction;
+        break;
+      default:
+        return;
+    }
+    if (action->has_value()) {
+      //already exists
+      return;
+    }
+
+    isValid = true;
+  } catch (std::out_of_range&) {
+  }
 }
 
 void AddActionCommand::redo()
@@ -528,24 +544,24 @@ RemoveActionCommand::RemoveActionCommand(ConfigData &c, uint32_t devicePos,
     auto &sm = c.getDevices().at(devicePos).getStateMachines().at(smPos);
     switch (t) {
       case item::StateMachineAction::Start:
-        action = *sm.startAction;
+        action = sm.startAction.value();
         break;
       case item::StateMachineAction::Finish:
-        action = *sm.finishAction;
+        action = sm.finishAction.value();
         break;
       case item::StateMachineAction::Relative_Reset:
-        action = *sm.relative.resetAction;
+        action = sm.relative.resetAction.value();
         break;
       case item::StateMachineAction::Relative_Next:
-        action = *sm.relative.nextStateAction;
+        action = sm.relative.nextStateAction.value();
         break;
       case item::StateMachineAction::Relative_Prev:
-        action = *sm.relative.prevStateAction;
+        action = sm.relative.prevStateAction.value();
         break;
       default:
         return;
     }
-  } catch (std::out_of_range&) {
+  } catch (std::bad_optional_access&) {
     return;
   }
   isValid = true;
