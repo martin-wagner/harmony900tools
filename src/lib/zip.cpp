@@ -1,18 +1,46 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "zip.h"
-
-using namespace std;
-
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 
+#ifdef _WIN32
+#include <minizip/ioapi.h>
+#include <minizip/iowin32.h>
+#endif
+
+#include "zip.h"
+
+
+using namespace std;
+
 namespace lib
 {
 
 static const uLong UTF8_FLAG = 0x0800;
+
+unzFile openZipForRead(const QString &path)
+{
+#ifdef _WIN32
+  zlib_filefunc64_def ffunc;
+  fill_win32_filefunc64W(&ffunc);
+  return unzOpen2_64(path.toStdWString().c_str(), &ffunc);
+#else
+  return unzOpen64(QFile::encodeName(path).constData());
+#endif
+}
+
+zipFile openZipForWrite(const QString &path)
+{
+#ifdef _WIN32
+  zlib_filefunc64_def ffunc;
+  fill_win32_filefunc64W(&ffunc);
+  return zipOpen2_64(path.toStdWString().c_str(), APPEND_STATUS_CREATE, nullptr, &ffunc);
+#else
+  return zipOpen64(QFile::encodeName(path).constData(), APPEND_STATUS_CREATE);
+#endif
+}
 
 bool zipDirectory(zipFile &zf, const QString &baseDir,
     const QStringList executableFileNames)
@@ -30,7 +58,7 @@ bool zipDirectory(zipFile &zf, const QString &baseDir,
     QFile file(it.filePath());
     if (!file.open(QIODevice::ReadOnly)) {
       qWarning() << "zipDirectory: cannot open" << it.filePath();
-      continue;
+      return false;
     }
     QByteArray data = file.readAll();
     file.close();
@@ -120,6 +148,7 @@ bool unzipToDirectory(unzFile &uf, const QString &destDir)
       outFile.close();
     } else {
       qWarning() << "unzipToDirectory: cannot write" << outPath;
+      return false;
     }
 
     unzCloseCurrentFile(uf);

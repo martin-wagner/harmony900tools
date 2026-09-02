@@ -44,8 +44,13 @@ bool document::Config::create()
 
 bool Config::read(const std::vector<uint8_t> &zip, Type t)
 {
+  //some windows pain here -- QTemporaryFile and libzip can't hold the file
+  //handle at the same time. workaround: use QTemporaryDir and create a file
+  //in there.
+
   bool ret = false;
-  QTemporaryFile zipFile;
+  QTemporaryDir zipDir;
+  QString zipFilePath = zipDir.path() + "/import.zip";
 
   reset();
 
@@ -60,29 +65,33 @@ bool Config::read(const std::vector<uint8_t> &zip, Type t)
   }
 
   // write the zip buffer to a temp file so minizip can open it by path
-  zipFile.setAutoRemove(true);
-  if (!zipFile.open()) {
-    emit writeLog(LogLevel::Error, tr("config: failed to create temp zip file"),
+  zipDir.setAutoRemove(true);
+  if (!zipDir.isValid()) {
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to create temp zip dir %1").arg(zipDir.path()),
+        ContentType::PlainText);
+    return false;
+  }
+
+  QFile zipFile(zipFilePath);
+  if (!zipFile.open(QIODevice::WriteOnly)) {
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to create temp zip file %1").arg(zipFilePath),
         ContentType::PlainText);
     return false;
   }
   emit writeLog(LogLevel::Debug, tr("config: using temp file %1, "
-      "temp dir %2").arg(zipFile.fileName()).arg(importPath),
-      ContentType::PlainText);
+      "temp dir %2").arg(zipFilePath).arg(importPath), ContentType::PlainText);
 
   zipFile.write(reinterpret_cast<const char*>(zip.data()),
       static_cast<qint64>(zip.size()));
   zipFile.flush();
-  zipFile.close();
+  zipFile.close(); // plain QFile: handle is actually released here
 
-  auto zipPath = QFile::encodeName(zipFile.fileName());
-#ifdef _WIN32
-  auto uf = unzOpen64(zipFile.fileName().toStdWString().c_str());
-#else
-  auto uf = unzOpen64(QFile::encodeName(zipFile.fileName()).constData());
-#endif
+  auto uf = lib::openZipForRead(zipFilePath);
   if (uf == nullptr) {
-    emit writeLog(LogLevel::Error, tr("config: failed to open temp zip file"),
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to open temp zip file %1").arg(zipFilePath),
         ContentType::PlainText);
     return false;
   }
@@ -140,14 +149,11 @@ bool Config::read(const QString &file)
     return false;
   }
 
-#ifdef _WIN32
-  auto uf = unzOpen64(file.toStdWString().c_str());
-#else
-  auto uf = unzOpen64(QFile::encodeName(file).constData());
-#endif
+  auto uf = lib::openZipForRead(file);
   if (uf == nullptr) {
     emit writeLog(LogLevel::Error,
-        tr("config: failed to open compressed config"), ContentType::PlainText);
+        tr("config: failed to open compressed config %1").arg(file),
+        ContentType::PlainText);
     return false;
   }
 
@@ -185,9 +191,14 @@ bool Config::reset()
 
   tempDir = std::make_unique<QTemporaryDir>();
   if (!tempDir->isValid()) {
-    qWarning() << "Config::create(zip): failed to create temp dir";
+    emit writeLog(LogLevel::Error,
+        tr("Config::create tmp: failed to create temp dir %1").arg(
+            tempDir->path()), ContentType::PlainText);
     return false;
   }
+  emit writeLog(LogLevel::Debug,
+      tr("Config::create tmp: created temp dir %1").arg(tempDir->path()),
+      ContentType::PlainText);
   tempDir->setAutoRemove(true);
   dir.mkpath(tempDir->path());
   importPath = tempDir->path() + "/import";
@@ -241,14 +252,10 @@ bool Config::saveAs(const QString &file)
     return false;
   }
 
-#ifdef _WIN32
-  auto zf = zipOpen64(file.toStdWString().c_str(), APPEND_STATUS_CREATE);
-#else
-  auto zf = zipOpen64(QFile::encodeName(file).constData(),
-  APPEND_STATUS_CREATE);
-#endif
+  auto zf = lib::openZipForWrite(file);
   if (zf == nullptr) {
-    emit writeLog(LogLevel::Error, tr("config: failed to create project file"),
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to create project file %1").arg(file),
         ContentType::PlainText);
     return false;
   }
@@ -264,8 +271,21 @@ bool Config::saveAs(const QString &file)
 
 bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
 {
+  //some windows pain here -- QTemporaryFile and libzip can't hold the file
+  //handle at the same time. workaround: use QTemporaryDir and create a file
+  //in there.
+
   bool ret;
-  QTemporaryFile zipFile;
+
+  QTemporaryDir zipDir;
+  zipDir.setAutoRemove(true);
+  if (!zipDir.isValid()) {
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to create temp zip dir %1").arg(zipDir.path()),
+        ContentType::PlainText);
+    return false;
+  }
+  QString zipFilePath = zipDir.path() + "/export.zip";
 
   switch (t) {
     case Type::H900: {
@@ -300,24 +320,10 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
     return ret;
   }
 
-  zipFile.setAutoRemove(true);
-  if (!zipFile.open()) {
-    emit writeLog(LogLevel::Error, tr("config: failed to create temp zip file"),
-        ContentType::PlainText);
-    return false;
-  }
-  auto zipFilePath = zipFile.fileName();
-  zipFile.close(); // hand off to minizip; file stays on disk until zipFile is destroyed
-
-  auto zipPath = QFile::encodeName(zipFilePath);
-#ifdef _WIN32
-  auto zf = zipOpen64(zipFilePath.toStdWString().c_str(), APPEND_STATUS_CREATE);
-#else
-  auto zf = zipOpen64(QFile::encodeName(zipFilePath).constData(),
-  APPEND_STATUS_CREATE);
-#endif
+  auto zf = lib::openZipForWrite(zipFilePath);
   if (zf == nullptr) {
-    emit writeLog(LogLevel::Error, tr("config: failed to open temp zip file"),
+    emit writeLog(LogLevel::Error,
+        tr("config: failed to open temp zip file %1").arg(zipFilePath),
         ContentType::PlainText);
     return false;
   }
@@ -337,6 +343,7 @@ bool Config::dumpZip(std::vector<uint8_t> &zip, Type t) const
     return false;
   }
   QByteArray data = result.readAll();
+  result.close();
   zip.assign(data.constBegin(), data.constEnd());
 
   return true;
