@@ -66,6 +66,7 @@ class ConcordConnection: public QWidget
 
     bool learningEnabled = false;
     bool dataMode = false;
+    bool busy = false;
     LearnedCommandMode learnMode = LearnedCommandMode::IR_STREAM;
 
   private:

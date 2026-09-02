@@ -246,6 +246,10 @@ void ConcordConnection::onUpdateProgress(const QString text, int step, int of)
 
 void ConcordConnection::onDisconnected(int time_s)
 {
+  if (busy) {
+    return;
+  }
+
   if (disconnectMsg != nullptr) {
     return; // already shown
   }
@@ -545,6 +549,8 @@ void ConcordConnection::updateActionStates(bool setToBusy)
 {
   bool state;
 
+  busy = setToBusy;
+
   auto connected = concord.isConnected();
   if (setToBusy) {
     state = false;
@@ -569,8 +575,9 @@ void ConcordConnection::updateActionStates(bool setToBusy)
 
 void ConcordConnection::cleanup()
 {
-  learningEnabled = false;
+  //learningEnabled = false; no! controlled externally
   dataMode = false;
+  busy = false;
   learnMode = LearnedCommandMode::IR_STREAM;
   if (disconnectMsg != nullptr) {
     disconnectMsg->deleteLater();

@@ -1695,7 +1695,7 @@ bool H900userconfig::readIrProto()
   auto status = protocols.parse(QString(wp + "/" + irProtoPath).toStdString());
   if (status != binary::irProto::Status::OK) {
     emit writeLog(LogLevel::Error,
-        tr("import ir protocols parser error: %d").arg((int) status),
+        tr("import ir protocols parser error: %1").arg((int) status),
         ContentType::PlainText);
     return false;
   }
@@ -1711,7 +1711,7 @@ bool H900userconfig::readIrStream()
   auto status = streams.parse(QString(wp + "/" + ssIrPath).toStdString());
   if (status != binary::ssIr::Status::OK) {
     emit writeLog(LogLevel::Error,
-        tr("import ir stream parser error: %d").arg((int) status),
+        tr("import ir stream parser error: %1").arg((int) status),
         ContentType::PlainText);
     return false;
   }

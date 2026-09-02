@@ -127,7 +127,9 @@ void MainWindow::about()
   QMessageBox::about(this, tr("About %1").arg(QString(PROGRAM_NAME)),
       tr("<b>%1</b> helps you to program your Logitech Harmony "
           "remote control without the always-online (now always-offline) "
-          "software. <br/><br/> %2").arg(QString(PROGRAM_NAME)).arg(
+          "software. <br/><br/> %2 <br/><br/> "
+          "<a href=\"https://github.com/martin-wagner/harmony900tools\">"
+          "GitHub Project Home</a>").arg(QString(PROGRAM_NAME)).arg(
           infoText()));
 }
 
@@ -389,7 +391,7 @@ void MainWindow::createActions()
   //help
   menuBar()->addSeparator();
   QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-  QAction *aboutAct = helpMenu->addAction(tr("&About"), this,
+  QAction *aboutAct = helpMenu->addAction(tr("&About project"), this,
       &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
 
@@ -435,8 +437,8 @@ void MainWindow::createActions()
       &LogViewer::addMessage);
   connect(deviceEditor, &editors::DeviceEditor::enableLearnMode,
       concordConnection, &ConcordConnection::enableLearnMode);
-  connect(concordConnection, &ConcordConnection::learnedCommand,
-      deviceEditor, &editors::DeviceEditor::setLearnedCommand);
+  connect(concordConnection, &ConcordConnection::learnedCommand, deviceEditor,
+      &editors::DeviceEditor::setLearnedCommand);
 
   connect(activityEditor, &editors::ActivityEditor::writeLog, log,
       &LogViewer::addEntry);
