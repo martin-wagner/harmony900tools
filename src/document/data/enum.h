@@ -28,16 +28,22 @@ enum class Locale { dan, deu, enu, esp, fin, fra, ita, nid, nor, plk, ptg, rus, 
 enum class TimeFormat { Military, Unknown };
 enum class PvrType { Generic, Unknown };
 enum class TunerInput { Tuner, Unknown };
-enum class DeviceType { Amplifier, AudioVideoSwitch, Cd, ClimateControl, Computer, DvdCd,
-    DvdCdGame, DvdCdRadio, GameConsole, Light, MediaCenterPC, Projector, Pvr, Receiver,
-    SetTopBox, Television, Vcr, Unknown };
+enum class DeviceType { Amplifier, AudioVideoSwitch, CableBox, Cassette, Cd, CdJukebox, CdRadioCassette,
+    ClimateControl, Computer, Dat, DvdCd, DvdCdGame, DvdCdRadio, DvdRecorder, DvdrVcr, DvdVcr, DvdVcrReceiver,
+    GameConsole, HomeAppliance, Laptop, Laserdisc, Light, MediaCenterPC, Minidisc, Monitor, MusicServer,
+    Projector, Pvr, RadioTuner, Receiver, Satellite, SetTopBox, Television, TvDvd, TvDvdVcr, TvHdd,
+    TvVcr, Vcr, Unknown
+};
 enum class StateMachineDeviceType { Power, Input, Screen, TVInput, AntennaOutput, User1, User2, User3, User4, User5, Unknown };
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };
-enum class ActivityType { VirtualCdMulti, VirtualDvd, VirtualGameConsole,
-    VirtualGeneric, VirtualMusicServer, VirtualPvr, VirtualRadioSimple,
-    VirtualSatelliteMusic, VirtualTelevisionN, VirtualVcr, Unknown};
+enum class ActivityType { VirtualCdJukebox, VirtualCdMulti, VirtualDvd, VirtualGameConsole, VirtualGeneric,
+    VirtualLaserdisc, VirtualMediaCenterMusic, VirtualMediaCenterPictures, VirtualMediaCenterTv,
+    VirtualMediaCenterVideos, VirtualMinidisc, VirtualMusicServer, VirtualPresentation, VirtualPvr,
+    VirtualRadioSimple, VirtualReplayTV, VirtualSatelliteMusic, VirtualTape, VirtualTeletext, VirtualTelevisionN,
+    VirtualTiVo, VirtualVcr, VirtualVcrRecorder, Unknown
+};
 enum class DeviceRole { DEFAULT, DISPLAY, VOLUME, LIGHTCONTROL, LIGHTCONTROL2, LIGHTCONTROL3, LIGHTCONTROL4,
     PASSTHROUGH, PASSTHROUGH2, PASSTHROUGH3, PASSTHROUGH4, Unknown};
 enum class ActivityStartPage { Transport, Numbers, GameController, Unknown };
