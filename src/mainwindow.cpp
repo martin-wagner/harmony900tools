@@ -106,7 +106,7 @@ void MainWindow::import()
   auto ret = maybeSave();
   if (ret) {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Import Config"),
-        QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"));
+        QDir::homePath(), tr("Hex Files (*.hex *.ezhex);;All Files (*)"));
 
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     ret = concord->stripHeader(fileName, data);

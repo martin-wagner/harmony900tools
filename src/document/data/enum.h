@@ -34,7 +34,7 @@ enum class DeviceType { Amplifier, AudioVideoSwitch, CableBox, Cassette, Cd, CdJ
     Projector, Pvr, RadioTuner, Receiver, Satellite, SetTopBox, Television, TvDvd, TvDvdVcr, TvHdd,
     TvVcr, Vcr, Unknown
 };
-enum class StateMachineDeviceType { Power, Input, Screen, TVInput, AntennaOutput, User1, User2, User3, User4, User5, Unknown };
+enum class StateMachineDeviceType { Power, Input, InputType, Screen, TVInput, AntennaOutput, User1, User2, User3, User4, User5, Unknown };
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };

@@ -187,7 +187,7 @@ void ConcordConnection::onBackupConfig()
 void ConcordConnection::onBackupConfigRestore()
 {
   auto file = QFileDialog::getOpenFileName(this, tr("Open File"),
-      QDir::homePath(), tr("hex Files (*.hex);;All Files (*)"));
+      QDir::homePath(), tr("Hex Files (*.hex *.ezhex);;All Files (*)"));
   if (file.isEmpty()) {
     return;
   }
