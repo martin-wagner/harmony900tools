@@ -42,6 +42,15 @@ zipFile openZipForWrite(const QString &path)
 #endif
 }
 
+gzFile openGzForRead(const QString &path)
+{
+#ifdef _WIN32
+  return gzopen_w(path.toStdWString().c_str(), "rb");
+#else
+  return gzopen(QFile::encodeName(path).constData(), "rb");
+#endif
+}
+
 bool zipDirectory(zipFile &zf, const QString &baseDir,
     const QStringList executableFileNames)
 {
@@ -159,6 +168,57 @@ bool unzipToDirectory(unzFile &uf, const QString &destDir)
   }
 
   return true;
+}
+
+bool gunzipToFile(const QString &gzPath, const QString &destPath,
+    const function<bool(uint64_t, uint64_t)> &progress)
+{
+  static const int CHUNK = 1 << 20;
+
+  gzFile gz = openGzForRead(gzPath);
+  if (gz == nullptr) {
+    qWarning() << "gunzipToFile: cannot open" << gzPath;
+    return false;
+  }
+  gzbuffer(gz, CHUNK);
+
+  QFile outFile(destPath);
+  if (!outFile.open(QIODevice::WriteOnly)) {
+    qWarning() << "gunzipToFile: cannot write" << destPath;
+    gzclose(gz);
+    return false;
+  }
+
+  const uint64_t total = QFileInfo(gzPath).size();
+  QByteArray buf(CHUNK, Qt::Uninitialized);
+  bool ok = true;
+
+  while (ok) {
+    const int bytesRead = gzread(gz, buf.data(), CHUNK);
+
+    if (bytesRead < 0) {
+      int errnum = Z_OK;
+      const char *msg = gzerror(gz, &errnum);
+      qWarning() << "gunzipToFile: read error in" << gzPath << msg;
+      ok = false;
+    } else if (bytesRead == 0) {
+      break; // end of file
+    } else if (outFile.write(buf.constData(), bytesRead) != bytesRead) {
+      qWarning() << "gunzipToFile: cannot write" << destPath;
+      ok = false;
+    } else if (progress != nullptr
+        && !progress(static_cast<uint64_t>(gzoffset(gz)), total)) {
+      ok = false; // cancelled
+    }
+  }
+
+  gzclose(gz);
+  outFile.close();
+
+  if (!ok) {
+    outFile.remove();
+  }
+  return ok;
 }
 
 } // namespace

@@ -22,6 +22,7 @@
 #include "stepProgress.h"
 
 using namespace std;
+using namespace document::files;
 
 namespace database
 {
@@ -62,6 +63,7 @@ void ImportWidget::setIndexProgress(qint64 done, qint64 total)
 void ImportWidget::appendLog(const QString &line)
 {
   logView->appendPlainText(line);
+  emit writeLog(LogLevel::Info, line, ContentType::PlainText);
 }
 
 void ImportWidget::setBusy(bool busy)
@@ -72,16 +74,18 @@ void ImportWidget::setBusy(bool busy)
   targetBrowseButton->setEnabled(idle);
 
   for (int i = 0; i < sourceRows.size(); i++) {
-    bool enabled = idle;
-    if ((i == checksumsIndex) && !verifyCheck->isChecked()) {
-      enabled = false;
-    }
-    sourceRows.at(i)->setInputEnabled(enabled);
+    sourceRows.at(i)->setInputEnabled(idle);
   }
 
-  verifyCheck->setEnabled(idle);
   importButton->setEnabled(idle);
   cancelButton->setEnabled(busy);
+
+  if (idle) {
+    databaseImporter->deleteLater();
+    databaseImporter = nullptr;
+
+    importDone(buildConfig());
+  }
 }
 
 void ImportWidget::onTargetBrowseClicked()
@@ -95,16 +99,6 @@ void ImportWidget::onTargetBrowseClicked()
       tr("Select target folder"), startDir);
   if (!dir.isEmpty()) {
     targetEdit->setText(dir);
-  }
-}
-
-void ImportWidget::onVerifyToggled(bool checked)
-{
-  sourceRows.at(checksumsIndex)->setInputEnabled(checked);
-  if (checked) {
-    sourceRows.at(checksumsIndex)->setState(StepState::Idle);
-  } else {
-    sourceRows.at(checksumsIndex)->setState(StepState::Skipped);
   }
 }
 
@@ -129,11 +123,37 @@ void ImportWidget::onImportClicked()
 
   resetStates();
   setBusy(true);
-  emit importRequested(buildConfig());
+
+  if (databaseImporter != nullptr) {
+    databaseImporter->deleteLater();
+  }
+  databaseImporter = new ImportDatabase(this);
+
+  connect(this, &ImportWidget::cancelRequested, databaseImporter,
+      &ImportDatabase::cancel);
+
+  connect(databaseImporter, &ImportDatabase::sourceStateChanged, this,
+      &ImportWidget::setSourceState);
+  connect(databaseImporter, &ImportDatabase::sourceProgressChanged, this,
+      &ImportWidget::setSourceProgress);
+  connect(databaseImporter, &ImportDatabase::indexStateChanged, this,
+      &ImportWidget::setIndexState);
+  connect(databaseImporter, &ImportDatabase::indexProgressChanged, this,
+      &ImportWidget::setIndexProgress);
+  connect(databaseImporter, &ImportDatabase::logMessage, this,
+      &ImportWidget::appendLog);
+  connect(databaseImporter, &ImportDatabase::finished, this,
+      [this](bool) {setBusy(false);});
+
+  databaseImporter->start(buildConfig());
 }
 
 void ImportWidget::onCancelClicked()
 {
+  if (databaseImporter == nullptr) {
+    return;
+  }
+
   cancelButton->setEnabled(false);
   appendLog(tr("Cancelling..."));
   emit cancelRequested();
@@ -165,15 +185,10 @@ void ImportWidget::createView()
     sourceRows.append(
         new SourceRow(name, releaseBaseUrl + name, gzipFilter, this));
   }
-  verifyCheck = new QCheckBox(tr("Verify SHA256 checksums"), this);
-  verifyCheck->setChecked(true);
-
   auto *sourcesLayout = new QVBoxLayout;
-  for (int i = 0; i < checksumsIndex; i++) {
+  for (int i = 0; i < sourceRows.size(); i++) {
     sourcesLayout->addWidget(sourceRows.at(i));
   }
-  sourcesLayout->addWidget(verifyCheck);
-  sourcesLayout->addWidget(sourceRows.at(checksumsIndex));
 
   auto *sourcesGroup = new QGroupBox(tr("Sources"), this);
   sourcesGroup->setLayout(sourcesLayout);
@@ -217,8 +232,6 @@ void ImportWidget::createConnections()
       &ImportWidget::updateSpaceInfo);
   connect(targetBrowseButton, &QPushButton::clicked, this,
       &ImportWidget::onTargetBrowseClicked);
-  connect(verifyCheck, &QCheckBox::toggled, this,
-      &ImportWidget::onVerifyToggled);
   connect(importButton, &QPushButton::clicked, this,
       &ImportWidget::onImportClicked);
   connect(cancelButton, &QPushButton::clicked, this,
@@ -273,10 +286,6 @@ bool ImportWidget::validateInput(QString &errorText) const
   }
 
   for (int i = 0; i < sourceRows.size(); i++) {
-    if (i == checksumsIndex && !verifyCheck->isChecked()) {
-      continue;
-    }
-
     const SourceRow *row = sourceRows.at(i);
     if (row->getLocation().isEmpty()) {
       errorText = tr("Missing location for %1.").arg(row->getFileName());
@@ -294,22 +303,16 @@ ImportConfig ImportWidget::buildConfig() const
 {
   ImportConfig config;
   config.targetDir = targetEdit->text().trimmed();
-  config.verifyChecksums = verifyCheck->isChecked();
-  for (int i = 0; i < checksumsIndex; i++) {
+  for (int i = 0; i < sourceRows.size(); i++) {
     config.sources.append(sourceRows.at(i)->getSpec());
   }
-  config.checksums = sourceRows.at(checksumsIndex)->getSpec();
   return config;
 }
 
 void ImportWidget::resetStates()
 {
   for (int i = 0; i < sourceRows.size(); i++) {
-    if (i == checksumsIndex && !verifyCheck->isChecked()) {
-      sourceRows.at(i)->setState(StepState::Skipped);
-    } else {
-      sourceRows.at(i)->setState(StepState::Idle);
-    }
+    sourceRows.at(i)->setState(StepState::Idle);
   }
   indexProgress->setState(StepState::Idle);
   logView->clear();

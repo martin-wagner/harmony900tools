@@ -7,6 +7,8 @@
 
 #include "stepProgress.h"
 
+using namespace document::files;
+
 namespace database
 {
 

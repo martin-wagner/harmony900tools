@@ -4,7 +4,7 @@
 
 #include <QWidget>
 
-#include "importConfig.h"
+#include "document/files/database.h"
 
 class QLabel;
 class QProgressBar;
@@ -24,7 +24,7 @@ class StepProgress: public QWidget
 
     /** total <= 0 shows a busy indicator (unknown size). */
     void setProgress(qint64 done, qint64 total);
-    void setState(StepState state, const QString &message = QString());
+    void setState(document::files::StepState state, const QString &message = QString());
 
   private:
     QProgressBar *progressBar = nullptr;

@@ -463,6 +463,11 @@ void MainWindow::createActions()
       &LogViewer::addEntry);
   connect(activityEditor, &editors::ActivityEditor::writeMsg, log,
       &LogViewer::addMessage);
+
+  connect(importWidget, &database::ImportWidget::writeLog, log,
+      &LogViewer::addEntry);
+  connect(importWidget, &database::ImportWidget::writeMsg, log,
+      &LogViewer::addMessage);
 }
 
 void MainWindow::readSettings()

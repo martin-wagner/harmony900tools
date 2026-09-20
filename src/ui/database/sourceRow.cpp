@@ -68,9 +68,9 @@ bool SourceRow::isLocal() const
   return true;
 }
 
-SourceSpec SourceRow::getSpec() const
+document::files::SourceSpec SourceRow::getSpec() const
 {
-  SourceSpec spec;
+  document::files::SourceSpec spec;
   spec.fileName = fileName;
   spec.location = getLocation();
   spec.isLocal = isLocal();
@@ -89,7 +89,8 @@ void SourceRow::setProgress(qint64 done, qint64 total)
   stepProgress->setProgress(done, total);
 }
 
-void SourceRow::setState(StepState state, const QString &message)
+void SourceRow::setState(document::files::StepState state,
+    const QString &message)
 {
   stepProgress->setState(state, message);
 }

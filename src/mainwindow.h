@@ -16,6 +16,7 @@
 #include "lib/undo.h"
 #include "context.h"
 #include "document/config.h"
+#include "document/files/database.h"
 #include "models/deviceListModel.h"
 #include "models/activityListModel.h"
 

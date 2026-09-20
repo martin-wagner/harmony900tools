@@ -4,7 +4,8 @@
 
 #include <QWidget>
 
-#include "importConfig.h"
+#include "document/files/database.h"
+
 
 class QLabel;
 class QLineEdit;
@@ -30,11 +31,11 @@ class SourceRow: public QWidget
     QString getFileName() const;
     QString getLocation() const;
     bool isLocal() const;
-    SourceSpec getSpec() const;
+    document::files::SourceSpec getSpec() const;
 
     void setInputEnabled(bool enabled);
     void setProgress(qint64 done, qint64 total);
-    void setState(StepState state, const QString &message = QString());
+    void setState(document::files::StepState state, const QString &message = QString());
 
   private slots:
     void onBrowseClicked();

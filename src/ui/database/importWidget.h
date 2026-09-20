@@ -5,7 +5,8 @@
 #include <QList>
 #include <QWidget>
 
-#include "importConfig.h"
+#include "logViewer.h"
+#include "document/files/database.h"
 
 class QCheckBox;
 class QLabel;
@@ -38,19 +39,20 @@ class ImportWidget: public QWidget
       "device_features_raw.jsonl.gz",
       "catalog_raw.jsonl.gz",
       "AllProtocols.json.gz",
-      "SHA256SUMS"
     };
-    static constexpr uint64_t requiredBytes = 7 * 1024 * 1024 * 1024;
-    static constexpr int checksumsIndex = 3;
+    static constexpr uint64_t requiredBytes = 7ull * 1024 * 1024 * 1024;
 
   signals:
-    void importRequested(const ImportConfig &config);
+    void writeLog(LogLevel level, const QString &message, ContentType contentType);
+    void writeMsg(const QString &message);
+
+    void importDone(const document::files::ImportConfig &config);
     void cancelRequested();
 
   public slots:
-    void setSourceState(int index, StepState state, const QString &message = QString());
+    void setSourceState(int index, document::files::StepState state, const QString &message = QString());
     void setSourceProgress(int index, qint64 done, qint64 total);
-    void setIndexState(StepState state, const QString &message = "");
+    void setIndexState(document::files::StepState state, const QString &message = "");
     void setIndexProgress(qint64 done, qint64 total);
     void appendLog(const QString &line);
 
@@ -59,7 +61,6 @@ class ImportWidget: public QWidget
 
   private slots:
     void onTargetBrowseClicked();
-    void onVerifyToggled(bool checked);
     void onImportClicked();
     void onCancelClicked();
 
@@ -70,7 +71,7 @@ class ImportWidget: public QWidget
     void updateSpaceInfo();
     qint64 getAvailableBytes() const;
     bool validateInput(QString &errorText) const;
-    ImportConfig buildConfig() const;
+    document::files::ImportConfig buildConfig() const;
     void resetStates();
 
     QLineEdit *targetEdit = nullptr;
@@ -78,13 +79,15 @@ class ImportWidget: public QWidget
     QLabel *spaceLabel = nullptr;
 
     QList<SourceRow*> sourceRows;
-    QCheckBox *verifyCheck = nullptr;
 
     StepProgress *indexProgress = nullptr;
 
     QPlainTextEdit *logView = nullptr;
     QPushButton *importButton = nullptr;
     QPushButton *cancelButton = nullptr;
+
+  private:
+    document::files::ImportDatabase *databaseImporter = nullptr;
 };
 
 }

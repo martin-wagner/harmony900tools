@@ -7,7 +7,7 @@ add_subdirectory(cli)
 set(programName h900edit)
 
 # dependencies (external)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg LinguistTools
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Concurrent Svg LinguistTools
                  OPTIONAL_COMPONENTS
 )
 find_package(Boost CONFIG REQUIRED)
@@ -80,6 +80,7 @@ set(sources ${sources}
   document/data/items/irProtoJson.cpp
   document/data/items/ssIrJson.cpp
   document/files/create.cpp
+  document/files/database.cpp
   document/files/h900.cpp
   document/files/protocols.cpp
   document/files/sharing.cpp
@@ -147,6 +148,8 @@ target_link_libraries(${programName} PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Svg
+    Qt6::Network
+    Qt6::Concurrent
     minizip
     qtadvanceddocking-qt6
     Libconcord::libconcord
