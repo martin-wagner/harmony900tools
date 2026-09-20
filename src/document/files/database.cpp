@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+#include <algorithm>
+#include <map>
+#include <vector>
+
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
@@ -9,6 +13,9 @@
 #include <QNetworkRequest>
 #include <QUrl>
 #include <QtConcurrent>
+#include <QSaveFile>
+
+#include <nlohmann/json.hpp>
 
 #include "database.h"
 
@@ -18,6 +25,251 @@ namespace document
 {
 namespace files
 {
+
+/**
+ * Sort order for manufacturers and devices: case insensitive first,
+ * ties are broken case sensitive. A search has to use the same order.
+ */
+struct NameLess
+{
+    bool operator()(const QString &a, const QString &b) const
+    {
+      const int folded = a.compare(b, Qt::CaseInsensitive);
+      if (folded != 0) {
+        return folded < 0;
+      }
+      return a.compare(b, Qt::CaseSensitive) < 0;
+    }
+};
+
+struct DeviceEntry
+{
+    QString name;
+    uint64_t id = 0;
+    uint64_t line = 0;
+};
+
+using Catalogue = std::map<QString, std::vector<DeviceEntry>, NameLess>;
+
+/**
+ * SAX handler that only picks the three wanted top level keys of one line.
+ * Nothing is stored for the rest of the document, so no DOM is built.
+ * Nested keys (e.g. "Id" inside arrays) are ignored via the depth check.
+ */
+class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
+{
+  public:
+    using Json = nlohmann::json;
+
+    enum class Field
+    {
+      None, Manufacturer, Model, Id
+    };
+
+    QString manufacturer;
+    QString model;
+    uint64_t id = 0;
+    bool hasId = false;
+
+    void reset()
+    {
+      manufacturer.clear();
+      model.clear();
+      id = 0;
+      hasId = false;
+      depth = 0;
+      currentField = Field::None;
+    }
+
+    bool isValid() const
+    {
+      return (!manufacturer.isEmpty() && !model.isEmpty() && hasId);
+    }
+
+    bool null() override
+    {
+      return true;
+    }
+
+    bool boolean(bool) override
+    {
+      return true;
+    }
+
+    bool number_integer(Json::number_integer_t value) override
+    {
+      storeNumber(static_cast<uint64_t>(value));
+      return true;
+    }
+
+    bool number_unsigned(Json::number_unsigned_t value) override
+    {
+      storeNumber(static_cast<uint64_t>(value));
+      return true;
+    }
+
+    bool number_float(Json::number_float_t, const Json::string_t&) override
+    {
+      return true;
+    }
+
+    bool string(Json::string_t &value) override
+    {
+      if (depth == 1) {
+        if (currentField == Field::Manufacturer) {
+          manufacturer = QString::fromUtf8(value.data(),
+              static_cast<int>(value.size()));
+        } else if (currentField == Field::Model) {
+          model = QString::fromUtf8(value.data(),
+              static_cast<int>(value.size()));
+        }
+      }
+      return true;
+    }
+
+    bool binary(Json::binary_t&) override
+    {
+      return true;
+    }
+
+    bool start_object(std::size_t) override
+    {
+      depth++;
+      return true;
+    }
+
+    bool key(Json::string_t &name) override
+    {
+      currentField = Field::None;
+      if (depth == 1) {
+        if (name == "PrimaryManufacturerAlias") {
+          currentField = Field::Manufacturer;
+        } else if (name == "PrimaryModelAlias") {
+          currentField = Field::Model;
+        } else if (name == "Id") {
+          currentField = Field::Id;
+        }
+      }
+      return true;
+    }
+
+    bool end_object() override
+    {
+      depth--;
+      return true;
+    }
+
+    bool start_array(std::size_t) override
+    {
+      depth++;
+      return true;
+    }
+
+    bool end_array() override
+    {
+      depth--;
+      return true;
+    }
+
+    bool parse_error(std::size_t, const std::string&, const Json::exception&)
+    override
+    {
+      return false;
+    }
+
+  private:
+    void storeNumber(uint64_t value)
+    {
+      if ((depth == 1) && (currentField == Field::Id)) {
+        id = value;
+        hasId = true;
+      }
+    }
+
+    int depth = 0;
+    Field currentField = Field::None;
+};
+
+/** Returns value as quoted / escaped json string. */
+QByteArray jsonString(const QString &value)
+{
+  const QByteArray utf8 = value.toUtf8();
+  const nlohmann::json json = std::string(utf8.constData(),
+      static_cast<size_t>(utf8.size()));
+  const std::string text = json.dump(-1, ' ', false,
+      nlohmann::json::error_handler_t::replace);
+  return QByteArray(text.data(), static_cast<int>(text.size()));
+}
+
+/** Writes the index (streamed, no json document in memory). Atomic via QSaveFile. */
+bool writeIndex(const QString &indexPath, const QString &sourceName,
+    uint64_t lineCount, const Catalogue &catalogue, QString &errorText)
+{
+  static const int FLUSH_SIZE = 1 << 20;
+
+  QSaveFile out(indexPath);
+  if (!out.open(QIODevice::WriteOnly)) {
+    errorText = QStringLiteral("Cannot write %1").arg(indexPath);
+    return false;
+  }
+
+  QByteArray buffer;
+  buffer.reserve(FLUSH_SIZE * 2);
+  bool ok = true;
+
+  const auto flush = [&]() {
+    if (ok && out.write(buffer) != buffer.size()) {
+      ok = false;
+    }
+    buffer.clear();
+  };
+
+  buffer += "{\n  \"Version\": 1,\n  \"Source\": " + jsonString(sourceName)
+      + ",\n  \"LineCount\": " + QByteArray::number(lineCount)
+      + ",\n  \"Manufacturers\": [\n";
+
+  bool firstManufacturer = true;
+  for (const auto &entry : catalogue) {
+    if (!firstManufacturer) {
+      buffer += ",\n";
+    }
+    firstManufacturer = false;
+
+    buffer += "    {\n      \"Name\": " + jsonString(entry.first)
+        + ",\n      \"Devices\": [\n";
+
+    bool firstDevice = true;
+    for (const DeviceEntry &device : entry.second) {
+      if (!firstDevice) {
+        buffer += ",\n";
+      }
+      firstDevice = false;
+
+      buffer += "        { \"Name\": " + jsonString(device.name) + ", \"Id\": "
+          + QByteArray::number(device.id) + ", \"Line\": "
+          + QByteArray::number(device.line) + " }";
+
+      if (buffer.size() > FLUSH_SIZE) {
+        flush();
+      }
+    }
+    buffer += "\n      ]\n    }";
+  }
+
+  buffer += "\n  ]\n}\n";
+  flush();
+
+  if (!ok) {
+    errorText = QStringLiteral("Write error on %1").arg(indexPath);
+    out.cancelWriting();
+    return false;
+  }
+  if (!out.commit()) {
+    errorText = QStringLiteral("Cannot finalize %1").arg(indexPath);
+    return false;
+  }
+  return true;
+}
 
 /** device_features_raw.jsonl.gz -> device_features_raw.jsonl */
 QString getExtractedName(const QString &fileName)
@@ -114,7 +366,7 @@ void ImportDatabase::onDownloadReadyRead()
   }
 }
 
-void ImportDatabase::onDownloadProgress(qint64 received, qint64 total)
+void ImportDatabase::onDownloadProgress(uint64_t received, uint64_t total)
 {
   if (reply != nullptr) {
     emit sourceProgressChanged(currentIndex, received, total);
@@ -265,7 +517,8 @@ void ImportDatabase::extractFile(int index)
   emit sourceStateChanged(index, StepState::Running, tr("Extracting"));
   emit logMessage(tr("Extracting %1").arg(source));
 
-  const std::function<bool(qint64, qint64)> reporter = createReporter(index);
+  const std::function<bool(uint64_t, uint64_t)> reporter = createReporter(
+      index);
   extractWatcher.setFuture(QtConcurrent::run([source, target, reporter]() {
     return lib::gunzipToFile(source, target, reporter);
   }));
@@ -287,10 +540,11 @@ void ImportDatabase::buildIndex()
   const QStringList files = extractedPaths;
   const QString indexPath = config.targetDir
       + QStringLiteral("/catalogue.index");
-  const std::function<bool(qint64, qint64)> reporter = createReporter(-1);
-  indexWatcher.setFuture(QtConcurrent::run([files, indexPath, reporter]() {
-    return ImportDatabase::createCatalogueIndex(files, indexPath, reporter);
-  }));
+  const std::function<bool(uint64_t, uint64_t)> reporter = createReporter(-1);
+  indexWatcher.setFuture(
+      QtConcurrent::run([this, files, indexPath, reporter]() {
+        return createCatalogueIndex(files, indexPath, reporter);
+      }));
 }
 
 void ImportDatabase::fail(int index, const QString &message)
@@ -324,10 +578,11 @@ QString ImportDatabase::getExtractedPath(int index) const
       + getExtractedName(config.sources.at(index).fileName);
 }
 
-std::function<bool(qint64, qint64)> ImportDatabase::createReporter(int index)
+std::function<bool(uint64_t, uint64_t)> ImportDatabase::createReporter(
+    int index)
 {
   QElapsedTimer timer;
-  return [this, index, timer](qint64 done, qint64 total) mutable
+  return [this, index, timer](uint64_t done, uint64_t total) mutable
   {
     if (!timer.isValid() || timer.elapsed() >= 100) {
       timer.start();
@@ -345,16 +600,119 @@ std::function<bool(qint64, qint64)> ImportDatabase::createReporter(int index)
 
 bool ImportDatabase::createCatalogueIndex(const QStringList &extractedFiles,
     const QString &indexPath,
-    const std::function<bool(qint64, qint64)> &progress)
+    const std::function<bool(uint64_t, uint64_t)> &progress)
 {
-  Q_UNUSED(extractedFiles)
-  Q_UNUSED(indexPath)
-  Q_UNUSED(progress)
+  // runs in a worker thread, so the log message is posted to the object's thread
+  const auto log = [this](const QString &text) {
+    QMetaObject::invokeMethod(this, [this, text]() {
+          emit logMessage(text);
+        }, Qt::QueuedConnection);
+  };
 
-  // TODO: read the catalogue file line by line and store manufacturer,
-  // device name, device id and line number in the index at indexPath.
-  // Call progress(bytesRead, fileSize) regularly and stop (return false)
-  // if it returns false.
+  // find the catalogue file
+  QString cataloguePath;
+  for (const QString &path : extractedFiles) {
+    if (QFileInfo(path).fileName().startsWith(QLatin1String("catalog_raw"),
+        Qt::CaseInsensitive)) {
+      cataloguePath = path;
+      break;
+    }
+  }
+  if (cataloguePath.isEmpty()) {
+    log(tr("Catalogue file not found"));
+    return false;
+  }
+
+  QFile file(cataloguePath);
+  if (!file.open(QIODevice::ReadOnly)) {
+    log(tr("Cannot open %1").arg(cataloguePath));
+    return false;
+  }
+
+  // read and collect
+  static const uint64_t PROGRESS_INTERVAL = 512; // lines
+  const uint64_t fileSize = file.size();
+  uint64_t bytesRead = 0;
+  uint64_t lineCount = 0;
+  uint64_t invalidLines = 0;
+  uint64_t incompleteLines = 0;
+
+  Catalogue catalogue;
+  CatalogueLineHandler handler;
+
+  while (!file.atEnd()) {
+    const QByteArray line = file.readLine();
+    bytesRead += line.size();
+
+    const char *begin = line.constData();
+    const char *end = begin + line.size();
+    while ((end > begin) && ((end[-1] == '\n') || (end[-1] == '\r'))) {
+      end--;
+    }
+
+    if (end != begin) {
+      handler.reset();
+      const bool parsed = nlohmann::json::sax_parse(begin, end, &handler);
+
+      if (!parsed) {
+        invalidLines ++;
+      } else if (!handler.isValid()) {
+        incompleteLines ++;
+      } else {
+        DeviceEntry device;
+        device.name = handler.model;
+        device.id = handler.id;
+        device.line = lineCount;
+        catalogue[handler.manufacturer].push_back(device);
+      }
+    }
+    lineCount++;
+
+    if (progress != nullptr && (lineCount % PROGRESS_INTERVAL) == 0
+        && !progress(bytesRead, fileSize)) {
+      return false;
+    }
+  }
+  file.close();
+
+  if ((invalidLines > 0) || (incompleteLines > 0)) {
+    log(tr("Skipped %1 invalid lines and %2 "
+        "lines without manufacturer, "
+        "model or id").arg(invalidLines).arg(incompleteLines));
+  }
+
+  // sort devices, keep the first of duplicate manufacturer / device pairs
+  uint64_t duplicates = 0;
+  for (auto &entry : catalogue) {
+    std::vector<DeviceEntry> &devices = entry.second;
+
+    std::stable_sort(devices.begin(), devices.end(),
+        [](const DeviceEntry &a, const DeviceEntry &b) {
+          return NameLess()(a.name, b.name);
+        });
+
+    const auto last = std::unique(devices.begin(), devices.end(),
+        [](const DeviceEntry &a, const DeviceEntry &b) {
+          return a.name == b.name;
+        });
+    duplicates += std::distance(last, devices.end());
+    devices.erase(last, devices.end());
+  }
+  if (duplicates > 0) {
+    log(tr("Dropped %1 duplicate manufacturer / "
+        "device entries").arg(duplicates));
+  }
+
+  if (progress != nullptr && !progress(fileSize, fileSize)) {
+    return false;
+  }
+
+  QString errorText;
+  if (!writeIndex(indexPath, QFileInfo(cataloguePath).fileName(), lineCount,
+      catalogue, errorText)) {
+    log(errorText);
+    return false;
+  }
   return true;
 }
 

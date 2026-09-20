@@ -41,7 +41,6 @@ struct ImportConfig
     QList<SourceSpec> sources;
 };
 
-
 /**
  * Runs the import: download (or use the local file), extract,
  * build the index. Files are processed one after another.
@@ -51,35 +50,36 @@ struct ImportConfig
  *
  * Source indices match ImportConfig::sources. Index -1 means the index step.
  */
-class ImportDatabase : public QObject {
-    Q_OBJECT
+class ImportDatabase: public QObject
+{
+  Q_OBJECT
 
-public:
+  public:
     explicit ImportDatabase(QObject *parent = nullptr);
     ~ImportDatabase() override;
 
     bool isRunning() const;
 
-signals:
+  signals:
     void sourceStateChanged(int index, StepState state, const QString &message);
-    void sourceProgressChanged(int index, qint64 done, qint64 total);
+    void sourceProgressChanged(int index, uint64_t done, uint64_t total);
     void indexStateChanged(StepState state, const QString &message);
-    void indexProgressChanged(qint64 done, qint64 total);
+    void indexProgressChanged(uint64_t done, uint64_t total);
     void logMessage(const QString &line);
     void finished(bool success);
 
-public slots:
+  public slots:
     void start(const ImportConfig &newConfig);
     void cancel();
 
-private slots:
+  private slots:
     void onDownloadReadyRead();
-    void onDownloadProgress(qint64 received, qint64 total);
+    void onDownloadProgress(uint64_t received, uint64_t total);
     void onDownloadFinished();
     void onExtractFinished();
     void onIndexFinished();
 
-private:
+  private:
     void processSource(int index);
     void startDownload(int index, const QString &location, const QString &targetPath);
     void extractFile(int index);
@@ -91,18 +91,15 @@ private:
     QString getExtractedPath(int index) const;
 
     /** Progress callback for worker threads. Throttled, returns false when cancelled. */
-    std::function<bool(qint64, qint64)> createReporter(int index);
+    std::function<bool(uint64_t, uint64_t)> createReporter(int index);
 
-    /**
-     * Placeholder for the catalogue index creation. Runs in a worker thread.
-     * extractedFiles has the same order as ImportConfig::sources.
-     */
-    static bool createCatalogueIndex(const QStringList &extractedFiles, const QString &indexPath,
-        const std::function<bool(qint64, qint64)> &progress);
+    bool createCatalogueIndex(const QStringList &extractedFiles,
+        const QString &indexPath,
+        const std::function<bool(uint64_t, uint64_t)> &progress);
 
     ImportConfig config;
     bool running = false;
-    std::atomic<bool> cancelRequested{false};
+    std::atomic<bool> cancelRequested { false };
     int currentIndex = -1;
 
     QStringList compressedPaths;

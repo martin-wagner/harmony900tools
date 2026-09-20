@@ -5,7 +5,7 @@
 #include <QList>
 #include <QWidget>
 
-#include "logViewer.h"
+#include "ui/logViewer.h"
 #include "document/files/database.h"
 
 class QCheckBox;
