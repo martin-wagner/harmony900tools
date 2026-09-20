@@ -11,6 +11,7 @@
 #include "ui/concordConnection.h"
 #include "ui/devices/deviceEditor.h"
 #include "ui/activities/activityEditor.h"
+#include "ui/database/importWidget.h"
 #include "lib/users.h"
 #include "lib/undo.h"
 #include "context.h"
@@ -54,6 +55,7 @@ class MainWindow: public QMainWindow
     void showSettings();
     void applySettings();
     void resetSettings();
+    void showDownloader();
     //ads view stuff
     void onLockUI(bool locked);
     void onSaveView();
@@ -102,6 +104,9 @@ class MainWindow: public QMainWindow
     editors::ActivityEditor *activityEditor = nullptr;
     models::DeviceModel *deviceModel = nullptr;
     models::ActivityModel *activityModel = nullptr;
+
+    ads::CDockWidget *dockImport = nullptr;
+    database::ImportWidget *importWidget = nullptr;
 
     ConcordConnection *concordConnection;
 };

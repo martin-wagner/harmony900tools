@@ -210,6 +210,13 @@ void MainWindow::createWidgets()
   dockManager->addDockWidget(ads::LeftDockWidgetArea, dockActivityEditor);
   dockMenu->addAction(dockActivityEditor->toggleViewAction());
 
+  importWidget = new database::ImportWidget(this);
+  dockImport = new ads::CDockWidget(dockManager,
+      tr("Download database"));
+  dockImport->setWidget(importWidget);
+  dockManager->addDockWidgetFloating(dockImport);
+  dockMenu->addAction(dockImport->toggleViewAction());
+
   QUndoView *undoView = new QUndoView(undo.getStack());
   undoView->setCleanIcon(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/edit-clear.png",
@@ -352,6 +359,18 @@ void MainWindow::createActions()
 //  connect(pasteAct, &QAction::triggered, textEdit, &QPlainTextEdit::paste);
 //  editMenu->addAction(pasteAct);
 //  editToolBar->addAction(pasteAct); todo
+
+  //database
+  QToolBar *databaseToolBar = addToolBar(tr("Database"));
+  databaseToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+  const QIcon downloadIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/status/state-download.png");
+  QAction *downloadAct = new QAction(downloadIcon, tr("Download database"),
+      this);
+  downloadAct->setShortcuts(QKeySequence::New);
+  downloadAct->setStatusTip(tr("Download / import device database"));
+  connect(downloadAct, &QAction::triggered, this, &MainWindow::showDownloader);
+  databaseToolBar->addAction(downloadAct);
 
   //connection
   QMenu *connectMenu = menuBar()->addMenu(tr("&Connection"));
@@ -671,6 +690,13 @@ void MainWindow::resetSettings()
   if (reply == QMessageBox::Yes) {
     lib::resetQSettings();
     QCoreApplication::exit(); // not calling closeEvent
+  }
+}
+
+void MainWindow::showDownloader()
+{
+  if (dockImport != nullptr) {
+    dockImport->toggleView(true);
   }
 }
 

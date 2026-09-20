@@ -99,6 +99,9 @@ set(sources ${sources}
   ui/activities/activityEditor.cpp
   ui/activities/activityTreeView.cpp
   ui/activities/activityEditor.cpp
+  ui/database/importWidget.cpp
+  ui/database/sourceRow.cpp
+  ui/database/stepProgress.cpp
   ui/devices/ir/codeEditor.cpp
   ui/devices/ir/rawIrEditor.cpp
   ui/devices/ir/commandEditorView.cpp
@@ -192,6 +195,7 @@ set(${programName}_resource_files
     ${iconPath}/actions/document-export.png
     ${iconPath}/actions/document-import.png
     ${iconPath}/actions/text-field.png
+    ${iconPath}/status/state-download.png
     ${buttonIcons}
     ${h900platform}
 )
