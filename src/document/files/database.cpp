@@ -314,7 +314,7 @@ bool ImportDatabase::isRunning() const
   return running;
 }
 
-void ImportDatabase::start(const ImportConfig &newConfig)
+void ImportDatabase::start(const ImporterConfig &newConfig)
 {
   if (running) {
     return;
@@ -325,7 +325,7 @@ void ImportDatabase::start(const ImportConfig &newConfig)
   cancelRequested = false;
   currentIndex = -1;
   compressedPaths.clear();
-  extractedPaths.clear();
+  extractedPaths = DatabasePaths();
 
   if (!QDir().mkpath(config.targetDir)) {
     emit logMessage(tr("Cannot create target folder %1").arg(config.targetDir));
@@ -452,6 +452,7 @@ void ImportDatabase::onIndexFinished()
 void ImportDatabase::processSource(int index)
 {
   if (index >= config.sources.size()) {
+    // done
     buildIndex();
     return;
   }
@@ -506,13 +507,8 @@ void ImportDatabase::extractFile(int index)
   const QString source = compressedPaths.at(index);
   const QString target = getExtractedPath(index);
 
-  // a local file that already is the extracted target, nothing to do
-  if (QFileInfo(source).absoluteFilePath()
-      == QFileInfo(target).absoluteFilePath()) {
-    emit logMessage(tr("%1 is already extracted").arg(source));
-    finishSource(index);
-    return;
-  }
+  //don't check if file exists -- might be partial/cancelled or failed.
+  //we most likely extract once per install lifetime, so doesn't matter.
 
   emit sourceStateChanged(index, StepState::Running, tr("Extracting"));
   emit logMessage(tr("Extracting %1").arg(source));
@@ -526,7 +522,21 @@ void ImportDatabase::extractFile(int index)
 
 void ImportDatabase::finishSource(int index)
 {
-  extractedPaths.append(getExtractedPath(index));
+  auto path = getExtractedPath(index);
+
+  switch (config.sources[index].type) {
+    case DatabaseCatalogueFileType::Raw:
+      extractedPaths.raw = path;
+      break;
+    case DatabaseCatalogueFileType::Devices:
+      extractedPaths.devices = path;
+      break;
+    case DatabaseCatalogueFileType::Protocols:
+      extractedPaths.protocols = path;
+      break;
+    default:
+      break;
+  }
   emit sourceStateChanged(index, StepState::Done, tr("Done"));
   processSource(index + 1);
 }
@@ -537,14 +547,12 @@ void ImportDatabase::buildIndex()
   emit indexStateChanged(StepState::Running, tr("Building index"));
   emit logMessage(tr("Building catalogue index"));
 
-  const QStringList files = extractedPaths;
-  const QString indexPath = config.targetDir
-      + QStringLiteral("/catalogue.index");
+  extractedPaths.catalogue = config.targetDir + "/" + catalogueFileName;
+  const auto files = extractedPaths;
   const std::function<bool(uint64_t, uint64_t)> reporter = createReporter(-1);
-  indexWatcher.setFuture(
-      QtConcurrent::run([this, files, indexPath, reporter]() {
-        return createCatalogueIndex(files, indexPath, reporter);
-      }));
+  indexWatcher.setFuture(QtConcurrent::run([this, files, reporter]() {
+    return createCatalogueIndex(files, reporter);
+  }));
 }
 
 void ImportDatabase::fail(int index, const QString &message)
@@ -565,11 +573,17 @@ void ImportDatabase::fail(int index, const QString &message)
 
 void ImportDatabase::finish(bool success)
 {
+  DatabasePaths files;
+
   if (downloadFile.isOpen()) {
     downloadFile.close();
   }
   running = false;
-  emit finished(success);
+
+  if (success) {
+    files = extractedPaths;
+  }
+  emit finished(success, files);
 }
 
 QString ImportDatabase::getExtractedPath(int index) const
@@ -598,10 +612,17 @@ std::function<bool(uint64_t, uint64_t)> ImportDatabase::createReporter(
   };
 }
 
-bool ImportDatabase::createCatalogueIndex(const QStringList &extractedFiles,
-    const QString &indexPath,
+bool ImportDatabase::createCatalogueIndex(const DatabasePaths &paths,
     const std::function<bool(uint64_t, uint64_t)> &progress)
 {
+  static const uint64_t PROGRESS_INTERVAL = 512; // lines
+  uint64_t bytesRead = 0;
+  uint64_t lineCount = 0;
+  uint64_t invalidLines = 0;
+  uint64_t incompleteLines = 0;
+  Catalogue catalogue;
+  CatalogueLineHandler handler;
+
   // runs in a worker thread, so the log message is posted to the object's thread
   const auto log = [this](const QString &text) {
     QMetaObject::invokeMethod(this, [this, text]() {
@@ -610,35 +631,19 @@ bool ImportDatabase::createCatalogueIndex(const QStringList &extractedFiles,
   };
 
   // find the catalogue file
-  QString cataloguePath;
-  for (const QString &path : extractedFiles) {
-    if (QFileInfo(path).fileName().startsWith(QLatin1String("catalog_raw"),
-        Qt::CaseInsensitive)) {
-      cataloguePath = path;
-      break;
-    }
-  }
-  if (cataloguePath.isEmpty()) {
+  if (paths.raw.isEmpty()) {
     log(tr("Catalogue file not found"));
     return false;
   }
 
-  QFile file(cataloguePath);
+  QFile file(paths.raw);
   if (!file.open(QIODevice::ReadOnly)) {
-    log(tr("Cannot open %1").arg(cataloguePath));
+    log(tr("Cannot open %1").arg(paths.raw));
     return false;
   }
 
   // read and collect
-  static const uint64_t PROGRESS_INTERVAL = 512; // lines
-  const uint64_t fileSize = file.size();
-  uint64_t bytesRead = 0;
-  uint64_t lineCount = 0;
-  uint64_t invalidLines = 0;
-  uint64_t incompleteLines = 0;
-
-  Catalogue catalogue;
-  CatalogueLineHandler handler;
+  const auto fileSize = file.size();
 
   while (!file.atEnd()) {
     const QByteArray line = file.readLine();
@@ -655,9 +660,9 @@ bool ImportDatabase::createCatalogueIndex(const QStringList &extractedFiles,
       const bool parsed = nlohmann::json::sax_parse(begin, end, &handler);
 
       if (!parsed) {
-        invalidLines ++;
+        invalidLines++;
       } else if (!handler.isValid()) {
-        incompleteLines ++;
+        incompleteLines++;
       } else {
         DeviceEntry device;
         device.name = handler.model;
@@ -668,7 +673,7 @@ bool ImportDatabase::createCatalogueIndex(const QStringList &extractedFiles,
     }
     lineCount++;
 
-    if (progress != nullptr && (lineCount % PROGRESS_INTERVAL) == 0
+    if ((progress != nullptr) && ((lineCount % PROGRESS_INTERVAL) == 0)
         && !progress(bytesRead, fileSize)) {
       return false;
     }
@@ -708,7 +713,7 @@ bool ImportDatabase::createCatalogueIndex(const QStringList &extractedFiles,
   }
 
   QString errorText;
-  if (!writeIndex(indexPath, QFileInfo(cataloguePath).fileName(), lineCount,
+  if (!writeIndex(paths.catalogue, QFileInfo(paths.raw).fileName(), lineCount,
       catalogue, errorText)) {
     log(errorText);
     return false;

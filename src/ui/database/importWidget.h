@@ -35,18 +35,18 @@ class ImportWidget: public QWidget
 
     const QString releaseBaseUrl =
         "https://github.com/pickysysadmin/logitech-harmony-ir-archive/releases/download/raw-2026-09-02/";
-    const QStringList dataFiles = {
-      "device_features_raw.jsonl.gz",
-      "catalog_raw.jsonl.gz",
-      "AllProtocols.json.gz",
+    const QList<QPair<document::files::DatabaseCatalogueFileType, QString>> dataFiles = {
+      {document::files::DatabaseCatalogueFileType::Raw, "catalog_raw.jsonl.gz"},
+      {document::files::DatabaseCatalogueFileType::Devices, "device_features_raw.jsonl.gz"},
+      {document::files::DatabaseCatalogueFileType::Protocols, "AllProtocols.json.gz"},
     };
     static constexpr uint64_t requiredBytes = 7ull * 1024 * 1024 * 1024;
 
   signals:
-    void writeLog(LogLevel level, const QString &message, ContentType contentType);
-    void writeMsg(const QString &message);
+    void writeLog(LogLevel level, const QString &message, ContentType contentType) const;
+    void writeMsg(const QString &message) const;
 
-    void importDone(const document::files::ImportConfig &config);
+    void importDone(const document::files::DatabasePaths &paths);
     void cancelRequested();
 
   public slots:
@@ -55,6 +55,7 @@ class ImportWidget: public QWidget
     void setIndexState(document::files::StepState state, const QString &message = "");
     void setIndexProgress(qint64 done, qint64 total);
     void appendLog(const QString &line);
+    void done(bool success, const document::files::DatabasePaths paths);
 
     /** The controller calls setBusy(false) when everything is finished or cancelled. */
     void setBusy(bool busy);
@@ -71,7 +72,7 @@ class ImportWidget: public QWidget
     void updateSpaceInfo();
     qint64 getAvailableBytes() const;
     bool validateInput(QString &errorText) const;
-    document::files::ImportConfig buildConfig() const;
+    document::files::ImporterConfig buildConfig() const;
     void resetStates();
 
     QLineEdit *targetEdit = nullptr;

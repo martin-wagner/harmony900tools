@@ -66,6 +66,17 @@ void ImportWidget::appendLog(const QString &line)
   emit writeLog(LogLevel::Info, line, ContentType::PlainText);
 }
 
+void ImportWidget::done(bool success,
+    const document::files::DatabasePaths paths)
+{
+  databaseImporter->deleteLater();
+  databaseImporter = nullptr;
+
+  if (success) {
+    emit importDone(paths);
+  }
+}
+
 void ImportWidget::setBusy(bool busy)
 {
   const bool idle = !busy;
@@ -79,13 +90,6 @@ void ImportWidget::setBusy(bool busy)
 
   importButton->setEnabled(idle);
   cancelButton->setEnabled(busy);
-
-  if (idle) {
-    databaseImporter->deleteLater();
-    databaseImporter = nullptr;
-
-    importDone(buildConfig());
-  }
 }
 
 void ImportWidget::onTargetBrowseClicked()
@@ -144,8 +148,11 @@ void ImportWidget::onImportClicked()
       &ImportWidget::appendLog);
   connect(databaseImporter, &ImportDatabase::finished, this,
       [this](bool) {setBusy(false);});
+  connect(databaseImporter, &ImportDatabase::finished, this,
+      &ImportWidget::done);
 
-  databaseImporter->start(buildConfig());
+  auto config = buildConfig();
+  databaseImporter->start(config);
 }
 
 void ImportWidget::onCancelClicked()
@@ -181,9 +188,10 @@ void ImportWidget::createView()
   storageGroup->setLayout(storageLayout);
 
   // sources
-  for (const QString &name : dataFiles) {
+  for (const auto &file : dataFiles) {
     sourceRows.append(
-        new SourceRow(name, releaseBaseUrl + name, gzipFilter, this));
+        new SourceRow(file.second, releaseBaseUrl + file.second, gzipFilter,
+            this));
   }
   auto *sourcesLayout = new QVBoxLayout;
   for (int i = 0; i < sourceRows.size(); i++) {
@@ -299,12 +307,18 @@ bool ImportWidget::validateInput(QString &errorText) const
   return true;
 }
 
-ImportConfig ImportWidget::buildConfig() const
+ImporterConfig ImportWidget::buildConfig() const
 {
-  ImportConfig config;
+  ImporterConfig config;
   config.targetDir = targetEdit->text().trimmed();
   for (int i = 0; i < sourceRows.size(); i++) {
-    config.sources.append(sourceRows.at(i)->getSpec());
+    auto spec = sourceRows.at(i)->getSpec();
+    try {
+      spec.type = dataFiles.at(i).first;
+    } catch (out_of_range&) {
+      spec.type = document::files::DatabaseCatalogueFileType::Raw;
+    }
+    config.sources.append(spec);
   }
   return config;
 }

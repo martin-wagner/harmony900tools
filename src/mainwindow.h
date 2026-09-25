@@ -56,7 +56,8 @@ class MainWindow: public QMainWindow
     void showSettings();
     void applySettings();
     void resetSettings();
-    void showDownloader();
+    void showDatabaseDownloader();
+    void updateDatabase(const document::files::DatabasePaths &paths);
     //ads view stuff
     void onLockUI(bool locked);
     void onSaveView();

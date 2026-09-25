@@ -211,8 +211,7 @@ void MainWindow::createWidgets()
   dockMenu->addAction(dockActivityEditor->toggleViewAction());
 
   importWidget = new database::ImportWidget(this);
-  dockImport = new ads::CDockWidget(dockManager,
-      tr("Download database"));
+  dockImport = new ads::CDockWidget(dockManager, tr("Download database"));
   dockImport->setWidget(importWidget);
   dockManager->addDockWidgetFloating(dockImport);
   dockMenu->addAction(dockImport->toggleViewAction());
@@ -369,7 +368,8 @@ void MainWindow::createActions()
       this);
   downloadAct->setShortcuts(QKeySequence::New);
   downloadAct->setStatusTip(tr("Download / import device database"));
-  connect(downloadAct, &QAction::triggered, this, &MainWindow::showDownloader);
+  connect(downloadAct, &QAction::triggered, this,
+      &MainWindow::showDatabaseDownloader);
   databaseToolBar->addAction(downloadAct);
 
   //connection
@@ -464,6 +464,8 @@ void MainWindow::createActions()
   connect(activityEditor, &editors::ActivityEditor::writeMsg, log,
       &LogViewer::addMessage);
 
+  connect(importWidget, &database::ImportWidget::importDone, this,
+      &MainWindow::updateDatabase);
   connect(importWidget, &database::ImportWidget::writeLog, log,
       &LogViewer::addEntry);
   connect(importWidget, &database::ImportWidget::writeMsg, log,
@@ -495,6 +497,11 @@ void MainWindow::readSettings()
 
   settings->addSetting(defaults::columWithFactor());
   settings->addSetting(defaults::stackedView());
+
+  settings->addSetting(defaults::databaseCatalogue());
+  settings->addSetting(defaults::databaseRaw());
+  settings->addSetting(defaults::databaseDevices());
+  settings->addSetting(defaults::databaseProtocols());
 
   const QByteArray geometry =
       qsettings.value("geometry", QByteArray()).toByteArray();
@@ -698,11 +705,19 @@ void MainWindow::resetSettings()
   }
 }
 
-void MainWindow::showDownloader()
+void MainWindow::showDatabaseDownloader()
 {
   if (dockImport != nullptr) {
     dockImport->toggleView(true);
   }
+}
+
+void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
+{
+  settings->setValue(defaults::databaseCatalogue().key, paths.catalogue);
+  settings->setValue(defaults::databaseRaw().key, paths.raw);
+  settings->setValue(defaults::databaseDevices().key, paths.devices);
+  settings->setValue(defaults::databaseProtocols().key, paths.protocols);
 }
 
 void MainWindow::applySettings()
