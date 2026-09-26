@@ -45,6 +45,7 @@ struct NameLess
 struct DeviceEntry
 {
     QString name;
+    uint64_t type;
     uint64_t id = 0;
     uint64_t line = 0;
 };
@@ -63,11 +64,12 @@ class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
 
     enum class Field
     {
-      None, Manufacturer, Model, Id
+      None, Manufacturer, Model, Type, Id
     };
 
     QString manufacturer;
     QString model;
+    uint64_t type;
     uint64_t id = 0;
     bool hasId = false;
 
@@ -75,6 +77,7 @@ class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
     {
       manufacturer.clear();
       model.clear();
+      type = 8; //computer / generic
       id = 0;
       hasId = false;
       depth = 0;
@@ -148,6 +151,8 @@ class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
           currentField = Field::Model;
         } else if (name == "Id") {
           currentField = Field::Id;
+        } else if (name == "DeviceType") {
+          currentField = Field::Type;
         }
       }
       return true;
@@ -183,6 +188,9 @@ class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
       if ((depth == 1) && (currentField == Field::Id)) {
         id = value;
         hasId = true;
+      }
+      if ((depth == 1) && (currentField == Field::Type)) {
+        type = value;
       }
     }
 
@@ -245,7 +253,8 @@ bool writeIndex(const QString &indexPath, const QString &sourceName,
       }
       firstDevice = false;
 
-      buffer += "        { \"Name\": " + jsonString(device.name) + ", \"Id\": "
+      buffer += "        { \"Name\": " + jsonString(device.name)
+          + ", \"Type\": " + QByteArray::number(device.type) + ", \"Id\": "
           + QByteArray::number(device.id) + ", \"Line\": "
           + QByteArray::number(device.line) + " }";
 
@@ -666,6 +675,7 @@ bool ImportDatabase::createCatalogueIndex(const DatabasePaths &paths,
       } else {
         DeviceEntry device;
         device.name = handler.model;
+        device.type = handler.type;
         device.id = handler.id;
         device.line = lineCount;
         catalogue[handler.manufacturer].push_back(device);
