@@ -48,6 +48,7 @@ class UserLevel: public QObject
       }
       QVariant val = static_cast<int>(level);
       settings.setValue("userLevel", val);
+      settings.save();
       updateLevel();
     }
 

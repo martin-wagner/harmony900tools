@@ -718,6 +718,7 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
   settings->setValue(defaults::databaseRaw().key, paths.raw);
   settings->setValue(defaults::databaseDevices().key, paths.devices);
   settings->setValue(defaults::databaseProtocols().key, paths.protocols);
+  settings->save();
 }
 
 void MainWindow::applySettings()

@@ -22,7 +22,8 @@ enum class SettingType {
     Int,
     Double,
     Bool,
-    MultiSelection   // combo box
+    MultiSelection,   // combo box
+    File              // text entry + browse button, existence-checked
 };
 
 struct SettingDef
@@ -41,6 +42,9 @@ struct SettingDef
     // multiselection options  (SettingType::MultiSelection only)
     // each entry: display string + associated QVariant (int or string)
     QList<QPair<QString, QVariant>> options;
+
+    // SettingType::File only, optional
+    QString fileFilter;
 };
 
 // ── Dialog ────────────────────────────────────────────────────────────────────
@@ -61,6 +65,9 @@ class Settings: public QDialog
     void setValues(const QMap<QString, QVariant> &vals);
     void setValue(const QString &key, QVariant val);
 
+    // Write to settings file
+    void save() { saveToQSettings(); };
+
   signals:
     // Emitted on OK and Apply with the current value map.
     void settingsAccepted(const QMap<QString, QVariant> &values);
@@ -77,6 +84,7 @@ class Settings: public QDialog
     void applyDef(const SettingDef &def, bool useDefault);
     void saveToQSettings();
     void loadFromQSettings();
+    void checkFileExists(const QString &key);
 
     // Returns the current widget value for a key.
     QVariant widgetValue(const QString &key) const;

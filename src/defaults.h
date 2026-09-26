@@ -162,9 +162,10 @@ inline const SettingDef databaseCatalogue()
   s.key = "dbCatalogue";
   s.label = QObject::tr("Catalogue json file");
   s.helpText = QObject::tr("Imported catalogue file (use database downloader to auto-fill). \nDefault file name: catalogue.json");
-  s.type = SettingType::String;
+  s.type = SettingType::File;
   s.defaultValue = "";
   s.tab = "Database";
+  s.fileFilter = "json Files (*.json);;All Files (*)";
 
   return s;
 };
@@ -176,9 +177,10 @@ inline const SettingDef databaseRaw()
   s.key = "dbRaw";
   s.label = QObject::tr("Devices (raw) json file");
   s.helpText = QObject::tr("Imported raw device file (use database downloader to auto-fill). \nDefault file name: catalog_raw.jsonl");
-  s.type = SettingType::String;
+  s.type = SettingType::File;
   s.defaultValue = "";
   s.tab = "Database";
+  s.fileFilter = "json line Files (*.jsonl);;All Files (*)";
 
   return s;
 };
@@ -190,9 +192,10 @@ inline const SettingDef databaseDevices()
   s.key = "dbDevices";
   s.label = QObject::tr("Devices (data) json file");
   s.helpText = QObject::tr("Imported device data file (use database downloader to auto-fill). \nDefault file name: device_features_raw.jsonl");
-  s.type = SettingType::String;
+  s.type = SettingType::File;
   s.defaultValue = "";
   s.tab = "Database";
+  s.fileFilter = "json line Files (*.jsonl);;All Files (*)";
 
   return s;
 };
@@ -204,9 +207,10 @@ inline const SettingDef databaseProtocols()
   s.key = "dbProtocols";
   s.label = QObject::tr("Protocol data json file");
   s.helpText = QObject::tr("Imported protocol data file (use database downloader to auto-fill). \nDefault file name: AllProtocols.json");
-  s.type = SettingType::String;
+  s.type = SettingType::File;
   s.defaultValue = "";
   s.tab = "Database";
+  s.fileFilter = "json Files (*.json);;All Files (*)";
 
   return s;
 };

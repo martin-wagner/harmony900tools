@@ -2,21 +2,7 @@
 
 #include "settings.h"
 
-#include <QTabWidget>
-#include <QDialogButtonBox>
-#include <QFormLayout>
-#include <QVBoxLayout>
-#include <QWidget>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QLabel>
-#include <QPushButton>
-#include <QAbstractButton>
-#include <QFrame>
-#include <QMessageBox>
+#include <QtWidgets>
 
 #include "lib/settings.h"
 
@@ -42,6 +28,7 @@ void Settings::addSetting(const SettingDef &def)
   QFormLayout *form = layoutForTab(tabName);
 
   QWidget *editor = nullptr;
+  QWidget *rowWidget = nullptr;
 
   switch (def.type) {
     case SettingType::String: {
@@ -108,6 +95,43 @@ void Settings::addSetting(const SettingDef &def)
       editor = combo;
       break;
     }
+    case SettingType::File: {
+      auto *container = new QWidget(this);
+      auto *hbox = new QHBoxLayout(container);
+      hbox->setContentsMargins(0, 0, 0, 0);
+
+      auto *le = new QLineEdit(container);
+      le->setText(def.defaultValue.toString());
+      if (!def.helpText.isEmpty()) {
+        le->setToolTip(def.helpText);
+      }
+
+      auto *browseBtn = new QPushButton(tr("Browse..."), container);
+
+      hbox->addWidget(le, 1);
+      hbox->addWidget(browseBtn);
+
+      const QString key = def.key;
+      const QString filter = def.fileFilter;
+
+      connect(browseBtn, &QPushButton::clicked, this,
+          [this, le, filter, key]() {
+            const QString path = QFileDialog::getOpenFileName(
+                this, tr("Select File"), le->text(), filter);
+            if (!path.isEmpty()) {
+              le->setText(path);
+              checkFileExists(key);
+            }
+          });
+
+      connect(le, &QLineEdit::editingFinished, this, [this, key]() {
+        checkFileExists(key);
+      });
+
+      editor = le;          // value lives in the QLineEdit
+      rowWidget = container; // but the row shows the container (le + button)
+      break;
+    }
   }
 
   if (editor != nullptr) {
@@ -115,7 +139,13 @@ void Settings::addSetting(const SettingDef &def)
     if (!def.helpText.isEmpty()) {
       rowLabel->setToolTip(def.helpText);
     }
-    form->addRow(rowLabel, editor);
+
+    QWidget *widgetForRow = editor;
+    if (rowWidget != nullptr) {
+      widgetForRow = rowWidget;
+    }
+    form->addRow(rowLabel, widgetForRow);
+
     editors.insert(def.key, editor);
 
     //load from qsettings
@@ -168,6 +198,10 @@ void Settings::setValues(const QMap<QString, QVariant> &vals)
           break;
         }
       }
+    }
+
+    if (def.type == SettingType::File) {
+      checkFileExists(def.key);
     }
   }
 }
@@ -331,6 +365,23 @@ void Settings::loadFromQSettings()
     }
   }
   setValues(vals);
+}
+
+void Settings::checkFileExists(const QString &key)
+{
+  auto *le = qobject_cast<QLineEdit*>(editors.value(key, nullptr));
+  if (le == nullptr) {
+    return;
+  }
+
+  const QFileInfo info(le->text());
+  if (le->text().isEmpty() || info.exists()) {
+    le->setStyleSheet("");
+    le->setToolTip("");
+  } else {
+    le->setStyleSheet("border: 1px solid #d9534f;");
+    le->setToolTip(tr("File does not exist"));
+  }
 }
 
 QVariant Settings::widgetValue(const QString &key) const
