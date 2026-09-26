@@ -34,6 +34,16 @@ enum class DeviceType { Amplifier, AudioVideoSwitch, CableBox, Cassette, Cd, CdJ
     Projector, Pvr, RadioTuner, Receiver, Satellite, SetTopBox, Television, TvDvd, TvDvdVcr, TvHdd,
     TvVcr, Vcr, Unknown
 };
+enum class DatabaseDeviceType { Television = 1, VCR = 2, CDPlayer = 3, DVD = 4,
+    StereoReceiver = 5, TapeDeck = 6, Projector = 7, Computer = 8, GameConsole = 9, Laptop = 10,
+    CDJukebox = 11, DigitalSetTopBox = 12, Monitor = 13, CableBox = 14, TVVCR = 15, Satellite = 16,
+    PVR = 18, Amplifier = 19, DAT = 20, MiniSystemCDRadioCassette = 21, MiniSystemDvdCDRadio = 22,
+    GameConsoleWithDvd = 23, LightController = 24, DVDVCR = 25, LaserdiscPlayer = 28, MinidiscPlayer = 29,
+    AudioVideoSwitch = 30, MiniSystemDvdVcrRadio = 32, DigitalMusicServer = 33, DVDRecorder = 34,
+    MediaCenterPC = 35, RadioTuner = 36, TVDVD = 37, TVDVDVCR = 38, HomeAppliance = 44, ClimateControl = 45,
+    DVDRVCR = 47, TVHDD = 48, TVCamera = 49, AppleTV = 51, Roku = 52, AutomationGateway = 53,
+    Controller = 57, Thermostat = 59, Camera = 60, MediaPlayer = 63, Plug = 66, Default = 999, Unknown = 0
+};
 enum class StateMachineDeviceType { Power, Input, InputType, Screen, TVInput, AntennaOutput, User1, User2, User3, User4, User5, Unknown };
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
@@ -122,6 +132,7 @@ template class Enum<TimeFormat>;
 template class Enum<PvrType>;
 template class Enum<TunerInput>;
 template class Enum<DeviceType>;
+template class Enum<DatabaseDeviceType>;
 template class Enum<StateMachineDeviceType>;
 template class Enum<ActionType>;
 template class Enum<Operation>;

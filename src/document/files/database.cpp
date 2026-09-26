@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <map>
+#include <fstream>
 #include <vector>
 
 #include <QDir>
@@ -17,9 +18,12 @@
 
 #include <nlohmann/json.hpp>
 
+#include "lib/zip.h"
+#include "lib/qtHelpers.h"
 #include "database.h"
 
-#include "lib/zip.h"
+using namespace nlohmann;
+//no using namespace std -- collides with nlohmann json stuff
 
 namespace document
 {
@@ -50,17 +54,15 @@ struct DeviceEntry
     uint64_t line = 0;
 };
 
-using Catalogue = std::map<QString, std::vector<DeviceEntry>, NameLess>;
-
 /**
  * SAX handler that only picks the three wanted top level keys of one line.
  * Nothing is stored for the rest of the document, so no DOM is built.
  * Nested keys (e.g. "Id" inside arrays) are ignored via the depth check.
  */
-class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
+class CatalogueLineHandler: public json_sax<json>
 {
   public:
-    using Json = nlohmann::json;
+    using Json = json;
 
     enum class Field
     {
@@ -197,100 +199,6 @@ class CatalogueLineHandler: public nlohmann::json_sax<nlohmann::json>
     int depth = 0;
     Field currentField = Field::None;
 };
-
-/** Returns value as quoted / escaped json string. */
-QByteArray jsonString(const QString &value)
-{
-  const QByteArray utf8 = value.toUtf8();
-  const nlohmann::json json = std::string(utf8.constData(),
-      static_cast<size_t>(utf8.size()));
-  const std::string text = json.dump(-1, ' ', false,
-      nlohmann::json::error_handler_t::replace);
-  return QByteArray(text.data(), static_cast<int>(text.size()));
-}
-
-/** Writes the index (streamed, no json document in memory). Atomic via QSaveFile. */
-bool writeIndex(const QString &indexPath, const QString &sourceName,
-    uint64_t lineCount, const Catalogue &catalogue, QString &errorText)
-{
-  static const int FLUSH_SIZE = 1 << 20;
-
-  QSaveFile out(indexPath);
-  if (!out.open(QIODevice::WriteOnly)) {
-    errorText = QStringLiteral("Cannot write %1").arg(indexPath);
-    return false;
-  }
-
-  QByteArray buffer;
-  buffer.reserve(FLUSH_SIZE * 2);
-  bool ok = true;
-
-  const auto flush = [&]() {
-    if (ok && out.write(buffer) != buffer.size()) {
-      ok = false;
-    }
-    buffer.clear();
-  };
-
-  buffer += "{\n  \"Version\": 1,\n  \"Source\": " + jsonString(sourceName)
-      + ",\n  \"LineCount\": " + QByteArray::number(lineCount)
-      + ",\n  \"Manufacturers\": [\n";
-
-  bool firstManufacturer = true;
-  for (const auto &entry : catalogue) {
-    if (!firstManufacturer) {
-      buffer += ",\n";
-    }
-    firstManufacturer = false;
-
-    buffer += "    {\n      \"Name\": " + jsonString(entry.first)
-        + ",\n      \"Devices\": [\n";
-
-    bool firstDevice = true;
-    for (const DeviceEntry &device : entry.second) {
-      if (!firstDevice) {
-        buffer += ",\n";
-      }
-      firstDevice = false;
-
-      buffer += "        { \"Name\": " + jsonString(device.name)
-          + ", \"Type\": " + QByteArray::number(device.type) + ", \"Id\": "
-          + QByteArray::number(device.id) + ", \"Line\": "
-          + QByteArray::number(device.line) + " }";
-
-      if (buffer.size() > FLUSH_SIZE) {
-        flush();
-      }
-    }
-    buffer += "\n      ]\n    }";
-  }
-
-  buffer += "\n  ]\n}\n";
-  flush();
-
-  if (!ok) {
-    errorText = QStringLiteral("Write error on %1").arg(indexPath);
-    out.cancelWriting();
-    return false;
-  }
-  if (!out.commit()) {
-    errorText = QStringLiteral("Cannot finalize %1").arg(indexPath);
-    return false;
-  }
-  return true;
-}
-
-/** device_features_raw.jsonl.gz -> device_features_raw.jsonl */
-QString getExtractedName(const QString &fileName)
-{
-  QString name = fileName;
-  if (name.endsWith(QLatin1String(".gz"), Qt::CaseInsensitive)) {
-    name.chop(3);
-  } else {
-    name += QStringLiteral(".extracted");
-  }
-  return name;
-}
 
 ImportDatabase::ImportDatabase(QObject *parent) :
     QObject(parent)
@@ -595,6 +503,104 @@ void ImportDatabase::finish(bool success)
   emit finished(success, files);
 }
 
+/** Returns value as quoted / escaped json string. */
+QByteArray ImportDatabase::jsonString(const QString &value)
+{
+  const QByteArray utf8 = value.toUtf8();
+  const json json = std::string(utf8.constData(),
+      static_cast<size_t>(utf8.size()));
+  const auto text = json.dump(-1, ' ', false, json::error_handler_t::replace);
+  return QByteArray(text.data(), static_cast<int>(text.size()));
+}
+
+/** Writes the index (streamed, no json document in memory). Atomic via QSaveFile. */
+bool ImportDatabase::writeIndex(const QString &indexPath,
+    const QString &sourceName, uint64_t lineCount, const Catalogue &catalogue,
+    QString &errorText)
+{
+  static const int FLUSH_SIZE = 1 << 20;
+
+  QSaveFile out(indexPath);
+  if (!out.open(QIODevice::WriteOnly)) {
+    errorText = QStringLiteral("Cannot write %1").arg(indexPath);
+    return false;
+  }
+
+  QByteArray buffer;
+  buffer.reserve(FLUSH_SIZE * 2);
+  bool ok = true;
+
+  const auto flush = [&]() {
+    if (ok && out.write(buffer) != buffer.size()) {
+      ok = false;
+    }
+    buffer.clear();
+  };
+
+  buffer += "{\n  \"" + keyCatalogueVersion.toUtf8() + "\":"
+      + QByteArray::number(catalogueVersion) + ",\n  \""
+      + keyCatalogueLc.toUtf8() + "\": " + QByteArray::number(lineCount)
+      + ",\n  \"" + keyCatalogueMnf.toUtf8() + "\": [\n";
+
+  bool firstManufacturer = true;
+  for (const auto &entry : catalogue) {
+    if (!firstManufacturer) {
+      buffer += ",\n";
+    }
+    firstManufacturer = false;
+
+    buffer += "    {\n      \"" + keyCatalogueMnfName.toUtf8() + "\": "
+        + jsonString(entry.first) + ",\n      \"" + keyCatalogueDev.toUtf8()
+        + "\": [\n";
+
+    bool firstDevice = true;
+    for (const DeviceEntry &device : entry.second) {
+      if (!firstDevice) {
+        buffer += ",\n";
+      }
+      firstDevice = false;
+
+      buffer += "        { \"" + keyCatalogueDevName.toUtf8() + "\": "
+          + jsonString(device.name) + ", \"" + keyCatalogueDevType.toUtf8()
+          + "\": " + QByteArray::number(device.type) + ", \""
+          + keyCatalogueDevId.toUtf8() + "\": " + QByteArray::number(device.id)
+          + ", \"" + keyCatalogueDevLine.toUtf8() + "\": "
+          + QByteArray::number(device.line) + " }";
+
+      if (buffer.size() > FLUSH_SIZE) {
+        flush();
+      }
+    }
+    buffer += "\n      ]\n    }";
+  }
+
+  buffer += "\n  ]\n}\n";
+  flush();
+
+  if (!ok) {
+    errorText = QStringLiteral("Write error on %1").arg(indexPath);
+    out.cancelWriting();
+    return false;
+  }
+  if (!out.commit()) {
+    errorText = QStringLiteral("Cannot finalize %1").arg(indexPath);
+    return false;
+  }
+  return true;
+}
+
+/** device_features_raw.jsonl.gz -> device_features_raw.jsonl */
+QString ImportDatabase::getExtractedName(const QString &fileName)
+{
+  QString name = fileName;
+  if (name.endsWith(QLatin1String(".gz"), Qt::CaseInsensitive)) {
+    name.chop(3);
+  } else {
+    name += QStringLiteral(".extracted");
+  }
+  return name;
+}
+
 QString ImportDatabase::getExtractedPath(int index) const
 {
   return config.targetDir + QLatin1Char('/')
@@ -666,7 +672,7 @@ bool ImportDatabase::createCatalogueIndex(const DatabasePaths &paths,
 
     if (end != begin) {
       handler.reset();
-      const bool parsed = nlohmann::json::sax_parse(begin, end, &handler);
+      const bool parsed = json::sax_parse(begin, end, &handler);
 
       if (!parsed) {
         invalidLines++;
@@ -729,6 +735,254 @@ bool ImportDatabase::createCatalogueIndex(const DatabasePaths &paths,
     return false;
   }
   return true;
+}
+
+Database::Database()
+{
+  clear();
+}
+
+bool Database::setDatabase(const DatabasePaths &paths)
+{
+  json j;
+
+  auto keyLc = strq(ImportDatabase::keyCatalogueLc);
+  auto keyMnf = strq(ImportDatabase::keyCatalogueMnf);
+  auto keyMnfName = strq(ImportDatabase::keyCatalogueMnfName);
+  auto keyDev = strq(ImportDatabase::keyCatalogueDev);
+  auto keyDevName = strq(ImportDatabase::keyCatalogueDevName);
+  auto keyDevType = strq(ImportDatabase::keyCatalogueDevType);
+  auto keyDevId = strq(ImportDatabase::keyCatalogueDevId);
+  auto keyDevLine = strq(ImportDatabase::keyCatalogueDevLine);
+
+  clear();
+  if (paths.catalogue.isEmpty()) {
+    return false;
+  }
+  d = paths;
+
+  auto size = QFile(d.catalogue).size();
+  if (size == 0) {
+    emit writeLog(LogLevel::Error, tr("load: %1 is empty").arg(d.catalogue),
+        ContentType::PlainText);
+    clear();
+    return false;
+  }
+
+#ifdef _WIN32
+  std::ifstream f(d.catalogue.toStdWString().c_str(), std::ios::binary);
+#else
+  std::ifstream f(d.catalogue.toUtf8(), std::ios::binary);
+#endif
+  if (!f.is_open()) {
+    emit writeLog(LogLevel::Error,
+        tr("load: failed to open %1").arg(d.catalogue), ContentType::PlainText);
+    clear();
+    return false;
+  }
+  try {
+    j = json::parse(f);
+  } catch (const json::parse_error &e) {
+    emit writeLog(LogLevel::Error,
+        tr("load: Json parse error at byte %1: %2").arg(e.byte).arg(
+            QString(e.what())), ContentType::PlainText);
+    clear();
+    return false;
+  } catch (const json::exception &e) {
+    emit writeLog(LogLevel::Error,
+        tr("load: Json error [%1]: %2").arg(e.id).arg(QString(e.what())),
+        ContentType::PlainText);
+    clear();
+    return false;
+  }
+
+  auto version = j[strq(ImportDatabase::keyCatalogueVersion)].get<uint32_t>();
+  if (version != ImportDatabase::catalogueVersion) {
+    emit writeLog(LogLevel::Error,
+        tr("load %1: unsupported version %2").arg(d.catalogue).arg(version),
+        ContentType::PlainText);
+    clear();
+    return false;
+
+  }
+  if ((!j.contains(keyLc)) || !j[keyLc].is_number_unsigned()) {
+    emit writeLog(LogLevel::Error,
+        tr("load %1: no Device entries").arg(d.catalogue),
+        ContentType::PlainText);
+    clear();
+    return false;
+  }
+  deviceCount = j[keyLc].get<uint64_t>();
+
+  if (!j.contains(keyMnf)) {
+    emit writeLog(LogLevel::Error,
+        tr("load %1: no Manufacturer entries").arg(d.catalogue),
+        ContentType::PlainText);
+    clear();
+    return false;
+  }
+
+  if (!j[keyMnf].is_array()) {
+    emit writeLog(LogLevel::Error,
+        tr("load %1: Manufacturers is not an array").arg(d.catalogue),
+        ContentType::PlainText);
+    clear();
+    return false;
+  }
+  for (const auto &mnfEntry : j[keyMnf]) {
+    Manufacturer manufacturer;
+
+    if (!mnfEntry.contains(keyMnfName) || !mnfEntry[keyMnfName].is_string()) {
+      emit writeLog(LogLevel::Notice,
+          tr("load %1: Manufacturer entry missing Name").arg(d.catalogue),
+          ContentType::PlainText);
+      continue;
+    }
+    manufacturer.name = QString::fromStdString(
+        mnfEntry[keyMnfName].get<std::string>());
+    QString mnfKey = normaliseKey(manufacturer.name);
+
+    if (!mnfEntry.contains(keyDev) || !mnfEntry[keyDev].is_array()) {
+      emit writeLog(LogLevel::Notice,
+          tr("load %1: Manufacturer %2 missing Devices").arg(d.catalogue).arg(
+              manufacturer.name), ContentType::PlainText);
+      continue;
+    }
+
+    for (const auto &devEntry : mnfEntry[keyDev]) {
+      Device device;
+
+      if (!devEntry.contains(keyDevName) || !devEntry[keyDevName].is_string()) {
+        emit writeLog(LogLevel::Notice,
+            tr("load %1: Device entry missing Name (%2)").arg(d.catalogue).arg(
+                manufacturer.name), ContentType::PlainText);
+        continue;
+      }
+      if (!devEntry.contains(keyDevType)
+          || !devEntry[keyDevType].is_number_unsigned()) {
+        emit writeLog(LogLevel::Notice,
+            tr("load %1: Device entry missing Type (%2)").arg(d.catalogue).arg(
+                manufacturer.name), ContentType::PlainText);
+        continue;
+      }
+      if (!devEntry.contains(keyDevId)
+          || !devEntry[keyDevId].is_number_unsigned()) {
+        emit writeLog(LogLevel::Notice,
+            tr("load %1: Device entry missing Id (%2)").arg(d.catalogue).arg(
+                manufacturer.name), ContentType::PlainText);
+        continue;
+      }
+      if (!devEntry.contains(keyDevLine)
+          || !devEntry[keyDevLine].is_number_unsigned()) {
+        emit writeLog(LogLevel::Notice,
+            tr("load %1: Device entry missing Line (%2)").arg(d.catalogue).arg(
+                manufacturer.name), ContentType::PlainText);
+        continue;
+      }
+
+      device.name = QString::fromStdString(
+          devEntry[keyDevName].get<std::string>());
+      auto typeValue = devEntry[keyDevType].get<uint32_t>();
+
+      device.type = data::Enum<data::DatabaseDeviceType>(
+          static_cast<data::DatabaseDeviceType>(typeValue));
+      device.id = devEntry[keyDevId].get<uint64_t>();
+      device.line = devEntry[keyDevLine].get<uint64_t>();
+
+      auto devKey = normaliseKey(device.name);
+      manufacturer.devices.emplace(devKey, device);
+    }
+
+    db.emplace(mnfKey, std::move(manufacturer));
+  }
+
+  return true;
+}
+
+QStringList Database::findManufacturers(const QString &substr) const
+{
+  QStringList result;
+  QString key = normaliseKey(substr);
+
+  for (const auto &entry : db) {
+    if (entry.first.contains(key)) {
+      result.append(entry.second.name);
+    }
+  }
+
+  return result;
+}
+
+QStringList Database::findDevices(const QString &substr) const
+{
+  QStringList result;
+  QString key = normaliseKey(substr);
+
+  for (const auto &mnfEntry : db) {
+    for (const auto &devEntry : mnfEntry.second.devices) {
+      if (devEntry.first.contains(key)) {
+        result.append(devEntry.second.name);
+      }
+    }
+  }
+
+  return result;
+}
+
+QStringList Database::findDevices(const QString &manufacturerName,
+    const QString &substr) const
+{
+  QStringList result;
+
+  auto mnfIt = db.find(normaliseKey(manufacturerName));
+  if (mnfIt == db.end()) {
+    return result;
+  }
+
+  QString key = normaliseKey(substr);
+
+  for (const auto &entry : mnfIt->second.devices) {
+    if (entry.first.contains(key)) {
+      result.append(entry.second.name);
+    }
+  }
+
+  return result;
+}
+
+Database::Device Database::getDeviceInfo(const QString &manufacturerName,
+    const QString &deviceName)
+{
+  auto mnf = normaliseKey(manufacturerName);
+  auto dev = normaliseKey(deviceName);
+
+  try {
+    auto &data = db.at(mnf).devices.at(dev);
+    return data;
+  } catch (std::out_of_range &) {
+    return Device();
+  }
+}
+
+void Database::clear()
+{
+  db.clear();
+  deviceCount = 0;
+  d = DatabasePaths();
+}
+
+QString Database::normaliseKey(const QString &s)
+{
+  QString result;
+  result.reserve(s.size());
+
+  for (const QChar &c : s) {
+    if (c.isLetterOrNumber() && (c.unicode() < 128)) {
+      result.append(c.toLower());
+    }
+  }
+
+  return result;
 }
 
 }

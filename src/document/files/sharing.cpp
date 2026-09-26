@@ -75,8 +75,8 @@ bool DeviceStorage::importDeviceJson(Config &c)
   }
 
 #ifdef _WIN32
-    ifstream f(file.toStdWString().c_str(), ios::binary);
-  #else
+  ifstream f(file.toStdWString().c_str(), ios::binary);
+#else
   ifstream f(file.toUtf8(), ios::binary);
 #endif
   if (!f.is_open()) {
@@ -86,12 +86,12 @@ bool DeviceStorage::importDeviceJson(Config &c)
   }
   try {
     j = json::parse(f);
-  } catch (const nlohmann::json::parse_error &e) {
+  } catch (const json::parse_error &e) {
     emit writeLog(LogLevel::Error,
         tr("load: Json parse error at byte %1: %2").arg(e.byte).arg(
             QString(e.what())), ContentType::PlainText);
     return false;
-  } catch (const nlohmann::json::exception &e) {
+  } catch (const json::exception &e) {
     emit writeLog(LogLevel::Error,
         tr("load: Json error [%1]: %2").arg(e.id).arg(QString(e.what())),
         ContentType::PlainText);
