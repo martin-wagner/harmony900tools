@@ -11,7 +11,6 @@ namespace document
 namespace files
 {
 
-
 /**
  * A single numeric element like "0x7", "1x0" or "2xB9FE".
  * The digit in front of the "x" is kept as prefix, the hex digits as string,
@@ -60,8 +59,14 @@ class KeyCode {
     /** Check if coding type is quad (four states per bit) */
     bool isQuadBitType() const;
 
-    /** Get quad bit 0...3 */
+    /** Get quad bit 0...3, -1 if missing or not a number. */
     int getQuadSymbol(const KeyCodeNumber& number, int index) const;
+
+    /** Check if coding type is hex (16 states per bit) */
+    bool isHexBitType() const;
+
+    /** Get hex bit 0...15, -1 if missing or not a number. */
+    int getHexSymbol(const KeyCodeNumber& number, int index) const;
 
     /** The number after the last ":", -1 if missing or not a number. */
     int getTrailer() const;

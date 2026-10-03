@@ -81,7 +81,8 @@ set(sources ${sources}
   document/data/items/ssIrJson.cpp
   document/files/lib/keyCode.cpp
   document/files/create.cpp
-  document/files/database.cpp
+  document/files/databaseImporter.cpp
+  document/files/databaseLoader.cpp
   document/files/h900.cpp
   document/files/protocols.cpp
   document/files/sharing.cpp

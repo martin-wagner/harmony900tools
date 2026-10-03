@@ -4,7 +4,7 @@
 
 #include <QWidget>
 
-#include "document/files/database.h"
+#include "document/files/databaseLoader.h"
 
 class QLabel;
 class QProgressBar;

@@ -10,7 +10,7 @@
 #include <QStringList>
 
 #include "lib/qtHelpers.h"
-#include "document/files/database.h"
+#include "document/files/databaseImporter.h"
 
 using namespace std;
 
@@ -172,8 +172,15 @@ int main(int argc, char **argv)
     cout << "Manufacturers: ";
     printStringList(db.findManufacturers(qstr(cfg.manufacturerSearch)));
   } else if (hasDeviceSearch == true) {
+    QString manufacturer;
+    auto deviceMatches = db.findDevices(qstr(cfg.deviceSearch), &manufacturer);
     cout << "Devices: ";
-    printStringList(db.findDevices(qstr(cfg.deviceSearch)));
+    printStringList(deviceMatches);
+
+    if (deviceMatches.size() == 1) {
+      auto device = db.getDeviceInfo(manufacturer, deviceMatches.first());
+      printDeviceInfo(device);
+    }
   } else {
     printHelp(argv[0]);
     return EXIT_FAILURE;

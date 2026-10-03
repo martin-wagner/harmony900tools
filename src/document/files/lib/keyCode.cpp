@@ -96,6 +96,18 @@ int KeyCode::getQuadSymbol(const KeyCodeNumber &number, int index) const
   return number.digits.at(index).digitValue();
 }
 
+bool KeyCode::isHexBitType() const
+{
+  static const QRegularExpression quadRegex(QStringLiteral("\\bHex\\b"));
+  return quadRegex.match(name).hasMatch();
+}
+
+int KeyCode::getHexSymbol(const KeyCodeNumber &number, int index) const
+{
+  //todo implement...
+  return -1;
+}
+
 int KeyCode::getTrailer() const
 {
   return trailer;
