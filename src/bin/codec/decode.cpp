@@ -92,14 +92,22 @@ Status Decode::parse(TimingStream data, int carrier)
   switch (decoder.decode_type) {
     case decode_type_t::NEC:
       if (decoder.bits == 32) {
-        res.codeType = CodeType::NEC;
+        if (carrier > 39000) {
+          res.codeType = CodeType::NEC40kHz;
+        } else {
+          res.codeType = CodeType::NEC;
+        }
       }
       break;
     case decode_type_t::NEC_LIKE:
       if (decoder.bits == 32) {
         res.command = decoder.value & 0xffff;
         res.address = (decoder.value >> 16) & 0xffff;
-        res.codeType = CodeType::NEC;
+        if (carrier > 39000) {
+          res.codeType = CodeType::NEC40kHz;
+        } else {
+          res.codeType = CodeType::NEC;
+        }
       }
       break;
     case decode_type_t::PANASONIC:
@@ -108,7 +116,11 @@ Status Decode::parse(TimingStream data, int carrier)
         //address = "mnf"
         res.command = 0;
         //data contains among others: 8bit device, 8bit subdevice, 8bit command
-        res.codeType = CodeType::KASEIKYO;
+        if (carrier > 37200) {
+          res.codeType = CodeType::KASEIKYO;
+        } else {
+          res.codeType = CodeType::KASEIKYO36kHz; //actually 36.4kHz
+        }
       }
       break;
     case decode_type_t::SONY:

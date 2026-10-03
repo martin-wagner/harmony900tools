@@ -26,8 +26,10 @@ inline irProto::Code encode(uint32_t protocolIndex, document::data::CodeType cod
 {
   switch (codeType) {
     case document::data::CodeType::NEC:
+    case document::data::CodeType::NEC40kHz:
       return encodeNec(protocolIndex, codeString, address, command, rawData);
     case document::data::CodeType::KASEIKYO:
+    case document::data::CodeType::KASEIKYO36kHz:
       return encodeKASEIKYO(protocolIndex, codeString, address, command, rawData);
     case document::data::CodeType::SIRCS12:
       return encodeSIRCS(protocolIndex, codeString, address, command, rawData);

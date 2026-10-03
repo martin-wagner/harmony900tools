@@ -80,8 +80,150 @@
             ]
         },
         {
+            "Name": "NEC40kHz",
+            "ClockPeriod": 25000,
+            "Sections": [
+                {
+                    "BitCount": 32,
+                    "Toggle": 255,
+                    "Timing": 110000,
+                    "Ctrl0": "IsDataFrame",
+                    "Ctrl1": "DataTwoPairs",
+                    "SoF": [
+                        {
+                            "State": true,
+                            "Time": 9000
+                        },
+                        {
+                            "State": false,
+                            "Time": 4500
+                        }
+                    ],
+                    "Data": {
+                        "FalsePair": [
+                            {
+                                "State": true,
+                                "Time": 560
+                            },
+                            {
+                                "State": false,
+                                "Time": 560
+                            }
+                        ],
+                        "TruePair": [
+                            {
+                                "State": true,
+                                "Time": 560
+                            },
+                            {
+                                "State": false,
+                                "Time": 1690
+                            }
+                        ]
+                    },
+                    "EoF": [
+                        {
+                            "State": true,
+                            "Time": 560
+                        }
+                    ]
+                },
+                {
+                    "BitCount": 0,
+                    "Toggle": 255,
+                    "Timing": 110000,
+                    "Ctrl0": "IsRepeatFrame",
+                    "Ctrl1": "NotDataFrame",
+                    "SoF": [
+                        {
+                            "State": true,
+                            "Time": 9000
+                        },
+                        {
+                            "State": false,
+                            "Time": 2250
+                        }
+                    ],
+                    "Data": {
+                        "FalsePair": [],
+                        "TruePair": []
+                    },
+                    "EoF": [
+                        {
+                            "State": true,
+                            "Time": 560
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "Name": "KASEIKYO",
             "ClockPeriod": 26316,
+            "Sections": [
+                {
+                    "BitCount": 48,
+                    "Toggle": 255,
+                    "Timing": 4294967295,
+                    "Ctrl0": "IsDataFrame",
+                    "Ctrl1": "DataTwoPairs",
+                    "SoF": [
+                        {
+                            "State": true,
+                            "Time": 3380
+                        },
+                        {
+                            "State": false,
+                            "Time": 1690
+                        }
+                    ],
+                    "Data": {
+                        "FalsePair": [
+                            {
+                                "State": true,
+                                "Time": 423
+                            },
+                            {
+                                "State": false,
+                                "Time": 423
+                            }
+                        ],
+                        "TruePair": [
+                            {
+                                "State": true,
+                                "Time": 423
+                            },
+                            {
+                                "State": false,
+                                "Time": 1269
+                            }
+                        ]
+                    },
+                    "EoF": [
+                        {
+                            "State": true,
+                            "Time": 423
+                        },
+                        {
+                            "State": false,
+                            "Time": 32767
+                        },
+                        {
+                            "State": false,
+                            "Time": 32767
+                        },
+                        {
+                            "State": false,
+                            "Time": 14466
+                        }
+                    ]
+                }
+            ]
+        },
+
+        {
+            "Name": "KASEIKYO36kHz",
+            "ClockPeriod": 27473,
             "Sections": [
                 {
                     "BitCount": 48,

@@ -128,10 +128,12 @@ editors::CodeEditor::CodeEditor(Context &ctx, CodeType codeType,
       loadProprietary();
       break;
     case CodeType::NEC:
+    case CodeType::NEC40kHz:
       stack->setCurrentIndex(1);
       loadNec();
       break;
     case CodeType::KASEIKYO:
+    case CodeType::KASEIKYO36kHz:
       stack->setCurrentIndex(2);
       loadKas();
       break;
@@ -186,7 +188,9 @@ bool CodeEditor::isSupported(CodeType type)
   switch (type) {
     case CodeType::Proprietary:
     case CodeType::NEC:
+    case CodeType::NEC40kHz:
     case CodeType::KASEIKYO:
+    case CodeType::KASEIKYO36kHz:
     case CodeType::SIRCS12:
     case CodeType::SIRCS15:
     case CodeType::SIRCS20:
@@ -207,9 +211,11 @@ void CodeEditor::accept()
       updateProprietaryData();
       break;
     case CodeType::NEC:
+    case CodeType::NEC40kHz:
       updateNecData();
       break;
     case CodeType::KASEIKYO:
+    case CodeType::KASEIKYO36kHz:
       updateKasData();
       break;
     case CodeType::SIRCS20:

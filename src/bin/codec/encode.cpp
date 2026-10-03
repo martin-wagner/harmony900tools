@@ -186,14 +186,16 @@ irProto::Code encodeDefaults(uint32_t protocolIndex,
     uint32_t &command, vector<bool> &rawData)
 {
   switch (codeType) {
-    case document::data::CodeType::NEC: {
+    case document::data::CodeType::NEC:
+    case document::data::CodeType::NEC40kHz: {
       rawData = irProto::Code::u64tobits(32, 0x00ff00ff); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::NEC);
       return encodeNec(protocolIndex, codeString, address, command, rawData);
     }
-    case document::data::CodeType::KASEIKYO: {
+    case document::data::CodeType::KASEIKYO: 
+    case document::data::CodeType::KASEIKYO36kHz: {
       rawData = irProto::Code::u64tobits(48, uint64_t(0x000000000000)); //addr 0, cmd 0
       address = 0;
       command = 0;
@@ -269,6 +271,7 @@ bool getCodeSize(document::data::CodeType codeType, const string &codeString,
 {
   switch (codeType) {
     case document::data::CodeType::NEC:
+    case document::data::CodeType::NEC40kHz:
       switch (strToDecodeType(codeString.c_str())) {
         case decode_type_t::NEC:
           addressWidth = 16;
@@ -283,6 +286,7 @@ bool getCodeSize(document::data::CodeType codeType, const string &codeString,
       }
       break;
     case document::data::CodeType::KASEIKYO:
+    case document::data::CodeType::KASEIKYO36kHz:
       //special coding, more than address / command
       break;
     case document::data::CodeType::SIRCS12:
@@ -337,10 +341,12 @@ QStringList getSubTypes(document::data::CodeType codeType)
 
   switch (codeType) {
     case document::data::CodeType::NEC:
+    case document::data::CodeType::NEC40kHz:
       ret.push_back(qstr(typeToString(decode_type_t::NEC)));
       ret.push_back(qstr(typeToString(decode_type_t::NEC_LIKE)));
       break;
     case document::data::CodeType::KASEIKYO:
+    case document::data::CodeType::KASEIKYO36kHz:
       ret.push_back(qstr(typeToString(decode_type_t::PANASONIC)));
       ret.push_back(qstr(typeToString(decode_type_t::DENON)));
       break;
