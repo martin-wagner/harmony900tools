@@ -6,7 +6,7 @@
 #include <QWidget>
 
 #include "ui/logViewer.h"
-#include "document/files/databaseLoader.h"
+#include "document/files/database/loader.h"
 
 class QCheckBox;
 class QLabel;

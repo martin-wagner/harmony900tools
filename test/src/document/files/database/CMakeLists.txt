@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Source location
 # ---------------------------------------------------------------------------
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/document/files/lib)
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/document/files/database)
 
 # ---------------------------------------------------------------------------
 # Qt — add this if not already in a parent CMakeLists.txt

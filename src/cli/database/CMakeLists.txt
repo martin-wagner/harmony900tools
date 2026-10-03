@@ -8,8 +8,8 @@ set(sources
     ${CMAKE_SOURCE_DIR}/src/bin/irProto/file.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/irProto/code.cpp
     ${CMAKE_SOURCE_DIR}/src/bin/timing.cpp
-    ${CMAKE_SOURCE_DIR}/src/document/files/databaseImporter.cpp
-    ${CMAKE_SOURCE_DIR}/src/document/files/lib/keyCode.cpp
+    ${CMAKE_SOURCE_DIR}/src/document/files/database/importer.cpp
+    ${CMAKE_SOURCE_DIR}/src/document/files/database/keyCode.cpp
 )
 
 add_executable(h900databaseTool ${sources})

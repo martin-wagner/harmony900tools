@@ -20,7 +20,7 @@
 #include <nlohmann/json.hpp>
 
 #include "lib/zip.h"
-#include "databaseLoader.h"
+#include "loader.h"
 
 using namespace nlohmann;
 //no using namespace std -- collides with nlohmann json stuff

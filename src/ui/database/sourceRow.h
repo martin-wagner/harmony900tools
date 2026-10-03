@@ -4,7 +4,7 @@
 
 #include <QWidget>
 
-#include "document/files/databaseLoader.h"
+#include "document/files/database/loader.h"
 
 
 class QLabel;

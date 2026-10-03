@@ -7,10 +7,10 @@
 
 #include "lib/qtHelpers.h"
 #include "lib/uid.h"
-#include "databaseImporter.h"
+#include "importer.h"
+#include "keyCode.h"
 #include "document/data/items/device.h"
 #include "document/data/items/jsonSerialise.h"
-#include "document/files/lib/keyCode.h"
 
 using namespace nlohmann;
 using namespace std;

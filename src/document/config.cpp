@@ -9,7 +9,7 @@
 #include "lib/uid.h"
 #include "ui/settings.h"
 #include "config.h"
-#include "files/h900.h"
+#include "files/types/h900.h"
 #include "files/create.h"
 #include "files/storage.h"
 

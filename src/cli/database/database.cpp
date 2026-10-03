@@ -10,7 +10,7 @@
 #include <QStringList>
 
 #include "lib/qtHelpers.h"
-#include "document/files/databaseImporter.h"
+#include "document/files/database/importer.h"
 
 using namespace std;
 

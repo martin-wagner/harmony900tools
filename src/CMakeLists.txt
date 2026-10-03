@@ -79,11 +79,11 @@ set(sources ${sources}
   document/data/items/deviceJson.cpp
   document/data/items/irProtoJson.cpp
   document/data/items/ssIrJson.cpp
-  document/files/lib/keyCode.cpp
+  document/files/database/importer.cpp
+  document/files/database/keyCode.cpp
+  document/files/database/loader.cpp
+  document/files/types/h900.cpp
   document/files/create.cpp
-  document/files/databaseImporter.cpp
-  document/files/databaseLoader.cpp
-  document/files/h900.cpp
   document/files/protocols.cpp
   document/files/sharing.cpp
   document/files/storage.cpp
