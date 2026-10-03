@@ -79,6 +79,7 @@ set(sources ${sources}
   document/data/items/deviceJson.cpp
   document/data/items/irProtoJson.cpp
   document/data/items/ssIrJson.cpp
+  document/files/lib/keyCode.cpp
   document/files/create.cpp
   document/files/database.cpp
   document/files/h900.cpp
