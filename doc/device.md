@@ -363,67 +363,113 @@ where _7_ is the protocol index and _0x07..._ is the parameter for command encod
 
 | Offset |    Bytes     |  Value  |  Meaning|
 | ---|---|---|---|
-|[0:1]  |    07 00     |  7      |  Protocol index → IrProto.bin|
-|[2:3]  |    F4 01     |  500    |  Unknown, maybe another pause / delay? |
-|       |              |         |  |
-|[4]    |    03        |  3      |  Repeats|
-|[5]    |    00        |  0      |  Special repeat frame (true = 1, false = 0)|
-|       |              |         |  Either repeats or repeat frame should be used.|
-|[6]    |    01        |  S1     |  Control|
-|       |              |         |  - 0 = Flat data coding|
-|       |              |         |  - 1 = Single section data coding|
-|       |              |         |  - >1 = Multi section data coding|
-|[7...e-1] |           |  payload | Depends on Control|
-|[e]    |    00        |  0      |  Trailing zero / terminator|
+|[0:1]   |    07 00     |  7      |  Protocol index → IrProto.bin|
+|[2:3]   |    F4 01     |  500    |  Silence before sending in us |
+|[4]     |    03        |  3      |  Repeats|
+|[5...n] |              |  Groups |  Always Start, Repeat, Finish |
 
-The header is always 6 bytes + terminator byte long. The payload size depends on the control.
+** Groups **
 
-Values in _Control_ are assumptions. Could as well be a direct reference to a protocol/protocol family
-- 0 = NEC (or generic + repeat)
-- 1 = Generic (if toggle is used, toggle info is in <CodeSequence index>)
-- 2 = ???
-- 3 = Philips RC-6
+To encode / decode the group, you need the bit- and quantum count from the corresponding IRproto protocol.
+
+Each group:
+
+```
+count            1 byte   number of records in this group (0 = group empty)
+record * count   idx (1 byte, section index) + data (bytes, depends on the section)
+```
+
+Data bytes of a section = ceil(symbols * bitsPerSymbol / 8), MSB first, symbols back to back, last byte padded with 0 bits. bitsPerSymbol = ceil(log2(number of Encodings)): 2 states = 1 bit, 4 states = 2 bits, 16 states = 4 bits. Sections without payload (repeat frames, 0 bits) have no data bytes.
+
+`0001009C6000`
+
+
+| Offset |    Bytes     |  Value  |  Meaning|
+| ---|---|---|---|
+|[+0]     |    00        |  0      |  Empty start group |
+|[+1]     |    01        |  1      |  One record in repeat group |
+|[+2]     |    00        |  0      |  IRproto section 0 selector |
+|[+[3:4]  |    9C60      |  bits   |  IRproto section 0 payload (You need to pull the bit count from irProto to get the required bytes. The bit stream is then MSB aligned.) |
+|[+5]     |    00        |  0      |  Empty finish group |
 ...
 
-** Control _Flat_ **
+** Example protocol that uses data frame = repeat frame (RC5) **
 
-`0x0000F401010100 -->20DF18E70101<-- 00`
+also samsung, japan, and almost all others. Toggle bit is not part of the protocol, not the command.
+
+`0x0700F40103 -->00<-->01009C88<-->00<--`
 
 |Offset    | Bytes      | Value   | Meaning|
 |---|---|---|---|
-|[7...e-3] | 20DF18E7   | bits    | Payload. The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. More bits are coded by adding another byte.|
-|[7...e-2] | 01         | 1       | unknown (always 1)|
-|[7...e-1] | 01         | 1       | unknown (always 1)|
+|[5]       | 00         | 0       | Empty start group |
+|[6]       | 01         | 1       | One record in repeat group |
+|[7]       | 00         | 0       | IRproto section 0 selector. RC5 -> 13 Bits -> 2 Bytes, 3 stuff bits |
+|[8:9]     | 9C88       | 0x5009  | Payload
+|[10]      | 00         | 0       | Empty finish group |
 
+*** Example protocol that uses special repeat frame (NEC) ***
 
-** Control _Single Section_ **
+`0x0000F40101 -->010020DF18E7->0101<-->00<-- `
 
-`0x0100F401030001 -->005F5F11EE<-- 00`
-
-|Offset    | Bytes       | Value   | Meaning|
+|Offset    | Bytes      | Value   | Meaning|
 |---|---|---|---|
-|[7]       | 00          | 0       | unknown (always 0)|
-|[8...e-1] | 5F5F11EE    | bits    | Payload. The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. More bits are coded by adding another byte.|
+|[5]       | 01         | 1       | One record in start group |
+|[6]       | 00         | 0       | IRproto section 0 selector. NEC -> 32 Bits -> 4 Bytes, no stuffing |
+|[7...10]  | 20DF18E7   | bits    | Payload
+|[11]      | 01         | 1       | One record in repeat group |
+|[12]      | 01         | 1       | IRproto section 1 selector. NEC Repeat -> 0 Bits -> Empty |
+|[13]      | 00         | 0       | Empty finish group |
 
-** Control _Multi Section_ **
+*** Example protocol that uses multiple sections (RC6) ***
 
-Each section is two bytes long and maps directly to the section in IrProto.bin.
+`0x0200F40103 -->00<-->030070010002B992<-->00<--`
 
-`0x0200F401030003 -->0070010002B992<-- 00`
-
-|Offset    | Bytes       | Value   | Meaning|
+|Offset    | Bytes      | Value   | Meaning|
 |---|---|---|---|
-|[7]       | 00          | 0       | unknown (always 0)|
-|[8:9]     | 70 01       | bits    | Payload section 1. The bit stream is MSB aligned, so in conjunction with the bit count in irProto you get the valid bit stream. you need to place 16 bits, with "1" at the end.|
-|[10:11]   | 00 02       | bits    |  Payload section 2. ... you need to place 16 bits, with "2" at the end.|
-|[12:13]   | B9 92       | bits    |  Payload section 3. ...|
+|[5]       | 00         | 0       | Empty start group |
+|[6]       | 03         | 3       | Three records in repeat group |
+|[7]       | 00         | 0       | IRproto section 0 selector. 4 Bits -> 1 Bytes, 4 stuff bits |
+|[8]       | 70         | 7       | Payload |
+|[10]      | 01         | 1       | IRproto section 1 selector. 1 Bit -> 1 Bytes, 7 stuff bits |
+|[11]      | 00         | 0       | Payload |
+|[12]      | 02         | 1       | IRproto section 2 selector. 16 Bits -> 2 Bytes, no stuffing |
+|[13:14]   | B992       | bits    | Payload |
+|[15]      | 00         | 0       | Empty finish group |
 
-I have one sample of this, for a device using the Philips RC-6 code. 
-- Section 0 codes 4 bit MSB aligned as in the other protocols before. Second byte seems to be index "1".
-- Section 1 codes 1 bit MSB aligned as in the other protocols before. Second byte seems to be index "2".
-- Section 2 is data.
-RC-6 seem to be the only protocols to have different encodings for true/false within a single frame. The 1 bit section is the toggle bit.
+*** Example protocol that uses four state coding (Belgacom quad) ***
 
+in this protocol, each timing state encodes four data bits
+
+`0x0300F40101 -->00<-->010022C026F6<-->020122C026F60222C0A6F6`
+
+|Offset    | Bytes      | Value   | Meaning|
+|---|---|---|---|
+|[5]       | 00         | 0       | Empty start group |
+|[6]       | 01         | 1       | One record in repeat group |
+|[7]       | 00         | 0       | IRproto section 0 selector. 16 quad bits -> 4 Bytes, no stuffing |
+|[8...11]  | 22C026F6   | 0202300002121033 (base 4) | Payload
+|[12]      | 02         | 2       | Two records in finish group |
+|[13]      | 01         | 1       | IRproto section 1 selector. 16 quad bits -> 4 Bytes, no stuffing |
+|[14...17] | 22C026F6   | 0202300002121033 (base 4) | Payload
+|[18]      | 02         | 2       | IRproto section 2 selector. 16 quad bits -> 4 Bytes, no stuffing |
+|[19...22] | 22C0A6F6   | 0202300022121033 (base 4) | Payload
+
+
+ *** Example protocol that uses sixteen-state coding ***
+
+No sample available, AI generated!
+
+In this protocol, each timing state encodes 16 data bits.
+
+`0x0300F40101 -->00<-->0100123456789ABCDEF0<-->00`
+
+| Offset | Bytes | Value | Meaning |
+|---|---|---|---|
+| [5] | 00 | 0 | Empty start group |
+| [6] | 01 | 1 | One record in repeat group |
+| [7] | 00 | 0 | IRproto section 0 selector |
+| [8...15] | 123456789ABCDEF0 | 123456789ABCDEF0 (base 16) | Payload: 16 symbols × 4 bits = 64 bits = 8 bytes |
+| [16]     | 00         | 0       | Empty finish group |
 
 ---
 
