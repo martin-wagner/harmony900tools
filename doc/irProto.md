@@ -99,30 +99,34 @@ Each Timing section consists of parameters, yet another offset table and corresp
 
 ```
 ... 30 00 ff ff ff ff ff ff 02 02 13 01 05 01 0a 01 dd dd dd ...
-        │     │  │        │  │  │     │     │     │
-        │     │  │        │  │  │     │     │     └── start offset EoF timing section 266+13 = raw[279]
-        │     │  │        │  │  │     │     └── start offset SoF timing section 261+13 = raw[274]
-        │     │  │        │  │  │     └── start offset Payload timing section 275+13 = raw[288]
-        │     │  │        │  │  └── Ctrl 1
-        │     │  │        │  └── Ctrl 0
-        │     │  │        └── time between Sof of this frame and SoF of the next frame in µs. -1 = pause coded in EoF data field
-        |     |  └── Padding (maybe second toggle bit pos?)
-        │     └── Bit position of toggle bit, 0xff = no toggle bit used
+        │  │  │           │  │  │     │     │     │
+        │  │  │           │  │  │     │     │     └── start offset EoF timing section 266+13 = raw[279]
+        │  │  │           │  │  │     │     └── start offset SoF timing section 261+13 = raw[274]
+        │  │  │           │  │  │     └── start offset Payload timing section 275+13 = raw[288]
+        │  │  │           │  │  └── Payload timing value counter
+        │  │  │           │  └── Payload timing section count
+        │  │  │           └── time between Sof of this frame and SoF of the next frame in µs. -1 = pause coded in EoF data field
+        |  |  └── Padding (maybe second toggle bit pos?)
+        │  └── Bit position of toggle bit, 0xff = no toggle bit used
         └── ir protocol data bit count 48 (for this section, excluding start/stop)
 ```
 
 Toggle bit position is seen from time-on-wire (meaning a value of 0 is the first bit transmitted). 0xff after toggle might suggest this is a second toggle bit position with "unused" marker. I didn't find a protocol using two toggle bits.
 
-Ctrl0:  
-Frame Type
-- 2: This timing section contains parameters for a data frame.
-- 0: This timing section contains parameters for a repeat frame (only SoF/EoF used, no data)  
+Payload timing section count:
+Some protocols code multiple bits per one transmitted quantum.
+0 = no payload
+2 = bool. codes 0/1
+4 = quad. codes 0/1/2/3
+16 = hex. codes 0/1/2/3/4/5/6/7/8/9/A/B/C/D/E/F
+Others where not seen, but there is nothing preventing them (e.g. octa). The samples indicate that always first pair = 0, second = 1, third = 2, ...
 
-Ctrl1:  
-Payload Data coding for 0/1 data bitstream from xml
-- 0: Data field is empty / not used (repeat frame)
-- 1: Data field contains one pair of timing values (usecase unknown. you can't code two binary states with this. Wii seems to use this, maybe only power-toggle?)
-- 2: Data field contains two pairs of timing values (first pair = binary "0", second pair binary "1" todo verify order is not 1/0).
+Payload value counter:
+each section has this number of timing values assigned.
+0 = no payload
+1 = one timing (very uncommon, you could do plain serial/uart-style with this)
+2 = two timings (almost everything)
+3, ... (also very uncommon)
 
 Offset: 0x0000 = NULL, field not used in this section.
 
