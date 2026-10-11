@@ -64,32 +64,54 @@ class TimingSectionIrHeader
 class TimingSectionIrPayload
 {
   protected:
-    std::vector<Item> streamFalse;
-    std::vector<Item> streamTrue;
+    //needs to be the same for all quanta!
+    uint8_t t_per_quantum = 0;
+
+    //1 quantum == 1 timing info
+    using Quantum = std::vector<Item>;
+    std::vector<Quantum> quanta;
 
   public:
     /** create an empty block */
     TimingSectionIrPayload();
-    /** add a block from IrProto.bin*/
-    TimingSectionIrPayload(const std::vector<uint8_t> &data);
 
-    /** set data */
-    void setFalsePair(std::vector<Item> timings);
-    void setTruePair(std::vector<Item> timings);
+    /**
+     * add a block from IrProto.bin
+     *
+     * @param quanta timing section count in <data>
+     * @param t_per_q timing values per quantum
+     * @param data raw data stream
+     * */
+    TimingSectionIrPayload(uint8_t quanta, uint8_t t_per_quantum, const std::vector<uint8_t> &data);
+
+    /**
+     * set data
+     *
+     * if this is the first quantum, the timing count will set "timings per quantum" value
+     */
+    bool setQuantum(uint8_t pos, Quantum &timings);
 
     /** access data */
-    const std::vector<Item> & accessFalsePair() const { return streamFalse; };
-    const std::vector<Item> & accessTruePair() const { return streamTrue; };
+    const Quantum &accessQuantum(uint8_t pos) const;
 
-    bool haveFalse() const { return (!streamFalse.empty()); };
-    bool haveTrue() const { return (!streamTrue.empty()); };
-    bool isEmpty() const { return (streamTrue.empty() && streamFalse.empty()); };
+    /** used symbols. 2 = bool, 4 = quad, 16 = hex */
+    uint8_t getQuantisation() const { return quanta.size(); };
+
+    /** timings per quantum */
+    uint8_t getTperQantum() const { return t_per_quantum; };
+
+    bool isEmpty() const { return quanta.empty(); };
+    bool isBoolean() const { return (quanta.size() == 2); };
+    static constexpr uint8_t QUANTUM_FALSE = 0;
+    static constexpr uint8_t QUANTUM_TRUE = 1;
+    bool isQuad() const { return (quanta.size() == 4); };
+    bool isHex() const { return (quanta.size() == 16); };
 
     /** serialise for writing to disk */
     std::vector<uint8_t> serialise() const;
 
     /** serialise for creating timing stream */
-    void serialiseIrStream(bool booleanState, std::vector<Item> &out) const;
+    void serialiseIrStream(uint8_t quantumState, std::vector<Item> &out) const;
 };
 
 /**
@@ -103,19 +125,6 @@ class TimingSectionIrPayload
 class TimingSection
 {
   public:
-    /** frame type */
-    enum class Ctrl0 :uint8_t {
-      IS_REPEAT_FRAME = 0,
-      IS_DATA_FRAME = 2
-    };
-    /** data type for data frame */
-    enum class Ctrl1 :uint8_t {
-      NOT_DATA_FRAME = 0,
-      NO_PAYLOAD = 0,
-      DATA_ONE_PAIR = 1, //can only code one binary state. ??
-      DATA_TWO_PAIRS = 2 //codes two binary states (true/false)
-    };
-
     static constexpr uint32_t TOGGLE_NONE = 0xff;
     static constexpr uint32_t PAUSE_IN_EOF = 0xffffffff;
 
@@ -124,8 +133,6 @@ class TimingSection
     uint16_t bitCount = 0;
     uint8_t togglePos = TOGGLE_NONE;
     uint32_t interval = PAUSE_IN_EOF; //us
-    Ctrl0 ctrl0 = Ctrl0::IS_DATA_FRAME;
-    Ctrl1 ctrl1 = Ctrl1::DATA_TWO_PAIRS;
     TimingSectionIrHeader sof;
     TimingSectionIrPayload data;
     TimingSectionIrHeader eof;
@@ -139,8 +146,6 @@ class TimingSection
     void setBitCount(uint16_t count);
     void setToggle(uint16_t toggle = TOGGLE_NONE);
     void setTiming(uint32_t t_us = PAUSE_IN_EOF);
-    void setCtrl0(Ctrl0 c);
-    void setCtrl1(Ctrl1 c);
     void setSoF(const TimingSectionIrHeader &sof);
     void setData(const TimingSectionIrPayload &d);
     void setEoF(const TimingSectionIrHeader &eof);
@@ -149,8 +154,6 @@ class TimingSection
     uint8_t getToggle() const { return togglePos;};
     bool hasToggle() const { return (togglePos != TOGGLE_NONE);};
     uint32_t getTiming() const { return interval;};
-    Ctrl0 getCtrl0() const { return ctrl0;};
-    Ctrl1 getCtrl1() const { return ctrl1;};
     const TimingSectionIrHeader &getSoF() const { return sof;};
     const TimingSectionIrPayload &getData() const { return data;};
     const TimingSectionIrHeader &getEoF() const { return eof;};
@@ -159,7 +162,7 @@ class TimingSection
     std::vector<uint8_t> serialise(int offset) const;
 
     /** serialise for creating timing stream */
-    void serialiseIrStream(std::vector<Item> &out, const std::vector<bool> &data) const;
+    void serialiseIrStream(std::vector<Item> &out, const std::vector<uint8_t> &data) const;
 };
 
 /** One Item in IrProto.bin file */
@@ -182,7 +185,7 @@ class IrProto
     /** create an empty protocol */
     IrProto();
     /** add a protocol block from IrProto.bin*/
-    IrProto(const std::vector<uint8_t> &data, int offset);
+    IrProto(const std::vector<uint8_t> &data, int offset, bool verbose = false);
     /** create a protocol */
     IrProto(uint16_t clockPeriod_ns, const std::vector<TimingSection> &sections);
 
@@ -201,8 +204,8 @@ class IrProto
     /** serialise for writing to disk */
     std::vector<uint8_t> serialise(int offset) const;
 
-    /** input data section index + section data (if any) */
-    using Data = std::vector<std::pair<int, std::vector<bool>>>;
+    /** input data section index + section data symbols (if any). */
+    using Data = std::vector<std::pair<int, std::vector<uint8_t>>>;
 
     /** serialise to timing stream */
     Status serialiseIrStream(binary::TimingStream &out, const IrProto::Data &data) const;
@@ -229,7 +232,7 @@ class File
     File(const std::string &filename);
 
     /** parse file (overwrite existing) */
-    Status parse(const std::string &filename);
+    Status parse(const std::string &filename, bool verbose = false);
 
     /** read protocol count */
     int getProtocolCount() const { return protocols.size(); };
@@ -266,7 +269,7 @@ class File
     Status serialiseIrStream(binary::TimingStream &out, uint16_t index, const IrProto::Data &data) const;
 
   private:
-    Status parseObject(const std::vector<uint8_t> &raw, uint16_t startOffset, uint16_t endOffset);
+    Status parseObject(const std::vector<uint8_t> &raw, uint16_t startOffset, uint16_t endOffset, bool verbose);
 
 };
 

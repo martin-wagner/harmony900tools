@@ -14,6 +14,17 @@ namespace binary
 namespace irProto
 {
 
+std::ostream& msg(bool isEnabled)
+{
+  static std::ostream nullStream(nullptr);
+
+  if (isEnabled) {
+    return std::cout;
+  } else {
+    return nullStream;
+  }
+}
+
 TimingSectionIrHeader::TimingSectionIrHeader()
 {
 }
@@ -82,8 +93,11 @@ TimingSectionIrPayload::TimingSectionIrPayload()
 {
 }
 
-TimingSectionIrPayload::TimingSectionIrPayload(const vector<uint8_t> &data)
+TimingSectionIrPayload::TimingSectionIrPayload(uint8_t quanta,
+    uint8_t t_per_quantum, const vector<uint8_t> &data)
 {
+  int i;
+  int j;
   vector<uint16_t> tmp;
   vector<Item> stream;
 
@@ -94,12 +108,15 @@ TimingSectionIrPayload::TimingSectionIrPayload(const vector<uint8_t> &data)
   if ((data.size() % 2) != 0) {
     return;
   }
-
+  if ((quanta * t_per_quantum) == 0) {
+    return;
+  }
   auto ret = lib::parseHarmony16_file(data, tmp);
   if ((ret != true) || (tmp.size() < 2)) {
     return;
   }
 
+  //stream, not quanta! separate later.
   for (const auto &word : tmp) {
     if ((word & 0x8000) != 0) {
       stream.push_back( { true, word & 0x7fff });
@@ -108,64 +125,75 @@ TimingSectionIrPayload::TimingSectionIrPayload(const vector<uint8_t> &data)
     }
   }
 
-  if (stream.size() == 2) {
-    streamFalse.push_back(stream[0]); //todo this needs to be coded as true or false??
-    streamFalse.push_back(stream[1]);
-  } else if (stream.size() == 4) {
-    streamFalse.push_back(stream[0]);
-    streamFalse.push_back(stream[1]);
-    streamTrue.push_back(stream[2]);
-    streamTrue.push_back(stream[3]);
-  }
-}
-
-void TimingSectionIrPayload::setFalsePair(vector<Item> timings)
-{
-  if (timings.size() != 2) {
-    streamFalse.clear();
+  //separate into quantas
+  if (stream.size() != (quanta * t_per_quantum)) {
     return;
   }
-  streamFalse = timings;
+  for (i = 0; i < quanta; i++) {
+    Quantum q;
+    for (j = 0; j < t_per_quantum; j++) {
+      q.push_back(stream[i * t_per_quantum + j]);
+    }
+    this->quanta.push_back(q);
+  }
+  this->t_per_quantum = t_per_quantum;
 }
 
-void TimingSectionIrPayload::setTruePair(vector<Item> timings)
+bool TimingSectionIrPayload::setQuantum(uint8_t pos, Quantum &timings)
 {
-  if (timings.size() != 2) {
-    streamTrue.clear();
-    return;
+  if (timings.size() == 0) {
+    return false;
   }
-  streamTrue = timings;
+
+  if (quanta.empty()) {
+    t_per_quantum = timings.size();
+  } else if (t_per_quantum != timings.size()) {
+    return false;
+  }
+
+  if (pos < quanta.size()) {
+    quanta[pos] = timings;
+    return true;
+  } else if ((quanta.size() + 1) == pos) {
+    //append
+    quanta.push_back(timings);
+    return true;
+  }
+  return false;
+}
+
+const TimingSectionIrPayload::Quantum& TimingSectionIrPayload::accessQuantum(
+    uint8_t pos) const
+{
+  static const Quantum q;
+
+  if (pos < quanta.size()) {
+    return quanta[pos];
+  }
+  return q;
 }
 
 vector<uint8_t> TimingSectionIrPayload::serialise() const
 {
   vector<uint8_t> data;
 
-  for (const auto &item : streamFalse) {
-    if (item.first == true) {
-      lib::setHarmony16_file(item.second | 0x8000, data);
-    } else {
-      lib::setHarmony16_file(item.second, data);
-    }
-  }
-  for (const auto &item : streamTrue) {
-    if (item.first == true) {
-      lib::setHarmony16_file(item.second | 0x8000, data);
-    } else {
-      lib::setHarmony16_file(item.second, data);
+  for (const auto &q : quanta) {
+    for (const auto &item : q) {
+      if (item.first == true) {
+        lib::setHarmony16_file(item.second | 0x8000, data);
+      } else {
+        lib::setHarmony16_file(item.second, data);
+      }
     }
   }
   return data;
 }
 
-void TimingSectionIrPayload::serialiseIrStream(bool booleanState,
+void TimingSectionIrPayload::serialiseIrStream(uint8_t quantumState,
     vector<Item> &out) const
 {
-  if (booleanState == true) {
-    out.insert(out.end(), streamTrue.begin(), streamTrue.end());
-  } else {
-    out.insert(out.end(), streamFalse.begin(), streamFalse.end());
-  }
+  auto &quantum = accessQuantum(quantumState);
+  out.insert(out.end(), quantum.begin(), quantum.end());
 }
 
 TimingSection::TimingSection()
@@ -174,6 +202,8 @@ TimingSection::TimingSection()
 
 TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
 {
+  uint8_t dataQuantumCount;
+  uint8_t dataTimingsPerQuantum;
   int pSoF;
   int pData;
   int pEoF;
@@ -196,28 +226,16 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
   }
   togglePos = data[2];
   interval = lib::parseHarmony32_file(data[4], data[5], data[6], data[7]);
-  ctrl0 = static_cast<Ctrl0>(data[8]);
-  switch (ctrl0) {
-    case Ctrl0::IS_DATA_FRAME:
-    case Ctrl0::IS_REPEAT_FRAME:
-      break;
-    default:
-      cout << "Warning: IrProto.bin timing ctrl0 unknown value (0x" << hex
-          << (int) ctrl0 << dec << ")" << endl;
-      break;
+  dataQuantumCount = data[8];
+  if (dataQuantumCount > 16) {
+    cout << "Warning: IrProto.bin quantum count is very large ("
+        << dataQuantumCount << ")" << endl;
   }
-  ctrl1 = static_cast<Ctrl1>(data[9]);
-  switch (ctrl1) {
-    case Ctrl1::NO_PAYLOAD:
-    case Ctrl1::DATA_ONE_PAIR:
-    case Ctrl1::DATA_TWO_PAIRS:
-      break;
-    default:
-      cout << "Warning: IrProto.bin timing ctrl1 unknown value (0x" << hex
-          << (int) ctrl1 << dec << ")" << endl;
-      break;
+  dataTimingsPerQuantum = data[9];
+  if (dataTimingsPerQuantum > 4) {
+    cout << "Warning: IrProto.bin quantum timing count is very large ("
+        << dataTimingsPerQuantum << ")" << endl;
   }
-
   pData = (int) lib::parseHarmony16_file(data[10], data[11]) - offset;
   pSoF = (int) lib::parseHarmony16_file(data[12], data[13]) - offset;
   pEoF = (int) lib::parseHarmony16_file(data[14], data[15]) - offset;
@@ -237,9 +255,10 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
     }
   }
   if ((pData >= HEADER_SIZE) && (pData <= data.size())) {
-    auto size = static_cast<int>(ctrl1) * 4;
+    auto size = dataQuantumCount * dataTimingsPerQuantum * 2;
     if ((pData + size) <= data.size()) {
-      this->data = TimingSectionIrPayload(
+      this->data = TimingSectionIrPayload(dataQuantumCount,
+          dataTimingsPerQuantum,
           { data.begin() + pData, data.begin() + pData + size });
     }
   }
@@ -258,16 +277,6 @@ void TimingSection::setToggle(uint16_t toggle)
 void TimingSection::setTiming(uint32_t t_us)
 {
   interval = t_us;
-}
-
-void TimingSection::setCtrl0(Ctrl0 c)
-{
-  ctrl0 = c;
-}
-
-void TimingSection::setCtrl1(Ctrl1 c)
-{
-  ctrl1 = c;
 }
 
 void TimingSection::setSoF(const TimingSectionIrHeader &sof)
@@ -293,12 +302,12 @@ vector<uint8_t> TimingSection::serialise(int offset) const
   data.push_back(togglePos);
   data.push_back(0xff);
   lib::setHarmony32_file(interval, data);
-  data.push_back(static_cast<uint8_t>(ctrl0));
-  data.push_back(static_cast<uint8_t>(ctrl1));
+  data.push_back(getData().getQuantisation());
+  data.push_back(getData().getTperQantum());
 
-  auto sofTimings = sof.serialise();
-  auto dataTimings = this->data.serialise();
-  auto eofTimings = eof.serialise();
+  auto sofTimings = getSoF().serialise();
+  auto dataTimings = getData().serialise();
+  auto eofTimings = getEoF().serialise();
 
   //we keep the original relationship between data pointer position and data position.
   //if the firmware actually interprets this correctly, it shouldn't matter...
@@ -327,7 +336,7 @@ vector<uint8_t> TimingSection::serialise(int offset) const
 }
 
 void TimingSection::serialiseIrStream(vector<Item> &out,
-    const vector<bool> &data) const
+    const vector<uint8_t> &data) const
 {
   vector<Item> tmp;
   int tmsg = 0;
@@ -403,7 +412,7 @@ IrProto::IrProto()
 {
 }
 
-IrProto::IrProto(const vector<uint8_t> &data, int offset)
+IrProto::IrProto(const vector<uint8_t> &data, int offset, bool verbose)
 {
   vector<uint16_t> offsetTable;
 
@@ -435,11 +444,15 @@ IrProto::IrProto(const vector<uint8_t> &data, int offset)
   for (auto &o : offsetTable) {
     o = o - offset;
     if ((o) >= data.size()) {
+      cout << "Protocol error (offsets point outside data)" << endl;
       return;
     }
   }
 
+  msg(verbose) << "Parsing sections..." << endl;
+
   for (int i = 0; i < offsetTable.size(); i++) {
+    msg(verbose) << "Section " << to_string(i) << endl;
     auto start = offsetTable[i];
     auto end = data.size();
     if ((i + 1) < offsetTable.size()) {
@@ -571,7 +584,7 @@ File::File(const string &filename)
   parse(filename);
 }
 
-Status File::parse(const string &filename)
+Status File::parse(const string &filename, bool verbose)
 {
   vector<uint16_t> offsetTable;
 
@@ -579,6 +592,7 @@ Status File::parse(const string &filename)
 
   ifstream file(filename, ios::binary);
   if (!file.is_open()) {
+    msg(verbose) << "Can't open file" << endl;
     return Status::ERROR_FILE;
   }
 
@@ -586,18 +600,22 @@ Status File::parse(const string &filename)
       istreambuf_iterator<char>());
 
   /* check wrapper */
+  msg(verbose) << "Parsing wrapper..." << endl;
 
   //minimum file size
   if (raw.size() < MIN_FILE_SIZE) {
+    msg(verbose) << "File too small" << endl;
     return Status::ERROR_SIZE;
   }
   auto expectedFileSize = lib::parseHarmony16_file(raw[4], raw[5]);
   if (expectedFileSize != (raw.size() - WRAPPER_SIZE)) {
+    msg(verbose) << "Outer file sizes don't match" << endl;
     return Status::ERROR_OUTER_SIZE;
   }
   //empty bytes
   auto empty = lib::parseHarmony16_file(raw[6], raw[7]);
   if (empty != 0) {
+    msg(verbose) << "Outer file format invalid" << endl;
     return Status::ERROR_OUTER_FILE_FORMAT;
   }
   //crc
@@ -611,6 +629,7 @@ Status File::parse(const string &filename)
   raw.erase(raw.begin(), raw.begin() + WRAPPER_SIZE); //makes offset calculations easier
 
   /* actual file */
+  msg(verbose) << "Parsing header..." << endl;
 
   //check header (equal)
   for (int i = 0; i < header.size(); i++) {
@@ -625,33 +644,44 @@ Status File::parse(const string &filename)
   auto objectCount = lib::parseHarmony16_file(raw[1], raw[2]);
   if (objectCount == 0) {
     //empty file
+    msg(verbose) << "File is empty" << endl;
     return Status::OK;
   }
+  msg(verbose) << "File contains " << to_string(objectCount) << " protocols"
+      << endl;
 
   auto ret = lib::parseHarmony16_file(
       { raw.begin() + 3, raw.begin() + 3 + 2 * objectCount }, offsetTable);
   if (ret != true) {
+    msg(verbose) << "File parsing error (offsets)" << endl;
     return Status::ERROR_FILE_FORMAT;
   }
   //offsets need to be within the file
   for (const auto &o : offsetTable) {
     if (o > raw.size()) {
+      msg(verbose) << "File error (offsets point outside file)" << endl;
       return Status::ERROR_SIZE;
     }
   }
 
+  msg(verbose) << "Parsing data..." << endl;
+
   for (int i = 0; i < objectCount; i++) {
+    msg(verbose) << "Protocol " << to_string(i) << endl;
     int start = offsetTable[i];
     int end = raw.size();
     if ((i + 1) < offsetTable.size()) {
       end = offsetTable[i + 1];
     }
 
-    auto status = parseObject(raw, start, end);
+    auto status = parseObject(raw, start, end, verbose);
     if (status != Status::OK) {
+      msg(verbose) << "Failure!" << endl;
       return status;
     }
   }
+
+  msg(verbose) << "Success!" << endl;
   return Status::OK;
 }
 
@@ -757,12 +787,12 @@ Status File::serialiseIrStream(binary::TimingStream &out, uint16_t index,
 }
 
 Status File::parseObject(const vector<uint8_t> &raw, uint16_t startOffset,
-    uint16_t endOffset)
+    uint16_t endOffset, bool verbose)
 {
   vector<uint8_t> payload =
       { raw.begin() + startOffset, raw.begin() + endOffset };
 
-  auto proto = IrProto(payload, startOffset);
+  auto proto = IrProto(payload, startOffset, verbose);
   protocols.push_back(move(proto));
 
   return Status::OK;

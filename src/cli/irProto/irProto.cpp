@@ -43,7 +43,7 @@ static void printHelp(const char *prog)
       << "Example -- roundtrip test:\n" << "  " << prog
       << " -f IrProto.bin --roundtrip out.bin\n" << "\n"
       << "Example -- command to IR:\n" << "  " << prog
-      << " -f IrProto.bin -c \"0x0000F401010100E1A2E817010100\" -d\n" << "\n";
+      << " -f IrProto.bin -c \"0x0000F401010100E1A2E817010100\" -d cmd.dat\n" << "\n";
 }
 
 static bool parseArgs(int argc, char **argv, Config &cfg)
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
   }
 
   irProto::File protocols;
-  auto status = protocols.parse(cfg.irProtoFileName);
+  auto status = protocols.parse(cfg.irProtoFileName, cfg.verbosity);
   if (status != irProto::Status::OK) {
     cout << "file parser error: " << (int) status << endl;
     return EXIT_FAILURE;
@@ -230,50 +230,30 @@ int main(int argc, char **argv)
       } else {
         cout << "Interval: " << timing / 1000 << "ms; ";
       }
-      auto ctrl0 = section.getCtrl0();
-      switch (ctrl0) {
-        case irProto::TimingSection::Ctrl0::IS_REPEAT_FRAME:
-          cout << "Repeat Frame; ";
-          break;
-        case irProto::TimingSection::Ctrl0::IS_DATA_FRAME:
-          cout << "Data Frame; ";
-          break;
-        default:
-          cout << "Ctrl0: " << hex << (int) ctrl0 << dec << "; ";
-          break;
-      }
-
-      //payload marker (??)
-      switch (section.getCtrl1()) {
-        case irProto::TimingSection::Ctrl1::NO_PAYLOAD:
-          if (ctrl0 != irProto::TimingSection::Ctrl0::IS_REPEAT_FRAME) {
-            cout << "Payload on repeat ???; ";
-          }
-          break;
-        case irProto::TimingSection::Ctrl1::DATA_ONE_PAIR:
-          //2 payload samples are required (see data coding)
-          cout << "1 Payload Sample ???; ";
-          break;
-        case irProto::TimingSection::Ctrl1::DATA_TWO_PAIRS:
-          if (ctrl0 == irProto::TimingSection::Ctrl0::IS_REPEAT_FRAME) {
-            cout << "no Payload ???; ";
-          }
-          break;
-        default:
-          cout << "Ctrl1: " << hex << (int) section.getCtrl1() << dec << "; ";
-          break;
-      }
-
-      const auto &sof = section.getSoF();
       const auto &data = section.getData();
+      const auto &sof = section.getSoF();
       const auto &eof = section.getEoF();
+      auto quant = data.getQuantisation();
+      auto TperQantum = data.getTperQantum();
+      if (quant == 0) {
+        //assume
+        cout << "Repeat Frame; ";
+      } else if ((quant == 2) && (TperQantum == 2)) {
+        //standard data item: bool, two timings per bit
+        cout << "Data Frame; ";
+      } else {
+        cout << "Data Frame (Symbols: " << to_string(quant) << ", n_t: "
+            << to_string(TperQantum) << "); ";
+      }
 
       printItems("SoF", sof.accessStream());
       printItems("EoF", eof.accessStream());
 
-      auto dataPrint = data.accessFalsePair();
-      auto dataTrue = data.accessTruePair();
-      dataPrint.insert(dataPrint.end(), dataTrue.begin(), dataTrue.end());
+      std::vector<irProto::Item> dataPrint;
+      for (int k = 0; k < quant; k++) {
+        auto &quantum = data.accessQuantum(k);
+        dataPrint.insert(dataPrint.end(), quantum.begin(), quantum.end());
+      }
 
       printItems("D", dataPrint, true);
       cout << endl;
@@ -282,15 +262,21 @@ int main(int argc, char **argv)
 
   if (!cfg.commandHex.empty()) {
     TimingStream samples;
-    irProto::Code code;
+    int index = 0;
 
-    auto status = code.parse(cfg.commandHex);
+    auto status = irProto::Code::parse(cfg.commandHex, index);
+    if ((status != irProto::Status::OK) || (index >= protocols.getProtocolCount())) {
+      cout << "command parser error (index): " << index << endl;
+      return EXIT_FAILURE;
+    }
+    irProto::Code code(index, protocols.accessProtocol(index));
+
+    status = code.parse(cfg.commandHex);
     if (status != irProto::Status::OK) {
       cout << "command parser error: " << (int) status << endl;
       return EXIT_FAILURE;
     }
     auto data = code.getData();
-    auto index = code.getIndex();
     status = protocols.serialiseIrStream(samples, index, data);
     if (status != irProto::Status::OK) {
       cout << "command encoding error: " << (int) status << endl;
@@ -298,8 +284,9 @@ int main(int argc, char **argv)
     }
 
     cout << "----- IR stream (Protocol " << index << ") -----" << endl;
-    cout << "Type: " << code.getControlStr() << ", uses "
-        << code.getRepeatTypeStr() << endl;
+    cout << "Has Start: " << code.accessStartGroups().size() << ", Repeat: "
+        << code.accessRepeatGroups().size() << ", Finish: "
+        << code.accessFinishGroups().size() << endl;
     cout << "Clock: " << protocols.accessProtocol(index).getClock() / 1000
         << "kHz" << endl;
     cout << "Sample count: " << samples.timings().size() * 2 << endl;

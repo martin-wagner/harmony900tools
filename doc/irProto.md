@@ -124,9 +124,9 @@ Others where not seen, but there is nothing preventing them (e.g. octa). The sam
 Payload value counter:
 each section has this number of timing values assigned.
 0 = no payload
-1 = one timing (very uncommon, you could do plain serial/uart-style with this)
+1 = one timing (exists, use case unknown)
 2 = two timings (almost everything)
-3, ... (also very uncommon)
+3, ... (exists, very uncommon)
 
 Offset: 0x0000 = NULL, field not used in this section.
 
