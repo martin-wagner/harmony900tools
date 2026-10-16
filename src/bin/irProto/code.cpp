@@ -106,17 +106,17 @@ uint64_t Code::listToU64bits(const vector<uint8_t> &values)
 //  return bits;
 //}
 //
-//vector<bool> Code::u64toBits(uint8_t bitCount, uint64_t data)
-//{
-//  vector<bool> bits;
-//  bits.reserve(bitCount);
-//
-//  for (int i = bitCount - 1; i >= 0; --i) {
-//    bits.push_back((data >> i) & 1);
-//  }
-//
-//  return bits;
-//}
+vector<bool> Code::u64toBits(uint8_t bitCount, uint64_t data)
+{
+  vector<bool> bits;
+  bits.reserve(bitCount);
+
+  for (int i = bitCount - 1; i >= 0; --i) {
+    bits.push_back((data >> i) & 1);
+  }
+
+  return bits;
+}
 //
 //vector<uint8_t> Code::bitsToBytes(const vector<bool> &bits)
 //{

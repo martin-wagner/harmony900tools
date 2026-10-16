@@ -5,14 +5,52 @@
 
 using namespace std;
 using namespace binary;
+using namespace irProto;
 using namespace codec;
 
 namespace
 {
 
-uint64_t singleSectionData(const irProto::Code &code)
+/** section with <symbols> symbols and <quanta> states per symbol (0 = no payload) */
+TimingSection makeSection(uint16_t symbols, uint8_t quanta)
 {
-  return irProto::Code::bitsToU64(code.accessSections().at(0).getData());
+  TimingSectionIrPayload payload;
+
+  for (uint8_t q = 0; q < quanta; q++) {
+    std::vector<Item> timings = { { true, 560 }, {
+      false,
+      static_cast<uint16_t>(560 * (q + 1)) } };
+    payload.setQuantum(q, timings);
+  }
+
+  TimingSection section;
+  section.setBitCount(symbols);
+  section.setData(payload);
+  return section;
+}
+
+IrProto makeProto(const std::vector<TimingSection> &sections)
+{
+  return IrProto(27778, sections);
+}
+
+// data section + repeat frame without data (NEC style)
+IrProto protoNec()
+{
+  return makeProto( { makeSection(32, 2), makeSection(0, 0) });
+}
+
+// one section, 2 states per symbol
+IrProto protoSingle(uint16_t symbols)
+{
+  return makeProto( { makeSection(symbols, 2) });
+}
+
+// 4 / 1 / 16 symbols
+IrProto protoRc6()
+{
+  return makeProto(
+      { makeSection(4, 2), makeSection(1, 2), makeSection(16, 2) });
 }
 
 }
@@ -20,34 +58,41 @@ uint64_t singleSectionData(const irProto::Code &code)
 TEST(Encoder, NecData1)
 {
   //address 0, command 0 -> 0x00FF00FF (verified against Decoder.NecData1)
-  auto code = encodeNec(0, "NEC", 0, 0, vector<bool>(32));
+  auto code = encodeNec(0, protoNec(), "NEC", 0, 0, vector<uint8_t>(32));
 
-  ASSERT_EQ(code.getControl(), static_cast<uint8_t>(irProto::Code::Ctrl::FLAT));
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x00FF00FFULL);
-  EXPECT_EQ(code.getRepeatFrame(), 1);
+  ASSERT_EQ(code.accessStartGroups().size(), 1);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessStartGroups().at(0).getData());
+  EXPECT_EQ(data, 0x00FF00FFULL);
 }
 
 TEST(Encoder, NecData2)
 {
   //address 162, command 93 -> 0x45BABA45 (verified against Decoder.NecData2)
-  auto code = encodeNec(0, "NEC", 162, 93, vector<bool>(32));
+  auto code = encodeNec(0, protoNec(), "NEC", 162, 93, vector<uint8_t>(32));
 
-  ASSERT_EQ(code.getControl(), static_cast<uint8_t>(irProto::Code::Ctrl::FLAT));
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x45BABA45ULL);
-  EXPECT_EQ(code.getRepeatFrame(), 1);
+  ASSERT_EQ(code.accessStartGroups().size(), 1);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessStartGroups().at(0).getData());
+  EXPECT_EQ(data, 0x45BABA45ULL);
 }
 
 TEST(Encoder, NecLikeData)
 {
   //NEC_LIKE packs address/command directly, 16 bits each, no inversion
-  auto code = encodeNec(0, "NEC_LIKE", 0x00ff, 0x40fe, vector<bool>(32));
+  auto code = encodeNec(0, protoNec(), "NEC_LIKE", 0x00ff, 0x40fe,
+      vector<uint8_t>(32));
 
-  ASSERT_EQ(code.getControl(), static_cast<uint8_t>(irProto::Code::Ctrl::FLAT));
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x00FF40FEULL);
-  EXPECT_EQ(code.getRepeatFrame(), 1);
+  ASSERT_EQ(code.accessStartGroups().size(), 1);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessStartGroups().at(0).getData());
+  EXPECT_EQ(data, 0x00FF40FEULL);
 }
 
 TEST(Encoder, KaseikyoPanasonic)
@@ -61,8 +106,9 @@ TEST(Encoder, KaseikyoPanasonic)
   const uint64_t rawValue = (static_cast<uint64_t>(device) << 24)
       | (static_cast<uint64_t>(subdevice) << 16)
       | (static_cast<uint64_t>(function) << 8);
-  auto rawData = irProto::Code::u64tobits(48, rawValue);
-  auto code = encodeKASEIKYO(0, "PANASONIC", manufacturer, 0, rawData);
+  auto rawData = irProto::Code::u64bitsToList(48, rawValue);
+  auto code = encodeKASEIKYO(0, protoSingle(48), "PANASONIC", manufacturer, 0,
+      rawData);
 
   const uint8_t checksum = device ^ subdevice ^ function;
   const uint64_t expected = (static_cast<uint64_t>(manufacturer) << 32)
@@ -70,44 +116,54 @@ TEST(Encoder, KaseikyoPanasonic)
       | (static_cast<uint64_t>(subdevice) << 16)
       | (static_cast<uint64_t>(function) << 8) | checksum;
 
-  ASSERT_EQ(code.getControl(),
-      static_cast<uint8_t>(irProto::Code::Ctrl::SECTIONS_1));
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), expected);
-  EXPECT_EQ(code.getRepeatFrame(), 0);
-  EXPECT_EQ(code.getDataFrameTxCount(), irProto::Code::DEFAULT_REPEATS);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, expected);
 }
 
 TEST(Encoder, KaseikyoZero)
 {
-  auto rawData = irProto::Code::u64tobits(48, 0);
-  auto code = encodeKASEIKYO(0, "PANASONIC", 0, 0, rawData);
+  auto rawData = irProto::Code::u64bitsToList(48, 0);
+  auto code = encodeKASEIKYO(0, protoSingle(48), "PANASONIC", 0, 0, rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0ULL);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0);
 }
 
 TEST(Encoder, SIRCS12)
 {
   //address 1, command 18 -> 0x490 (verified against Decoder.SIRCS12data)
-  auto rawData = irProto::Code::u64tobits(12, 0);
-  auto code = encodeSIRCS(0, "SONY", 1, 18, rawData);
+  auto rawData = irProto::Code::u64bitsToList(12, 0);
+  auto code = encodeSIRCS(0, protoSingle(12), "SONY", 1, 18, rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x490ULL);
-  EXPECT_EQ(code.getRepeatFrame(), 0);
-  EXPECT_EQ(code.getDataFrameTxCount(), irProto::Code::DEFAULT_REPEATS);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0x490ULL);
 }
 
 TEST(Encoder, SIRCS15)
 {
   //nbits=15 -> 8 address bits, 7 command bits, then reversed over 15 bits.
   //address 129, command 18 -> 0x2481
-  auto rawData = irProto::Code::u64tobits(15, 0);
-  auto code = encodeSIRCS(0, "SONY", 129, 18, rawData);
+  auto rawData = irProto::Code::u64bitsToList(15, 0);
+  auto code = encodeSIRCS(0, protoSingle(15), "SONY", 129, 18, rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x2481ULL);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0x2481ULL);
 }
 
 TEST(Encoder, SIRCS20)
@@ -115,156 +171,188 @@ TEST(Encoder, SIRCS20)
   //encodeSIRCS20 splits the command param into a 7-bit command (low bits) and
   //an 8-bit extended value (bits 7+), matching IRsend::encodeSony(20, ...).
   //address 5, command 200 -> 7-bit cmd 0x48, extended 0x01 -> 0x13480
-  auto rawData = irProto::Code::u64tobits(20, 0);
-  auto code = encodeSIRCS20(0, "SONY", 5, 200, rawData);
+  auto rawData = irProto::Code::u64bitsToList(20, 0);
+  auto code = encodeSIRCS20(0, protoSingle(20), "SONY", 5, 200, rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x13480ULL);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0x13480ULL);
 }
 
 TEST(Encoder, Samsung32)
 {
   //address 0x07, command 0xE0 -> 0xE0E007F8 (verified against Decoder.Samsung32data)
-  auto rawData = irProto::Code::u64tobits(32, 0);
-  auto code = encodeSamsung32(0, "SAMSUNG", 0x07, 0xE0, rawData);
+  auto rawData = irProto::Code::u64bitsToList(32, 0);
+  auto code = encodeSamsung32(0, protoSingle(32), "SAMSUNG", 0x07, 0xE0,
+      rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0xE0E007F8ULL);
-  EXPECT_EQ(code.getRepeatFrame(), 0);
-  EXPECT_EQ(code.getDataFrameTxCount(), irProto::Code::DEFAULT_REPEATS);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0xE0E007F8ULL);
 }
 
 TEST(Encoder, PhilipsRC5)
 {
   //address 10, command 42 -> 0x2aa data bits, with 2nd start bit forced set
   //(verified against Decoder.RC5Data1, which strips the start bit)
-  auto rawData = irProto::Code::u64tobits(13, 0);
-  auto code = encodePhilipsRC5(0, "RC5", 10, 42, rawData);
+  auto rawData = irProto::Code::u64bitsToList(13, 0);
+  auto code = encodePhilipsRC5(0, protoSingle(13), "RC5", 10, 42, rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code) & 0xFFFULL, 0x2aaULL);
-  EXPECT_EQ(code.getRepeatFrame(), 0);
-  EXPECT_EQ(code.getDataFrameTxCount(), irProto::Code::DEFAULT_REPEATS);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data & 0xFFFULL, 0x2aaULL);
 }
 
 TEST(Encoder, PhilipsRC5X)
 {
   //address 7, command 112 -> 0x11f0 (verified against Decoder.RC5Data2)
-  auto rawData = irProto::Code::u64tobits(13, 0);
-  auto code = encodePhilipsRC5(0, "RC5X", 7, 112, rawData);
+  auto rawData = irProto::Code::u64bitsToList(13, 0);
+  auto code = encodePhilipsRC5(0, protoSingle(13), "RC5X", 7, 112, rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x11f0ULL);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0x11f0ULL);
 }
 
 TEST(Encoder, PhilipsRC6)
 {
   //address 20, command 58 -> data payload 0x143a (verified against Decoder.RC6Data)
-  auto rawData = irProto::Code::u64tobits(16, 0);
-  auto code = encodePhilipsRC6(0, "RC6", 20, 58, rawData);
+  auto rawData = irProto::Code::u64bitsToList(16, 0);
+  auto code = encodePhilipsRC6(0, protoRc6(), "RC6", 20, 58, rawData);
 
-  //createMultiSection sets ctrl to the actual section count (SECTIONS_N is a
-  //placeholder for "2 or more", the real value tracks how many sections exist)
-  ASSERT_EQ(code.getControl(), 3);
-  ASSERT_EQ(code.getDataSectionCount(), 3);
-  EXPECT_EQ(irProto::Code::bitsToU64(code.accessSections().at(0).getData()),
-      0x8001ULL);
-  EXPECT_EQ(irProto::Code::bitsToU64(code.accessSections().at(1).getData()),
-      0x0002ULL);
-  EXPECT_EQ(irProto::Code::bitsToU64(code.accessSections().at(2).getData()),
-      0x143aULL);
-  EXPECT_EQ(code.getRepeatFrame(), 0);
-  EXPECT_EQ(code.getDataFrameTxCount(), irProto::Code::DEFAULT_REPEATS);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 3);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0x08);
+  data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(1).getData());
+  EXPECT_EQ(data, 0x00);
+  data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(2).getData());
+  EXPECT_EQ(data, 0x143aULL);
 }
 
 TEST(Encoder, PhilipsRC6A)
 {
   //address & 0xFFFFFFF, command in low byte
-  auto rawData = irProto::Code::u64tobits(31, 0);
-  auto code = encodePhilipsRC6A(0, "RC6", 0x1234, 0x56, rawData);
+  auto rawData = irProto::Code::u64bitsToList(31, 0);
+  auto code = encodePhilipsRC6A(0, protoSingle(31), "RC6", 0x1234, 0x56,
+      rawData);
 
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), (0x1234ULL << 8) | 0x56ULL);
-  EXPECT_EQ(code.getRepeatFrame(), 0);
-  EXPECT_EQ(code.getDataFrameTxCount(), irProto::Code::DEFAULT_REPEATS);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, (0x1234ULL << 8) | 0x56ULL);
 }
 
 TEST(Encoder, DefaultsNec)
 {
   string codeString;
   uint32_t address, command;
-  vector<bool> rawData;
+  vector<uint8_t> rawData;
 
-  auto code = encodeDefaults(0, document::data::CodeType::NEC, codeString,
-      address, command, rawData);
+  auto code = encodeDefaults(0, protoNec(), document::data::CodeType::NEC,
+      codeString, address, command, rawData);
 
   EXPECT_EQ(address, 0);
   EXPECT_EQ(command, 0);
   EXPECT_EQ(rawData.size(), 32);
   EXPECT_STREQ(codeString.c_str(), "NEC");
-  ASSERT_EQ(code.getControl(), static_cast<uint8_t>(irProto::Code::Ctrl::FLAT));
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0x00FF00FFULL);
+  ASSERT_EQ(code.accessStartGroups().size(), 1);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessStartGroups().at(0).getData());
+  EXPECT_EQ(data, 0x00FF00FFULL);
 }
 
 TEST(Encoder, DefaultsKaseikyo)
 {
   string codeString;
   uint32_t address, command;
-  vector<bool> rawData;
+  vector<uint8_t> rawData;
 
-  auto code = encodeDefaults(0, document::data::CodeType::KASEIKYO, codeString,
-      address, command, rawData);
+  auto code = encodeDefaults(0, protoSingle(48),
+      document::data::CodeType::KASEIKYO, codeString, address, command,
+      rawData);
 
   EXPECT_EQ(address, 0);
   EXPECT_EQ(command, 0);
   EXPECT_EQ(rawData.size(), 48);
   EXPECT_STREQ(codeString.c_str(), "PANASONIC");
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0ULL);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0ULL);
 }
 
 TEST(Encoder, DefaultsSamsung32)
 {
   string codeString;
   uint32_t address, command;
-  vector<bool> rawData;
+  vector<uint8_t> rawData;
 
-  auto code = encodeDefaults(0, document::data::CodeType::Samsung32, codeString,
-      address, command, rawData);
+  auto code = encodeDefaults(0, protoSingle(32),
+      document::data::CodeType::Samsung32, codeString, address, command,
+      rawData);
 
   EXPECT_EQ(address, 0);
   EXPECT_EQ(command, 0);
   EXPECT_EQ(rawData.size(), 32);
   EXPECT_STREQ(codeString.c_str(), "SAMSUNG");
-  ASSERT_EQ(code.getDataSectionCount(), 1);
-  EXPECT_EQ(singleSectionData(code), 0xFFULL); //addr 0, cmd 0 -> encodeSAMSUNG(0,0)
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
+  auto data = irProto::Code::listToU64bits(
+      code.accessRepeatGroups().at(0).getData());
+  EXPECT_EQ(data, 0xFFULL);
 }
 
 TEST(Encoder, DefaultsPhilipsRC6)
 {
   string codeString;
   uint32_t address, command;
-  vector<bool> rawData;
+  vector<uint8_t> rawData;
 
-  auto code = encodeDefaults(0, document::data::CodeType::PhilipsRC6,
-      codeString, address, command, rawData);
+  auto code = encodeDefaults(0, protoRc6(),
+      document::data::CodeType::PhilipsRC6, codeString, address, command,
+      rawData);
 
   EXPECT_EQ(address, 0);
   EXPECT_EQ(command, 0);
   EXPECT_EQ(rawData.size(), 16);
   EXPECT_STREQ(codeString.c_str(), "RC6");
-  ASSERT_EQ(code.getDataSectionCount(), 3);
+  ASSERT_EQ(code.accessStartGroups().size(), 0);
+  ASSERT_EQ(code.accessRepeatGroups().size(), 3);
+  ASSERT_EQ(code.accessFinishGroups().size(), 0);
 }
 
 TEST(Encoder, DefaultsUnknown)
 {
   string codeString;
   uint32_t address, command;
-  vector<bool> rawData;
+  vector<uint8_t> rawData;
 
-  auto code = encodeDefaults(0, document::data::CodeType::Unknown, codeString,
-      address, command, rawData);
+  auto code = encodeDefaults(0, protoSingle(16),
+      document::data::CodeType::Unknown, codeString, address, command, rawData);
 
   EXPECT_EQ(address, 0);
   EXPECT_EQ(command, 0);
@@ -357,11 +445,10 @@ TEST(Encoder, EncodeDispatchMatchesDirectCall)
 {
   //the encode() dispatcher in encode.h must route to the same function/result
   //as calling encodeNec() directly
-  auto rawData = vector<bool>(32);
-  auto direct = encodeNec(0, "NEC", 162, 93, rawData);
-  auto dispatched = encode(0, document::data::CodeType::NEC, "NEC", 162, 93,
-      rawData);
+  auto rawData = vector<uint8_t>(32);
+  auto direct = encodeNec(0, protoNec(), "NEC", 162, 93, rawData);
+  auto dispatched = encode(0, protoNec(), document::data::CodeType::NEC, "NEC",
+      162, 93, rawData);
 
-  EXPECT_EQ(direct.getControl(), dispatched.getControl());
-  EXPECT_EQ(direct.getRepeatFrame(), dispatched.getRepeatFrame());
+  EXPECT_EQ(direct.serialiseVec(), dispatched.serialiseVec());
 }

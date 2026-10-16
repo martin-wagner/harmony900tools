@@ -53,7 +53,7 @@ class Code
 
 //todo
 //    static std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
-//    static std::vector<bool> u64toBits(uint8_t bitCount, uint64_t data);
+    static std::vector<bool> u64toBits(uint8_t bitCount, uint64_t data);
 //    static std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
     static uint64_t bitsToU64(const std::vector<bool>& bits);
 
@@ -95,6 +95,7 @@ class Code
     std::vector<uint8_t> serialiseVec() const;
 
     /** irProto protocol index */
+    void changeIndex(uint16_t index) { this->index = index; };
     uint16_t getIndex() const { return index; };
 
     /** Delay */

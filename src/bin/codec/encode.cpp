@@ -16,6 +16,7 @@
 #include "encode.h"
 
 using namespace std;
+using namespace binary::irProto;
 
 namespace binary
 {
@@ -24,11 +25,11 @@ namespace codec
 
 //functions must match "decode.cpp -- parse" and "ir_protocols.json" coding params!
 
-irProto::Code encodeNec(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodeNec(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  irProto::Code code;
   IRsend send(0, false, false);
 
   switch (strToDecodeType(codeString.c_str())) {
@@ -40,20 +41,18 @@ irProto::Code encodeNec(uint32_t protocolIndex, string codeString,
       break;
     default:
       //should not happen
-      data = irProto::Code::bitsToU64(rawData);
+      data = Code::listToU64bits(rawData);
       break;
   }
-  code.createFlat(protocolIndex, irProto::Code::DEFAULT_DELAY, rawData.size(),
-      data);
-  code.setRepeatFrame(1);
-  return code;
+  return Code::createSimpleRepeatEmpty(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodeKASEIKYO(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodeKASEIKYO(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
-  uint64_t data = irProto::Code::bitsToU64(rawData);
-  irProto::Code code;
+  uint64_t data = Code::listToU64bits(rawData);
   IRsend send(0, false, false);
 
   switch (strToDecodeType(codeString.c_str())) {
@@ -66,64 +65,52 @@ irProto::Code encodeKASEIKYO(uint32_t protocolIndex, string codeString,
       //should not happen, keep as-is
       break;
   }
-  code.createSingleSection(protocolIndex, irProto::Code::DEFAULT_DELAY,
-      rawData.size(), data);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createSimpleRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodeSIRCS(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodeSIRCS(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  irProto::Code code;
   IRsend send(0, false, false);
 
   data = send.encodeSony(rawData.size(), command, address);
-  code.createSingleSection(protocolIndex, irProto::Code::DEFAULT_DELAY,
-      rawData.size(), data);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createSimpleRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodeSIRCS20(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodeSIRCS20(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  irProto::Code code;
   IRsend send(0, false, false);
 
   data = send.encodeSony(rawData.size(), command & 0x7f, address,
       (command >> 7) & 0xff);
-  code.createSingleSection(protocolIndex, irProto::Code::DEFAULT_DELAY,
-      rawData.size(), data);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createSimpleRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodeSamsung32(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodeSamsung32(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  irProto::Code code;
   IRsend send(0, false, false);
 
   data = send.encodeSAMSUNG(address, command);
-  code.createSingleSection(protocolIndex, irProto::Code::DEFAULT_DELAY,
-      rawData.size(), data);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createSimpleRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodePhilipsRC5(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodePhilipsRC5(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  irProto::Code code;
   IRsend send(0, false, false);
 
   switch (strToDecodeType(codeString.c_str())) {
@@ -136,132 +123,125 @@ irProto::Code encodePhilipsRC5(uint32_t protocolIndex, string codeString,
       data = send.encodeRC5X(address, command);
       break;
   }
-  code.createSingleSection(protocolIndex, irProto::Code::DEFAULT_DELAY, 13,
-      data);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createSimpleRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodePhilipsRC6(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodePhilipsRC6(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  vector<pair<uint8_t, uint16_t>> sections;
-  irProto::Code code;
+  vector<pair<uint8_t, uint64_t>> sections;
   IRsend send(0, false, false);
 
   address = address | 0x100000; //always 1 bit
   data = send.encodeRC6(address, command, kRC6Mode0Bits);
 
-  sections.push_back( { 16, 0x8001 });  //start
-  sections.push_back( { 16, 0x0002 });  //toggle bit
+  sections.push_back( { 4, 0x08 });  //start
+  sections.push_back( { 1, 0x00 });  //toggle bit
   sections.push_back( { 16, data }); //16 data bits
-
-  code.createMultiSection(protocolIndex, irProto::Code::DEFAULT_DELAY,
-      sections);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createMultiRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, sections);
 }
 
-irProto::Code encodePhilipsRC6A(uint32_t protocolIndex, string codeString,
-    uint32_t address, uint32_t command, vector<bool> rawData)
+Code encodePhilipsRC6A(uint32_t protocolIndex, const IrProto &protocol,
+    string codeString, uint32_t address, uint32_t command,
+    vector<uint8_t> rawData)
 {
   uint64_t data;
-  irProto::Code code;
   IRsend send(0, false, false);
 
   data = send.encodeRC6(address, command, kRC6_36Bits);
-
-  code.createSingleSection(protocolIndex, irProto::Code::DEFAULT_DELAY,
-      rawData.size(), data);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(irProto::Code::DEFAULT_REPEATS);
-  return code;
+  return Code::createSimpleRepeatEqData(protocolIndex, protocol,
+      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
 }
 
-irProto::Code encodeDefaults(uint32_t protocolIndex,
+Code encodeDefaults(uint32_t protocolIndex, const IrProto &protocol,
     document::data::CodeType codeType, string &codeString, uint32_t &address,
-    uint32_t &command, vector<bool> &rawData)
+    uint32_t &command, vector<uint8_t> &rawData)
 {
   switch (codeType) {
     case document::data::CodeType::NEC:
     case document::data::CodeType::NEC40kHz: {
-      rawData = irProto::Code::u64tobits(32, 0x00ff00ff); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(32, 0x00ff00ff); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::NEC);
-      return encodeNec(protocolIndex, codeString, address, command, rawData);
+      return encodeNec(protocolIndex, protocol, codeString, address, command,
+          rawData);
     }
-    case document::data::CodeType::KASEIKYO: 
+    case document::data::CodeType::KASEIKYO:
     case document::data::CodeType::KASEIKYO36kHz: {
-      rawData = irProto::Code::u64tobits(48, uint64_t(0x000000000000)); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(48, uint64_t(0x000000000000)); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::PANASONIC);
-      return encodeKASEIKYO(protocolIndex, codeString, address, command,
-          rawData);
+      return encodeKASEIKYO(protocolIndex, protocol, codeString, address,
+          command, rawData);
     }
     case document::data::CodeType::SIRCS12: {
-      rawData = irProto::Code::u64tobits(12, 0x000); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(12, 0x000); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::SONY);
-      return encodeSIRCS(protocolIndex, codeString, address, command, rawData);
+      return encodeSIRCS(protocolIndex, protocol, codeString, address, command,
+          rawData);
     }
     case document::data::CodeType::SIRCS15: {
-      rawData = irProto::Code::u64tobits(15, 0x000); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(15, 0x000); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::SONY);
-      return encodeSIRCS(protocolIndex, codeString, address, command, rawData);
+      return encodeSIRCS(protocolIndex, protocol, codeString, address, command,
+          rawData);
     }
     case document::data::CodeType::SIRCS20: {
-      rawData = irProto::Code::u64tobits(20, 0x000); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(20, 0x000); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::SONY);
-      return encodeSIRCS(protocolIndex, codeString, address, command, rawData);
+      return encodeSIRCS(protocolIndex, protocol, codeString, address, command,
+          rawData);
     }
     case document::data::CodeType::Samsung32: {
-      rawData = irProto::Code::u64tobits(32, 0x00000000); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(32, 0x00000000); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::SAMSUNG);
-      return encodeSamsung32(protocolIndex, codeString, address, command,
-          rawData);
+      return encodeSamsung32(protocolIndex, protocol, codeString, address,
+          command, rawData);
     }
     case document::data::CodeType::PhilipsRC5: {
-      rawData = irProto::Code::u64tobits(12, 0x000); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(12, 0x000); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::RC5);
-      return encodePhilipsRC5(protocolIndex, codeString, address, command,
-          rawData);
+      return encodePhilipsRC5(protocolIndex, protocol, codeString, address,
+          command, rawData);
     }
     case document::data::CodeType::PhilipsRC6: {
-      rawData = irProto::Code::u64tobits(16, 0x000); //addr 0, cmd 0
+      rawData = Code::u64bitsToList(16, 0x000); //addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::RC6);
-      return encodePhilipsRC6(protocolIndex, codeString, address, command,
-          rawData);
+      return encodePhilipsRC6(protocolIndex, protocol, codeString, address,
+          command, rawData);
     }
     case document::data::CodeType::PhilipsRC6A: {
-      rawData = irProto::Code::u64tobits(31, 0x00000000); //mnf 0, addr 0, cmd 0
+      rawData = Code::u64bitsToList(31, 0x00000000); //mnf 0, addr 0, cmd 0
       address = 0;
       command = 0;
       codeString = typeToString(decode_type_t::RC6);
-      return encodePhilipsRC6A(protocolIndex, codeString, address, command,
-          rawData);
+      return encodePhilipsRC6A(protocolIndex, protocol, codeString, address,
+          command, rawData);
     }
     default: {
       rawData.clear();
       address = 0;
       command = 0;
       codeString = "";
-      return irProto::Code();
+      return Code(protocolIndex, protocol);
     }
   }
 }

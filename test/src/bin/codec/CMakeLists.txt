@@ -21,6 +21,7 @@ add_executable(test_codec
     ${SRC_DIR}/encode.cpp
     ${LIB_DIR}/timing.cpp
     ${LIB_DIR}/irProto/code.cpp
+    ${LIB_DIR}/irProto/file.cpp
     ${CMAKE_SOURCE_DIR}/src/document/data/enum.cpp
 )
 
