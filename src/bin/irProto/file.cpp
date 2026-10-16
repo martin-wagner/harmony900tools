@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include <fstream>
+#include <iostream>
 
 #include "file.h"
 
@@ -43,7 +44,7 @@ TimingSectionIrHeader::TimingSectionIrHeader(vector<uint8_t> data)
   }
 
   //data is "mark" when MSB is set
-  for (int i = 0; i < data.size(); i += 2) {
+  for (int i = 0; i < itemCount * 2; i += 2) {
     auto word = lib::parseHarmony16_file(data[i], data[i + 1]);
     if ((word & 0x8000) != 0) {
       stream.push_back( { true, word & 0x7fff });
@@ -72,7 +73,7 @@ vector<uint8_t> TimingSectionIrHeader::serialise() const
   }
 
   //size
-  data.push_back(stream.size());
+  data.push_back(static_cast<uint8_t>(stream.size()));
   //data
   for (const auto &item : stream) {
     if (item.first == true) {
@@ -141,25 +142,36 @@ TimingSectionIrPayload::TimingSectionIrPayload(uint8_t quanta,
 
 bool TimingSectionIrPayload::setQuantum(uint8_t pos, Quantum &timings)
 {
-  if (timings.size() == 0) {
+  if (timings.empty()) {
     return false;
   }
 
-  if (quanta.empty()) {
-    t_per_quantum = timings.size();
-  } else if (t_per_quantum != timings.size()) {
+  //no gaps
+  if (pos > quanta.size()) {
     return false;
+  }
+
+  //all quanta need the same timing count. the first one defines it.
+  if ((!quanta.empty()) && (t_per_quantum != timings.size())) {
+    return false;
+  }
+
+  //assume timing values in the payload are 15 bit, like in the header
+  Quantum cropped = timings;
+  for (auto &item : cropped) {
+    if ((item.second & 0x8000) != 0) {
+      item.second = 0x7fff;
+    }
   }
 
   if (pos < quanta.size()) {
-    quanta[pos] = timings;
-    return true;
-  } else if ((quanta.size() + 1) == pos) {
-    //append
-    quanta.push_back(timings);
-    return true;
+    quanta[pos] = cropped;
+  } else {
+    // Append
+    quanta.push_back(cropped);
   }
-  return false;
+  t_per_quantum = cropped.size();
+  return true;
 }
 
 const TimingSectionIrPayload::Quantum& TimingSectionIrPayload::accessQuantum(
@@ -221,7 +233,7 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
     //ignore
   }
   if (data[3] != 0xff) {
-    cout << "Warning: IrProto.bin padding before toggle used (" << (int) data[2]
+    cout << "Warning: IrProto.bin padding before toggle used (" << (int) data[3]
         << ")" << endl;
   }
   togglePos = data[2];
@@ -229,32 +241,32 @@ TimingSection::TimingSection(const vector<uint8_t> &data, int offset)
   dataQuantumCount = data[8];
   if (dataQuantumCount > 16) {
     cout << "Warning: IrProto.bin quantum count is very large ("
-        << dataQuantumCount << ")" << endl;
+        << static_cast<int>(dataQuantumCount) << ")" << endl;
   }
   dataTimingsPerQuantum = data[9];
   if (dataTimingsPerQuantum > 4) {
     cout << "Warning: IrProto.bin quantum timing count is very large ("
-        << dataTimingsPerQuantum << ")" << endl;
+        << static_cast<int>(dataTimingsPerQuantum) << ")" << endl;
   }
   pData = (int) lib::parseHarmony16_file(data[10], data[11]) - offset;
   pSoF = (int) lib::parseHarmony16_file(data[12], data[13]) - offset;
   pEoF = (int) lib::parseHarmony16_file(data[14], data[15]) - offset;
 
-  if ((pSoF >= HEADER_SIZE) && (pSoF <= data.size())) {
+  if ((pSoF >= HEADER_SIZE) && (pSoF < data.size())) {
     auto size = data[pSoF] * 2 + 1;
     if ((pSoF + size) <= data.size()) {
       sof = TimingSectionIrHeader(
           { data.begin() + pSoF, data.begin() + pSoF + size });
     }
   }
-  if ((pEoF >= HEADER_SIZE) && (pEoF <= data.size())) {
+  if ((pEoF >= HEADER_SIZE) && (pEoF < data.size())) {
     auto size = data[pEoF] * 2 + 1;
     if ((pEoF + size) <= data.size()) {
       eof = TimingSectionIrHeader(
           { data.begin() + pEoF, data.begin() + pEoF + size });
     }
   }
-  if ((pData >= HEADER_SIZE) && (pData <= data.size())) {
+  if ((pData >= HEADER_SIZE) && (pData < data.size())) {
     auto size = dataQuantumCount * dataTimingsPerQuantum * 2;
     if ((pData + size) <= data.size()) {
       this->data = TimingSectionIrPayload(dataQuantumCount,
@@ -271,7 +283,12 @@ void TimingSection::setBitCount(uint16_t count)
 
 void TimingSection::setToggle(uint16_t toggle)
 {
-  togglePos = toggle;
+  if (toggle > 0xff) {
+    //does not fit, better have none than wrong
+    togglePos = TOGGLE_NONE;
+  } else {
+    togglePos = toggle;
+  }
 }
 
 void TimingSection::setTiming(uint32_t t_us)
@@ -345,6 +362,15 @@ void TimingSection::serialiseIrStream(vector<Item> &out,
     return;
   }
 
+  //every symbol needs a quantum with timings
+  for (auto i = 0; i < bitCount; i++) {
+    if (data[i] >= this->data.getQuantisation()) {
+      cout << "Warning: IrProto.bin create IR stream symbol " << (int) data[i]
+          << " is not defined in the protocol" << endl;
+      return;
+    }
+  }
+
   sof.serialiseIrStream(tmp);
   for (auto i = 0; i < bitCount; i++) {
     this->data.serialiseIrStream(data[i], tmp);
@@ -415,6 +441,7 @@ IrProto::IrProto()
 IrProto::IrProto(const vector<uint8_t> &data, int offset, bool verbose)
 {
   vector<uint16_t> offsetTable;
+  vector<int> starts;
 
   if (data.size() < HEADER_SIZE) {
     cout << "Warning: IrProto.bin protocol section too small (" << data.size()
@@ -428,35 +455,53 @@ IrProto::IrProto(const vector<uint8_t> &data, int offset, bool verbose)
   }
   //again, include pointers
   auto timingSectionCount = data[6];
-  if (data.size() < (HEADER_SIZE + 2 * timingSectionCount)) {
+  if (timingSectionCount == 0) {
+    cout << "Warning: IrProto.bin protocol section without timings" << endl;
+    return;
+  }
+  auto tableEnd = HEADER_SIZE + 2 * timingSectionCount;
+  if (data.size() < tableEnd) {
     cout << "Warning: IrProto.bin protocol section too small (pointers, "
         << data.size() << " bytes)" << endl;
     return;
   }
 
-  clockPeriod = lib::parseHarmony16_file(data[1], data[2]);
+  auto period = lib::parseHarmony16_file(data[1], data[2]);
+  if (period == 0) {
+    cout << "Warning: IrProto.bin protocol clock period is 0" << endl;
+    return;
+  }
+  clockPeriod = period;
 
-  lib::parseHarmony16_file(
-      { data.begin() + HEADER_SIZE, data.begin() + HEADER_SIZE
-          + 2 * timingSectionCount }, offsetTable);
+  auto res = lib::parseHarmony16_file(
+      { data.begin() + HEADER_SIZE, data.begin() + tableEnd }, offsetTable);
+  if (res != true) {
+    cout << "Warning: IrProto.bin protocol offset table invalid" << endl;
+    return;
+  }
 
-  //offsets need to be within data
-  for (auto &o : offsetTable) {
-    o = o - offset;
-    if ((o) >= data.size()) {
+  //offsets need to be within data, behind the offset table and in ascending order
+  for (const auto &o : offsetTable) {
+    auto start = static_cast<int>(o) - offset;
+    if ((start < tableEnd) || (start >= static_cast<int>(data.size()))) {
       cout << "Protocol error (offsets point outside data)" << endl;
       return;
     }
+    if ((!starts.empty()) && (start <= starts.back())) {
+      cout << "Protocol error (offsets not ascending)" << endl;
+      return;
+    }
+    starts.push_back(start);
   }
 
   msg(verbose) << "Parsing sections..." << endl;
 
-  for (int i = 0; i < offsetTable.size(); i++) {
+  for (int i = 0; i < starts.size(); i++) {
     msg(verbose) << "Section " << to_string(i) << endl;
-    auto start = offsetTable[i];
+    auto start = starts[i];
     auto end = data.size();
-    if ((i + 1) < offsetTable.size()) {
-      end = offsetTable[i + 1];
+    if ((i + 1) < starts.size()) {
+      end = starts[i + 1];
     }
 
     auto s = TimingSection( { data.begin() + start, data.begin() + end },
@@ -485,7 +530,7 @@ const TimingSection& IrProto::accessSection(int index) const
 {
   static const TimingSection s;
 
-  if (index >= sections.size()) {
+  if ((index < 0) || (index >= static_cast<int>(sections.size()))) {
     return s;
   }
   return sections[index];
@@ -501,7 +546,7 @@ vector<uint8_t> IrProto::serialise(int offset) const
   data.push_back(UNUSED);
   data.push_back(UNUSED);
   data.push_back(SEPARATOR);
-  data.push_back(sections.size());
+  data.push_back(static_cast<uint8_t>(sections.size()));
 
   offset = offset + HEADER_SIZE + 2 * sections.size();
   for (const auto &s : sections) {
@@ -568,7 +613,7 @@ void IrProto::serialiseIrStream(vector<Item> &out, const Data &data) const
 {
   for (const auto &s : data) {
     auto index = s.first;
-    if (index >= sections.size()) {
+    if ((index < 0) || (index >= static_cast<int>(sections.size()))) {
       continue;
     }
     sections[index].serialiseIrStream(out, s.second);
@@ -634,8 +679,9 @@ Status File::parse(const string &filename, bool verbose)
   //check header (equal)
   for (int i = 0; i < header.size(); i++) {
     if (header[i] != raw[i]) {
-      cout << "Error: IrProto.bin header mismatch at " << i + WRAPPER_SIZE
-          << " (is " << raw[i] << ", expected " << header[i] << ")" << endl;
+      cout << "Error: IrProto.bin header mismatch at "
+          << to_string(i + WRAPPER_SIZE) << " (is " << to_string(raw[i])
+          << ", expected " << to_string(header[i]) << ")" << endl;
       return Status::ERROR_FILE_FORMAT;
     }
   }
@@ -650,17 +696,32 @@ Status File::parse(const string &filename, bool verbose)
   msg(verbose) << "File contains " << to_string(objectCount) << " protocols"
       << endl;
 
+  //offset table needs to be inside the file
+  auto tableEnd = 3 + 2 * objectCount;
+  if (raw.size() < tableEnd) {
+    msg(verbose) << "File error (offset table outside file)" << endl;
+    return Status::ERROR_SIZE;
+  }
+
   auto ret = lib::parseHarmony16_file(
-      { raw.begin() + 3, raw.begin() + 3 + 2 * objectCount }, offsetTable);
+      { raw.begin() + 3, raw.begin() + tableEnd }, offsetTable);
   if (ret != true) {
     msg(verbose) << "File parsing error (offsets)" << endl;
     return Status::ERROR_FILE_FORMAT;
   }
-  //offsets need to be within the file
-  for (const auto &o : offsetTable) {
-    if (o > raw.size()) {
+  //offsets need to be within the file, behind the offset table and in ascending order
+  for (int i = 0; i < offsetTable.size(); i++) {
+    if (offsetTable[i] >= raw.size()) {
       msg(verbose) << "File error (offsets point outside file)" << endl;
       return Status::ERROR_SIZE;
+    }
+    if (offsetTable[i] < tableEnd) {
+      msg(verbose) << "File error (offsets point into offset table)" << endl;
+      return Status::ERROR_FILE_FORMAT;
+    }
+    if ((i > 0) && (offsetTable[i] <= offsetTable[i - 1])) {
+      msg(verbose) << "File error (offsets not ascending)" << endl;
+      return Status::ERROR_FILE_FORMAT;
     }
   }
 
@@ -677,6 +738,7 @@ Status File::parse(const string &filename, bool verbose)
     auto status = parseObject(raw, start, end, verbose);
     if (status != Status::OK) {
       msg(verbose) << "Failure!" << endl;
+      protocols.clear();
       return status;
     }
   }
@@ -777,8 +839,6 @@ Status File::serialise(const string &filename, uint32_t *crc) const
 Status File::serialiseIrStream(binary::TimingStream &out, uint16_t index,
     const IrProto::Data &data) const
 {
-  vector<Item> items;
-
   if (index >= protocols.size()) {
     return Status::ERROR_INDEX;
   }
@@ -793,6 +853,10 @@ Status File::parseObject(const vector<uint8_t> &raw, uint16_t startOffset,
       { raw.begin() + startOffset, raw.begin() + endOffset };
 
   auto proto = IrProto(payload, startOffset, verbose);
+  if (proto.isEmpty()) {
+    //protocol could not be parsed, there is no protocol without sections
+    return Status::ERROR_PAYLOAD_FORMAT;
+  }
   protocols.push_back(move(proto));
 
   return Status::OK;
@@ -800,4 +864,3 @@ Status File::parseObject(const vector<uint8_t> &raw, uint16_t startOffset,
 
 }
 }
-

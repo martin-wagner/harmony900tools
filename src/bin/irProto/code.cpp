@@ -49,6 +49,10 @@ vector<uint8_t> Code::u64bitsToList(uint8_t bitCount, uint64_t data)
   vector<uint8_t> values;
   values.reserve(bitCount);
 
+  if (bitCount > 64) {
+    return values;
+  }
+
   for (int i = bitCount - 1; i >= 0; --i) {
     values.push_back((data >> i) & 1);
   }
@@ -138,16 +142,16 @@ uint64_t Code::listToU64bits(const vector<uint8_t> &values)
 //  return data;
 //}
 //
-//uint64_t Code::bitsToU64(const vector<bool> &bits)
-//{
-//  uint64_t data = 0;
-//
-//  for (size_t i = 0; i < bits.size(); ++i) {
-//    data = (data << 1) | bits[i];
-//  }
-//
-//  return data;
-//}
+uint64_t Code::bitsToU64(const vector<bool> &bits)
+{
+  uint64_t data = 0;
+
+  for (size_t i = 0; i < bits.size(); ++i) {
+    data = (data << 1) | bits[i];
+  }
+
+  return data;
+}
 
 uint8_t Code::getBitsPerSymbol(uint8_t quantums)
 {
@@ -158,7 +162,7 @@ uint8_t Code::getBitsPerSymbol(uint8_t quantums)
   return static_cast<uint8_t>(ceil(log2(quantums)));
 }
 
-uint8_t Code::getDataBytes(uint8_t symbols, uint8_t bitsPerSymbol)
+uint16_t Code::getDataBytes(uint16_t symbols, uint8_t bitsPerSymbol)
 {
   if (symbols == 0 || bitsPerSymbol == 0) {
     return 0;
@@ -181,12 +185,18 @@ Status Code::parseGroup(vector<uint8_t> &data, vector<Group> &group)
 
     for (i = 0; i < recordCount; ++i) {
       auto protoSection = data.at(0);
+      if (protoSection >= protocol.getSectionCount()) {
+        return Status::ERROR_PAYLOAD_FORMAT;
+      }
 
       auto symbols = protocol.accessSection(protoSection).getBitCount();
       auto quantisation =
           protocol.accessSection(protoSection).getData().getQuantisation();
       auto bits = getBitsPerSymbol(quantisation);
       auto dataBytes = getDataBytes(symbols, bits);
+      if (data.size() < (1 + dataBytes)) {
+        return Status::ERROR_SIZE; //doesn't throw
+      }
       auto groupData = bytesToList(symbols, bits,
           { data.begin() + 1, data.begin() + 1 + dataBytes });
       group.push_back(Group(protoSection, bits, groupData));
@@ -290,18 +300,22 @@ Status Code::parse(vector<uint8_t> code)
 
   auto status = parseGroup(code, start);
   if (status != Status::OK) {
+    reset();
     return status;
   }
   status = parseGroup(code, repeat);
   if (status != Status::OK) {
+    reset();
     return status;
   }
-  status = parseGroup(code, start);
+  status = parseGroup(code, finish);
   if (status != Status::OK) {
+    reset();
     return status;
   }
   //used up all bytes?
   if (!code.empty()) {
+    reset();
     return Status::ERROR_SIZE;
   }
   return Status::OK;
@@ -313,7 +327,7 @@ Status Code::parse(const string &code)
   return parse(data);
 }
 
-Code Code::createSimpleRepeatEqData(uint8_t index, const IrProto &protocol,
+Code Code::createSimpleRepeatEqData(uint16_t index, const IrProto &protocol,
     uint16_t delay, uint8_t bits, uint64_t data, uint8_t repeats)
 {
   Code code(index, protocol);
@@ -323,7 +337,7 @@ Code Code::createSimpleRepeatEqData(uint8_t index, const IrProto &protocol,
   return code;
 }
 
-Code Code::createSimpleRepeatEmpty(uint8_t index, const IrProto &protocol,
+Code Code::createSimpleRepeatEmpty(uint16_t index, const IrProto &protocol,
     uint16_t delay, uint8_t bits, uint64_t data, uint8_t repeats)
 {
   Code code(index, protocol);
@@ -334,7 +348,7 @@ Code Code::createSimpleRepeatEmpty(uint8_t index, const IrProto &protocol,
   return code;
 }
 
-Code Code::createMultiRepeatEqData(uint8_t index, const IrProto &protocol,
+Code Code::createMultiRepeatEqData(uint16_t index, const IrProto &protocol,
     uint16_t delay, const std::vector<std::pair<uint8_t, uint64_t> > &data,
     uint8_t repeats)
 {

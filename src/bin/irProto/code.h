@@ -55,10 +55,10 @@ class Code
 //    static std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
 //    static std::vector<bool> u64toBits(uint8_t bitCount, uint64_t data);
 //    static std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
-//    static uint64_t bitsToU64(const std::vector<bool>& bits);
+    static uint64_t bitsToU64(const std::vector<bool>& bits);
 
-    uint8_t getBitsPerSymbol(uint8_t quantums);
-    uint8_t getDataBytes(uint8_t symbols, uint8_t bitsPerSymbol);
+    static uint8_t getBitsPerSymbol(uint8_t quantums);
+    static uint16_t getDataBytes(uint16_t symbols, uint8_t bitsPerSymbol);
 
   protected:
     Status parseGroup(std::vector<uint8_t> &data, std::vector<Group> &group);
@@ -84,11 +84,11 @@ class Code
 
     /** create common codes from data. You are responsible for respecting the protocol! */
     //rc5, japan, samsung, most others. one continuous data frame, repeat re-sends the frame.
-    static Code createSimpleRepeatEqData(uint8_t index, const IrProto &protocol, uint16_t delay, uint8_t bits, uint64_t data, uint8_t repeats = DEFAULT_REPEATS);
+    static Code createSimpleRepeatEqData(uint16_t index, const IrProto &protocol, uint16_t delay, uint8_t bits, uint64_t data, uint8_t repeats = DEFAULT_REPEATS);
     //NEC. one continious data frame, Repeat sends a special, empty repeat frame
-    static Code createSimpleRepeatEmpty(uint8_t index, const IrProto &protocol, uint16_t delay, uint8_t bits, uint64_t data, uint8_t repeats = 0);
+    static Code createSimpleRepeatEmpty(uint16_t index, const IrProto &protocol, uint16_t delay, uint8_t bits, uint64_t data, uint8_t repeats = 1);
     //RC6. assembles a data frame from multiple sections, repeat re-sends the frame.
-    static Code createMultiRepeatEqData(uint8_t index, const IrProto &protocol, uint16_t delay, const std::vector<std::pair<uint8_t, uint64_t>> &data, uint8_t repeats = DEFAULT_REPEATS);
+    static Code createMultiRepeatEqData(uint16_t index, const IrProto &protocol, uint16_t delay, const std::vector<std::pair<uint8_t, uint64_t>> &data, uint8_t repeats = DEFAULT_REPEATS);
 
     /** create code */
     std::string serialiseStr() const;
