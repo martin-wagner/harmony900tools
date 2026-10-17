@@ -210,7 +210,6 @@ bool models::ProtocolIrModel::addItem(int row)
   suggestName = makeStringUnique(usedNames, suggestName);
   cmd.name = suggestName.toStdString();
   cmd.codeType.set(document::data::CodeType::None);
-  cmd.canDecode.set(true);
   return config.modify().setIrCommand(devicePos, cmd, row, false);
 }
 
@@ -243,22 +242,22 @@ QVariant ProtocolIrModel::getDisplayData(const QModelIndex &index) const
       case Column::PROTO:
         return cmd.protocolIndex.get();
       case Column::VERBOSE:
-        if (printData(cmd)) {
+        if (canPrintData(cmd)) {
           return qstr(cmd.libName.get());
         }
         return tr("Not available");
       case Column::IRADDRESS:
-        if (printData(cmd)) {
+        if (canPrintData(cmd)) {
           return cmd.irAddress.get();
         }
         break;
       case Column::IRCOMMAND:
-        if (printData(cmd)) {
+        if (canPrintData(cmd)) {
           return cmd.irCommand.get();
         }
         break;
       case Column::IRBITS:
-        if (printData(cmd)) {
+        if (canPrintData(cmd)) {
           return tr("0x%1, %2 bits").arg(
               QString::number(cmd.irBitData.get(), 16)).arg(
               cmd.irBitCount.get());
@@ -358,20 +357,17 @@ QVariant ProtocolIrModel::getFontData(const QModelIndex &index) const
   return {};
 }
 
-bool ProtocolIrModel::printData(
+bool ProtocolIrModel::canPrintData(
     const document::data::item::ProtoCommand &cmd) const
 {
-  if (cmd.canDecode.get() == true) {
-    switch (cmd.codeType.get().getValue()) {
-      case document::data::CodeType::Unknown:
-      case document::data::CodeType::Proprietary:
-      case document::data::CodeType::None:
-        return false;
-      default:
-        return true;
-    }
+  switch (cmd.codeType.get().getValue()) {
+    case document::data::CodeType::Unknown:
+    case document::data::CodeType::Proprietary:
+    case document::data::CodeType::None:
+      return false;
+    default:
+      return true;
   }
-  return false;
 }
 
 QVariant ProtocolIrModel::visualiseData(
@@ -379,9 +375,6 @@ QVariant ProtocolIrModel::visualiseData(
 {
   binary::TimingStream timingData;
 
-  if (cmd.canDecode.get() != true) {
-    return tr("Proprietary data, format not supported!");
-  }
   if ((cmd.codeType.get().getValue() == document::data::CodeType::Unknown)
       || (cmd.codeType.get().getValue() == document::data::CodeType::None)) {
     return "";
@@ -441,16 +434,15 @@ bool models::ProtocolIrModel::setCommandType(
     }
   }
   cmd.protocolIndex.set(index);
-  cmd.canDecode.set(true);
-  auto code = binary::codec::encodeDefaults(cmd.protocolIndex.get(),
+  auto code = binary::codec::encodeDefaults(index,
+      config.data().getProtocolLib().accessProtocol(index),
       cmd.codeType.get().getValue(), codeString, address, command, rawData);
   cmd.libName.set(codeString);
   cmd.irAddress.set(address);
   cmd.irCommand.set(command);
   cmd.irBitCount.set(rawData.size());
-  cmd.irBitData.set(binary::irProto::Code::bitsToU64(rawData));
+  cmd.irBitData.set(binary::irProto::Code::listToU64bits(rawData));
   cmd.command = code;
-  cmd.data.set( { });
   auto ret = worker.setIrCommand(devicePos, cmd, row, true);
 
   config.endMacro();
@@ -507,9 +499,7 @@ bool models::ProtocolIrModel::setCommandData(
 
   auto cmd = getCmds(&devicePos).at(row);
   auto code = qvariant_cast<binary::irProto::Code>(value);
-  cmd.canDecode.set(true);
   cmd.command = code;
-  cmd.data.set( { });
   return worker.setIrCommand(devicePos, cmd, row, true);
 }
 

@@ -85,7 +85,7 @@ class ProtocolIrModel: public BaseModel
     QVariant getSelectionItemsData(const QModelIndex &index) const override;
     QVariant getFontData(const QModelIndex &index) const override;
 
-    bool printData(const document::data::item::ProtoCommand &cmd) const;
+    bool canPrintData(const document::data::item::ProtoCommand &cmd) const;
     QVariant visualiseData(const document::data::item::ProtoCommand &cmd) const;
 
     bool setCommandName(document::data::CmdCatalogue &worker, int row, const QVariant &value);
