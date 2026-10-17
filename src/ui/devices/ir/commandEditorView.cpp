@@ -144,9 +144,11 @@ void ProtoCommandTreeView::setLearnedCommand(
     return;
   }
   //step 4: create the command code from received data
-  auto code = binary::codec::encode(protocolIndex, data.codeType,
+  auto &protocol = ctx.config()->data().getProtocolLib().accessProtocol(
+      protocolIndex);
+  auto code = binary::codec::encode(protocolIndex, protocol, data.codeType,
       data.codeString, data.address, data.command, data.data);
-  if (code.getDataSectionCount() == 0) {
+  if (!code.isValid()) {
     msgBox.setText(tr("Creating data stream from learned command failed. "
         "Try again or use Raw IR mode."));
     msgBox.exec();
