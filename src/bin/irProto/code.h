@@ -32,6 +32,7 @@ class Group
 class Code
 {
   public:
+    static constexpr uint16_t INVALID_INDEX_MARKER = 0xffff;
     static constexpr uint16_t DEFAULT_PRE_SEND_SILENCE = 500;
     static constexpr uint16_t DEFAULT_REPEATS = 3;
     static constexpr uint16_t HEADER_SIZE = 5;
@@ -40,7 +41,7 @@ class Code
 
   protected:
     IrProto protocol;
-    uint16_t index = 0;
+    uint16_t index = INVALID_INDEX_MARKER;
 
     uint16_t delay;
     uint8_t repeats;
@@ -53,12 +54,6 @@ class Code
     static std::vector<uint8_t> u64bitsToList(uint8_t bitCount, uint64_t data);
     static std::vector<uint8_t> listToBytes(uint8_t bits, const std::vector<uint8_t> &values);
     static uint64_t listToU64bits(const std::vector<uint8_t> &values);
-
-//todo
-//    static std::vector<bool> bytesToBits(const std::vector<uint8_t>& data);
-    static std::vector<bool> u64toBits(uint8_t bitCount, uint64_t data);
-//    static std::vector<uint8_t> bitsToBytes(const std::vector<bool>& bits);
-    static uint64_t bitsToU64(const std::vector<bool>& bits);
 
     static uint8_t getBitsPerSymbol(uint8_t quantums);
     static uint16_t getDataBytes(uint16_t symbols, uint8_t bitsPerSymbol);
@@ -124,6 +119,8 @@ class Code
     void setRepeatGroups(const std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &data) { setGroup(data, repeat); }
     void setFinishGroups(const std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &data) { setGroup(data, finish); }
 
+    /** checks if a valid comand can be created */
+    bool isValid() const;
 
     /** create data item for coding with irProto data */
     const IrProto::Data getData() const;

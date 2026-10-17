@@ -48,7 +48,7 @@ QWidget* ProtocolIr::createEditor(QWidget *parent,
   auto command = model->data(
       index.siblingAtColumn(models::ProtocolIrModel::Column::IRCOMMAND),
       Qt::EditRole).toUInt();
-  auto data = qvariant_cast<std::vector<bool>>(
+  auto data = qvariant_cast<std::vector<uint8_t>>(
       model->data(
           index.siblingAtColumn(models::ProtocolIrModel::Column::IRBITS),
           Qt::EditRole));

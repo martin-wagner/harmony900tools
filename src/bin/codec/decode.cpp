@@ -85,7 +85,7 @@ Status Decode::parse(TimingStream data, int carrier)
   res.codeString = typeToString(decoder.decode_type);
   res.address = decoder.address;
   res.command = decoder.command;
-  res.data = irProto::Code::u64toBits(decoder.bits, decoder.value);
+  res.data = irProto::Code::u64bitsToList(decoder.bits, decoder.value);
   res.decoded = Status::OK;
   //only allow the protocols we support encoding for
   //functions must match "encode.cpp"
@@ -148,7 +148,7 @@ Status Decode::parse(TimingStream data, int carrier)
       } else if (decoder.bits == 36) {
         res.codeType = CodeType::PhilipsRC6A;
         res.address = res.address & 0x7FFF7F; //mask always-1-bit / header / toggle
-        res.data = irProto::Code::u64toBits(31, decoder.value);
+        res.data = irProto::Code::u64bitsToList(31, decoder.value);
       }
       break;
     default:

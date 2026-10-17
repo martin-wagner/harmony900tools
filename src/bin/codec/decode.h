@@ -33,7 +33,7 @@ class Decode
         std::string codeString = "Unknown";     //the libraries code type (as string)
         uint32_t address = -1;                  //decoded address
         uint32_t command = -1;                  //decoded command
-        std::vector<bool> data;                 //raw data as received from remote
+        std::vector<uint8_t> data;              //raw data as received from remote
         std::string error;                      //info about !Status::OK
     };
 

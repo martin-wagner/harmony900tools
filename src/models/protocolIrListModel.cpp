@@ -294,7 +294,7 @@ QVariant ProtocolIrModel::getEditData(const QModelIndex &index) const
         return cmd.irCommand.get();
       case Column::IRBITS:
         return QVariant::fromValue(
-            binary::irProto::Code::u64toBits(cmd.irBitCount.get(),
+            binary::irProto::Code::u64bitsToList(cmd.irBitCount.get(),
                 cmd.irBitData.get()));
       case Column::DATA: {
         return QVariant::fromValue(cmd.command);

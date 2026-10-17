@@ -89,70 +89,6 @@ uint64_t Code::listToU64bits(const vector<uint8_t> &values)
   return data;
 }
 
-//todo
-//
-//vector<bool> Code::bytesToBits(const vector<uint8_t> &data)
-//{
-//  vector<bool> bits;
-//  bits.reserve(data.size() * 8);
-//
-//  for (auto byte : data) {
-//    // iterate from MSB (bit 7) to LSB (bit 0)
-//    for (int i = 7; i >= 0; --i) {
-//      bits.push_back((byte >> i) & 1);
-//    }
-//  }
-//
-//  return bits;
-//}
-//
-vector<bool> Code::u64toBits(uint8_t bitCount, uint64_t data)
-{
-  vector<bool> bits;
-  bits.reserve(bitCount);
-
-  for (int i = bitCount - 1; i >= 0; --i) {
-    bits.push_back((data >> i) & 1);
-  }
-
-  return bits;
-}
-//
-//vector<uint8_t> Code::bitsToBytes(const vector<bool> &bits)
-//{
-//  vector<uint8_t> data;
-//  size_t numBytes = (bits.size() + 7) / 8; // ceil division
-//  data.reserve(numBytes);
-//
-//  for (size_t i = 0; i < bits.size(); i += 8) {
-//    uint8_t byte = 0;
-//
-//    for (int j = 0; j < 8; j++) {
-//      byte = byte << 1;
-//
-//      if (i + j < bits.size()) {
-//        byte |= bits[i + j] ? 1 : 0;
-//      }
-//      // else: implicit zero padding
-//    }
-//
-//    data.push_back(byte);
-//  }
-//
-//  return data;
-//}
-//
-uint64_t Code::bitsToU64(const vector<bool> &bits)
-{
-  uint64_t data = 0;
-
-  for (size_t i = 0; i < bits.size(); ++i) {
-    data = (data << 1) | bits[i];
-  }
-
-  return data;
-}
-
 uint8_t Code::getBitsPerSymbol(uint8_t quantums)
 {
   if (quantums <= 1) {
@@ -236,7 +172,7 @@ void Code::writeGroup(const vector<Group> &group, vector<uint8_t> &data) const
 }
 
 Code::Code() :
-    Code(0xffff, IrProto())
+    Code(INVALID_INDEX_MARKER, IrProto())
 {
 }
 
@@ -389,10 +325,33 @@ vector<uint8_t> Code::serialiseVec() const
   return code;
 }
 
+bool Code::isValid() const
+{
+  //some plausibility checks...
+  if (index == INVALID_INDEX_MARKER) {
+    return false;
+  }
+  if (protocol.isEmpty()) {
+    return false;
+  }
+  if (start.empty() && repeat.empty() && finish.empty()) {
+    return false;
+  }
+  if (protocol.getSectionCount()
+      != (start.size() + repeat.size() + finish.size())) {
+    return false;
+  }
+  return true;
+}
+
 const IrProto::Data Code::getData() const
 {
   uint8_t i;
   IrProto::Data data;
+
+  if (!isValid()) {
+    return data;
+  }
 
   for (const auto &g : start) {
     data.push_back( { g.getSection(), g.getData() });
