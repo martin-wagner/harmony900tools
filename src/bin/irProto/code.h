@@ -68,6 +68,7 @@ class Code
   public:
     /** create empty code item */
     Code(uint16_t index, const IrProto &protocol);
+    Code(const Code &src);
     /** parse code */
     Code(uint16_t index, const IrProto &protocol, const std::vector<uint8_t> &code);
     Code(uint16_t index, const IrProto &protocol, const std::string &code);
@@ -110,6 +111,9 @@ class Code
     const std::vector<Group> &accessStartGroups() const { return start; }
     const std::vector<Group> &accessRepeatGroups() const { return repeat; }
     const std::vector<Group> &accessFinishGroups() const { return finish; }
+    std::vector<Group> &accessStartGroups()  { return start; }
+    std::vector<Group> &accessRepeatGroups()  { return repeat; }
+    std::vector<Group> &accessFinishGroups()  { return finish; }
 
     /** writers. group-list with protocol section + symbol list */
     void setStartGroups(const std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &data) { setGroup(data, start); }

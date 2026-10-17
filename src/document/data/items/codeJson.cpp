@@ -62,63 +62,138 @@ void fromJson(const ordered_json &in, binary::TimingStream &stream)
 // bin/irProto/code.h
 //---------------------------------------------------------------------------
 
-void toJson(ordered_json &out, const binary::irProto::Section &section)
+void toJson(ordered_json &out, const binary::irProto::Group &group)
 {
-  out["Index"] = section.getIndex();
-  auto data = binary::irProto::Code::bitsToU64(section.getData());
-  out["Data"] = QString("0x" + QString::number(data, 16)).toStdString();
-  out["DataBitCount"] = section.getData().size();
+  out["Section"] = group.getSection();
+  out["Bits"] = group.getBits();
+  out["DataBitCount"] = group.getData().size();
+  if (group.getBits() == 2) {
+    //compact -> string
+    auto data = binary::irProto::Code::listToU64bits(group.getData());
+    out["Data"] = QString("0x" + QString::number(data, 16)).toStdString();
+  } else {
+    //array
+    out["Data"] = group.getData();
+  }
 }
 
-void fromJson(const ordered_json &in, binary::irProto::Section &section)
+binary::irProto::Group fromJsonOld(const ordered_json &in, uint32_t idx)
 {
-  vector<bool> data;
+  vector<uint8_t> data;
 
-  int index = in.value("Index", 0);
   auto dataIt = in.find("Data");
   if (dataIt != in.end()) {
     auto bitCount = in.value("DataBitCount", size_t(0));
     auto bits = qstr(dataIt->get<string>()).toULongLong(nullptr, 16);
-    data = binary::irProto::Code::u64tobits(bitCount, bits);
+    data = binary::irProto::Code::u64bitsToList(bitCount, bits);
   }
-  section = binary::irProto::Section(index, data);
+  return binary::irProto::Group(idx, 2, data);
+}
+
+binary::irProto::Group fromJson(const ordered_json &in)
+{
+  vector<uint8_t> data;
+
+  auto section = in.value("Section", 0);
+  auto bits = in.value("Bits", 2);
+  auto bitCount = in.value("DataBitCount", 0);
+  auto dataIt = in.find("Data");
+  if (dataIt != in.end()) {
+    if (dataIt->is_string()) {
+      auto hexValue = qstr(dataIt->get<string>()).toULongLong(nullptr, 16);
+      data = binary::irProto::Code::u64bitsToList(bitCount, hexValue);
+    } else if (dataIt->is_array()) {
+      data = dataIt->get<vector<uint8_t>>();
+    }
+  }
+  return binary::irProto::Group(section, bits, data);
 }
 
 void toJson(ordered_json &out, const binary::irProto::Code &code)
 {
-  out["Index"] = code.getIndex();
+  //index is part of parent
   out["Delay"] = code.getDelay();
-  out["RepeatFrame"] = code.getRepeatFrame();
-  out["DataFrameTxCount"] = code.getDataFrameTxCount();
-  out["Control"] = code.getControl();
+  out["Repeats"] = code.getRepeats();
 
-  ordered_json sectionsArr = ordered_json::array();
-  for (const auto &section : code.accessSections()) {
-    ordered_json sectionJson;
-    toJson(sectionJson, section);
-    sectionsArr.push_back(sectionJson);
+  ordered_json groupsArr = ordered_json::array();
+  for (const auto &group : code.accessStartGroups()) {
+    ordered_json groupJson;
+    toJson(groupJson, group);
+    groupsArr.push_back(groupJson);
   }
-  out["Sections"] = sectionsArr;
+  out["StartGroups"] = groupsArr;
+
+  groupsArr = ordered_json::array();
+  for (const auto &group : code.accessRepeatGroups()) {
+    ordered_json groupJson;
+    toJson(groupJson, group);
+    groupsArr.push_back(groupJson);
+  }
+  out["RepeatGroups"] = groupsArr;
+
+  groupsArr = ordered_json::array();
+  for (const auto &group : code.accessFinishGroups()) {
+    ordered_json groupJson;
+    toJson(groupJson, group);
+    groupsArr.push_back(groupJson);
+  }
+  out["FinishGroups"] = groupsArr;
 }
 
 void fromJson(const ordered_json &in, binary::irProto::Code &code)
 {
-  code.setIndex(in.value("Index", uint16_t(0)));
-  code.setDelay(in.value("Delay", uint16_t(0)));
-  code.setRepeatFrame(in.value("RepeatFrame", uint8_t(0)));
-  code.setDataFrameTxCount(in.value("DataFrameTxCount", uint8_t(1)));
-  code.setControl(in.value("Control", uint8_t(0)));
+  vector<binary::irProto::Group> groups;
 
-  vector<binary::irProto::Section> sections;
-  auto sectionsIt = in.find("Sections");
-  if (sectionsIt != in.end()) {
-    for (const auto &sectionJson : *sectionsIt) {
-      binary::irProto::Section section(0, { });
-      fromJson(sectionJson, section);
-      sections.push_back(section);
+  code.setDelay(
+      in.value("Delay", binary::irProto::Code::DEFAULT_PRE_SEND_SILENCE));
+
+  if (in.contains("Control")) {
+    //fixme pre v0.2 when to drop?
+    code.setRepeats(
+        in.value("DataFrameTxCount", binary::irProto::Code::DEFAULT_REPEATS));
+
+    auto groupsIt = in.find("Sections");
+    if (groupsIt != in.end()) {
+      for (size_t i = 0; i < groupsIt->size(); i++) {
+        auto group = fromJsonOld((*groupsIt)[i], i);
+        groups.push_back(group);
+      }
     }
+
+    auto control = in.value("Control", uint8_t(0));
+    //0 = NEC (or generic + repeat) -> start + empty repeat (see createSimpleRepeatEmpty())
+    //1 = Generic
+    //3 = Philips RC-6
+    //else -> n repeat groups
+    switch (control) {
+      case 0:
+        code.accessStartGroups() = groups;
+        code.setRepeatGroups( { { 1, { } } });
+        break;
+      default:
+        code.accessRepeatGroups() = groups;
+        break;
+    }
+
+  } else {
+    code.setRepeats(
+        in.value("Repeats", binary::irProto::Code::DEFAULT_REPEATS));
+
+    auto parseGroups = [&in](const char *key,
+        vector<binary::irProto::Group> &target) {
+          target.clear();
+          auto groupsIt = in.find(key);
+          if (groupsIt != in.end()) {
+            for (size_t i = 0; i < groupsIt->size(); i++) {
+              target.push_back(fromJson((*groupsIt)[i]));
+            }
+          }
+        };
+
+    parseGroups("StartGroups", code.accessStartGroups());
+    parseGroups("RepeatGroups", code.accessRepeatGroups());
+    parseGroups("FinishGroups", code.accessFinishGroups());
   }
-  code.setSections(sections);
 }
 
 }

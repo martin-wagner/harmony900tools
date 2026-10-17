@@ -617,7 +617,7 @@ void CodeEditor::updateProprietaryData()
     code.setDataFrameTxCount(static_cast<uint8_t>(repeatCountBox->value()));
   }
 
-  std::vector<Section> sections;
+  std::vector<Group> sections;
   for (int row = 0; row < sectionTable->rowCount(); row++) {
     auto *valueItem = sectionTable->item(row, 0);
     auto *bitsBox = qobject_cast<QSpinBox*>(sectionTable->cellWidget(row, 1));
@@ -627,8 +627,8 @@ void CodeEditor::updateProprietaryData()
 
     auto value = parsePrefixedValue(valueItem->text());
     auto bitCount = static_cast<uint8_t>(bitsBox->value());
-    auto bits = binary::irProto::Code::u64tobits(bitCount, value);
-    sections.push_back(Section(row, bits));
+    auto bits = binary::irProto::Code::u64toBits(bitCount, value);
+    sections.push_back(Group(row, bits));
   }
   code.setSections(sections);
 }
@@ -654,7 +654,7 @@ void CodeEditor::updateKasData()
   data = data | (kasSubdeviceBox->value() << 16);
   data = data | (kasCommandBox->value() << 8);
   //parity byte not required for encoding
-  rawData = binary::irProto::Code::u64tobits(48, data);
+  rawData = binary::irProto::Code::u64toBits(48, data);
   code = binary::codec::encode(kasIndexBox->value(), codeType,
       codeString.toStdString(), address, command, rawData);
   code.setDataFrameTxCount(kasRepeatCountBox->value());

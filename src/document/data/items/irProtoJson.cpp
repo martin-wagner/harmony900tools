@@ -31,7 +31,8 @@ void fromJson(const ordered_json &in, binary::irProto::Item &item)
 namespace
 {
 
-ordered_json toJsonItemList(const std::vector<binary::irProto::Item> &items)
+ordered_json toJsonItemList(
+    const binary::irProto::TimingSectionIrPayload::Quantum &items)
 {
   ordered_json arr = ordered_json::array();
   for (const auto &item : items) {
@@ -42,9 +43,10 @@ ordered_json toJsonItemList(const std::vector<binary::irProto::Item> &items)
   return arr;
 }
 
-std::vector<binary::irProto::Item> fromJsonItemList(const ordered_json &in)
+binary::irProto::TimingSectionIrPayload::Quantum fromJsonItemList(
+    const ordered_json &in)
 {
-  std::vector<binary::irProto::Item> items;
+  binary::irProto::TimingSectionIrPayload::Quantum items;
   if (in.is_array()) {
     for (const auto &itemJson : in) {
       binary::irProto::Item item;
@@ -79,8 +81,13 @@ void fromJson(const ordered_json &in,
 void toJson(ordered_json &out,
     const binary::irProto::TimingSectionIrPayload &payload)
 {
-  out["FalsePair"] = toJsonItemList(payload.accessFalsePair());
-  out["TruePair"] = toJsonItemList(payload.accessTruePair());
+  ordered_json quanta = ordered_json::array();
+
+  for (int i = 0; i < payload.getQuantisation(); i++) {
+    quanta.push_back(toJsonItemList(payload.accessQuantum(i)));
+  }
+
+  out["Quanta"] = quanta;
 }
 
 void fromJson(const ordered_json &in,
@@ -88,14 +95,36 @@ void fromJson(const ordered_json &in,
 {
   payload = binary::irProto::TimingSectionIrPayload();
 
+  auto quantaIt = in.find("Quanta");
+  if (quantaIt == in.end() || !quantaIt->is_array()) {
+    return;
+  }
+
+  uint8_t pos = 0;
+  for (const auto &quantumJson : *quantaIt) {
+    auto timings = fromJsonItemList(quantumJson);
+    payload.setQuantum(pos, timings);
+    pos++;
+  }
+}
+
+void fromJsonOld(const ordered_json &in,
+    binary::irProto::TimingSectionIrPayload &payload)
+{
+  int pos = 0;
+  payload = binary::irProto::TimingSectionIrPayload();
+
   auto falseIt = in.find("FalsePair");
   if (falseIt != in.end()) {
-    payload.setFalsePair(fromJsonItemList(*falseIt));
+    auto timings = fromJsonItemList(*falseIt);
+    payload.setQuantum(pos, timings);
+    pos++;
   }
 
   auto trueIt = in.find("TruePair");
   if (trueIt != in.end()) {
-    payload.setTruePair(fromJsonItemList(*trueIt));
+    auto timings = fromJsonItemList(*trueIt);
+    payload.setQuantum(pos, timings);
   }
 }
 
@@ -103,61 +132,11 @@ void fromJson(const ordered_json &in,
 // TimingSection
 //---------------------------------------------------------------------------
 
-namespace
-{
-
-std::string ctrl0ToString(binary::irProto::TimingSection::Ctrl0 c)
-{
-  switch (c) {
-    case binary::irProto::TimingSection::Ctrl0::IS_REPEAT_FRAME:
-      return "IsRepeatFrame";
-    case binary::irProto::TimingSection::Ctrl0::IS_DATA_FRAME:
-      return "IsDataFrame";
-  }
-  return "IsDataFrame";
-}
-
-binary::irProto::TimingSection::Ctrl0 ctrl0FromString(const std::string &s)
-{
-  if (s == "IsRepeatFrame") {
-    return binary::irProto::TimingSection::Ctrl0::IS_REPEAT_FRAME;
-  }
-  return binary::irProto::TimingSection::Ctrl0::IS_DATA_FRAME;
-}
-
-std::string ctrl1ToString(binary::irProto::TimingSection::Ctrl1 c)
-{
-  switch (c) {
-    case binary::irProto::TimingSection::Ctrl1::NOT_DATA_FRAME:
-      return "NotDataFrame"; //== NoPayload, same value 0
-    case binary::irProto::TimingSection::Ctrl1::DATA_ONE_PAIR:
-      return "DataOnePair";
-    case binary::irProto::TimingSection::Ctrl1::DATA_TWO_PAIRS:
-      return "DataTwoPairs";
-  }
-  return "NotDataFrame";
-}
-
-binary::irProto::TimingSection::Ctrl1 ctrl1FromString(const std::string &s)
-{
-  if (s == "DataOnePair") {
-    return binary::irProto::TimingSection::Ctrl1::DATA_ONE_PAIR;
-  }
-  if (s == "DataTwoPairs") {
-    return binary::irProto::TimingSection::Ctrl1::DATA_TWO_PAIRS;
-  }
-  return binary::irProto::TimingSection::Ctrl1::NOT_DATA_FRAME;
-}
-
-}
-
 void toJson(ordered_json &out, const binary::irProto::TimingSection &section)
 {
   out["BitCount"] = section.getBitCount();
   out["Toggle"] = section.getToggle();
   out["Timing"] = section.getTiming();
-  out["Ctrl0"] = ctrl0ToString(section.getCtrl0());
-  out["Ctrl1"] = ctrl1ToString(section.getCtrl1());
 
   ordered_json sofJson;
   toJson(sofJson, section.getSoF());
@@ -181,10 +160,6 @@ void fromJson(const ordered_json &in, binary::irProto::TimingSection &section)
   section.setTiming(
       in.value("Timing",
           uint32_t(binary::irProto::TimingSection::PAUSE_IN_EOF)));
-  section.setCtrl0(
-      ctrl0FromString(in.value("Ctrl0", std::string("IsDataFrame"))));
-  section.setCtrl1(
-      ctrl1FromString(in.value("Ctrl1", std::string("DataTwoPairs"))));
 
   auto sofIt = in.find("SoF");
   if (sofIt != in.end()) {
@@ -195,9 +170,18 @@ void fromJson(const ordered_json &in, binary::irProto::TimingSection &section)
 
   auto dataIt = in.find("Data");
   if (dataIt != in.end()) {
-    binary::irProto::TimingSectionIrPayload data;
-    fromJson(*dataIt, data);
-    section.setData(data);
+    if (in.contains("Ctrl0")) {
+      //fixme pre v0.2 when to drop?
+      //ctrl0 / ctrl1 contain redundant data, ignore those
+      binary::irProto::TimingSectionIrPayload data;
+      fromJsonOld(*dataIt, data);
+      section.setData(data);
+
+    } else {
+      binary::irProto::TimingSectionIrPayload data;
+      fromJson(*dataIt, data);
+      section.setData(data);
+    }
   }
 
   auto eofIt = in.find("EoF");

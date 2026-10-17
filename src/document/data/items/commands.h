@@ -32,34 +32,36 @@ class ProtoCommand
 {
   public:
     //empty
-    ProtoCommand() {};
+    ProtoCommand(uint32_t protocolIndex, const binary::irProto::IrProto &protocol) :
+      protocolIndex(protocolIndex), command(protocolIndex, protocol)
+    {
+    };
 
     //create from binary
-    ProtoCommand(uint32_t protocolIndex, const std::vector<uint8_t> &data, CodeType t = CodeType::Proprietary) :
-      codeType(t), protocolIndex(protocolIndex), data(data)
+    ProtoCommand(uint32_t protocolIndex, const binary::irProto::IrProto &protocol, const std::vector<uint8_t> &data, CodeType t = CodeType::Proprietary) :
+      ProtoCommand(protocolIndex, protocol)
     {
-      status = command.parse(std::vector<uint8_t>(data));
-      if (status == binary::irProto::Status::OK) {
-        canDecode.set(true).setIncluded(Used::YES);
-      } else {
-        this->data.setIncluded(Used::YES);
+      codeType.set(t);
+
+      status = command.parse(data);
+      if (status != binary::irProto::Status::OK) {
+        codeType.set(CodeType::Unknown);
       }
     }
     //get status after constructor call
     binary::irProto::Status getStatus() { return status; };
 
     // from parent data
-    ProtoCommand(uint32_t protocolIndex, CodeType t) :
-      codeType(t), canDecode(true)
+    ProtoCommand(uint32_t protocolIndex, const binary::irProto::IrProto &protocol, CodeType t) :
+      ProtoCommand(protocolIndex, protocol)
     {
+      codeType.set(t);
     }
 
     //protocol
     PropertyString name { "Unknown" };
     PropertyEnum<CodeType> codeType { CodeType::None} ;
     PropertyU32 protocolIndex { 0 };
-    //command writer. false = data as read from xml, decoding not possible
-    PropertyBool canDecode { false, Used::YES };
 
     //data for command writer
     PropertyString libName { "Unknown" }; //name assigned by the IR (de)coder lib. just pass trough
@@ -70,8 +72,6 @@ class ProtoCommand
 
     //command writer output
     binary::irProto::Code command;
-    //raw data output (canDecode == false)
-    Property<std::vector<uint8_t>> data {{}, Used::NO};
 
   private:
     binary::irProto::Status status = binary::irProto::Status::OK;
@@ -140,7 +140,7 @@ class Commands
     static constexpr int SILENCE_MIN = 50;
     static constexpr int SILENCE_MAX = 5000;
 
-    PropertyU32 pressPreSilenceMs {300, Used::YES};
+    PropertyU32 pressPreSilenceMs {500, Used::YES};
     PropertyU32 pressInterKeyMs {100, Used::YES};
     PropertyU32 holdPreSilenceMs {50, Used::YES};
     PropertyU32 holdInterKeyMs {100, Used::YES};

@@ -295,7 +295,7 @@ QVariant ProtocolIrModel::getEditData(const QModelIndex &index) const
         return cmd.irCommand.get();
       case Column::IRBITS:
         return QVariant::fromValue(
-            binary::irProto::Code::u64tobits(cmd.irBitCount.get(),
+            binary::irProto::Code::u64toBits(cmd.irBitCount.get(),
                 cmd.irBitData.get()));
       case Column::DATA: {
         return QVariant::fromValue(cmd.command);
@@ -427,7 +427,7 @@ bool models::ProtocolIrModel::setCommandType(
   string codeString;
   uint32_t address;
   uint32_t command;
-  vector<bool> rawData;
+  vector<uint8_t> rawData;
 
   config.beginMacro(QObject::tr("Set IR protocol"));
 
@@ -494,9 +494,9 @@ bool ProtocolIrModel::setCommandIrBits(document::data::CmdCatalogue &worker,
   uint32_t devicePos;
 
   auto cmd = getCmds(&devicePos).at(row);
-  auto bits = qvariant_cast<vector<bool>>(value);
+  auto bits = qvariant_cast<vector<uint8_t>>(value);
   cmd.irBitCount = bits.size();
-  cmd.irBitData = binary::irProto::Code::bitsToU64(bits);
+  cmd.irBitData = binary::irProto::Code::listToU64bits(bits);
   return worker.setIrCommand(devicePos, cmd, row, true);
 }
 

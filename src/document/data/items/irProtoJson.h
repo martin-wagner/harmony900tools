@@ -24,6 +24,7 @@ void fromJson(const ordered_json &in, binary::irProto::TimingSectionIrHeader &he
 
 void toJson(ordered_json &out, const binary::irProto::TimingSectionIrPayload &payload);
 void fromJson(const ordered_json &in, binary::irProto::TimingSectionIrPayload &payload);
+void fromJsonOld(const ordered_json &in, binary::irProto::TimingSectionIrPayload &payload);
 
 void toJson(ordered_json &out, const binary::irProto::TimingSection &section);
 void fromJson(const ordered_json &in, binary::irProto::TimingSection &section);

@@ -9,10 +9,24 @@
 #include <string>
 #include <vector>
 
+#include "bin/irProto/dummyProto.h"
 #include "deviceJson.h"
 
 using namespace document::data;
 using namespace document::data::item;
+
+
+File protoLib()
+{
+  File lib;
+
+  auto protocol = protoSingle(16);
+  lib.insertProtocol(protocol, 0);
+  protocol = protoNec();
+  lib.insertProtocol(protocol, 1);
+  return lib;
+}
+
 
 // ---------------------------------------------------------------------------
 // Property<T>: Used gating contract
@@ -50,7 +64,7 @@ TEST(DevicePropertyUsed, MissingKeyOnReadSetsUsedToNo)
 
     Device d(1);
     d.audioSwitch.setIncluded(Used::YES); // start as YES to prove it flips
-    serialiser::fromJson(j, d);
+    serialiser::fromJson(j, d, protoLib());
 
     EXPECT_EQ(d.audioSwitch.isIncluded(), Used::NO);
 }
@@ -63,7 +77,7 @@ TEST(DevicePropertyUsed, PresentKeyOnReadSetsUsedToYes)
 
     Device d(1);
     d.audioSwitch.setIncluded(Used::NO); // start as NO to prove it flips
-    serialiser::fromJson(j, d);
+    serialiser::fromJson(j, d, protoLib());
 
     EXPECT_EQ(d.audioSwitch.isIncluded(), Used::YES);
     EXPECT_EQ(d.audioSwitch.get(), true);
@@ -91,7 +105,7 @@ TEST(DevicePropertyEnum, ReadFromString)
     j["Type"] = "Amplifier";
 
     Device d(1);
-    serialiser::fromJson(j, d);
+    serialiser::fromJson(j, d, protoLib());
 
     EXPECT_EQ(d.type.get().getValue(), DeviceType::Amplifier);
 }
@@ -129,7 +143,7 @@ TEST(ButtonJson, RoundTripButtonReconstructsTypeFromDevice)
     serialiser::toJson(j, d);
 
     Device d2(1);
-    serialiser::fromJson(j, d2);
+    serialiser::fromJson(j, d2, protoLib());
 
     ASSERT_EQ(d2.getSoftButtons().size(), 1u);
     EXPECT_EQ(d2.getSoftButtons()[0].name.get(), "Guide");
@@ -260,50 +274,33 @@ TEST(NumpadJson, AbsentOptionalDigitsStayNullopt)
 }
 
 // ---------------------------------------------------------------------------
-// Commands / RawCommand / ProtoCommand (binary data as base64)
+// Commands / RawCommand / ProtoCommand
 // ---------------------------------------------------------------------------
-
-TEST(ProtoCommandJson, BinaryDataRoundTripsViaBase64)
-{
-    ProtoCommand proto(1, {0x00, 0x01, 0xFF, 0x7E, 0x80});
-    proto.name.set("ProtoTest");
-
-    nlohmann::ordered_json j;
-    serialiser::toJson(j, proto);
-
-    ASSERT_TRUE(j["Data"].is_string());
-
-    ProtoCommand proto2;
-    serialiser::fromJson(j, proto2);
-
-    EXPECT_EQ(proto2.data.get(), proto.data.get());
-    EXPECT_EQ(proto2.data.isIncluded(), Used::YES);
-}
 
 TEST(CommandsJson, RawAndProtoListsRoundTrip)
 {
     Commands commands;
+    auto lib = protoLib();
 
     RawCommand raw;
     raw.name.set("RawOne");
     commands.getRawCommands().push_back(raw);
 
-    ProtoCommand proto;
-    proto.name.set("ProtoOne");
-    proto.data.set({0x10, 0x20});
-    commands.getProtoCommands().push_back(proto);
+    ProtoCommand protoCmd(1, lib.accessProtocol(1));
+    protoCmd.name.set("ProtoOne");
+    commands.getProtoCommands().push_back(protoCmd);
 
     nlohmann::ordered_json j;
     serialiser::toJson(j, commands);
 
     Commands commands2;
-    serialiser::fromJson(j, commands2);
+    serialiser::fromJson(j, commands2, lib);
 
     ASSERT_EQ(commands2.getRawCommands().size(), 1u);
     EXPECT_EQ(commands2.getRawCommands()[0].name.get(), "RawOne");
 
     ASSERT_EQ(commands2.getProtoCommands().size(), 1u);
-    EXPECT_EQ(commands2.getProtoCommands()[0].data.get(), proto.data.get());
+    EXPECT_EQ(commands2.getProtoCommands()[0].protocolIndex.get(), protoCmd.protocolIndex.get());
 }
 
 // ---------------------------------------------------------------------------
@@ -322,7 +319,7 @@ TEST(DeviceUnknownProperties, RoundTripsNestedChildren)
     serialiser::toJson(j, d);
 
     Device d2(1);
-    serialiser::fromJson(j, d2);
+    serialiser::fromJson(j, d2, protoLib());
 
     ASSERT_EQ(d2.getUnknownProperties().size(), 1u);
     const auto &p = d2.getUnknownProperties()[0];
@@ -365,7 +362,7 @@ TEST(DeviceJson, FullRoundTripProducesIdenticalJson)
     serialiser::toJson(j, d);
 
     Device d2(42);
-    serialiser::fromJson(j, d2);
+    serialiser::fromJson(j, d2, protoLib());
 
     nlohmann::ordered_json j2;
     serialiser::toJson(j2, d2);

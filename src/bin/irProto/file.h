@@ -63,12 +63,14 @@ class TimingSectionIrHeader
 /** IR protocol part: Payload data encoding */
 class TimingSectionIrPayload
 {
+  public:
+    //1 quantum == 1 timing info
+    using Quantum = std::vector<Item>;
+
   protected:
     //needs to be the same for all quanta!
     uint8_t t_per_quantum = 0;
 
-    //1 quantum == 1 timing info
-    using Quantum = std::vector<Item>;
     std::vector<Quantum> quanta;
 
   public:

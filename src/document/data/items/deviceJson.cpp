@@ -290,39 +290,32 @@ void fromJson(const ordered_json &in, item::RawCommand &cmd)
 
 void toJson(ordered_json &out, const item::ProtoCommand &cmd)
 {
+  ordered_json tmp;
+
   toJson(out, "Name", cmd.name);
   toJson(out, "CodeType", cmd.codeType);
   toJson(out, "ProtocolIndex", cmd.protocolIndex);
-  toJson(out, "Decoder", cmd.canDecode);
   toJson(out, "LibName", cmd.libName);
   toJson(out, "IrAddress", cmd.irAddress);
   toJson(out, "IrCommand", cmd.irCommand);
   toJson(out, "IrBitCount", cmd.irBitCount);
   toJson(out, "IrBitData", cmd.irBitData);
-  if (cmd.canDecode.get() == true) {
-    ordered_json tmp;
-    toJson(tmp, cmd.command);
-    out["Command"] = tmp;
-  } else {
-    //binary IR stream, base64 encoded
-    out["Data"] = base64Encode(cmd.data.get());
-  }
+  toJson(tmp, cmd.command);
+  out["Command"] = tmp;
 }
 
 void fromJson(const ordered_json &in, item::ProtoCommand &cmd)
 {
-  binary::irProto::Code decodeCmd;
-
   fromJson(in, "Name", cmd.name);
   fromJson(in, "CodeType", cmd.codeType);
-  fromJson(in, "ProtocolIndex", cmd.protocolIndex);
-  fromJson(in, "Decoder", cmd.canDecode);
+  //already set by constructor fromJson(in, "ProtocolIndex", cmd.protocolIndex);
+  auto canDecode = in.value("Decoder", true); //fixme pre v0.2 when to drop?
   fromJson(in, "LibName", cmd.libName);
   fromJson(in, "IrAddress", cmd.irAddress);
   fromJson(in, "IrCommand", cmd.irCommand);
   fromJson(in, "IrBitCount", cmd.irBitCount);
   fromJson(in, "IrBitData", cmd.irBitData);
-  if (cmd.canDecode.get() == true) {
+  if (canDecode == true) {
     auto it = in.find("Command");
     if (it != in.end()) {
       fromJson(*it, cmd.command);
@@ -330,14 +323,7 @@ void fromJson(const ordered_json &in, item::ProtoCommand &cmd)
   } else {
     auto it = in.find("Data");
     if (it != in.end()) {
-      cmd.data.set(base64Decode(it->get<std::string>())).setIncluded(Used::YES);
-      //re-try importing on every load. maybe version updated added the missing part...
-      auto status = decodeCmd.parse(cmd.data.get());
-      if (status == binary::irProto::Status::OK) {
-        cmd.command = decodeCmd;
-        cmd.canDecode.set(true).setIncluded(Used::YES);
-        cmd.data.setIncluded(Used::NO);
-      }
+      cmd.command.parse(it->get<std::string>());
     }
   }
 }
@@ -355,10 +341,23 @@ void toJson(ordered_json &out, const item::Commands &commands)
   toJson(out, "UnknownProperties", commands.getUnknownProperties());
 }
 
-void fromJson(const ordered_json &in, item::Commands &commands)
+void fromJson(const ordered_json &in, item::Commands &commands,
+    const binary::irProto::File &protocolLib)
 {
   fromJsonVec(in, "RawCommands", commands.getRawCommands());
-  fromJsonVec(in, "ProtoCommands", commands.getProtoCommands());
+  auto protoCmdIt = in.find("ProtoCommands");
+  if (protoCmdIt != in.end()) {
+    for (const auto &itemJson : *protoCmdIt) {
+      auto protoIndex = itemJson.value("ProtocolIndex", -1);
+      if ((protoIndex < 0) || (protoIndex >= protocolLib.getProtocolCount())) {
+        continue;
+      }
+      item::ProtoCommand value(protoIndex,
+          protocolLib.accessProtocol(protoIndex));
+      fromJson(itemJson, value);
+      commands.getProtoCommands().push_back(move(value));
+    }
+  }
 
   fromJson(in, "PressPreSilenceMs", commands.pressPreSilenceMs);
   fromJson(in, "PressInterKeyMs", commands.pressInterKeyMs);
@@ -442,7 +441,8 @@ void toJson(ordered_json &out, const item::Device &device)
   out["IrCommands"] = commandsJson;
 }
 
-void fromJson(const ordered_json &in, item::Device &device)
+void fromJson(const ordered_json &in, item::Device &device,
+    const binary::irProto::File &protocolLib)
 {
   fromJson(in, "Type", device.type);
   fromJson(in, "Mnf", device.mnf);
@@ -512,7 +512,7 @@ void fromJson(const ordered_json &in, item::Device &device)
   auto irCommandsIt = in.find("IrCommands");
   if (irCommandsIt != in.end()) {
     item::Commands commands;
-    fromJson(*irCommandsIt, commands);
+    fromJson(*irCommandsIt, commands, protocolLib);
     device.setIrCommands(commands);
   }
 }

@@ -1,20 +1,28 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 /*
- * Unit tests for document::data::serialiser (de)serialization of item::Blob,
- * binary::Block / binary::TimingStream, and binary::irProto::Code / Section.
+ * Unit tests for document::data::serialiser (de)serialization of
+ * binary::Block / binary::TimingStream and binary::irProto::Group / Code,
+ * including the pre v0.2 legacy Code format.
  */
 
 #include <gtest/gtest.h>
+#include <sstream>
 #include <string>
 #include <vector>
 
+#include "bin/irProto/dummyProto.h"
 #include "codeJson.h"
 
 using namespace document::data;
 using namespace binary::irProto;
 
-
+std::string toHexString(uint64_t value)
+{
+  std::stringstream stream;
+  stream << "0x" << std::hex << value;
+  return stream.str();
+}
 
 // ---------------------------------------------------------------------------
 // binary::Block / binary::TimingStream
@@ -49,7 +57,11 @@ TEST(BlockJson, SegmentIsDerivedNotStored)
 
 TEST(TimingStreamJson, RoundTripsMultipleBlocks)
 {
-  binary::TimingStream stream = binary::TimingStream::fromMarkPause({500, 1500, 300, 700});
+  binary::TimingStream stream = binary::TimingStream::fromMarkPause( {
+    500,
+    1500,
+    300,
+    700 });
 
   serialiser::ordered_json j;
   serialiser::toJson(j, stream);
@@ -68,93 +80,315 @@ TEST(TimingStreamJson, RoundTripsMultipleBlocks)
 }
 
 // ---------------------------------------------------------------------------
-// binary::irProto::Section
+// binary::irProto::Group
 // ---------------------------------------------------------------------------
 
-TEST(SectionJson, RoundTrips)
+TEST(GroupJson, CompactBitsRoundTripUsesHexString)
 {
-  Section section(2, {true, false, true, true});
+  Group group(1, 2, Symbols { 1, 0, 1, 1, 0, 0, 1, 0 });
 
   serialiser::ordered_json j;
-  serialiser::toJson(j, section);
+  serialiser::toJson(j, group);
 
-  EXPECT_EQ(j["Index"], 2);
+  EXPECT_EQ(j["Section"], 1);
+  EXPECT_EQ(j["Bits"], 2);
+  EXPECT_EQ(j["DataBitCount"], 8);
+  ASSERT_TRUE(j["Data"].is_string());
+  EXPECT_EQ(j["Data"].get<std::string>(),
+      toHexString(Code::listToU64bits(group.getData())));
 
-  Section section2(0, {});
-  serialiser::fromJson(j, section2);
+  Group group2 = serialiser::fromJson(j);
 
-  EXPECT_EQ(section2.getIndex(), 2);
-  EXPECT_EQ(section2.getData(), (std::vector<bool>{true, false, true, true}));
+  EXPECT_EQ(group2.getSection(), 1);
+  EXPECT_EQ(group2.getBits(), 2);
+  EXPECT_EQ(group2.getData(), group.getData());
+}
+
+TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
+{
+  Group group(2, 4, Symbols { 3, 1, 2, 0 });
+
+  serialiser::ordered_json j;
+  serialiser::toJson(j, group);
+
+  EXPECT_EQ(j["Section"], 2);
+  EXPECT_EQ(j["Bits"], 4);
+  EXPECT_EQ(j["DataBitCount"], 4);
+  ASSERT_TRUE(j["Data"].is_array());
+  EXPECT_EQ(j["Data"].get<Symbols>(), (Symbols { 3, 1, 2, 0 }));
+
+  Group group2 = serialiser::fromJson(j);
+
+  EXPECT_EQ(group2.getSection(), 2);
+  EXPECT_EQ(group2.getBits(), 4);
+  EXPECT_EQ(group2.getData(), (Symbols { 3, 1, 2, 0 }));
+}
+
+TEST(GroupJson, EmptyGroupRoundTrips)
+{
+  Group group(1, 2, Symbols { });
+
+  serialiser::ordered_json j;
+  serialiser::toJson(j, group);
+
+  Group group2 = serialiser::fromJson(j);
+
+  EXPECT_EQ(group2.getSection(), 1);
+  EXPECT_EQ(group2.getBits(), 2);
+  EXPECT_TRUE(group2.getData().empty());
+}
+
+TEST(GroupJson, ParsesHexStringWithBitCount)
+{
+  serialiser::ordered_json j =
+      serialiser::ordered_json::parse(
+          R"({
+    "Section": 0,
+    "Bits": 2,
+    "DataBitCount": 32,
+    "Data": "0xb4b4fe01"
+  })");
+
+  Group group = serialiser::fromJson(j);
+
+  EXPECT_EQ(group.getSection(), 0);
+  EXPECT_EQ(group.getBits(), 2);
+  EXPECT_EQ(group.getData(), Code::u64bitsToList(32, 0xb4b4fe01));
+}
+
+TEST(GroupJson, MissingFieldsUseDefaults)
+{
+  serialiser::ordered_json j = serialiser::ordered_json::object();
+
+  Group group = serialiser::fromJson(j);
+
+  EXPECT_EQ(group.getSection(), 0);
+  EXPECT_EQ(group.getBits(), 2);
+  EXPECT_TRUE(group.getData().empty());
 }
 
 // ---------------------------------------------------------------------------
-// binary::irProto::Code
+// binary::irProto::Code (current format)
 // ---------------------------------------------------------------------------
 
 TEST(CodeJson, RawFieldsRoundTrip)
 {
-  Code code;
-  code.setIndex(7);
+  Code code(7, protoNec());
   code.setDelay(526);
-  code.setRepeatFrame(1);
-  code.setDataFrameTxCount(1);
-  code.setControl(3);
+  code.setRepeats(2);
 
   serialiser::ordered_json j;
   serialiser::toJson(j, code);
 
-  EXPECT_EQ(j["Index"], 7);
   EXPECT_EQ(j["Delay"], 526);
-  EXPECT_EQ(j["RepeatFrame"], 1);
-  EXPECT_EQ(j["Control"], 3);
+  EXPECT_EQ(j["Repeats"], 2);
 
-  Code code2;
+  Code code2(7, protoNec());
   serialiser::fromJson(j, code2);
 
-  EXPECT_EQ(code2.getIndex(), 7);
   EXPECT_EQ(code2.getDelay(), 526);
-  EXPECT_EQ(code2.getRepeatFrame(), 1);
-  EXPECT_EQ(code2.getControl(), 3);
+  EXPECT_EQ(code2.getRepeats(), 2);
 }
 
-TEST(CodeJson, SectionsRoundTrip)
+TEST(CodeJson, GroupsRoundTrip)
 {
-  Code code;
-  code.setSections({Section(0, {true, false}), Section(1, {})});
+  Code code(1, protoNec());
+  code.accessStartGroups().push_back(Group(0, 2, Symbols { 1, 0, 1, 1 }));
+  code.accessRepeatGroups().push_back(Group(1, 2, Symbols { }));
+  code.accessFinishGroups().push_back(Group(0, 4, Symbols { 3, 2, 1 }));
 
   serialiser::ordered_json j;
   serialiser::toJson(j, code);
 
-  ASSERT_TRUE(j["Sections"].is_array());
-  EXPECT_EQ(j["Sections"].size(), 2u);
+  ASSERT_TRUE(j["StartGroups"].is_array());
+  ASSERT_TRUE(j["RepeatGroups"].is_array());
+  ASSERT_TRUE(j["FinishGroups"].is_array());
+  EXPECT_EQ(j["StartGroups"].size(), 1u);
+  EXPECT_EQ(j["RepeatGroups"].size(), 1u);
+  EXPECT_EQ(j["FinishGroups"].size(), 1u);
 
-  Code code2;
+  Code code2(1, protoNec());
   serialiser::fromJson(j, code2);
 
-  ASSERT_EQ(code2.accessSections().size(), 2u);
-  EXPECT_EQ(code2.accessSections()[0].getIndex(), 0);
-  EXPECT_EQ(code2.accessSections()[0].getData(), (std::vector<bool>{true, false}));
-  EXPECT_EQ(code2.accessSections()[1].getIndex(), 1);
+  ASSERT_EQ(code2.accessStartGroups().size(), 1u);
+  EXPECT_EQ(code2.accessStartGroups()[0].getSection(), 0);
+  EXPECT_EQ(code2.accessStartGroups()[0].getBits(), 2);
+  EXPECT_EQ(code2.accessStartGroups()[0].getData(), (Symbols { 1, 0, 1, 1 }));
+
+  ASSERT_EQ(code2.accessRepeatGroups().size(), 1u);
+  EXPECT_EQ(code2.accessRepeatGroups()[0].getSection(), 1);
+  EXPECT_TRUE(code2.accessRepeatGroups()[0].getData().empty());
+
+  ASSERT_EQ(code2.accessFinishGroups().size(), 1u);
+  EXPECT_EQ(code2.accessFinishGroups()[0].getSection(), 0);
+  EXPECT_EQ(code2.accessFinishGroups()[0].getBits(), 4);
+  EXPECT_EQ(code2.accessFinishGroups()[0].getData(), (Symbols { 3, 2, 1 }));
+}
+
+TEST(CodeJson, FromJsonReplacesExistingGroups)
+{
+  Code source(1, protoNec());
+  source.accessStartGroups().push_back(Group(0, 2, Symbols { 1, 0 }));
+
+  serialiser::ordered_json j;
+  serialiser::toJson(j, source);
+
+  Code target(1, protoNec());
+  target.accessStartGroups().push_back(Group(0, 2, Symbols { 0, 0, 0 }));
+  target.accessStartGroups().push_back(Group(0, 2, Symbols { 1, 1, 1 }));
+  target.accessFinishGroups().push_back(Group(0, 2, Symbols { 1 }));
+  serialiser::fromJson(j, target);
+
+  ASSERT_EQ(target.accessStartGroups().size(), 1u);
+  EXPECT_EQ(target.accessStartGroups()[0].getData(), (Symbols { 1, 0 }));
+  EXPECT_TRUE(target.accessFinishGroups().empty());
+}
+
+TEST(CodeJson, MissingFieldsUseDefaults)
+{
+  serialiser::ordered_json j = serialiser::ordered_json::object();
+
+  Code code(1, protoNec());
+  serialiser::fromJson(j, code);
+
+  EXPECT_EQ(code.getDelay(), Code::DEFAULT_PRE_SEND_SILENCE);
+  EXPECT_EQ(code.getRepeats(), Code::DEFAULT_REPEATS);
+  EXPECT_TRUE(code.accessStartGroups().empty());
+  EXPECT_TRUE(code.accessRepeatGroups().empty());
+  EXPECT_TRUE(code.accessFinishGroups().empty());
 }
 
 TEST(CodeJson, FullRoundTripProducesIdenticalJson)
 {
-  Code code;
-  code.setIndex(3);
+  Code code(3, protoNec());
   code.setDelay(526);
-  code.setRepeatFrame(0);
-  code.setDataFrameTxCount(2);
-  code.setControl(0);
-  code.setSections({Section(0, {true, true, false})});
+  code.setRepeats(2);
+  code.accessStartGroups().push_back(Group(0, 2, Symbols { 1, 1, 0, 1 }));
+  code.accessRepeatGroups().push_back(Group(1, 2, Symbols { }));
+  code.accessFinishGroups().push_back(Group(0, 4, Symbols { 2, 3 }));
 
   serialiser::ordered_json j;
   serialiser::toJson(j, code);
 
-  Code code2;
+  Code code2(3, protoNec());
   serialiser::fromJson(j, code2);
 
   serialiser::ordered_json j2;
   serialiser::toJson(j2, code2);
 
   EXPECT_EQ(j, j2);
+}
+
+// ---------------------------------------------------------------------------
+// binary::irProto::Code (legacy format, pre v0.2)
+// ---------------------------------------------------------------------------
+
+TEST(CodeJsonLegacy, ControlZeroBecomesStartGroupsWithEmptyRepeat)
+{
+  serialiser::ordered_json j =
+      serialiser::ordered_json::parse(
+          R"({
+    "Index": 1,
+    "Delay": 500,
+    "RepeatFrame": 1,
+    "DataFrameTxCount": 1,
+    "Control": 0,
+    "Sections": [
+      {
+        "Index": 0,
+        "Data": "0xb4b4fe01",
+        "DataBitCount": 32
+      }
+    ]
+  })");
+
+  Code code(1, protoNec());
+  serialiser::fromJson(j, code);
+
+  EXPECT_EQ(code.getIndex(), 1);
+  EXPECT_EQ(code.getDelay(), 500);
+  EXPECT_EQ(code.getRepeats(), 1);
+
+  ASSERT_EQ(code.accessStartGroups().size(), 1u);
+  EXPECT_EQ(code.accessStartGroups()[0].getSection(), 0);
+  EXPECT_EQ(code.accessStartGroups()[0].getBits(), 2);
+  EXPECT_EQ(code.accessStartGroups()[0].getData(),
+      Code::u64bitsToList(32, 0xb4b4fe01));
+
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1u);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getSection(), 1);
+  EXPECT_TRUE(code.accessRepeatGroups()[0].getData().empty());
+
+  EXPECT_TRUE(code.accessFinishGroups().empty());
+}
+
+TEST(CodeJsonLegacy, ControlOneBecomesRepeatGroups)
+{
+  serialiser::ordered_json j =
+      serialiser::ordered_json::parse(
+          R"({
+    "Index": 3,
+    "Delay": 500,
+    "RepeatFrame": 0,
+    "DataFrameTxCount": 0,
+    "Control": 1,
+    "Sections": [
+      {
+        "Index": 0,
+        "Data": "0xffc1ef8c",
+        "DataBitCount": 32
+      }
+    ]
+  })");
+
+  Code code(3, protoSingle(32));
+  serialiser::fromJson(j, code);
+
+  EXPECT_EQ(code.getIndex(), 3);
+  EXPECT_EQ(code.getDelay(), 500);
+  EXPECT_EQ(code.getRepeats(), 0);
+
+  EXPECT_TRUE(code.accessStartGroups().empty());
+
+  ASSERT_EQ(code.accessRepeatGroups().size(), 1u);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getSection(), 0);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getBits(), 2);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getData(),
+      Code::u64bitsToList(32, 0xffc1ef8c));
+
+  EXPECT_TRUE(code.accessFinishGroups().empty());
+}
+
+TEST(CodeJsonLegacy, SectionIndexIsPositionInList)
+{
+  serialiser::ordered_json j =
+      serialiser::ordered_json::parse(
+          R"({
+    "Index": 3,
+    "Delay": 500,
+    "DataFrameTxCount": 2,
+    "Control": 3,
+    "Sections": [
+      { "Index": 0, "Data": "0x5", "DataBitCount": 4 },
+      { "Index": 1, "Data": "0x1", "DataBitCount": 1 },
+      { "Index": 2, "Data": "0xabcd", "DataBitCount": 16 }
+    ]
+  })");
+
+  Code code(3, protoSingle(32));
+  serialiser::fromJson(j, code);
+
+  EXPECT_EQ(code.getRepeats(), 2);
+  EXPECT_TRUE(code.accessStartGroups().empty());
+
+  ASSERT_EQ(code.accessRepeatGroups().size(), 3u);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getSection(), 0);
+  EXPECT_EQ(code.accessRepeatGroups()[1].getSection(), 1);
+  EXPECT_EQ(code.accessRepeatGroups()[2].getSection(), 2);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getData(),
+      Code::u64bitsToList(4, 0x5));
+  EXPECT_EQ(code.accessRepeatGroups()[1].getData(),
+      Code::u64bitsToList(1, 0x1));
+  EXPECT_EQ(code.accessRepeatGroups()[2].getData(),
+      Code::u64bitsToList(16, 0xabcd));
 }

@@ -10,6 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core)  # QString / QList
 # ---------------------------------------------------------------------------
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/bin/codec)
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/src/bin)
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/test/src)
 
 # ---------------------------------------------------------------------------
 # test_irProto
@@ -29,6 +30,7 @@ target_include_directories(test_codec
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
+        ${TEST_DIR}
 )
 
 target_link_libraries(test_codec

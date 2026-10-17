@@ -3,9 +3,9 @@
 # ---------------------------------------------------------------------------
 # Source locations
 # ---------------------------------------------------------------------------
-set(SERIAL_DIR ${SRC_DIR}/items)
 set(ITEMS_DIR ${SRC_DIR}/items)
 set(BIN_DIR ${CMAKE_SOURCE_DIR}/src/bin)
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/test/src)
 
 # ---------------------------------------------------------------------------
 # test_deviceJson
@@ -13,11 +13,12 @@ set(BIN_DIR ${CMAKE_SOURCE_DIR}/src/bin)
 add_executable(test_deviceJson
     test_deviceJson.cpp
     ${BIN_DIR}/irProto/code.cpp
+    ${BIN_DIR}/irProto/file.cpp
     ${BIN_DIR}/ssIr/file.cpp
     ${BIN_DIR}/timing.cpp
-    ${SERIAL_DIR}/deviceJson.cpp
-    ${SERIAL_DIR}/ssIrJson.cpp
-    ${SERIAL_DIR}/codeJson.cpp
+    ${ITEMS_DIR}/deviceJson.cpp
+    ${ITEMS_DIR}/ssIrJson.cpp
+    ${ITEMS_DIR}/codeJson.cpp
     ${SRC_DIR}/enum.cpp
 )
 
@@ -25,7 +26,7 @@ target_include_directories(test_deviceJson
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
-        ${SERIAL_DIR}
+        ${TEST_DIR}
         ${ITEMS_DIR}
 )
 
@@ -42,7 +43,7 @@ target_link_libraries(test_deviceJson
 # ---------------------------------------------------------------------------
 add_executable(test_commonJson
     test_commonJson.cpp
-    ${SERIAL_DIR}/commonJson.cpp
+    ${ITEMS_DIR}/commonJson.cpp
     ${SRC_DIR}/enum.cpp
 )
 
@@ -50,7 +51,7 @@ target_include_directories(test_commonJson
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
-        ${SERIAL_DIR}
+        ${TEST_DIR}
         ${ITEMS_DIR}
 )
 
@@ -68,9 +69,10 @@ target_link_libraries(test_commonJson
 # ---------------------------------------------------------------------------
 add_executable(test_codeJson
     test_codeJson.cpp
-    ${SERIAL_DIR}/codeJson.cpp
+    ${ITEMS_DIR}/codeJson.cpp
     ${SRC_DIR}/enum.cpp
     ${BIN_DIR}/timing.cpp
+    ${BIN_DIR}/irProto/file.cpp
     ${BIN_DIR}/irProto/code.cpp
 )
  
@@ -78,7 +80,7 @@ target_include_directories(test_codeJson
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
-        ${SERIAL_DIR}
+        ${TEST_DIR}
         ${ITEMS_DIR}
 )
  
@@ -95,7 +97,7 @@ target_link_libraries(test_codeJson
 # ---------------------------------------------------------------------------
 add_executable(test_irProtoJson
     test_irProtoJson.cpp
-    ${SERIAL_DIR}/irProtoJson.cpp
+    ${ITEMS_DIR}/irProtoJson.cpp
     ${SRC_DIR}/enum.cpp
     ${BIN_DIR}/timing.cpp
     ${BIN_DIR}/irProto/file.cpp
@@ -105,7 +107,8 @@ target_include_directories(test_irProtoJson
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
-        ${SERIAL_DIR}
+        ${TEST_DIR}
+        ${ITEMS_DIR}
 )
  
 target_link_libraries(test_irProtoJson
@@ -122,11 +125,12 @@ target_link_libraries(test_irProtoJson
 # ---------------------------------------------------------------------------
 add_executable(test_ssIrJson
     test_ssIrJson.cpp
-    ${SERIAL_DIR}/ssIrJson.cpp
-    ${SERIAL_DIR}/codeJson.cpp
+    ${ITEMS_DIR}/ssIrJson.cpp
+    ${ITEMS_DIR}/codeJson.cpp
     ${SRC_DIR}/enum.cpp
     ${BIN_DIR}/timing.cpp
     ${BIN_DIR}/irProto/code.cpp
+    ${BIN_DIR}/irProto/file.cpp
     ${BIN_DIR}/ssIr/file.cpp
 )
  
@@ -134,7 +138,7 @@ target_include_directories(test_ssIrJson
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
-        ${SERIAL_DIR}
+        ${TEST_DIR}
         ${ITEMS_DIR}
 )
  
@@ -153,13 +157,14 @@ target_link_libraries(test_ssIrJson
 # ---------------------------------------------------------------------------
 add_executable(test_activityJson
     test_activityJson.cpp
+    ${BIN_DIR}/irProto/file.cpp
     ${BIN_DIR}/irProto/code.cpp
     ${BIN_DIR}/ssIr/file.cpp
     ${BIN_DIR}/timing.cpp
-    ${SERIAL_DIR}/activityJson.cpp
-    ${SERIAL_DIR}/deviceJson.cpp
-    ${SERIAL_DIR}/ssIrJson.cpp
-    ${SERIAL_DIR}/codeJson.cpp
+    ${ITEMS_DIR}/activityJson.cpp
+    ${ITEMS_DIR}/deviceJson.cpp
+    ${ITEMS_DIR}/ssIrJson.cpp
+    ${ITEMS_DIR}/codeJson.cpp
     ${SRC_DIR}/enum.cpp
 )
 
@@ -167,7 +172,7 @@ target_include_directories(test_activityJson
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${SRC_DIR}
-        ${SERIAL_DIR}
+        ${TEST_DIR}
         ${ITEMS_DIR}
 )
 

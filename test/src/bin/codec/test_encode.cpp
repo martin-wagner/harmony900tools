@@ -1,59 +1,13 @@
 #include <gtest/gtest.h>
 
 #include "encode.h"
+#include "bin/irProto/dummyProto.h"
 #include "bin/irProto/code.h"
 
 using namespace std;
 using namespace binary;
 using namespace irProto;
 using namespace codec;
-
-namespace
-{
-
-/** section with <symbols> symbols and <quanta> states per symbol (0 = no payload) */
-TimingSection makeSection(uint16_t symbols, uint8_t quanta)
-{
-  TimingSectionIrPayload payload;
-
-  for (uint8_t q = 0; q < quanta; q++) {
-    std::vector<Item> timings = { { true, 560 }, {
-      false,
-      static_cast<uint16_t>(560 * (q + 1)) } };
-    payload.setQuantum(q, timings);
-  }
-
-  TimingSection section;
-  section.setBitCount(symbols);
-  section.setData(payload);
-  return section;
-}
-
-IrProto makeProto(const std::vector<TimingSection> &sections)
-{
-  return IrProto(27778, sections);
-}
-
-// data section + repeat frame without data (NEC style)
-IrProto protoNec()
-{
-  return makeProto( { makeSection(32, 2), makeSection(0, 0) });
-}
-
-// one section, 2 states per symbol
-IrProto protoSingle(uint16_t symbols)
-{
-  return makeProto( { makeSection(symbols, 2) });
-}
-
-// 4 / 1 / 16 symbols
-IrProto protoRc6()
-{
-  return makeProto(
-      { makeSection(4, 2), makeSection(1, 2), makeSection(16, 2) });
-}
-
-}
 
 TEST(Encoder, NecData1)
 {
