@@ -85,14 +85,14 @@ TEST(TimingStreamJson, RoundTripsMultipleBlocks)
 
 TEST(GroupJson, CompactBitsRoundTripUsesHexString)
 {
-  Group group(1, 2, Symbols { 1, 0, 1, 1, 0, 0, 1, 0 });
+  Group group(1, 1, Symbols { 1, 0, 1, 1, 0, 0, 1, 0 });
   Group group2;
 
   serialiser::ordered_json j;
   serialiser::toJson(j, group);
 
   EXPECT_EQ(j["Section"], 1);
-  EXPECT_EQ(j["Bits"], 2);
+  EXPECT_EQ(j["Bits"], 1);
   EXPECT_EQ(j["DataBitCount"], 8);
   ASSERT_TRUE(j["Data"].is_string());
   EXPECT_EQ(j["Data"].get<std::string>(),
@@ -101,20 +101,20 @@ TEST(GroupJson, CompactBitsRoundTripUsesHexString)
   serialiser::fromJson(j, group2);
 
   EXPECT_EQ(group2.getSection(), 1);
-  EXPECT_EQ(group2.getBits(), 2);
+  EXPECT_EQ(group2.getBits(), 1);
   EXPECT_EQ(group2.getData(), group.getData());
 }
 
 TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
 {
-  Group group(2, 4, Symbols { 3, 1, 2, 0 });
+  Group group(2, 2, Symbols { 3, 1, 2, 0 });
   Group group2;
 
   serialiser::ordered_json j;
   serialiser::toJson(j, group);
 
   EXPECT_EQ(j["Section"], 2);
-  EXPECT_EQ(j["Bits"], 4);
+  EXPECT_EQ(j["Bits"], 2);
   EXPECT_EQ(j["DataBitCount"], 4);
   ASSERT_TRUE(j["Data"].is_array());
   EXPECT_EQ(j["Data"].get<Symbols>(), (Symbols { 3, 1, 2, 0 }));
@@ -122,7 +122,7 @@ TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
   serialiser::fromJson(j, group2);
 
   EXPECT_EQ(group2.getSection(), 2);
-  EXPECT_EQ(group2.getBits(), 4);
+  EXPECT_EQ(group2.getBits(), 2);
   EXPECT_EQ(group2.getData(), (Symbols { 3, 1, 2, 0 }));
 }
 
@@ -168,7 +168,7 @@ TEST(GroupJson, MissingFieldsUseDefaults)
   serialiser::fromJson(j, group);
 
   EXPECT_EQ(group.getSection(), 0);
-  EXPECT_EQ(group.getBits(), 2);
+  EXPECT_EQ(group.getBits(), 1);
   EXPECT_TRUE(group.getData().empty());
 }
 
@@ -316,7 +316,7 @@ TEST(CodeJsonLegacy, ControlZeroBecomesStartGroupsWithEmptyRepeat)
 
   ASSERT_EQ(code.accessStartGroups().size(), 1u);
   EXPECT_EQ(code.accessStartGroups()[0].getSection(), 0);
-  EXPECT_EQ(code.accessStartGroups()[0].getBits(), 2);
+  EXPECT_EQ(code.accessStartGroups()[0].getBits(), 1);
   EXPECT_EQ(code.accessStartGroups()[0].getData(),
       Code::u64bitsToList(32, 0xb4b4fe01));
 
@@ -357,7 +357,7 @@ TEST(CodeJsonLegacy, ControlOneBecomesRepeatGroups)
 
   ASSERT_EQ(code.accessRepeatGroups().size(), 1u);
   EXPECT_EQ(code.accessRepeatGroups()[0].getSection(), 0);
-  EXPECT_EQ(code.accessRepeatGroups()[0].getBits(), 2);
+  EXPECT_EQ(code.accessRepeatGroups()[0].getBits(), 1);
   EXPECT_EQ(code.accessRepeatGroups()[0].getData(),
       Code::u64bitsToList(32, 0xffc1ef8c));
 

@@ -67,7 +67,7 @@ void toJson(ordered_json &out, const binary::irProto::Group &group)
   out["Section"] = group.getSection();
   out["Bits"] = group.getBits();
   out["DataBitCount"] = group.getData().size();
-  if (group.getBits() == 2) {
+  if (group.getBits() == 1) {
     //compact -> string
     auto data = binary::irProto::Code::listToU64bits(group.getData());
     out["Data"] = QString("0x" + QString::number(data, 16)).toStdString();
@@ -88,7 +88,7 @@ void fromJsonOld(const ordered_json &in, binary::irProto::Group &group,
     auto bits = qstr(dataIt->get<string>()).toULongLong(nullptr, 16);
     data = binary::irProto::Code::u64bitsToList(bitCount, bits);
   }
-  group = binary::irProto::Group(idx, 2, data);
+  group = binary::irProto::Group(idx, 1, data);
 }
 
 void fromJson(const ordered_json &in, binary::irProto::Group &group)
@@ -96,7 +96,7 @@ void fromJson(const ordered_json &in, binary::irProto::Group &group)
   vector<uint8_t> data;
 
   auto section = in.value("Section", 0);
-  auto bits = in.value("Bits", 2);
+  auto bits = in.value("Bits", 1);
   auto bitCount = in.value("DataBitCount", 0);
   auto dataIt = in.find("Data");
   if (dataIt != in.end()) {
