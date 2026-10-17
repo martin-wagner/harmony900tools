@@ -246,11 +246,6 @@ Code::Code(uint16_t index, const IrProto &protocol) :
   reset();
 }
 
-Code::Code(const Code &src) :
-    Code(src.index, src.protocol)
-{
-}
-
 Code::Code(uint16_t index, const IrProto &protocol, const vector<uint8_t> &code) :
     Code(index, protocol)
 {

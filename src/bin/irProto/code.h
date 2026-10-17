@@ -12,7 +12,7 @@ class Group
 {
   protected:
     uint8_t section; //in corresponding IRproto
-    uint8_t bits; // bits per symbol in data
+    uint8_t bits; // bits per symbol in data. Example: Boolean = 1 bit / 2 symbols (true/false), Hex = 4 bits / 16 symbols (0...F)
     std::vector<uint8_t> data; //list of quantums, size corresponding to IRproto
 
   public:
@@ -73,7 +73,6 @@ class Code
     Code();
     /** create empty code item */
     Code(uint16_t index, const IrProto &protocol);
-    Code(const Code &src);
     /** parse code */
     Code(uint16_t index, const IrProto &protocol, const std::vector<uint8_t> &code);
     Code(uint16_t index, const IrProto &protocol, const std::string &code);
