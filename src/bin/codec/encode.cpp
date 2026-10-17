@@ -124,7 +124,7 @@ Code encodePhilipsRC5(uint32_t protocolIndex, const IrProto &protocol,
       break;
   }
   return Code::createSimpleRepeatEqData(protocolIndex, protocol,
-      Code::DEFAULT_PRE_SEND_SILENCE, rawData.size(), data);
+      Code::DEFAULT_PRE_SEND_SILENCE, 13, data);
 }
 
 Code encodePhilipsRC6(uint32_t protocolIndex, const IrProto &protocol,
