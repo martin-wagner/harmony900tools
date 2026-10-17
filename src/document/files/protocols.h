@@ -23,7 +23,7 @@ class ProtocolCatalogue
 
   public:
     const QString jsonPath = ":/res/ir_protocols.json";
-    const uint32_t jsonVersion = 1;
+    const uint32_t jsonVersion = 2;
 
   private:
     binary::irProto::IrProto getFromJson(const QString &name) const;

@@ -1,5 +1,5 @@
 {
-    "Version": 1,
+    "Version": 2,
     "IrProtocols": [
         {
             "Name": "NEC",
@@ -9,8 +9,6 @@
                     "BitCount": 32,
                     "Toggle": 255,
                     "Timing": 110000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -22,25 +20,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 560
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 1690
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 560
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 560
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 560
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 1690
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -54,8 +54,6 @@
                     "BitCount": 0,
                     "Toggle": 255,
                     "Timing": 110000,
-                    "Ctrl0": "IsRepeatFrame",
-                    "Ctrl1": "NotDataFrame",
                     "SoF": [
                         {
                             "State": true,
@@ -67,8 +65,7 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [],
-                        "TruePair": []
+                        "Quanta": []
                     },
                     "EoF": [
                         {
@@ -87,8 +84,6 @@
                     "BitCount": 32,
                     "Toggle": 255,
                     "Timing": 110000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -100,25 +95,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 560
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 560
-                            },
-                            {
-                                "State": false,
-                                "Time": 1690
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 560
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 560
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 560
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 1690
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -132,8 +129,6 @@
                     "BitCount": 0,
                     "Toggle": 255,
                     "Timing": 110000,
-                    "Ctrl0": "IsRepeatFrame",
-                    "Ctrl1": "NotDataFrame",
                     "SoF": [
                         {
                             "State": true,
@@ -145,8 +140,7 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [],
-                        "TruePair": []
+                        "Quanta": []
                     },
                     "EoF": [
                         {
@@ -165,8 +159,6 @@
                     "BitCount": 48,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -178,25 +170,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 423
-                            },
-                            {
-                                "State": false,
-                                "Time": 423
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 423
-                            },
-                            {
-                                "State": false,
-                                "Time": 1269
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 423
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 423
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 423
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 1269
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -220,7 +214,6 @@
                 }
             ]
         },
-
         {
             "Name": "KASEIKYO36kHz",
             "ClockPeriod": 27473,
@@ -229,8 +222,6 @@
                     "BitCount": 48,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -242,25 +233,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 423
-                            },
-                            {
-                                "State": false,
-                                "Time": 423
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 423
-                            },
-                            {
-                                "State": false,
-                                "Time": 1269
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 423
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 423
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 423
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 1269
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -292,8 +285,6 @@
                     "BitCount": 12,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -305,25 +296,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 600
-                            },
-                            {
-                                "State": false,
-                                "Time": 600
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 1200
-                            },
-                            {
-                                "State": false,
-                                "Time": 600
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 600
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 600
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 1200
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 600
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -343,8 +336,6 @@
                     "BitCount": 15,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -356,25 +347,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 600
-                            },
-                            {
-                                "State": false,
-                                "Time": 600
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 1200
-                            },
-                            {
-                                "State": false,
-                                "Time": 600
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 600
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 600
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 1200
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 600
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -394,8 +387,6 @@
                     "BitCount": 20,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -407,25 +398,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 600
-                            },
-                            {
-                                "State": false,
-                                "Time": 600
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 1200
-                            },
-                            {
-                                "State": false,
-                                "Time": 600
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 600
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 600
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 1200
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 600
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -445,8 +438,6 @@
                     "BitCount": 32,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -458,25 +449,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 550
-                            },
-                            {
-                                "State": false,
-                                "Time": 550
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 550
-                            },
-                            {
-                                "State": false,
-                                "Time": 1650
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 550
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 550
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 550
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 1650
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -504,8 +497,6 @@
                     "BitCount": 13,
                     "Toggle": 1,
                     "Timing": 114000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -513,25 +504,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": true,
-                                "Time": 889
-                            },
-                            {
-                                "State": false,
-                                "Time": 889
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": false,
-                                "Time": 889
-                            },
-                            {
-                                "State": true,
-                                "Time": 889
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 889
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 889
+                                }
+                            ],
+                            [
+                                {
+                                    "State": false,
+                                    "Time": 889
+                                },
+                                {
+                                    "State": true,
+                                    "Time": 889
+                                }
+                            ]
                         ]
                     },
                     "EoF": []
@@ -546,8 +539,6 @@
                     "BitCount": 4,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -559,25 +550,27 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": false,
-                                "Time": 444
-                            },
-                            {
-                                "State": true,
-                                "Time": 444
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 444
-                            },
-                            {
-                                "State": false,
-                                "Time": 444
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": false,
+                                    "Time": 444
+                                },
+                                {
+                                    "State": true,
+                                    "Time": 444
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 444
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 444
+                                }
+                            ]
                         ]
                     },
                     "EoF": []
@@ -586,29 +579,29 @@
                     "BitCount": 1,
                     "Toggle": 0,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": false,
-                                "Time": 889
-                            },
-                            {
-                                "State": true,
-                                "Time": 889
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 889
-                            },
-                            {
-                                "State": false,
-                                "Time": 889
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": false,
+                                    "Time": 889
+                                },
+                                {
+                                    "State": true,
+                                    "Time": 889
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 889
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 889
+                                }
+                            ]
                         ]
                     },
                     "EoF": []
@@ -617,29 +610,29 @@
                     "BitCount": 16,
                     "Toggle": 255,
                     "Timing": 4294967295,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": false,
-                                "Time": 444
-                            },
-                            {
-                                "State": true,
-                                "Time": 444
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 444
-                            },
-                            {
-                                "State": false,
-                                "Time": 444
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": false,
+                                    "Time": 444
+                                },
+                                {
+                                    "State": true,
+                                    "Time": 444
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 444
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 444
+                                }
+                            ]
                         ]
                     },
                     "EoF": [
@@ -667,8 +660,6 @@
                     "BitCount": 31,
                     "Toggle": 15,
                     "Timing": 105000,
-                    "Ctrl0": "IsDataFrame",
-                    "Ctrl1": "DataTwoPairs",
                     "SoF": [
                         {
                             "State": true,
@@ -720,27 +711,30 @@
                         }
                     ],
                     "Data": {
-                        "FalsePair": [
-                            {
-                                "State": false,
-                                "Time": 444
-                            },
-                            {
-                                "State": true,
-                                "Time": 444
-                            }
-                        ],
-                        "TruePair": [
-                            {
-                                "State": true,
-                                "Time": 444
-                            },
-                            {
-                                "State": false,
-                                "Time": 444
-                            }
+                        "Quanta": [
+                            [
+                                {
+                                    "State": false,
+                                    "Time": 444
+                                },
+                                {
+                                    "State": true,
+                                    "Time": 444
+                                }
+                            ],
+                            [
+                                {
+                                    "State": true,
+                                    "Time": 444
+                                },
+                                {
+                                    "State": false,
+                                    "Time": 444
+                                }
+                            ]
                         ]
-                    }
+                    },
+                    "EoF": []
                 }
             ]
         }
