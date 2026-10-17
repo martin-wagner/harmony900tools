@@ -31,11 +31,16 @@ class RawCommand
 class ProtoCommand
 {
   public:
+    //default construt an empty item. this item can only be used as placeholder
+    ProtoCommand()
+    {
+    }
+
     //empty
     ProtoCommand(uint32_t protocolIndex, const binary::irProto::IrProto &protocol) :
       protocolIndex(protocolIndex), command(protocolIndex, protocol)
     {
-    };
+    }
 
     //create from binary
     ProtoCommand(uint32_t protocolIndex, const binary::irProto::IrProto &protocol, const std::vector<uint8_t> &data, CodeType t = CodeType::Proprietary) :

@@ -16,6 +16,9 @@ class Group
     std::vector<uint8_t> data; //list of quantums, size corresponding to IRproto
 
   public:
+    /** default construt an empty item. this item can only be used as placeholder */
+    Group() : section(0), bits(0) {};
+
     Group(uint8_t section, uint8_t bits, const std::vector<uint8_t> &data) :section(section), bits(bits), data(data)
     {
     }
@@ -66,6 +69,8 @@ class Code
     void writeGroup(const std::vector<Group> &group, std::vector<uint8_t> &data) const;
 
   public:
+    /** default construt an empty item. this item can only be used as placeholder */
+    Code();
     /** create empty code item */
     Code(uint16_t index, const IrProto &protocol);
     Code(const Code &src);
@@ -95,7 +100,7 @@ class Code
     std::string serialiseStr() const;
     std::vector<uint8_t> serialiseVec() const;
 
-    /** irProto protocol index */
+    /** irProto protocol index. the index is only ever used for (de)serialising and can be freely set */
     void changeIndex(uint16_t index) { this->index = index; };
     uint16_t getIndex() const { return index; };
 

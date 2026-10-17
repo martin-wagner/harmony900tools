@@ -235,6 +235,11 @@ void Code::writeGroup(const vector<Group> &group, vector<uint8_t> &data) const
   }
 }
 
+Code::Code() :
+    Code(0xffff, IrProto())
+{
+}
+
 Code::Code(uint16_t index, const IrProto &protocol) :
     protocol(protocol), index(index)
 {

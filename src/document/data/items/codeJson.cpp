@@ -77,7 +77,8 @@ void toJson(ordered_json &out, const binary::irProto::Group &group)
   }
 }
 
-binary::irProto::Group fromJsonOld(const ordered_json &in, uint32_t idx)
+void fromJsonOld(const ordered_json &in, binary::irProto::Group &group,
+    uint32_t idx)
 {
   vector<uint8_t> data;
 
@@ -87,10 +88,10 @@ binary::irProto::Group fromJsonOld(const ordered_json &in, uint32_t idx)
     auto bits = qstr(dataIt->get<string>()).toULongLong(nullptr, 16);
     data = binary::irProto::Code::u64bitsToList(bitCount, bits);
   }
-  return binary::irProto::Group(idx, 2, data);
+  group = binary::irProto::Group(idx, 2, data);
 }
 
-binary::irProto::Group fromJson(const ordered_json &in)
+void fromJson(const ordered_json &in, binary::irProto::Group &group)
 {
   vector<uint8_t> data;
 
@@ -106,7 +107,7 @@ binary::irProto::Group fromJson(const ordered_json &in)
       data = dataIt->get<vector<uint8_t>>();
     }
   }
-  return binary::irProto::Group(section, bits, data);
+  group = binary::irProto::Group(section, bits, data);
 }
 
 void toJson(ordered_json &out, const binary::irProto::Code &code)
@@ -155,7 +156,8 @@ void fromJson(const ordered_json &in, binary::irProto::Code &code)
     auto groupsIt = in.find("Sections");
     if (groupsIt != in.end()) {
       for (size_t i = 0; i < groupsIt->size(); i++) {
-        auto group = fromJsonOld((*groupsIt)[i], i);
+        binary::irProto::Group group;
+        fromJsonOld((*groupsIt)[i], group, i);
         groups.push_back(group);
       }
     }
@@ -185,7 +187,9 @@ void fromJson(const ordered_json &in, binary::irProto::Code &code)
           auto groupsIt = in.find(key);
           if (groupsIt != in.end()) {
             for (size_t i = 0; i < groupsIt->size(); i++) {
-              target.push_back(fromJson((*groupsIt)[i]));
+              binary::irProto::Group group;
+              fromJson((*groupsIt)[i], group);
+              target.push_back(group);
             }
           }
         };

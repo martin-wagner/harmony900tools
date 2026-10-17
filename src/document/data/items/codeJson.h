@@ -26,8 +26,8 @@ void fromJson(const ordered_json &in, binary::TimingStream &stream);
 
 //bin/irProto/code.h
 void toJson(ordered_json &out, const binary::irProto::Group &group);
-binary::irProto::Group fromJsonOld(const ordered_json &in, uint32_t idx); // pre 0.2
-binary::irProto::Group fromJson(const ordered_json &in);
+void fromJsonOld(const ordered_json &in, binary::irProto::Group &group, uint32_t idx); // pre 0.2
+void fromJson(const ordered_json &in, binary::irProto::Group &group);
 
 void toJson(ordered_json &out, const binary::irProto::Code &code);
 void fromJson(const ordered_json &in, binary::irProto::Code &code);

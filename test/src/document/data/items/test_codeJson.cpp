@@ -86,6 +86,7 @@ TEST(TimingStreamJson, RoundTripsMultipleBlocks)
 TEST(GroupJson, CompactBitsRoundTripUsesHexString)
 {
   Group group(1, 2, Symbols { 1, 0, 1, 1, 0, 0, 1, 0 });
+  Group group2;
 
   serialiser::ordered_json j;
   serialiser::toJson(j, group);
@@ -97,7 +98,7 @@ TEST(GroupJson, CompactBitsRoundTripUsesHexString)
   EXPECT_EQ(j["Data"].get<std::string>(),
       toHexString(Code::listToU64bits(group.getData())));
 
-  Group group2 = serialiser::fromJson(j);
+  serialiser::fromJson(j, group2);
 
   EXPECT_EQ(group2.getSection(), 1);
   EXPECT_EQ(group2.getBits(), 2);
@@ -107,6 +108,7 @@ TEST(GroupJson, CompactBitsRoundTripUsesHexString)
 TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
 {
   Group group(2, 4, Symbols { 3, 1, 2, 0 });
+  Group group2;
 
   serialiser::ordered_json j;
   serialiser::toJson(j, group);
@@ -117,7 +119,7 @@ TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
   ASSERT_TRUE(j["Data"].is_array());
   EXPECT_EQ(j["Data"].get<Symbols>(), (Symbols { 3, 1, 2, 0 }));
 
-  Group group2 = serialiser::fromJson(j);
+  serialiser::fromJson(j, group2);
 
   EXPECT_EQ(group2.getSection(), 2);
   EXPECT_EQ(group2.getBits(), 4);
@@ -127,11 +129,12 @@ TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
 TEST(GroupJson, EmptyGroupRoundTrips)
 {
   Group group(1, 2, Symbols { });
+  Group group2;
 
   serialiser::ordered_json j;
   serialiser::toJson(j, group);
 
-  Group group2 = serialiser::fromJson(j);
+  serialiser::fromJson(j, group2);
 
   EXPECT_EQ(group2.getSection(), 1);
   EXPECT_EQ(group2.getBits(), 2);
@@ -140,6 +143,7 @@ TEST(GroupJson, EmptyGroupRoundTrips)
 
 TEST(GroupJson, ParsesHexStringWithBitCount)
 {
+  Group group;
   serialiser::ordered_json j =
       serialiser::ordered_json::parse(
           R"({
@@ -149,7 +153,7 @@ TEST(GroupJson, ParsesHexStringWithBitCount)
     "Data": "0xb4b4fe01"
   })");
 
-  Group group = serialiser::fromJson(j);
+  serialiser::fromJson(j, group);
 
   EXPECT_EQ(group.getSection(), 0);
   EXPECT_EQ(group.getBits(), 2);
@@ -158,9 +162,10 @@ TEST(GroupJson, ParsesHexStringWithBitCount)
 
 TEST(GroupJson, MissingFieldsUseDefaults)
 {
+  Group group;
   serialiser::ordered_json j = serialiser::ordered_json::object();
 
-  Group group = serialiser::fromJson(j);
+  serialiser::fromJson(j, group);
 
   EXPECT_EQ(group.getSection(), 0);
   EXPECT_EQ(group.getBits(), 2);
