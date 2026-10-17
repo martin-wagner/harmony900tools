@@ -44,7 +44,7 @@ class Code
     uint16_t index = INVALID_INDEX_MARKER;
 
     uint16_t delay;
-    uint8_t repeats;
+    uint8_t repeats; //maybe -- repeats or transmit count (1 + repeats). a value of 0 is possible, but it's not clear if the remote just error-handles 0 to 1...
     std::vector<Group> start;
     std::vector<Group> repeat;
     std::vector<Group> finish;
@@ -123,7 +123,7 @@ class Code
     bool isValid() const;
 
     /** create data item for coding with irProto data */
-    const IrProto::Data getData() const;
+    const IrProto::Data getData(bool forceOneRepeat = false) const;
 };
 
 }

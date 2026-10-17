@@ -344,10 +344,11 @@ bool Code::isValid() const
   return true;
 }
 
-const IrProto::Data Code::getData() const
+const IrProto::Data Code::getData(bool forceOneRepeat) const
 {
   uint8_t i;
   IrProto::Data data;
+  uint8_t tx = repeats;
 
   if (!isValid()) {
     return data;
@@ -356,7 +357,10 @@ const IrProto::Data Code::getData() const
   for (const auto &g : start) {
     data.push_back( { g.getSection(), g.getData() });
   }
-  for (i = 0; i < repeats; i++) {
+  if (forceOneRepeat && (tx == 0)) {
+    tx = 1;
+  }
+  for (i = 0; i < tx; i++) {
     for (const auto &g : repeat) {
       data.push_back( { g.getSection(), g.getData() });
     }

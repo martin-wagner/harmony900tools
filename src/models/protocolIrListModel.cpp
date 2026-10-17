@@ -380,7 +380,7 @@ QVariant ProtocolIrModel::visualiseData(
     return "";
   }
 
-  auto binaryData = cmd.command.getData();
+  auto binaryData = cmd.command.getData(true); //display only -- make this non-empty
   config.data().getProtocolLib().serialiseIrStream(timingData,
       cmd.protocolIndex.get(), binaryData);
   auto str = timingData.convertAsciiPlot(250, true, false);
