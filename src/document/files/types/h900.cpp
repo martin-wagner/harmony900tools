@@ -110,8 +110,8 @@ bool H900userconfig::read(const ConfigData *c, CmdCatalogue *worker)
 
   try {
     ret &= readIrStream();
+    ret &= readIrProto(); //xml parse needs protocols!
     ret &= readUserConfigXml();
-    ret &= readIrProto();
   } catch (const exception &e) {
     emit writeLog(LogLevel::Error,
         tr("import: exception: %1").arg(QString(e.what())),
@@ -1102,7 +1102,15 @@ bool H900userconfig::readIr(pugi::xml_node &command)
     return worker->setIrCommand(devicePos, cmd);
   } else {
     //protocol command
-    auto cmd = item::ProtoCommand(protoIndex, rawData);
+    auto &protoLib = c->getProtocolLib();
+    if (protoIndex >= protoLib.getProtocolCount()) {
+      emit writeLog(LogLevel::Error,
+          tr("xml: Proto lib item %1 referenced, but not available").arg(
+              protoIndex), ContentType::PlainText);
+      return false;
+    }
+    auto cmd = item::ProtoCommand(protoIndex,
+        protoLib.accessProtocol(protoIndex), rawData);
     if (cmd.getStatus() != binary::irProto::Status::OK) {
       emit writeLog(LogLevel::Debug,
           tr("import device: device %1 cmd %2 decode failed (%3). "
@@ -2190,13 +2198,8 @@ bool H900userconfig::writeIr(pugi::xml_node &command,
   command.append_child("Name").text().set(data.name.get());
   auto cmdData = command.append_child("Data");
   cmdData.append_child("Protocol").text().set(data.protocolIndex.get());
-  if (data.canDecode.get() == true) {
-    auto raw = data.command.serialiseStr();
-    cmdData.append_child("Code").text().set(raw);
-  } else {
-    const auto &raw = data.data.get();
-    cmdData.append_child("Code").text().set(lib::bytesToHexString(raw));
-  }
+  auto raw = data.command.serialiseStr();
+  cmdData.append_child("Code").text().set(raw);
   return true;
 }
 
