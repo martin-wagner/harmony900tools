@@ -93,7 +93,7 @@ TEST(GroupJson, CompactBitsRoundTripUsesHexString)
 
   EXPECT_EQ(j["Section"], 1);
   EXPECT_EQ(j["Bits"], 1);
-  EXPECT_EQ(j["DataBitCount"], 8);
+  EXPECT_EQ(j["DataQuantumCount"], 8);
   ASSERT_TRUE(j["Data"].is_string());
   EXPECT_EQ(j["Data"].get<std::string>(),
       toHexString(Code::listToU64bits(group.getData())));
@@ -115,7 +115,7 @@ TEST(GroupJson, MultiBitSymbolsRoundTripUsesArray)
 
   EXPECT_EQ(j["Section"], 2);
   EXPECT_EQ(j["Bits"], 2);
-  EXPECT_EQ(j["DataBitCount"], 4);
+  EXPECT_EQ(j["DataQuantumCount"], 4);
   ASSERT_TRUE(j["Data"].is_array());
   EXPECT_EQ(j["Data"].get<Symbols>(), (Symbols { 3, 1, 2, 0 }));
 
@@ -149,7 +149,7 @@ TEST(GroupJson, ParsesHexStringWithBitCount)
           R"({
     "Section": 0,
     "Bits": 2,
-    "DataBitCount": 32,
+    "DataQuantumCount": 32,
     "Data": "0xb4b4fe01"
   })");
 
