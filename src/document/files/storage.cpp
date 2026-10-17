@@ -94,13 +94,21 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
 
   }
 
+  //protocols are required for reading devices (commands need them), so pull them in first.
+  for (i = 0; i < j["IrProtocols"].size(); i++) {
+    binary::irProto::IrProto prot;
+    auto name = data::serialiser::fromJson(j["IrProtocols"][i], prot);
+    auto index = c.getProtocolLib().appendProtocol(prot);
+    c.addProtocolLibListItem(data::Enum<data::CodeType>(name).getValue(), index);
+  }
+
   data::serialiser::fromJson(j["User"], c.getUser());
   data::serialiser::fromJson(j["Controller"], c.getController());
   for (i = 0; i < j["Devices"].size(); i++) {
     auto id = j["Devices"][i]["Id"].get<uint32_t>();
     lib::UidGenerator::getInstance().markUsed(id);
     data::item::Device d(id);
-    data::serialiser::fromJson(j["Devices"][i], d);
+    data::serialiser::fromJson(j["Devices"][i], d, c.getProtocolLib());
     c.getDevices().push_back(d);
   }
   for (i = 0; i < j["Activities"].size(); i++) {
@@ -113,12 +121,6 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
   for (i = 0; i < j["Blobs"].size(); i++) {
     auto b = data::serialiser::fromJson(j["Blobs"][i]);
     c.getBlobs().push_back(b);
-  }
-  for (i = 0; i < j["IrProtocols"].size(); i++) {
-    binary::irProto::IrProto prot;
-    auto name = data::serialiser::fromJson(j["IrProtocols"][i], prot);
-    auto index = c.getProtocolLib().appendProtocol(prot);
-    c.addProtocolLibListItem(data::Enum<data::CodeType>(name).getValue(), index);
   }
 
   return true;
