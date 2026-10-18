@@ -1,7 +1,10 @@
 {
     "Version": 1,
+    "Lib": [
+        "NEC"
+    ],
     "Device": {
-        "Id": 65365501,
+        "Id": 10000006,
         "Type": "Television",
         "Mnf": "LG",
         "Model": "42LH7000",
@@ -759,1451 +762,1799 @@
                 {
                     "Name": "0",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 64,
                     "IrBitCount": 32,
                     "IrBitData": 1574044413,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd202fd",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd202fd"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "1",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 65,
                     "IrBitCount": 32,
                     "IrBitData": 1574077053,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd2827d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd2827d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "2",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 66,
                     "IrBitCount": 32,
                     "IrBitData": 1574060733,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd242bd",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd242bd"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "3",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 67,
                     "IrBitCount": 32,
                     "IrBitData": 1574093373,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd2c23d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd2c23d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "4",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 68,
                     "IrBitCount": 32,
                     "IrBitData": 1574052573,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd222dd",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd222dd"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "5",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 69,
                     "IrBitCount": 32,
                     "IrBitData": 1574085213,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd2a25d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd2a25d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "6",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 70,
                     "IrBitCount": 32,
                     "IrBitData": 1574068893,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd2629d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd2629d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "7",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 71,
                     "IrBitCount": 32,
                     "IrBitData": 1574101533,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd2e21d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd2e21d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "8",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 72,
                     "IrBitCount": 32,
                     "IrBitData": 1574048493,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd212ed",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd212ed"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "9",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 19386,
                     "IrCommand": 73,
                     "IrBitCount": 32,
                     "IrBitData": 1574081133,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5dd2926d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x5dd2926d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Aspect",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 121,
                     "IrBitCount": 32,
                     "IrBitData": 551525985,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df9e61",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df9e61"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "AvMode",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 48,
                     "IrBitCount": 32,
                     "IrBitData": 551488755,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df0cf3",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df0cf3"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Blue",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 97,
                     "IrBitCount": 32,
                     "IrBitData": 551519865,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df8679",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df8679"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Bookmark",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 30,
                     "IrBitCount": 32,
                     "IrBitData": 551516295,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df7887",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df7887"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChannelDown",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 1,
                     "IrBitCount": 32,
                     "IrBitData": 551518335,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df807f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df807f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChannelPrev",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 26,
                     "IrBitCount": 32,
                     "IrBitData": 551508135,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df58a7",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df58a7"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChannelUp",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 0,
                     "IrBitCount": 32,
                     "IrBitData": 551485695,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df00ff",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df00ff"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionDown",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 65,
                     "IrBitCount": 32,
                     "IrBitData": 551518845,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df827d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df827d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionLeft",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 7,
                     "IrBitCount": 32,
                     "IrBitData": 551542815,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfe01f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfe01f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionRight",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 6,
                     "IrBitCount": 32,
                     "IrBitData": 551510175,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df609f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df609f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionUp",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 64,
                     "IrBitCount": 32,
                     "IrBitData": 551486205,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df02fd",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df02fd"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "EnergySaving",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 149,
                     "IrBitCount": 32,
                     "IrBitData": 551528790,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfa956",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfa956"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Exit",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 40,
                     "IrBitCount": 32,
                     "IrBitData": 551490795,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df14eb",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df14eb"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Favorite",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 30,
                     "IrBitCount": 32,
                     "IrBitData": 551516295,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df7887",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df7887"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Green",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 113,
                     "IrBitCount": 32,
                     "IrBitData": 551521905,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df8e71",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df8e71"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Guide",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 171,
                     "IrBitCount": 32,
                     "IrBitData": 551540010,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfd52a",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfd52a"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Info",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 170,
                     "IrBitCount": 32,
                     "IrBitData": 551507370,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df55aa",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df55aa"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputAntenna",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 214,
                     "IrBitCount": 32,
                     "IrBitData": 551512980,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df6b94",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df6b94"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputComponent",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 191,
                     "IrBitCount": 32,
                     "IrBitData": 551550210,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dffd02",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dffd02"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputHdmi1",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 206,
                     "IrBitCount": 32,
                     "IrBitData": 551515020,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df738c",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df738c"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputHdmi2",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 204,
                     "IrBitCount": 32,
                     "IrBitData": 551498700,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df33cc",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df33cc"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputHdmi3",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 233,
                     "IrBitCount": 32,
                     "IrBitData": 551524200,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df9768",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df9768"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputHdmi4",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 218,
                     "IrBitCount": 32,
                     "IrBitData": 551508900,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df5ba4",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df5ba4"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputNext",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 11,
                     "IrBitCount": 32,
                     "IrBitData": 551538735,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfd02f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfd02f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputRgb",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 152,
                     "IrBitCount": 32,
                     "IrBitData": 551492070,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df19e6",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df19e6"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputVideo1",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 90,
                     "IrBitCount": 32,
                     "IrBitData": 551508645,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df5aa5",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df5aa5"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputVideo2",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 208,
                     "IrBitCount": 32,
                     "IrBitData": 551488500,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df0bf4",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df0bf4"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "InputVideo3",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 209,
                     "IrBitCount": 32,
                     "IrBitData": 551521140,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df8b74",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df8b74"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "List",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 83,
                     "IrBitCount": 32,
                     "IrBitData": 551537205,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfca35",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfca35"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Menu",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 67,
                     "IrBitCount": 32,
                     "IrBitData": 551535165,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfc23d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfc23d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Mute",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 9,
                     "IrBitCount": 32,
                     "IrBitData": 551522415,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df906f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df906f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PageDown",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 1,
                     "IrBitCount": 32,
                     "IrBitData": 551518335,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df807f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df807f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PageUp",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 0,
                     "IrBitCount": 32,
                     "IrBitData": 551485695,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df00ff",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df00ff"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerOff",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 196,
                     "IrBitCount": 32,
                     "IrBitData": 551494620,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df23dc",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df23dc"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerOn",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 197,
                     "IrBitCount": 32,
                     "IrBitData": 551527260,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfa35c",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfa35c"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerToggle",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 8,
                     "IrBitCount": 32,
                     "IrBitData": 551489775,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df10ef",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df10ef"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "QMenu",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 69,
                     "IrBitCount": 32,
                     "IrBitData": 551527005,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfa25d",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfa25d"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Red",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 114,
                     "IrBitCount": 32,
                     "IrBitData": 551505585,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df4eb1",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df4eb1"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Return",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 40,
                     "IrBitCount": 32,
                     "IrBitData": 551490795,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df14eb",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df14eb"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Select",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 68,
                     "IrBitCount": 32,
                     "IrBitData": 551494365,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df22dd",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df22dd"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Simplink",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 126,
                     "IrBitCount": 32,
                     "IrBitData": 551517825,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df7e81",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df7e81"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Subtitle",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 57,
                     "IrBitCount": 32,
                     "IrBitData": 551525475,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df9c63",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df9c63"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "T.Option",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 33,
                     "IrBitCount": 32,
                     "IrBitData": 551519355,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df847b",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df847b"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Teletext",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 32,
                     "IrBitCount": 32,
                     "IrBitData": 551486715,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df04fb",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df04fb"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Tv/Radio",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 240,
                     "IrBitCount": 32,
                     "IrBitData": 551489520,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df0ff0",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df0ff0"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "VolumeDown",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 3,
                     "IrBitCount": 32,
                     "IrBitData": 551534655,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfc03f",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfc03f"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "VolumeUp",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 2,
                     "IrBitCount": 32,
                     "IrBitData": 551502015,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20df40bf",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20df40bf"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Yellow",
                     "CodeType": "NEC",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 9,
                     "LibName": "NEC",
                     "IrAddress": 4,
                     "IrCommand": 99,
                     "IrBitCount": 32,
                     "IrBitData": 551536185,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 1,
-                        "DataFrameTxCount": 1,
-                        "Control": 0,
-                        "Sections": [
+                        "Repeats": 1,
+                        "StartGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20dfc639",
-                                "DataBitCount": 32
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 32,
+                                "Data": "0x20dfc639"
                             }
-                        ]
+                        ],
+                        "RepeatGroups": [
+                            {
+                                "Section": 1,
+                                "Bits": 0,
+                                "DataQuantumCount": 0,
+                                "Data": []
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 }
             ]

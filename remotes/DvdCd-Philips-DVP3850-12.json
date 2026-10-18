@@ -1,5 +1,8 @@
 {
     "Version": 1,
+    "Lib": [
+        "PhilipsRC6"
+    ],
     "Device": {
         "Id": 89782307,
         "Type": "DvdCd",
@@ -166,910 +169,936 @@
                     "Name": "Audio",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 78,
                     "IrBitCount": 20,
                     "IrBitData": 66638,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x44e",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x44e"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChapterNext",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 32,
                     "IrBitCount": 20,
-                    "IrBitData": 1056,
+                    "IrBitData": 66592,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x420",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x420"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChapterPrev",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 33,
                     "IrBitCount": 20,
-                    "IrBitData": 66593,
+                    "IrBitData": 1057,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x421",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x421"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionDown",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 89,
                     "IrBitCount": 20,
-                    "IrBitData": 1113,
+                    "IrBitData": 66649,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x459",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x459"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionLeft",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 90,
                     "IrBitCount": 20,
-                    "IrBitData": 66650,
+                    "IrBitData": 1114,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x45a",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x45a"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionRight",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 91,
                     "IrBitCount": 20,
-                    "IrBitData": 1115,
+                    "IrBitData": 66651,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x45b",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x45b"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionUp",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 88,
                     "IrBitCount": 20,
-                    "IrBitData": 66648,
+                    "IrBitData": 1112,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x458",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x458"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DiscMenu",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 209,
                     "IrBitCount": 20,
-                    "IrBitData": 1233,
+                    "IrBitData": 66769,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x4d1",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x4d1"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Eject",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 66,
                     "IrBitCount": 20,
-                    "IrBitData": 66626,
+                    "IrBitData": 1090,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x442",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x442"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "FastForward",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 91,
                     "IrBitCount": 20,
-                    "IrBitData": 1115,
+                    "IrBitData": 66651,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x45b",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x45b"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Goto",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 208,
                     "IrBitCount": 20,
-                    "IrBitData": 66768,
+                    "IrBitData": 1232,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x4d0",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x4d0"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Menu",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 146,
                     "IrBitCount": 20,
-                    "IrBitData": 1170,
+                    "IrBitData": 66706,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x492",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x492"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "OK",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 92,
                     "IrBitCount": 20,
-                    "IrBitData": 66652,
+                    "IrBitData": 1116,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x45c",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x45c"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Options",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 130,
                     "IrBitCount": 20,
-                    "IrBitData": 1154,
+                    "IrBitData": 66690,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x482",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x482"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Pause",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
-                    "LibName": "RC6",
-                    "IrAddress": 4,
-                    "IrCommand": 44,
-                    "IrBitCount": 20,
-                    "IrBitData": 66604,
-                    "Command": {
-                        "Index": 4,
-                        "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
-                            {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
-                            },
-                            {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
-                            },
-                            {
-                                "Index": 2,
-                                "Data": "0x42c",
-                                "DataBitCount": 16
-                            }
-                        ]
-                    }
-                },
-                {
-                    "Name": "Play",
-                    "CodeType": "PhilipsRC6",
-                    "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 44,
                     "IrBitCount": 20,
                     "IrBitData": 1068,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x42c",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x42c"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
+                    }
+                },
+                {
+                    "Name": "Play",
+                    "CodeType": "PhilipsRC6",
+                    "ProtocolIndex": 4,
+                    "LibName": "RC6",
+                    "IrAddress": 4,
+                    "IrCommand": 44,
+                    "IrBitCount": 20,
+                    "IrBitData": 66604,
+                    "Command": {
+                        "Delay": 500,
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
+                            {
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
+                            },
+                            {
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
+                            },
+                            {
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x42c"
+                            }
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerToggle",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 199,
                     "IrBitCount": 20,
-                    "IrBitData": 66759,
+                    "IrBitData": 1223,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x4c7",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x4c7"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Repeat",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 29,
                     "IrBitCount": 20,
-                    "IrBitData": 1053,
+                    "IrBitData": 66589,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x41d",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x41d"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "RepeatA-B",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 59,
                     "IrBitCount": 20,
-                    "IrBitData": 66619,
+                    "IrBitData": 1083,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x43b",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x43b"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Return",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 131,
                     "IrBitCount": 20,
-                    "IrBitData": 1155,
+                    "IrBitData": 66691,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x483",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x483"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Rewind",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 90,
                     "IrBitCount": 20,
-                    "IrBitData": 66650,
+                    "IrBitData": 1114,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x45a",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x45a"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "SlowBackward",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 89,
                     "IrBitCount": 20,
-                    "IrBitData": 1113,
+                    "IrBitData": 66649,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x459",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x459"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "SlowForward",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 88,
                     "IrBitCount": 20,
-                    "IrBitData": 66648,
+                    "IrBitData": 1112,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x458",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x458"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Stop",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 49,
                     "IrBitCount": 20,
-                    "IrBitData": 1073,
+                    "IrBitData": 66609,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x431",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x431"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Subtitle",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 75,
                     "IrBitCount": 20,
-                    "IrBitData": 66635,
+                    "IrBitData": 1099,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x44b",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x44b"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Zoom",
                     "CodeType": "PhilipsRC6",
                     "ProtocolIndex": 4,
-                    "Decoder": true,
                     "LibName": "RC6",
                     "IrAddress": 4,
                     "IrCommand": 247,
                     "IrBitCount": 20,
-                    "IrBitData": 1271,
+                    "IrBitData": 66807,
                     "Command": {
-                        "Index": 4,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 3,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x8001",
-                                "DataBitCount": 16
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 4,
+                                "Data": "0x8"
                             },
                             {
-                                "Index": 1,
-                                "Data": "0x2",
-                                "DataBitCount": 16
+                                "Section": 1,
+                                "Bits": 1,
+                                "DataQuantumCount": 1,
+                                "Data": "0x0"
                             },
                             {
-                                "Index": 2,
-                                "Data": "0x4f7",
-                                "DataBitCount": 16
+                                "Section": 2,
+                                "Bits": 1,
+                                "DataQuantumCount": 16,
+                                "Data": "0x4f7"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 }
             ]

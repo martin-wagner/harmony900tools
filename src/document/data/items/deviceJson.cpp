@@ -19,7 +19,7 @@ namespace serialiser
 // button.h
 //---------------------------------------------------------------------------
 
-std::string buttonTypeToString(item::ButtonType t)
+string buttonTypeToString(item::ButtonType t)
 {
   switch (t) {
     case item::ButtonType::Soft:
@@ -30,7 +30,7 @@ std::string buttonTypeToString(item::ButtonType t)
   return "Soft";
 }
 
-item::ButtonType buttonTypeFromString(const std::string &s)
+item::ButtonType buttonTypeFromString(const string &s)
 {
   if (s == "Hard") {
     return item::ButtonType::Hard;
@@ -121,7 +121,7 @@ void toJson(ordered_json &out, const item::DiscreteActions &actions)
 
 void fromJson(const ordered_json &in, item::DiscreteActions &actions)
 {
-  actions.states = in.value("States", std::vector<std::string>());
+  actions.states = in.value("States", vector<string>());
 
   actions.enterStateAction.clear();
   auto it = in.find("EnterStateAction");
@@ -145,7 +145,7 @@ void toJson(ordered_json &out, const item::RelativeActions &actions)
 void fromJson(const ordered_json &in, item::RelativeActions &actions)
 {
   fromJsonOpt(in, "ResetAction", actions.resetAction);
-  actions.states = in.value("States", std::vector<std::string>());
+  actions.states = in.value("States", vector<string>());
   fromJsonOpt(in, "NextStateAction", actions.nextStateAction);
   fromJsonOpt(in, "PrevStateAction", actions.prevStateAction);
 }
@@ -250,17 +250,16 @@ void fromJson(const ordered_json &in, item::Numpad &numpad)
 {
   fromJson(in, "FixedDigits", numpad.fixedDigits);
 
-  auto readDigits = [&in](const char *key,
-      std::optional<item::Digits> &target) {
-        auto it = in.find(key);
-        if (it == in.end()) {
-          target.reset();
-          return;
-        }
-        item::Digits digits {};
-        fromJson(*it, digits);
-        target = digits;
-      };
+  auto readDigits = [&in](const char *key, optional<item::Digits> &target) {
+    auto it = in.find(key);
+    if (it == in.end()) {
+      target.reset();
+      return;
+    }
+    item::Digits digits {};
+    fromJson(*it, digits);
+    target = digits;
+  };
 
   readDigits("First", numpad.first);
   readDigits("Middle", numpad.middle);
@@ -323,7 +322,7 @@ void fromJson(const ordered_json &in, item::ProtoCommand &cmd)
   } else {
     auto it = in.find("Data");
     if (it != in.end()) {
-      cmd.command.parse(it->get<std::string>());
+      cmd.command.parse(it->get<string>());
     }
   }
 }
@@ -342,15 +341,30 @@ void toJson(ordered_json &out, const item::Commands &commands)
 }
 
 void fromJson(const ordered_json &in, item::Commands &commands,
-    const binary::irProto::File &protocolLib)
+    const binary::irProto::File &protocolLib, CodeTypeMap *updateIndex)
 {
+  int protoIndex;
+
   fromJsonVec(in, "RawCommands", commands.getRawCommands());
   auto protoCmdIt = in.find("ProtoCommands");
   if (protoCmdIt != in.end()) {
     for (const auto &itemJson : *protoCmdIt) {
-      auto protoIndex = itemJson.value("ProtocolIndex", -1);
-      if ((protoIndex < 0) || (protoIndex >= protocolLib.getProtocolCount())) {
-        continue;
+      protoIndex = -1;
+      if (updateIndex == nullptr) {
+        protoIndex = itemJson.value("ProtocolIndex", -1);
+        if ((protoIndex < 0)
+            || (protoIndex >= protocolLib.getProtocolCount())) {
+          continue;
+        }
+      } else {
+        //ignore value from json, use supplied list
+        auto codeType = data::Enum<data::CodeType>(
+            itemJson.value("CodeType", ""));
+        if (updateIndex->contains(codeType.getValue())) {
+          protoIndex = (*updateIndex)[codeType.getValue()];
+        } else {
+          continue;
+        }
       }
       item::ProtoCommand value(protoIndex,
           protocolLib.accessProtocol(protoIndex));
@@ -442,7 +456,7 @@ void toJson(ordered_json &out, const item::Device &device)
 }
 
 void fromJson(const ordered_json &in, item::Device &device,
-    const binary::irProto::File &protocolLib)
+    const binary::irProto::File &protocolLib, CodeTypeMap *updateIndex)
 {
   fromJson(in, "Type", device.type);
   fromJson(in, "Mnf", device.mnf);
@@ -512,7 +526,7 @@ void fromJson(const ordered_json &in, item::Device &device,
   auto irCommandsIt = in.find("IrCommands");
   if (irCommandsIt != in.end()) {
     item::Commands commands;
-    fromJson(*irCommandsIt, commands, protocolLib);
+    fromJson(*irCommandsIt, commands, protocolLib, updateIndex);
     device.setIrCommands(commands);
   }
 }

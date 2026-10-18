@@ -15,6 +15,8 @@ namespace serialiser
 
 using nlohmann::ordered_json;
 
+using CodeTypeMap = std::map<data::CodeType, int>;
+
 //button.h
 std::string buttonTypeToString(item::ButtonType t);
 item::ButtonType buttonTypeFromString(const std::string &s);
@@ -54,11 +56,11 @@ void toJson(ordered_json &out, const item::ProtoCommand &cmd);
 void fromJson(const ordered_json &in, item::ProtoCommand &cmd);
 
 void toJson(ordered_json &out, const item::Commands &commands);
-void fromJson(const ordered_json &in, item::Commands &commands, const binary::irProto::File &protocolLib);
+void fromJson(const ordered_json &in, item::Commands &commands, const binary::irProto::File &protocolLib, CodeTypeMap *updateIndex = nullptr);
 
 //device.h
 void toJson(ordered_json &out, const item::Device &device);
-void fromJson(const ordered_json &in, item::Device &device, const binary::irProto::File &protocolLib);
+void fromJson(const ordered_json &in, item::Device &device, const binary::irProto::File &protocolLib, CodeTypeMap *updateIndex = nullptr);
 
 }
 }

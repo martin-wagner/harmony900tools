@@ -60,6 +60,7 @@ bool DeviceStorage::import(Config &c)
 bool DeviceStorage::importDeviceJson(Config &c)
 {
   json j;
+  data::serialiser::CodeTypeMap codeTypeToIndex;
 
   auto file = QFileDialog::getOpenFileName(nullptr,
       tr("Import device from json"), QDir::homePath(),
@@ -98,13 +99,17 @@ bool DeviceStorage::importDeviceJson(Config &c)
     return false;
   }
 
+  if (!j.contains("Version")) {
+    emit writeLog(LogLevel::Error, tr("load %1: no Version entry").arg(file),
+        ContentType::PlainText);
+    return false;
+  }
   auto version = j["Version"].get<uint32_t>();
   if (version != jsonVersion) {
     emit writeLog(LogLevel::Error,
         tr("load %1: unsupported version %2").arg(file).arg(version),
         ContentType::PlainText);
     return false;
-
   }
   if (!j.contains("Device")) {
     emit writeLog(LogLevel::Error, tr("load %1: no Device entry").arg(file),
@@ -116,38 +121,48 @@ bool DeviceStorage::importDeviceJson(Config &c)
     return false;
   }
 
-  data::item::Device d(0); //will be overwritten anyway
-  data::serialiser::fromJson(j["Device"], d);
-  auto &worker = c.modify();
+  //fetch required protocol types
+  if ((!j.contains("Lib")) || !j.at("Lib").is_array()) {
+    emit writeLog(LogLevel::Error,
+        tr("load %1: protocol libs missing").arg(file).arg(version),
+        ContentType::PlainText);
+    return false;
+  }
+  auto lib = j.at("Lib").get<vector<string>>();
 
-  //check if we have the required irProto lib entries to import this device
-  for (const auto &cmd : d.getIrCommands().getProtoCommands()) {
-    if (!cmd.codeType.get().isEnumValue()) {
+  //ensure we have the required irProto lib entries for the import
+  for (const auto &codeType : lib) {
+    if (!data::Enum<data::CodeType>::isEnumValue(codeType)) {
       emit writeLog(LogLevel::Error,
           tr("load %1: unsupported protocol type %2").arg(file).arg(
-              cmd.codeType.get().getQString()), ContentType::PlainText);
+              qstr(codeType)), ContentType::PlainText);
       QMessageBox msgBox(QMessageBox::Warning, tr("Import"),
           tr("Can't import this device, the protocol %1 is not available. "
-              "Check for updates.").arg(cmd.codeType.get().getQString()),
-          QMessageBox::Ok);
+              "Check for updates.").arg(qstr(codeType)), QMessageBox::Ok);
       msgBox.exec();
       return false;
     }
   }
   //...and now add them
-  c.beginMacro(tr("Import Device %1").arg(qstr(d.model.get())));
-
-  for (auto &cmd : d.getIrCommands().getProtoCommands()) {
-    auto protocolIndex = worker.appendIrProtoLibItem(cmd.codeType.get());
+  c.beginMacro(tr("Import Device from file %1").arg(file));
+  auto &worker = c.modify();
+  for (const auto &codeTypeStr : lib) {
+    auto codeType = data::Enum<data::CodeType>(codeTypeStr);
+    auto protocolIndex = worker.appendIrProtoLibItem(codeType);
     if (protocolIndex < 0) {
       emit writeLog(LogLevel::Error,
           tr("load %1: adding protocol type %2 failed").arg(file).arg(
-              cmd.codeType.get().getQString()), ContentType::PlainText);
+              qstr(codeTypeStr)), ContentType::PlainText);
       c.endMacro();
       return false;
     }
-    cmd.protocolIndex = protocolIndex; //update protocol index
+    codeTypeToIndex[codeType.getValue()] = protocolIndex;
   }
+
+  //load data
+  data::item::Device d(0); //will be overwritten anyway
+  data::serialiser::fromJson(j["Device"], d, c.data().getProtocolLib(),
+      &codeTypeToIndex);
   auto ret = worker.addDeviceCommand(d, -1);
   c.endMacro();
   return ret;
@@ -160,6 +175,7 @@ bool DeviceStorage::writeDeviceJson(const data::ConfigData &c, int deviceId)
   ordered_json j; //top level -> insertion order
 
   j["Version"] = jsonVersion;
+  j["Lib"] = ordered_json::array();
 
   const auto *device = c.getDevice(deviceId);
   if (device == nullptr) {
@@ -178,6 +194,7 @@ bool DeviceStorage::writeDeviceJson(const data::ConfigData &c, int deviceId)
         proprietary = proprietary + qstr(cmd.name.get() + "; ");
         break;
       default:
+        j["Lib"].push_back(cmd.codeType.get().getString());
         break;
     }
   }
@@ -194,6 +211,9 @@ bool DeviceStorage::writeDeviceJson(const data::ConfigData &c, int deviceId)
     msgBox.exec();
     return false;
   }
+  auto &lib = j["Lib"];
+  sort(lib.begin(), lib.end());
+  lib.erase(unique(lib.begin(), lib.end()), lib.end());
 
   data::serialiser::toJson(j["Device"], *device);
 

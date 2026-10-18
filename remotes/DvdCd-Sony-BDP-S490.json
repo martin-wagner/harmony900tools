@@ -1,7 +1,10 @@
 {
     "Version": 1,
+    "Lib": [
+        "SIRCS20"
+    ],
     "Device": {
-        "Id": 78384485,
+        "Id": 10000003,
         "Type": "DvdCd",
         "Mnf": "Sony",
         "Model": "BDP-S490",
@@ -337,1001 +340,961 @@
                 {
                     "Name": "0",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28937,
                     "IrBitCount": 20,
                     "IrBitData": 592711,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x90b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x90b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "1",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28928,
                     "IrBitCount": 20,
                     "IrBitData": 2887,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "2",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28929,
                     "IrBitCount": 20,
                     "IrBitData": 527175,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x80b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x80b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "3",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28930,
                     "IrBitCount": 20,
                     "IrBitData": 265031,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x40b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x40b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "4",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28931,
                     "IrBitCount": 20,
                     "IrBitData": 789319,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xc0b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xc0b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "5",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28932,
                     "IrBitCount": 20,
                     "IrBitData": 133959,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x20b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x20b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "6",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28933,
                     "IrBitCount": 20,
                     "IrBitData": 658247,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xa0b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xa0b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "7",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28934,
                     "IrBitCount": 20,
                     "IrBitData": 396103,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x60b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x60b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "8",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28935,
                     "IrBitCount": 20,
                     "IrBitData": 920391,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xe0b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xe0b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "9",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28936,
                     "IrBitCount": 20,
                     "IrBitData": 68423,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x10b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x10b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Audio",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29028,
                     "IrBitCount": 20,
                     "IrBitData": 158535,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x26b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x26b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Blue",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29030,
                     "IrBitCount": 20,
                     "IrBitData": 420679,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x66b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x66b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChapterNext",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29014,
                     "IrBitCount": 20,
                     "IrBitData": 437063,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x6ab47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x6ab47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "ChapterPrev",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29015,
                     "IrBitCount": 20,
                     "IrBitData": 961351,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xeab47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xeab47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionDown",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28986,
                     "IrBitCount": 20,
                     "IrBitData": 379719,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x5cb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x5cb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionLeft",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28987,
                     "IrBitCount": 20,
                     "IrBitData": 904007,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xdcb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xdcb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionRight",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28988,
                     "IrBitCount": 20,
                     "IrBitData": 248647,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x3cb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x3cb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "DirectionUp",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28985,
                     "IrBitCount": 20,
                     "IrBitData": 641863,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x9cb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x9cb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Display",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28993,
                     "IrBitCount": 20,
                     "IrBitData": 535367,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x82b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x82b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Eject",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28950,
                     "IrBitCount": 20,
                     "IrBitData": 428871,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x68b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x68b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "FastForward",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28956,
                     "IrBitCount": 20,
                     "IrBitData": 232263,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x38b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x38b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Green",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29032,
                     "IrBitCount": 20,
                     "IrBitData": 92999,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x16b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x16b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Home",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28994,
                     "IrBitCount": 20,
                     "IrBitData": 273223,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x42b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x42b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Menu",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28969,
                     "IrBitCount": 20,
                     "IrBitData": 609095,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x94b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x94b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Options",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28991,
                     "IrBitCount": 20,
                     "IrBitData": 1035079,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xfcb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xfcb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Pause",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28953,
                     "IrBitCount": 20,
                     "IrBitData": 625479,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x98b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x98b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Play",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28954,
                     "IrBitCount": 20,
                     "IrBitData": 363335,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x58b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x58b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PopUpMenu",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28969,
                     "IrBitCount": 20,
                     "IrBitData": 609095,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x94b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x94b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerOff",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28975,
                     "IrBitCount": 20,
                     "IrBitData": 1002311,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 6,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 6,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xf4b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xf4b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerOn",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28974,
                     "IrBitCount": 20,
                     "IrBitData": 478023,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 6,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 6,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x74b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x74b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "PowerToggle",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28949,
                     "IrBitCount": 20,
                     "IrBitData": 691015,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xa8b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xa8b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Red",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29031,
                     "IrBitCount": 20,
                     "IrBitData": 944967,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xe6b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xe6b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Return",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28995,
                     "IrBitCount": 20,
                     "IrBitData": 797511,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xc2b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xc2b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Rewind",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28955,
                     "IrBitCount": 20,
                     "IrBitData": 887623,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xd8b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xd8b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "SEN",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29004,
                     "IrBitCount": 20,
                     "IrBitData": 207687,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x32b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x32b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Select",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28989,
                     "IrBitCount": 20,
                     "IrBitData": 772935,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xbcb47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xbcb47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Stop",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28952,
                     "IrBitCount": 20,
                     "IrBitData": 101191,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x18b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x18b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Subtitle",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29027,
                     "IrBitCount": 20,
                     "IrBitData": 813895,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0xc6b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0xc6b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "TopMenu",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 28972,
                     "IrBitCount": 20,
                     "IrBitData": 215879,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x34b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x34b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 },
                 {
                     "Name": "Yellow",
                     "CodeType": "SIRCS20",
-                    "ProtocolIndex": 6,
-                    "Decoder": true,
+                    "ProtocolIndex": 7,
                     "LibName": "SONY",
                     "IrAddress": 26,
                     "IrCommand": 29033,
                     "IrBitCount": 20,
                     "IrBitData": 617287,
                     "Command": {
-                        "Index": 6,
                         "Delay": 500,
-                        "RepeatFrame": 0,
-                        "DataFrameTxCount": 3,
-                        "Control": 1,
-                        "Sections": [
+                        "Repeats": 3,
+                        "StartGroups": [],
+                        "RepeatGroups": [
                             {
-                                "Index": 0,
-                                "Data": "0x96b47",
-                                "DataBitCount": 20
+                                "Section": 0,
+                                "Bits": 1,
+                                "DataQuantumCount": 20,
+                                "Data": "0x96b47"
                             }
-                        ]
+                        ],
+                        "FinishGroups": []
                     }
                 }
             ]

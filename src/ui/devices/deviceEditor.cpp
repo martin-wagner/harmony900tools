@@ -66,6 +66,10 @@ void DeviceEditor::onSelectionChanged(int row)
 void DeviceEditor::onImportClicked()
 {
   auto reader = document::files::DeviceStorage();
+  connect(&reader, &document::files::DeviceStorage::writeLog, this,
+      &DeviceEditor::writeLog);
+  connect(&reader, &document::files::DeviceStorage::writeMsg, this,
+      &DeviceEditor::writeMsg);
   reader.import(*ctx.config());
 }
 
@@ -75,6 +79,10 @@ void DeviceEditor::onExportClicked()
       reinterpret_cast<DeviceTreeView*>(mainView)->getCurrentDeviceId();
 
   auto writer = document::files::DeviceStorage();
+  connect(&writer, &document::files::DeviceStorage::writeLog, this,
+      &DeviceEditor::writeLog);
+  connect(&writer, &document::files::DeviceStorage::writeMsg, this,
+      &DeviceEditor::writeMsg);
   writer.write(ctx.config()->data(), deviceId);
 }
 
