@@ -172,6 +172,13 @@ void fromJson(const ordered_json &in, binary::irProto::Code &code)
         code.accessStartGroups() = groups;
         code.setRepeatGroups( { { 1, { } } });
         break;
+      case 3:
+        if (groups.size() == 3) {
+          //values cannot be imported, overwrite with fixed values for RC6 and hope for the best...
+          groups[0] = binary::irProto::Group(0, 1, { 1, 0, 0, 0 });
+          groups[1] = binary::irProto::Group(1, 1, { 0 });
+        }
+        //fall-trough
       default:
         code.accessRepeatGroups() = groups;
         break;
