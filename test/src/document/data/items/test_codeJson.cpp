@@ -374,8 +374,8 @@ TEST(CodeJsonLegacy, SectionIndexIsPositionInList)
     "DataFrameTxCount": 2,
     "Control": 3,
     "Sections": [
-      { "Index": 0, "Data": "0x5", "DataBitCount": 4 },
-      { "Index": 1, "Data": "0x1", "DataBitCount": 1 },
+      { "Index": 0, "Data": "0x8001", "DataBitCount": 16 },
+      { "Index": 1, "Data": "0x2", "DataBitCount": 16 },
       { "Index": 2, "Data": "0xabcd", "DataBitCount": 16 }
     ]
   })");
@@ -390,10 +390,11 @@ TEST(CodeJsonLegacy, SectionIndexIsPositionInList)
   EXPECT_EQ(code.accessRepeatGroups()[0].getSection(), 0);
   EXPECT_EQ(code.accessRepeatGroups()[1].getSection(), 1);
   EXPECT_EQ(code.accessRepeatGroups()[2].getSection(), 2);
+  //hard-coded fix for the header
   EXPECT_EQ(code.accessRepeatGroups()[0].getData(),
-      Code::u64bitsToList(4, 0x5));
+      Code::u64bitsToList(4, 0x8));
   EXPECT_EQ(code.accessRepeatGroups()[1].getData(),
-      Code::u64bitsToList(1, 0x1));
+      Code::u64bitsToList(1, 0x0));
   EXPECT_EQ(code.accessRepeatGroups()[2].getData(),
       Code::u64bitsToList(16, 0xabcd));
 }
