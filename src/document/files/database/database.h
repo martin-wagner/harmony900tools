@@ -47,6 +47,9 @@ struct DatabasePaths
     QString raw;
     QString devices;
     QString protocols;
+
+    bool valid() const { return (!catalogue.isEmpty() && !raw.isEmpty() && !devices.isEmpty() && !protocols.isEmpty()); };
+    bool operator==(const DatabasePaths &) const = default;
 };
 
 inline static const QString catalogueFileName = "catalogue.json";

@@ -27,13 +27,13 @@ class Database: public QObject
     };
 
   public:
-    Database();
+    Database(QObject *parent = nullptr);
 
     /** parse files */
     bool setDatabase(const DatabasePaths &paths);
 
     /** how many devices the database contains */
-    uint64_t getDeviceCount() { return deviceCount; };
+    uint64_t getDeviceCount() const { return deviceCount; };
 
     /**
      * find a manufacturer.
@@ -88,9 +88,6 @@ class Database: public QObject
     uint64_t deviceCount;
     //lowercase/stripped mnf name / devices
     std::unordered_map<QString, Manufacturer> db;
-
-    //ProtocolId, Protocol
-    mutable std::unordered_map<uint32_t, binary::irProto::IrProto> irProtoCache;
 
   private:
     //ai did some guessing...

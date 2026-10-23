@@ -20,7 +20,8 @@ namespace document
 namespace files
 {
 
-Database::Database()
+Database::Database(QObject *parent) :
+    QObject(parent)
 {
   clear();
 }
@@ -38,10 +39,15 @@ bool Database::setDatabase(const DatabasePaths &paths)
   auto keyDevId = strq(keyCatalogueDevId);
   auto keyDevLine = strq(keyCatalogueDevLine);
 
-  clear();
-  if (paths.catalogue.isEmpty()) {
+  if (!paths.valid()) {
+    clear();
     return false;
   }
+  if (paths == d) {
+    //no change, keep current data
+    return true;
+  }
+  clear();
   d = paths;
 
   auto size = QFile(d.catalogue).size();
@@ -481,11 +487,7 @@ bool document::files::Database::command(const nlohmann::json &j,
     return false;
   }
   auto protocolId = j.at("ProtocolId").get<uint32_t>();
-  auto [it, inserted] = irProtoCache.try_emplace(protocolId);
-  if (inserted) {
-      //todo fill it->second = createIrProto();
-  }
-  auto &irProto = it->second;
+  //todo  createIrProto();
 
   auto keyCodeStr = j.at("KeyCode").get<string>();
   auto res = KeyCode::parse(qstr(keyCodeStr), keyCode);
@@ -498,7 +500,9 @@ bool document::files::Database::command(const nlohmann::json &j,
   //fixme the following verifies that we actually can encode the data into
   //irProt.bin / userconfig.xml code fields. this needs a sample for each and every case.
   //without that, best we _might_ do is serialise and store as raw command
-  if ((keyCode.getGroup() != "G") || (keyCode.getTrailer() != 3)) {
+  if ((keyCode.getGroup() != "G")
+  //|| (keyCode.getTrailer() != 3) //fixme not always 3 -- just ignore for now.
+  ) {
     emit writeLog(LogLevel::Warning,
         tr("inport %1: PROTO header/trailer not supported").arg(
             qstr(device.label.get())), ContentType::PlainText);

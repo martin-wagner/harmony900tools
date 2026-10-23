@@ -153,12 +153,25 @@ void MainWindow::createLog()
 
 void MainWindow::createData()
 {
+  document::files::DatabasePaths paths;
+
   ctx = make_unique<Context>(*settings, *user, undo);
 
   concord = new Concord(*ctx, this);
   ctx->setConcord(concord);
   config = new document::Config(*ctx, false, this);
   ctx->setConfig(config);
+
+  database = new document::files::Database(this);
+  paths.catalogue =
+      settings->value(defaults::databaseCatalogue().key).toString();
+  paths.raw = settings->value(defaults::databaseRaw().key).toString();
+  paths.devices = settings->value(defaults::databaseDevices().key).toString();
+  paths.protocols =
+      settings->value(defaults::databaseProtocols().key).toString();
+  if (paths.valid()) {
+    database->setDatabase(paths);
+  }
 }
 
 void MainWindow::createAds()
@@ -215,6 +228,13 @@ void MainWindow::createWidgets()
   dockImport->setWidget(importWidget);
   dockManager->addDockWidgetFloating(dockImport);
   dockMenu->addAction(dockImport->toggleViewAction());
+
+  deviceSearchWidget = new database::DeviceSearchWidget(this);
+  deviceSearchWidget->setCatalogue(database);
+  dockDeviceSearch = new ads::CDockWidget(dockManager, tr("Search database"));
+  dockDeviceSearch->setWidget(deviceSearchWidget);
+  dockManager->addDockWidgetFloating(dockDeviceSearch);
+  dockMenu->addAction(dockDeviceSearch->toggleViewAction());
 
   QUndoView *undoView = new QUndoView(undo.getStack());
   undoView->setCleanIcon(
@@ -366,11 +386,16 @@ void MainWindow::createActions()
       ":/res/icons/BreezeConverted/64x64/status/state-download.png");
   QAction *downloadAct = new QAction(downloadIcon, tr("Download database"),
       this);
-  downloadAct->setShortcuts(QKeySequence::New);
   downloadAct->setStatusTip(tr("Download / import device database"));
   connect(downloadAct, &QAction::triggered, this,
       &MainWindow::showDatabaseDownloader);
   databaseToolBar->addAction(downloadAct);
+  const QIcon queryIcon = lib::getIcon(
+      ":/res/icons/BreezeConverted/64x64/actions/system-search.png");
+  QAction *queryAct = new QAction(queryIcon, tr("Search database"), this);
+  queryAct->setStatusTip(tr("Search for devices in device database"));
+  connect(queryAct, &QAction::triggered, this, &MainWindow::showDatabaseSearch);
+  databaseToolBar->addAction(queryAct);
 
   //connection
   QMenu *connectMenu = menuBar()->addMenu(tr("&Connection"));
@@ -469,6 +494,11 @@ void MainWindow::createActions()
   connect(importWidget, &database::ImportWidget::writeLog, log,
       &LogViewer::addEntry);
   connect(importWidget, &database::ImportWidget::writeMsg, log,
+      &LogViewer::addMessage);
+
+  connect(deviceSearchWidget, &database::DeviceSearchWidget::writeLog, log,
+      &LogViewer::addEntry);
+  connect(deviceSearchWidget, &database::DeviceSearchWidget::writeMsg, log,
       &LogViewer::addMessage);
 }
 
@@ -719,10 +749,24 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
   settings->setValue(defaults::databaseDevices().key, paths.devices);
   settings->setValue(defaults::databaseProtocols().key, paths.protocols);
   settings->save();
+
+  if (paths.valid()) {
+    database->setDatabase(paths);
+    deviceSearchWidget->setCatalogue(database);
+  }
+}
+
+void MainWindow::showDatabaseSearch()
+{
+  if (dockDeviceSearch != nullptr) {
+    dockDeviceSearch->toggleView(true);
+  }
 }
 
 void MainWindow::applySettings()
 {
+  document::files::DatabasePaths paths;
+
   logLevel = settings->value(defaults::loglevel().key).toInt();
   log->setLoglevel(static_cast<LogLevel>(logLevel));
   log->addMessage("Setting loglevel to " + QString(logLevelName(logLevel)));
@@ -731,6 +775,17 @@ void MainWindow::applySettings()
 
   auto debugMacros = settings->value(defaults::undoMacros().key).toBool();
   undo.setMacrosDisabled(debugMacros);
+
+  paths.catalogue =
+      settings->value(defaults::databaseCatalogue().key).toString();
+  paths.raw = settings->value(defaults::databaseRaw().key).toString();
+  paths.devices = settings->value(defaults::databaseDevices().key).toString();
+  paths.protocols =
+      settings->value(defaults::databaseProtocols().key).toString();
+  if (paths.valid()) {
+    database->setDatabase(paths);
+    deviceSearchWidget->setCatalogue(database);
+  }
 
   //todo weitere
 }

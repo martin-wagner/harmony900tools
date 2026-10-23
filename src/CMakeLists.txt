@@ -102,6 +102,7 @@ set(sources ${sources}
   ui/activities/activityEditor.cpp
   ui/activities/activityTreeView.cpp
   ui/activities/activityEditor.cpp
+  ui/database/deviceSearchWidget.cpp
   ui/database/importWidget.cpp
   ui/database/sourceRow.cpp
   ui/database/stepProgress.cpp
@@ -201,6 +202,7 @@ set(${programName}_resource_files
     ${iconPath}/actions/document-import.png
     ${iconPath}/actions/text-field.png
     ${iconPath}/status/state-download.png
+    ${iconPath}/actions/system-search.png
     ${buttonIcons}
     ${h900platform}
 )

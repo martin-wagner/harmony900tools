@@ -11,11 +11,14 @@
 #include "ui/concordConnection.h"
 #include "ui/devices/deviceEditor.h"
 #include "ui/activities/activityEditor.h"
+#include "ui/database/deviceSearchWidget.h"
 #include "ui/database/importWidget.h"
 #include "lib/users.h"
 #include "lib/undo.h"
 #include "context.h"
 #include "document/config.h"
+#include "document/files/database/database.h"
+#include "document/files/database/importer.h"
 #include "models/deviceListModel.h"
 #include "models/activityListModel.h"
 
@@ -57,6 +60,7 @@ class MainWindow: public QMainWindow
     void resetSettings();
     void showDatabaseDownloader();
     void updateDatabase(const document::files::DatabasePaths &paths);
+    void showDatabaseSearch();
     //ads view stuff
     void onLockUI(bool locked);
     void onSaveView();
@@ -100,6 +104,7 @@ class MainWindow: public QMainWindow
     Concord *concord;
     document::Config *config;
     QString curFile;
+    document::files::Database *database = nullptr;
 
     editors::DeviceEditor *deviceEditor = nullptr;
     editors::ActivityEditor *activityEditor = nullptr;
@@ -108,6 +113,9 @@ class MainWindow: public QMainWindow
 
     ads::CDockWidget *dockImport = nullptr;
     database::ImportWidget *importWidget = nullptr;
+
+    ads::CDockWidget *dockDeviceSearch = nullptr;
+    database::DeviceSearchWidget *deviceSearchWidget = nullptr;
 
     ConcordConnection *concordConnection;
 };
