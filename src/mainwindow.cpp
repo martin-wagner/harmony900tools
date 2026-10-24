@@ -169,9 +169,8 @@ void MainWindow::createData()
   paths.devices = settings->value(defaults::databaseDevices().key).toString();
   paths.protocols =
       settings->value(defaults::databaseProtocols().key).toString();
-  if (paths.valid()) {
-    database->setDatabase(paths);
-  }
+  database->setDatabase(paths);
+  enableQueryButton();
 }
 
 void MainWindow::createAds()
@@ -392,7 +391,7 @@ void MainWindow::createActions()
   databaseToolBar->addAction(downloadAct);
   const QIcon queryIcon = lib::getIcon(
       ":/res/icons/BreezeConverted/64x64/actions/system-search.png");
-  QAction *queryAct = new QAction(queryIcon, tr("Search database"), this);
+  queryAct = new QAction(queryIcon, tr("Search database"), this);
   queryAct->setStatusTip(tr("Search for devices in device database"));
   connect(queryAct, &QAction::triggered, this, &MainWindow::showDatabaseSearch);
   databaseToolBar->addAction(queryAct);
@@ -749,11 +748,8 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
   settings->setValue(defaults::databaseDevices().key, paths.devices);
   settings->setValue(defaults::databaseProtocols().key, paths.protocols);
   settings->save();
-
-  if (paths.valid()) {
-    database->setDatabase(paths);
-    deviceSearchWidget->setCatalogue(database);
-  }
+  database->setDatabase(paths);
+  enableQueryButton();
 }
 
 void MainWindow::showDatabaseSearch()
@@ -782,10 +778,8 @@ void MainWindow::applySettings()
   paths.devices = settings->value(defaults::databaseDevices().key).toString();
   paths.protocols =
       settings->value(defaults::databaseProtocols().key).toString();
-  if (paths.valid()) {
-    database->setDatabase(paths);
-    deviceSearchWidget->setCatalogue(database);
-  }
+  database->setDatabase(paths);
+  enableQueryButton();
 
   //todo weitere
 }
@@ -883,4 +877,17 @@ bool MainWindow::importData(const std::vector<uint8_t> &data)
   setCurrentFile(QString());
   log->addMessage(tr("Project loaded"));
   return true;
+}
+
+void MainWindow::enableQueryButton()
+{
+  if (queryAct == nullptr) {
+    return;
+  }
+  if ((database == nullptr) || (database->getDeviceCount() <= 0)) {
+    queryAct->setEnabled(false);
+    return;
+  }
+  deviceSearchWidget->setCatalogue(database);
+  queryAct->setEnabled(true);
 }

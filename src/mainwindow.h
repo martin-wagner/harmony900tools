@@ -87,6 +87,7 @@ class MainWindow: public QMainWindow
     void updateModelView();
     void setTitle(const QString &append = "");
     bool importData(const std::vector<uint8_t> &data);
+    void enableQueryButton();
 
   private:
     ads::CDockManager* dockManager;
@@ -118,5 +119,8 @@ class MainWindow: public QMainWindow
     database::DeviceSearchWidget *deviceSearchWidget = nullptr;
 
     ConcordConnection *concordConnection;
+
+  private:
+    QAction *queryAct = nullptr;
 };
 
