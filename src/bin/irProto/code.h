@@ -62,6 +62,7 @@ class Code
     Status parseGroup(std::vector<uint8_t> &data, std::vector<Group> &group);
     void setGroup(const std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &data, std::vector<Group> &group);
     void writeGroup(const std::vector<Group> &group, std::vector<uint8_t> &data) const;
+    bool isGroupValid(const std::vector<Group> &group) const;
 
   public:
     /** default construt an empty item. this item can only be used as placeholder */

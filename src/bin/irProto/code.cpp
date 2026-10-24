@@ -171,6 +171,38 @@ void Code::writeGroup(const vector<Group> &group, vector<uint8_t> &data) const
   }
 }
 
+bool Code::isGroupValid(const vector<Group> &group) const
+{
+  //record count is stored in one byte
+  if (group.size() > 0xff) {
+    return false;
+  }
+
+  for (const auto &g : group) {
+    if (g.getSection() >= protocol.getSectionCount()) {
+      return false;
+    }
+
+    const auto &section = protocol.accessSection(g.getSection());
+    const auto quantisation = section.getData().getQuantisation();
+    const auto &data = g.getData();
+
+    //one symbol per bit. the stored form has no length, the section defines it.
+    if (data.size() != static_cast<size_t>(section.getBitCount())) {
+      return false;
+    }
+    if (g.getBits() != getBitsPerSymbol(quantisation)) {
+      return false;
+    }
+    for (const auto symbol : data) {
+      if (symbol >= quantisation) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 Code::Code() :
     Code(INVALID_INDEX_MARKER, IrProto())
 {
@@ -337,8 +369,7 @@ bool Code::isValid() const
   if (start.empty() && repeat.empty() && finish.empty()) {
     return false;
   }
-  if (protocol.getSectionCount()
-      != (start.size() + repeat.size() + finish.size())) {
+  if (!isGroupValid(start) || !isGroupValid(repeat) || !isGroupValid(finish)) {
     return false;
   }
   return true;
