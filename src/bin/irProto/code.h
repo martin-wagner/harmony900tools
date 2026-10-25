@@ -121,7 +121,7 @@ class Code
     void setFinishGroups(const std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &data) { setGroup(data, finish); }
 
     /** checks if a valid comand can be created */
-    bool isValid() const;
+    bool isValid(bool skipIndex = false) const;
 
     /** create data item for coding with irProto data */
     const IrProto::Data getData(bool forceOneRepeat = false) const;

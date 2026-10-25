@@ -1,0 +1,2223 @@
+{
+ "TestFixture": true,
+ "Protocols": [
+  {
+   "Id-": 101,
+   "Name": "Test Simple 8 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Simple 8 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Simple 8 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 12000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 102,
+   "Name": "Test NEC Like 32 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": [
+     {
+      "SegmentName": "Test NEC Like 32 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Repeat": [
+     {
+      "SegmentName": "Test NEC Like 32 Bit KeyCodeRepeat",
+      "SegmentType": 0
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test NEC Like 32 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 8000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 4000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 90000,
+     "Payload": {
+      "NumberOfBits": 32,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1300,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": [
+    {
+     "Name": "Test NEC Like 32 Bit KeyCodeRepeat",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 8000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 2000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 30000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": null
+    }
+   ]
+  },
+  {
+   "Id-": 103,
+   "Name": "Test Quad 6 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Quad 6 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Quad 6 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 70000,
+     "Payload": {
+      "NumberOfBits": 6,
+      "ToggleBit": null,
+      "EncodingType": 2,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 800,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 2,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1200,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 3,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1600,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 104,
+   "Name": "Test Hex 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Hex 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Hex 4 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 300,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 80000,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 3,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 600,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 2,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 900,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 3,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1200,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 4,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1500,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 5,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1800,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 6,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 2100,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 7,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 2400,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 8,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 2700,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 9,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 3000,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 10,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 3300,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 11,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 3600,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 12,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 3900,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 13,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 4200,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 14,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 4500,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 15,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 4800,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 105,
+   "Name": "Test Multi Section",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": [
+     {
+      "SegmentName": "Test Multi Section KeyCodeStart",
+      "SegmentType": 0
+     }
+    ],
+    "Repeat": [
+     {
+      "SegmentName": "Test Multi Section",
+      "SegmentType": 1
+     },
+     {
+      "SegmentName": "Test Multi Section 1",
+      "SegmentType": 1
+     },
+     {
+      "SegmentName": "Test Multi Section 2",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": [
+     {
+      "SegmentName": "Test Multi Section KeyCodeTrailer",
+      "SegmentType": 0
+     }
+    ]
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Multi Section",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "Name": "Test Multi Section 1",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 12,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "Name": "Test Multi Section 2",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 2,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 800,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 2,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1200,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 3,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 400,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1600,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": [
+    {
+     "Name": "Test Multi Section KeyCodeStart",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 6000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [],
+     "TotalLength": 0,
+     "Payload": null
+    },
+    {
+     "Name": "Test Multi Section KeyCodeSpace",
+     "Header": [
+      {
+       "Type": 0,
+       "Value": 9000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [],
+     "TotalLength": 0,
+     "Payload": null
+    },
+    {
+     "Name": "Test Multi Section KeyCodeTrailer",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 20000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [],
+     "TotalLength": 0,
+     "Payload": null
+    }
+   ]
+  },
+  {
+   "Id-": 106,
+   "Name": "Test Trailing Space 8 Bit ",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Trailing Space 8 Bit ",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Trailing Space 8 Bit ",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 107,
+   "Name": "Test Toggle 13 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Toggle 13 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Toggle 13 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": null,
+     "Payload": {
+      "NumberOfBits": 13,
+      "ToggleBit": 2,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 108,
+   "Name": "Test Carrier 36k 8 Bit",
+   "CarrierFrequency": 36000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Carrier 36k 8 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Carrier 36k 8 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 109,
+   "Name": "Test No Carrier 8 Bit",
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test No Carrier 8 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test No Carrier 8 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 110,
+   "Name": "Test Low Carrier 8 Bit",
+   "CarrierFrequency": 10000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Low Carrier 8 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Low Carrier 8 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 111,
+   "Name": "Test IP Only",
+   "CarrierFrequency": 0,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": null,
+   "IRSegments": [],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 112,
+   "Name": "Test Long Timing 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Long Timing 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Long Timing 4 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 70000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 1000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 0,
+       "Value": 40000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 113,
+   "Name": "Test Padding 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Padding 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Padding 4 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 0,
+          "Value": 100,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 10,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 20,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 1,
+          "Value": 30,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 114,
+   "Name": "Test BitType Order 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test BitType Order 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test BitType Order 4 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 900,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 900,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 115,
+   "Name": "Test Bad BitType 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Bad BitType 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Bad BitType 4 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 900,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 900,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 300,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 116,
+   "Name": "Test Too Long Pause 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Too Long Pause 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Too Long Pause 4 Bit",
+     "Header": [
+      {
+       "Type": 0,
+       "Value": 6000000,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 117,
+   "Name": "Test No Segments",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": null,
+    "Finish": null
+   },
+   "IRSegments": [],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 118,
+   "Name": "Test Too Long Bit 4 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Too Long Bit 4 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Too Long Bit 4 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 0,
+     "Payload": {
+      "NumberOfBits": 4,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 6000000,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 120,
+   "Name": "Test KeyCode Missing",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "IRSegments": [
+    {
+     "Name": "Test KeyCode Missing",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 121,
+   "Name": "Test Null Carrier 8 Bit",
+   "CarrierFrequency": null,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Null Carrier 8 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Null Carrier 8 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  },
+  {
+   "Id-": 5,
+   "Name": "Test Low Id 8 Bit",
+   "CarrierFrequency": 38000,
+   "PressMinimumRepeats": 0,
+   "HoldDelay": 0,
+   "KeyCode": {
+    "Start": null,
+    "Repeat": [
+     {
+      "SegmentName": "Test Low Id 8 Bit",
+      "SegmentType": 1
+     }
+    ],
+    "Finish": null
+   },
+   "IRSegments": [
+    {
+     "Name": "Test Low Id 8 Bit",
+     "Header": [
+      {
+       "Type": 1,
+       "Value": 7000,
+       "MinValue": null,
+       "MaxValue": null
+      },
+      {
+       "Type": 0,
+       "Value": 3500,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "Trailer": [
+      {
+       "Type": 1,
+       "Value": 450,
+       "MinValue": null,
+       "MaxValue": null
+      }
+     ],
+     "TotalLength": 60000,
+     "Payload": {
+      "NumberOfBits": 8,
+      "ToggleBit": null,
+      "EncodingType": 0,
+      "Encodings": [
+       {
+        "BitType": 0,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       },
+       {
+        "BitType": 1,
+        "Atoms": [
+         {
+          "Type": 1,
+          "Value": 450,
+          "MinValue": null,
+          "MaxValue": null
+         },
+         {
+          "Type": 0,
+          "Value": 1350,
+          "MinValue": null,
+          "MaxValue": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "CodeSegments": []
+  }
+ ]
+}

@@ -508,18 +508,18 @@ bool document::files::Database::command(const nlohmann::json &j,
             qstr(device.label.get())), ContentType::PlainText);
     return false;
   }
-  if (keyCode.isQuadBitType()) {
-    emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO quad type not supported").arg(
-            qstr(device.label.get())), ContentType::PlainText);
-    return false;
-  }
-  if (keyCode.isHexBitType()) {
-    emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO hex type not supported").arg(
-            qstr(device.label.get())), ContentType::PlainText);
-    return false;
-  }
+//  if (keyCode.isQuadBitType()) {
+//    emit writeLog(LogLevel::Warning,
+//        tr("inport %1: PROTO quad type not supported").arg(
+//            qstr(device.label.get())), ContentType::PlainText);
+//    return false;
+//  }
+//  if (keyCode.isHexBitType()) {
+//    emit writeLog(LogLevel::Warning,
+//        tr("inport %1: PROTO hex type not supported").arg(
+//            qstr(device.label.get())), ContentType::PlainText);
+//    return false;
+//  } todo is it?
 
   //todo wie das machen...
   if ((keyCode.getItemType(0) != KeyCode::ItemType::Empty)

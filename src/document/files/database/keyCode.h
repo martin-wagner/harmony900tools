@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <array>
+#include <cstdint>
+
 #include <QString>
 #include <QVariant>
 
@@ -13,8 +16,8 @@ namespace files
 
 /**
  * A single numeric element like "0x7", "1x0" or "2xB9FE".
- * The digit in front of the "x" is kept as prefix, the hex digits as string,
- * because values can be much wider than 64 bit (up to ~450 bit in the data).
+ * The number in front of the "x" is the section index, the digits are kept
+ * as string because values can be wider than 64 bit.
  */
 class KeyCodeNumber {
   public:
@@ -22,7 +25,7 @@ class KeyCodeNumber {
     QString digits;
 
     /** Converts digits to a number. Returns false if it does not fit into 64 bit. */
-    bool toUInt64(uint64_t& value) const;
+    bool toUInt64(uint64_t &value) const;
 };
 
 /**
@@ -33,7 +36,7 @@ class KeyCodeNumber {
  *  - invalid          -> empty "()"
  *  - QString          -> a single word, e.g. "Repeat"
  *  - KeyCodeNumber    -> a single number
- *  - QVariantList     -> "_" separated array, each entry is a QString or KeyCodeNumber
+ *  - QVariantList     -> "_" separated list, each entry is a QString or KeyCodeNumber
  */
 class KeyCode {
   public:
@@ -45,42 +48,33 @@ class KeyCode {
     };
 
     /** Parses one KeyCode string. Returns false if the basic structure is broken. */
-    static bool parse(const QString& text, KeyCode& result);
+    static bool parse(const QString &text, KeyCode &result);
 
     /** The leading letter, e.g. "G". */
     QString getGroup() const;
-
     /** Manufacturer and bits as one string, e.g. "Sony 15 Bit". */
     QString getName() const;
-
     /** Number in front of "Bit" in the name, -1 if there is none. */
     int getBitCount() const;
 
-    /** Check if coding type is quad (four states per bit) */
-    bool isQuadBitType() const;
-
-    /** Get quad bit 0...3, -1 if missing or not a number. */
-    int getQuadSymbol(const KeyCodeNumber& number, int index) const;
-
-    /** Check if coding type is hex (16 states per bit) */
-    bool isHexBitType() const;
-
-    /** Get hex bit 0...15, -1 if missing or not a number. */
-    int getHexSymbol(const KeyCodeNumber& number, int index) const;
+    /** Quad symbol 0...3 of the digit at index, -1 if missing or not a quad symbol. */
+    static int getQuadSymbol(const KeyCodeNumber &number, int index);
+    /** Hex symbol 0...15 of the digit at index, -1 if missing or not a hex digit. */
+    static int getHexSymbol(const KeyCodeNumber &number, int index);
 
     /** The number after the last ":", -1 if missing or not a number. */
     int getTrailer() const;
 
     /** Item 0..2. Returns an invalid QVariant for out of range. */
     QVariant getItem(int index) const;
-
     ItemType getItemType(int index) const;
-    static ItemType getItemType(const QVariant& value);
+    static ItemType getItemType(const QVariant &value);
 
   private:
-    static int parseBitCount(const QString& name);
-    static QVariant parseElement(const QString& token);
-    static QVariant parseItem(const QString& content);
+    static int parseBitCount(const QString &name);
+    static QVariant parseElement(const QString &token);
+    static QVariant parseItem(const QString &content);
+    static int hexDigitValue(QChar ch);
 
     QString group;
     QString name;
@@ -91,5 +85,3 @@ class KeyCode {
 
 }
 }
-
-

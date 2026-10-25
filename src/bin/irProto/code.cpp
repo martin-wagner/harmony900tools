@@ -357,10 +357,10 @@ vector<uint8_t> Code::serialiseVec() const
   return code;
 }
 
-bool Code::isValid() const
+bool Code::isValid(bool skipIndex) const
 {
   //some plausibility checks...
-  if (index == INVALID_INDEX_MARKER) {
+  if (!skipIndex && (index == INVALID_INDEX_MARKER)) {
     return false;
   }
   if (protocol.isEmpty()) {

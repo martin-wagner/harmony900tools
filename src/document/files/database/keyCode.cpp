@@ -30,7 +30,7 @@ bool KeyCode::parse(const QString &text, KeyCode &result)
   if (groupEnd < 0) {
     return false;
   }
-  const int nameEnd = line.indexOf(QLatin1String(":("), groupEnd + 1);
+  const int nameEnd = line.indexOf(QStringLiteral(":("), groupEnd + 1);
   if (nameEnd < 0) {
     return false;
   }
@@ -42,7 +42,8 @@ bool KeyCode::parse(const QString &text, KeyCode &result)
 
   int pos = nameEnd + 1;
   int itemIndex = 0;
-  while (itemIndex < 3 && pos < line.size() && line.at(pos) == QLatin1Char('(')) {
+  while ((itemIndex < 3) && (pos < line.size())
+      && (line.at(pos) == QLatin1Char('('))) {
     const int close = line.indexOf(QLatin1Char(')'), pos);
     if (close < 0) {
       return false;
@@ -55,7 +56,7 @@ bool KeyCode::parse(const QString &text, KeyCode &result)
     }
   }
 
-  if (pos < line.size() && line.at(pos) == QLatin1Char(':')) {
+  if ((pos < line.size()) && (line.at(pos) == QLatin1Char(':'))) {
     bool ok = false;
     const int value = line.mid(pos + 1).trimmed().toInt(&ok);
     if (ok) {
@@ -82,30 +83,21 @@ int KeyCode::getBitCount() const
   return bitCount;
 }
 
-bool KeyCode::isQuadBitType() const
+int KeyCode::getQuadSymbol(const KeyCodeNumber &number, int index)
 {
-  static const QRegularExpression quadRegex(QStringLiteral("\\bQuad\\b"));
-  return quadRegex.match(name).hasMatch();
-}
-
-int KeyCode::getQuadSymbol(const KeyCodeNumber &number, int index) const
-{
-  if ((index < 0) || (index >= number.digits.size())) {
+  const int value = getHexSymbol(number, index);
+  if ((value < 0) || (value > 3)) {
     return -1;
   }
-  return number.digits.at(index).digitValue();
+  return value;
 }
 
-bool KeyCode::isHexBitType() const
+int KeyCode::getHexSymbol(const KeyCodeNumber &number, int index)
 {
-  static const QRegularExpression quadRegex(QStringLiteral("\\bHex\\b"));
-  return quadRegex.match(name).hasMatch();
-}
-
-int KeyCode::getHexSymbol(const KeyCodeNumber &number, int index) const
-{
-  //todo implement...
-  return -1;
+  if ((index < 0) || (index >= static_cast<int>(number.digits.size()))) {
+    return -1;
+  }
+  return hexDigitValue(number.digits.at(index));
 }
 
 int KeyCode::getTrailer() const
@@ -187,6 +179,17 @@ QVariant KeyCode::parseItem(const QString &content)
   return QVariant(list);
 }
 
-}
+int KeyCode::hexDigitValue(QChar ch)
+{
+  const char16_t c = ch.toUpper().unicode();
+  if ((c >= u'0') && (c <= u'9')) {
+    return c - u'0';
+  }
+  if ((c >= u'A') && (c <= u'F')) {
+    return c - u'A' + 10;
+  }
+  return -1;
 }
 
+}
+}

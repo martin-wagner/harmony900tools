@@ -80,6 +80,7 @@ set(sources ${sources}
   document/data/items/irProtoJson.cpp
   document/data/items/ssIrJson.cpp
   document/files/database/importer.cpp
+  document/files/database/jsonProtocols.cpp
   document/files/database/keyCode.cpp
   document/files/database/loader.cpp
   document/files/types/h900.cpp
