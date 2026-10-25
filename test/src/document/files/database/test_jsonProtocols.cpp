@@ -99,6 +99,18 @@ Symbols bitsOf(uint64_t value, int width)
   return bits;
 }
 
+/** sum of all pauses (space) in us */
+uint32_t pauseOf(const Items &items)
+{
+  uint32_t pause = 0;
+  for (const auto &item : items) {
+    if (!item.first) {
+      pause += item.second;
+    }
+  }
+  return pause;
+}
+
 Records recordsOf(const std::vector<Group> &groups)
 {
   Records records;
@@ -297,10 +309,7 @@ TEST_F(ProtocolDatabaseLoadTest, protocolWithoutNameFails)
 
 TEST_F(ProtocolDatabaseLoadTest, duplicateIdFails)
 {
-  EXPECT_FALSE(
-      load(
-          databaseOf(
-              { minimalProtocol(7, "First"), minimalProtocol(7, "Second") })));
+  EXPECT_FALSE(load(databaseOf( { minimalProtocol(7, "First"), minimalProtocol(7, "Second") })));
   EXPECT_NE(db.getErrStr(), okText());
 }
 
@@ -400,8 +409,7 @@ TEST_F(ProtocolDatabaseTest, secondLookupGivesTheSameProtocol)
   ASSERT_FALSE(first.isEmpty());
   EXPECT_EQ(first.getSectionCount(), second.getSectionCount());
   EXPECT_EQ(first.getClockPeriod(), second.getClockPeriod());
-  EXPECT_EQ(first.accessSection(0).serialise(0),
-      second.accessSection(0).serialise(0));
+  EXPECT_EQ(first.accessSection(0).serialise(0), second.accessSection(0).serialise(0));
 }
 
 TEST_F(ProtocolDatabaseTest, carrierIsConvertedToClockPeriod)
@@ -444,8 +452,7 @@ TEST_F(ProtocolDatabaseTest, sectionsAreIrSegmentsFollowedByCodeSegments)
   for (int i = 0; i < 6; i++) {
     SCOPED_TRACE(i);
     EXPECT_EQ(proto.accessSection(i).getBitCount(), bitCounts[i]);
-    EXPECT_EQ(proto.accessSection(i).getData().getQuantisation(),
-        quantisations[i]);
+    EXPECT_EQ(proto.accessSection(i).getData().getQuantisation(), quantisations[i]);
   }
 }
 
@@ -465,34 +472,22 @@ TEST_F(ProtocolDatabaseTest, sectionTimingsAreRead)
   EXPECT_EQ(section.getTiming(), 60000u);
   EXPECT_FALSE(section.hasToggle());
   //type 1 = mark
-  EXPECT_EQ(section.getSoF().accessStream(), (Items { { true, 7000 }, {
-    false,
-    3500 } }));
-  EXPECT_EQ(section.getEoF().accessStream(), (Items { { true, 450 }, {
-    false,
-    12000 } }));
+  EXPECT_EQ(section.getSoF().accessStream(), (Items { { true, 7000 }, { false, 3500 } }));
+  EXPECT_EQ(section.getEoF().accessStream(), (Items { { true, 450 }, { false, 12000 } }));
   EXPECT_EQ(section.getData().getTperQantum(), 2);
-  EXPECT_EQ(section.getData().accessQuantum(0), (Items { { true, 450 }, {
-    false,
-    450 } }));
-  EXPECT_EQ(section.getData().accessQuantum(1), (Items { { true, 450 }, {
-    false,
-    1350 } }));
+  EXPECT_EQ(section.getData().accessQuantum(0), (Items { { true, 450 }, { false, 450 } }));
+  EXPECT_EQ(section.getData().accessQuantum(1), (Items { { true, 450 }, { false, 1350 } }));
 }
 
 TEST_F(ProtocolDatabaseTest, quadAndHexSymbolsHaveTheirOwnTimings)
 {
   const IrProto quad = db.getProtocol(103);
   ASSERT_EQ(quad.accessSection(0).getData().getQuantisation(), 4);
-  EXPECT_EQ(quad.accessSection(0).getData().accessQuantum(2), (Items { {
-    true,
-    400 }, { false, 1200 } }));
+  EXPECT_EQ(quad.accessSection(0).getData().accessQuantum(2), (Items { { true, 400 }, { false, 1200 } }));
 
   const IrProto hex = db.getProtocol(104);
   ASSERT_EQ(hex.accessSection(0).getData().getQuantisation(), 16);
-  EXPECT_EQ(hex.accessSection(0).getData().accessQuantum(15), (Items { {
-    true,
-    300 }, { false, 4800 } }));
+  EXPECT_EQ(hex.accessSection(0).getData().accessQuantum(15), (Items { { true, 300 }, { false, 4800 } }));
 }
 
 TEST_F(ProtocolDatabaseTest, toggleBitIsRead)
@@ -528,12 +523,8 @@ TEST_F(ProtocolDatabaseTest, codeSegmentHasNoPayload)
 
   EXPECT_EQ(section.getBitCount(), 0);
   EXPECT_TRUE(section.getData().isEmpty());
-  EXPECT_EQ(section.getSoF().accessStream(), (Items { { true, 8000 }, {
-    false,
-    2000 } }));
-  EXPECT_EQ(section.getEoF().accessStream(), (Items { { true, 450 }, {
-    false,
-    30000 } }));
+  EXPECT_EQ(section.getSoF().accessStream(), (Items { { true, 8000 }, { false, 2000 } }));
+  EXPECT_EQ(section.getEoF().accessStream(), (Items { { true, 450 }, { false, 30000 } }));
 }
 
 TEST_F(ProtocolDatabaseTest, longTimingsAreSplitIntoMultipleItems)
@@ -542,9 +533,9 @@ TEST_F(ProtocolDatabaseTest, longTimingsAreSplitIntoMultipleItems)
   ASSERT_FALSE(proto.isEmpty());
 
   //70000 us mark: max length mark, 0 us space, max length mark, 0 us space, rest
-  const Items expectedSof = { { true, 32767 }, { false, 0 }, { true, 32767 }, {
-    false,
-    0 }, { true, 4466 }, { false, 1000 } };
+  const Items expectedSof = {
+    { true, 32767 }, { false, 0 }, { true, 32767 }, { false, 0 }, { true, 4466 }, { false, 1000 }
+  };
   EXPECT_EQ(proto.accessSection(0).getSoF().accessStream(), expectedSof);
 
   //40000 us space
@@ -560,12 +551,8 @@ TEST_F(ProtocolDatabaseTest, quantaAreFilledUpToTheSameItemCount)
 
   //timings stay the same, the 0 us items alternate the state
   EXPECT_EQ(data.getTperQantum(), 3);
-  EXPECT_EQ(data.accessQuantum(0), (Items { { false, 100 }, { true, 0 }, {
-    false,
-    0 } }));
-  EXPECT_EQ(data.accessQuantum(1), (Items { { true, 10 }, { false, 20 }, {
-    true,
-    30 } }));
+  EXPECT_EQ(data.accessQuantum(0), (Items { { false, 100 }, { true, 0 }, { false, 0 } }));
+  EXPECT_EQ(data.accessQuantum(1), (Items { { true, 10 }, { false, 20 }, { true, 30 } }));
 }
 
 TEST_F(ProtocolDatabaseTest, symbolIsTheBitTypeNotThePosition)
@@ -585,12 +572,51 @@ TEST_F(ProtocolDatabaseTest, invalidBitTypeFails)
   expectNotLoadable(115);
 }
 
-TEST_F(ProtocolDatabaseTest, timingsWhichDoNotFitIntoTheFormatFail)
+TEST_F(ProtocolDatabaseTest, longPausesAreLimitedToOneSecond)
 {
-  //header: 6 s pause needs more than 255 items
-  expectNotLoadable(116);
-  //payload: same
-  expectNotLoadable(118);
+  //header: 6 s pause in the file
+  const IrProto header = db.getProtocol(116);
+  ASSERT_FALSE(header.isEmpty());
+  const Items &sof = header.accessSection(0).getSoF().accessStream();
+  EXPECT_EQ(sof.size(), 61u);
+  EXPECT_EQ(pauseOf(sof), 1000000u);
+  EXPECT_EQ(sof.front(), (Item { false, 32767 }));
+
+  //payload: same, the other symbol is filled up to the same item count
+  const IrProto payload = db.getProtocol(118);
+  ASSERT_FALSE(payload.isEmpty());
+  const auto &data = payload.accessSection(0).getData();
+  EXPECT_EQ(data.getTperQantum(), 62);
+  EXPECT_EQ(pauseOf(data.accessQuantum(0)), 1000000u);
+  EXPECT_EQ(pauseOf(data.accessQuantum(1)), 450u);
+}
+
+TEST_F(ProtocolDatabaseTest, shortPausesAreNotChanged)
+{
+  const IrProto proto = db.getProtocol(101);
+
+  EXPECT_EQ(pauseOf(proto.accessSection(0).getEoF().accessStream()), 12000u);
+}
+
+TEST_F(ProtocolDatabaseTest, timingsWithTooManyItemsFail)
+{
+  //more than 255 items, the count is stored in one byte
+  expectNotLoadable(119);
+  expectNotLoadable(122);
+}
+
+TEST_F(ProtocolDatabaseTest, valuesTheFormatCanNotStoreFail)
+{
+  //bit count above 16 bit, toggle position 255 (= none), total length 0xffffffff (= pause in eof),
+  //timing type 2, negative timing, 256 symbols, bits without symbols
+  for (uint32_t id = 125; id <= 131; id++) {
+    expectNotLoadable(id);
+  }
+}
+
+TEST_F(ProtocolDatabaseTest, protocolWhichIsTooBigForTheFileFails)
+{
+  expectNotLoadable(132);
 }
 
 //===========================================================================
@@ -605,8 +631,7 @@ TEST_F(ProtocolDatabaseTest, simpleCodeIsCreated)
   EXPECT_EQ(db.getErrStr(), okText());
   EXPECT_EQ(code.getIndex(), irProtoIndex);
   EXPECT_TRUE(code.accessStartGroups().empty());
-  EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
-      (Records { { 0, bitsOf(0xA5, 8) } }));
+  EXPECT_EQ(recordsOf(code.accessRepeatGroups()), (Records { { 0, bitsOf(0xA5, 8) } }));
   EXPECT_TRUE(code.accessFinishGroups().empty());
 }
 
@@ -614,13 +639,11 @@ TEST_F(ProtocolDatabaseTest, wordSelectsSectionWithoutData)
 {
   const Code code = makeCode("G:Test NEC Like 32 Bit:(0x12345678)(Repeat)():3");
 
-  ASSERT_TRUE(code.isValid())<< db.getErrStr().toStdString();
+  ASSERT_TRUE(code.isValid()) << db.getErrStr().toStdString();
   EXPECT_EQ(code.getIndex(), irProtoIndex);
-  EXPECT_EQ(recordsOf(code.accessStartGroups()),
-      (Records { { 0, bitsOf(0x12345678, 32) } }));
+  EXPECT_EQ(recordsOf(code.accessStartGroups()), (Records { { 0, bitsOf(0x12345678, 32) } }));
   //the code segment is the section after the ir segment
-  EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
-      (Records { { 1, Symbols() } }));
+  EXPECT_EQ(recordsOf(code.accessRepeatGroups()), (Records { { 1, Symbols() } }));
   EXPECT_TRUE(code.accessFinishGroups().empty());
 }
 
@@ -641,62 +664,30 @@ TEST_F(ProtocolDatabaseTest, codeCreatesTheTransmitData)
 
 TEST_F(ProtocolDatabaseTest, boolValueIsMsbFirstAndLeftPadded)
 {
-  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0xA5)():3"), (Records { {
-    0,
-    bitsOf(0xA5, 8) } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0x1)():3"), (Records { {
-    0,
-    bitsOf(0x01, 8) } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0x0)():3"), (Records { {
-    0,
-    bitsOf(0x00, 8) } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0xFF)():3"), (Records { {
-    0,
-    bitsOf(0xFF, 8) } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0xA5)():3"), (Records { { 0, bitsOf(0xA5, 8) } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0x1)():3"), (Records { { 0, bitsOf(0x01, 8) } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0x0)():3"), (Records { { 0, bitsOf(0x00, 8) } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0xFF)():3"), (Records { { 0, bitsOf(0xFF, 8) } }));
 }
 
 TEST_F(ProtocolDatabaseTest, leadingZerosCanBeOmittedOrAdded)
 {
-  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0x00A5)():3"), (Records { {
-    0,
-    bitsOf(0xA5, 8) } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Quad 6 Bit:()(0x0123)():3"), (Records { {
-    0,
-    { 0, 0, 0, 1, 2, 3 } } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0x0A5F)():3"), (Records { {
-    0,
-    { 0, 10, 5, 15 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Simple 8 Bit:()(0x00A5)():3"), (Records { { 0, bitsOf(0xA5, 8) } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Quad 6 Bit:()(0x0123)():3"), (Records { { 0, { 0, 0, 0, 1, 2, 3 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0x0A5F)():3"), (Records { { 0, { 0, 10, 5, 15 } } }));
 }
 
 TEST_F(ProtocolDatabaseTest, quadValueIsOneSymbolPerDigit)
 {
-  EXPECT_EQ(repeatRecordsOf("G:Test Quad 6 Bit:()(0x321032)():3"), (Records { {
-    0,
-    { 3, 2, 1, 0, 3, 2 } } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Quad 6 Bit:()(0x0)():3"), (Records { { 0, {
-    0,
-    0,
-    0,
-    0,
-    0,
-    0 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Quad 6 Bit:()(0x321032)():3"), (Records { { 0, { 3, 2, 1, 0, 3, 2 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Quad 6 Bit:()(0x0)():3"), (Records { { 0, { 0, 0, 0, 0, 0, 0 } } }));
 }
 
 TEST_F(ProtocolDatabaseTest, hexValueIsOneSymbolPerDigit)
 {
-  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0xA5F)():3"), (Records { { 0, {
-    0,
-    10,
-    5,
-    15 } } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0xFEDC)():3"), (Records { {
-    0,
-    { 15, 14, 13, 12 } } }));
-  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0x0)():3"), (Records { { 0, {
-    0,
-    0,
-    0,
-    0 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0xA5F)():3"), (Records { { 0, { 0, 10, 5, 15 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0xFEDC)():3"), (Records { { 0, { 15, 14, 13, 12 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Hex 4 Bit:()(0x0)():3"), (Records { { 0, { 0, 0, 0, 0 } } }));
 }
 
 TEST_F(ProtocolDatabaseTest, valuesWhichDoNotFitAreRejected)
@@ -717,26 +708,40 @@ TEST_F(ProtocolDatabaseTest, symbolsWhichTheSectionDoesNotHaveAreRejected)
 
 TEST_F(ProtocolDatabaseTest, numberInFrontOfTheXIsTheSection)
 {
-  const Code code = makeCode(
-      "G:Test Multi Section:(Start)(0x12_1x345)(Trailer):3");
+  const Code code = makeCode("G:Test Multi Section:(Start)(0x12_1x345)(Trailer):3");
 
-  ASSERT_TRUE(code.isValid())<< db.getErrStr().toStdString();
-  EXPECT_EQ(recordsOf(code.accessStartGroups()),
-      (Records { { 3, Symbols() } }));
+  ASSERT_TRUE(code.isValid()) << db.getErrStr().toStdString();
+  EXPECT_EQ(recordsOf(code.accessStartGroups()), (Records { { 3, Symbols() } }));
   EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
       (Records { { 0, bitsOf(0x12, 8) }, { 1, bitsOf(0x345, 12) } }));
+  EXPECT_EQ(recordsOf(code.accessFinishGroups()), (Records { { 5, Symbols() } }));
+}
+
+TEST_F(ProtocolDatabaseTest, sectionNumberIsThePositionInTheIrSegmentsNotTheKeyCodeOrder)
+{
+  //key code lists: start 0, 1 / repeat 4, 0, 2 / finish 4, 0, 3
+  const Code code = makeCode("G:Test Reordered Refs:(0x12_1xABCD)(4x0_0x34_2x15)(4x1_0x56_3x07):3");
+
+  ASSERT_TRUE(code.isValid()) << db.getErrStr().toStdString();
+  EXPECT_EQ(recordsOf(code.accessStartGroups()),
+      (Records { { 0, bitsOf(0x12, 8) }, { 1, { 10, 11, 12, 13 } } }));
+  EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
+      (Records { { 4, { 0 } }, { 0, bitsOf(0x34, 8) }, { 2, bitsOf(0x15, 6) } }));
   EXPECT_EQ(recordsOf(code.accessFinishGroups()),
-      (Records { { 5, Symbols() } }));
+      (Records { { 4, { 1 } }, { 0, bitsOf(0x56, 8) }, { 3, bitsOf(0x07, 5) } }));
+}
+
+TEST_F(ProtocolDatabaseTest, sectionWhichIsNotInTheKeyCodeListsCanBeUsed)
+{
+  EXPECT_EQ(repeatRecordsOf("G:Test Unreferenced Section:()(0x12_2x5)():3"),
+      (Records { { 0, bitsOf(0x12, 8) }, { 2, bitsOf(0x5, 4) } }));
 }
 
 TEST_F(ProtocolDatabaseTest, framesKeepTheirOrder)
 {
-  EXPECT_EQ(
-      repeatRecordsOf(
-          "G:Test Multi Section:()(Start_0x61_Space_1xA_Trailer)():3"),
-      (Records { { 3, Symbols() }, { 0, bitsOf(0x61, 8) }, { 4, Symbols() }, {
-        1,
-        bitsOf(0xA, 12) }, { 5, Symbols() } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Multi Section:()(Start_0x61_Space_1xA_Trailer)():3"),
+      (Records { { 3, Symbols() }, { 0, bitsOf(0x61, 8) }, { 4, Symbols() }, { 1, bitsOf(0xA, 12) },
+          { 5, Symbols() } }));
 }
 
 TEST_F(ProtocolDatabaseTest, sectionCanBeUsedMultipleTimes)
@@ -747,33 +752,26 @@ TEST_F(ProtocolDatabaseTest, sectionCanBeUsedMultipleTimes)
 
 TEST_F(ProtocolDatabaseTest, sectionCanBeLeftOut)
 {
-  EXPECT_EQ(repeatRecordsOf("G:Test Multi Section:()(2x0123)():3"), (Records { {
-    2,
-    { 0, 1, 2, 3 } } }));
+  EXPECT_EQ(repeatRecordsOf("G:Test Multi Section:()(2x0123)():3"), (Records { { 2, { 0, 1, 2, 3 } } }));
 }
 
 TEST_F(ProtocolDatabaseTest, wordsCanBeUsedInEveryGroup)
 {
   const Code code = makeCode("G:Test Multi Section:(Trailer)(0x01)(Start):3");
 
-  ASSERT_TRUE(code.isValid())<< db.getErrStr().toStdString();
-  EXPECT_EQ(recordsOf(code.accessStartGroups()),
-      (Records { { 5, Symbols() } }));
-  EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
-      (Records { { 0, bitsOf(0x01, 8) } }));
-  EXPECT_EQ(recordsOf(code.accessFinishGroups()),
-      (Records { { 3, Symbols() } }));
+  ASSERT_TRUE(code.isValid()) << db.getErrStr().toStdString();
+  EXPECT_EQ(recordsOf(code.accessStartGroups()), (Records { { 5, Symbols() } }));
+  EXPECT_EQ(recordsOf(code.accessRepeatGroups()), (Records { { 0, bitsOf(0x01, 8) } }));
+  EXPECT_EQ(recordsOf(code.accessFinishGroups()), (Records { { 3, Symbols() } }));
 }
 
 TEST_F(ProtocolDatabaseTest, wordsIgnoreCase)
 {
   const Code code = makeCode("G:Test Multi Section:(START)()(trailer):3");
 
-  ASSERT_TRUE(code.isValid())<< db.getErrStr().toStdString();
-  EXPECT_EQ(recordsOf(code.accessStartGroups()),
-      (Records { { 3, Symbols() } }));
-  EXPECT_EQ(recordsOf(code.accessFinishGroups()),
-      (Records { { 5, Symbols() } }));
+  ASSERT_TRUE(code.isValid()) << db.getErrStr().toStdString();
+  EXPECT_EQ(recordsOf(code.accessStartGroups()), (Records { { 3, Symbols() } }));
+  EXPECT_EQ(recordsOf(code.accessFinishGroups()), (Records { { 5, Symbols() } }));
 }
 
 TEST_F(ProtocolDatabaseTest, protocolNameIgnoresCaseAndSurroundingSpaces)
@@ -786,23 +784,15 @@ TEST_F(ProtocolDatabaseTest, protocolNameIgnoresCaseAndSurroundingSpaces)
 
 TEST_F(ProtocolDatabaseTest, tailAfterTheGroupsIsIgnored)
 {
-  const std::vector<std::string> tails = {
-    ":3",
-    ":0",
-    ":1",
-    ":3\t",
-    ":3.",
-    ":312",
-    "" };
+  const std::vector<std::string> tails = { ":3", ":0", ":1", ":3\t", ":3.", ":312", "" };
 
   for (const std::string &tail : tails) {
     const std::string line = "G:Test Simple 8 Bit:()(0xA5)()" + tail;
     SCOPED_TRACE(line);
 
     const Code code = makeCode(line);
-    ASSERT_TRUE(code.isValid())<< db.getErrStr().toStdString();
-    EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
-        (Records { { 0, bitsOf(0xA5, 8) } }));
+    ASSERT_TRUE(code.isValid()) << db.getErrStr().toStdString();
+    EXPECT_EQ(recordsOf(code.accessRepeatGroups()), (Records { { 0, bitsOf(0xA5, 8) } }));
     EXPECT_EQ(code.getRepeats(), Code::DEFAULT_REPEATS);
   }
 }
@@ -1223,12 +1213,9 @@ TEST(keyCodes, everyLineCreatesTheExpectedCode)
     validCount++;
 
     const SampleProtocol &protocol = protocols.at(line.protocolKey);
-    EXPECT_EQ(recordsOf(code.accessStartGroups()),
-        expectedRecords(protocol, line.groups[0]));
-    EXPECT_EQ(recordsOf(code.accessRepeatGroups()),
-        expectedRecords(protocol, line.groups[1]));
-    EXPECT_EQ(recordsOf(code.accessFinishGroups()),
-        expectedRecords(protocol, line.groups[2]));
+    EXPECT_EQ(recordsOf(code.accessStartGroups()), expectedRecords(protocol, line.groups[0]));
+    EXPECT_EQ(recordsOf(code.accessRepeatGroups()), expectedRecords(protocol, line.groups[1]));
+    EXPECT_EQ(recordsOf(code.accessFinishGroups()), expectedRecords(protocol, line.groups[2]));
   }
   EXPECT_GT(validCount, 0u);
 }

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include <QDebug>
 #include <QFile>
@@ -124,10 +125,10 @@ binary::irProto::Code ProtocolDatabase::getCode(const QString &keyCodeLine)
     return binary::irProto::Code();
   }
 
-  //every group is a list of frames, each frame is one protocol section
+  //every group is a list of frames, each frame uses one protocol section
   array<vector<pair<uint8_t, vector<uint8_t>>>, 3> groups;
   for (int g = 0; g < groups.size(); g++) {
-    if (!buildGroup(elementsOf(key.getItem(g)), *cached, groups[g])) {
+    if (!buildGroup(key.getItem(g), *cached, groups[g])) {
       return binary::irProto::Code();
     }
   }
@@ -137,7 +138,7 @@ binary::irProto::Code ProtocolDatabase::getCode(const QString &keyCodeLine)
   }
 
   binary::irProto::Code code(binary::irProto::Code::INVALID_INDEX_MARKER,
-      cached->proto); //protocol index in output binary, not source id. Index not known yet.
+      cached->proto); //protocol index in output binary, not id! Index not known yet.
   code.setStartGroups(groups[0]);
   code.setRepeatGroups(groups[1]);
   code.setFinishGroups(groups[2]);
@@ -179,6 +180,8 @@ uint32_t ProtocolDatabase::findId(const QString &name) const
 const ProtocolDatabase::CachedProtocol* ProtocolDatabase::loadProtocol(
     uint32_t id)
 {
+  CachedProtocol entry;
+
   if (id == 0) {
     errStr = QObject::tr("ID0 = RAW, not PROTO");
     return nullptr;
@@ -198,7 +201,6 @@ const ProtocolDatabase::CachedProtocol* ProtocolDatabase::loadProtocol(
     return nullptr;
   }
 
-  CachedProtocol entry;
   try {
     const json &jp = j.at("Protocols").at(index->second);
     entry.name = qstr(jp.value("Name", string()));
@@ -217,6 +219,8 @@ const ProtocolDatabase::CachedProtocol* ProtocolDatabase::loadProtocol(
 
 bool ProtocolDatabase::buildProtocol(const json &jp, CachedProtocol &entry)
 {
+  vector<binary::irProto::TimingSection> sections;
+
   //ip and raw only protocols have no key codes
   if (!jp.contains("KeyCode") || !jp.at("KeyCode").is_object()) {
     errStr = QObject::tr(
@@ -224,7 +228,7 @@ bool ProtocolDatabase::buildProtocol(const json &jp, CachedProtocol &entry)
     return false;
   }
 
-  double carrier = binary::irProto::DEFAULT_CLOCK_HZ;
+  auto carrier = binary::irProto::DEFAULT_CLOCK_HZ;
   if (jp.contains("CarrierFrequency")
       && jp.at("CarrierFrequency").is_number()) {
     carrier = jp.at("CarrierFrequency").get<double>();
@@ -233,16 +237,23 @@ bool ProtocolDatabase::buildProtocol(const json &jp, CachedProtocol &entry)
     errStr = QObject::tr("load: invalid CarrierFrequency");
     return false;
   }
-  const long clockPeriod = lround(1000000000.0 / carrier);
+  auto clockPeriod = lround(1000000000.0 / carrier);
   if ((clockPeriod <= 0) || (clockPeriod > 0xffff)) {
     errStr = QObject::tr("load: CarrierFrequency %1 Hz can not be "
         "stored (clock period %2 ns)").arg(carrier).arg(clockPeriod);
     return false;
   }
 
+  //we have two options here:
+  // - read KeyCode object, use the Start/Repeat/Finish items, and use the "pointers"
+  //   within to build the sections.
+  // - read IRSegments / CodeSegments arrays to sections directly, ignoring KeyCode.
+  //   This follows the order in the arrays.
+  //The direct approach always returns valid data, also in combination with getCode()
+  //further on. The indirect approach is not reliable. Maybe KeyCode was never used?
+
   //sections: IRSegments first, their index is what the key codes use. then the data-less CodeSegments.
   static const char *listNames[2] = { "IRSegments", "CodeSegments" };
-  vector<binary::irProto::TimingSection> sections;
 
   for (int listIndex = 0; listIndex < 2; listIndex++) {
     if (!jp.contains(listNames[listIndex])) {
@@ -256,21 +267,22 @@ bool ProtocolDatabase::buildProtocol(const json &jp, CachedProtocol &entry)
     }
 
     for (const auto &segment : list) {
+      binary::irProto::TimingSection section;
+
       if (sections.size() >= MAX_SECTIONS) {
         errStr = QObject::tr("load: too many sections");
         return false;
       }
 
-      binary::irProto::TimingSection section;
       auto res = buildSection(segment, section);
       if (res != true) {
         return false;
       }
 
-      //exception for code segments only -- fetch the keyword for payload-less items
+      //for code segments only -- fetch the keyword "KeyCode>>X<<"
       if (listIndex == 1) {
-        const QString keyword = getKeyword(entry.name,
-            qstr(segment.value("Name", string())));
+        auto name = qstr(segment.value("Name", string()));
+        auto keyword = getKeyword(entry.name, name);
         if ((!keyword.isEmpty()) && (!entry.keywords.contains(keyword))) {
           entry.keywords.insert(keyword, static_cast<uint8_t>(sections.size()));
         }
@@ -286,68 +298,84 @@ bool ProtocolDatabase::buildProtocol(const json &jp, CachedProtocol &entry)
 
   entry.proto = binary::irProto::IrProto(static_cast<uint16_t>(clockPeriod),
       sections);
+  if (entry.proto.serialise(0).size() > MAX_PROTOCOL_SIZE) {
+    //plausibility only -- all protocols in the remote share the same space
+    errStr = QObject::tr("load: protocol is too big for IrProto.bin");
+    return false;
+  }
   return true;
 }
 
 QString ProtocolDatabase::getKeyword(const QString &protocolName,
     const QString &segmentName)
 {
-  static const QString marker = QStringLiteral("keycode");
+  static const auto marker = QStringLiteral("keycode");
 
-  const QString prefix = normalizeName(protocolName);
-  const QString name = normalizeName(segmentName);
+  auto prefix = normalizeName(protocolName);
+  auto name = normalizeName(segmentName);
   if (!name.startsWith(prefix)) {
     return QString();
   }
 
-  const QString rest = name.mid(prefix.size()).trimmed();
+  auto rest = name.mid(prefix.size()).trimmed();
   if (!rest.startsWith(marker)) {
     return QString();
   }
   return rest.mid(marker.size()).trimmed();
 }
 
-QVariantList ProtocolDatabase::elementsOf(const QVariant &item)
+bool ProtocolDatabase::appendItems(const json &atom,
+    std::vector<binary::irProto::Item> &out)
 {
-  QVariantList elements;
-  const KeyCode::ItemType type = KeyCode::getItemType(item);
-  if (type == KeyCode::ItemType::Array) {
-    elements = item.toList();
+  //everything has to fit into the IrProto format, there is no "almost"
+  const json &type = atom.at("Type");
+  if (!type.is_number_unsigned() || (type.get<uint64_t>() > 1)) {
+    errStr = QObject::tr("load: timing type has to be 0 (pause) or 1 (mark)");
+    return false;
   }
-  if ((type == KeyCode::ItemType::Number)
-      || (type == KeyCode::ItemType::Text)) {
-    elements.append(item);
+  const json &value = atom.at("Value");
+  if (!value.is_number_unsigned()
+      || (value.get<uint64_t>() > std::numeric_limits<uint32_t>::max())) {
+    errStr = QObject::tr("load: invalid timing value");
+    return false;
   }
-  return elements;
-}
 
-void ProtocolDatabase::appendItems(const json &atom,
-    vector<binary::irProto::Item> &out)
-{
-  const bool state = (atom.at("Type").get<int>() == 1);
-  uint32_t remaining = atom.at("Value").get<uint32_t>();
+  const bool state = (type.get<uint64_t>() == 1);
+  auto remaining = value.get<uint32_t>();
+
+  //a pause that long is a database error. keep the first part, drop the rest.
+  if (!state && (remaining > MAX_PAUSE)) {
+    qDebug() << "pause limited to" << MAX_PAUSE << "us, database has"
+        << remaining << "us";
+    remaining = MAX_PAUSE;
+  }
 
   //too long for one item: max-length item, then 0 us of the other state, repeat
+  size_t needed = 1;
+  if (remaining > 0) {
+    needed = 1 + 2 * static_cast<size_t>((remaining - 1) / MAX_SINGLE_TIMING);
+  }
+  if ((out.size() + needed) > MAX_ITEMS) {
+    errStr = QObject::tr("load: more than %1 timing items").arg(MAX_ITEMS);
+    return false;
+  }
   while (remaining > MAX_SINGLE_TIMING) {
     out.emplace_back(state, static_cast<uint16_t>(MAX_SINGLE_TIMING));
     out.emplace_back(!state, static_cast<uint16_t>(0));
     remaining -= MAX_SINGLE_TIMING;
   }
   out.emplace_back(state, static_cast<uint16_t>(remaining));
+  return true;
 }
 
 bool ProtocolDatabase::buildHeader(const json &atoms,
     binary::irProto::TimingSectionIrHeader &header)
 {
-  vector<binary::irProto::Item> items;
+  std::vector<binary::irProto::Item> items;
   for (const auto &atom : atoms) {
-    appendItems(atom, items);
-  }
-  if (items.size() > MAX_ITEMS) {
-    errStr = QObject::tr(
-        "load: header / trailer needs %1 timing items, max is %2").arg(
-        items.size()).arg(MAX_ITEMS);
-    return false;
+    if (!appendItems(atom, items)) {
+      return false;
+    }
   }
 
   for (const auto &item : items) {
@@ -356,70 +384,106 @@ bool ProtocolDatabase::buildHeader(const json &atoms,
   return true;
 }
 
-bool ProtocolDatabase::buildSection(const json &segment,
+bool ProtocolDatabase::buildPayload(const json &payload,
     binary::irProto::TimingSection &section)
 {
   using Quantum = binary::irProto::TimingSectionIrPayload::Quantum;
 
-  //interval is the total frame time. if not given, the pause is coded in the eof (default)
-  const json total = segment.value("TotalLength", json());
-  if (total.is_number_unsigned() && (total.get<uint32_t>() > 0)) {
-    section.setTiming(total.get<uint32_t>());
+  const json &bitCount = payload.at("NumberOfBits");
+  if (!bitCount.is_number_unsigned()
+      || (bitCount.get<uint64_t>() > MAX_BIT_COUNT)) {
+    errStr = QObject::tr("load: invalid NumberOfBits");
+    return false;
   }
+  section.setBitCount(bitCount.get<uint16_t>());
 
-  const json payload = segment.value("Payload", json());
-  if (payload.is_object()) {
-    section.setBitCount(payload.at("NumberOfBits").get<uint16_t>());
-
-    const json toggleBit = payload.value("ToggleBit", json());
-    if (toggleBit.is_number_unsigned()) {
-      section.setToggle(toggleBit.get<uint16_t>());
-    }
-
-    //the symbol is the "BitType", not the position in the list
-    const json &encodings = payload.at("Encodings");
-    const size_t quantumCount = encodings.size();
-    vector<Quantum> quanta(quantumCount);
-    vector<bool> assigned(quantumCount, false);
-    size_t maxItems = 0;
-
-    for (const auto &encoding : encodings) {
-      const auto bitType = encoding.at("BitType").get<size_t>();
-      if ((bitType >= quantumCount) || assigned[bitType]) {
-        errStr = QObject::tr("load: invalid BitType %1").arg(bitType);
-        return false;
-      }
-      assigned[bitType] = true;
-
-      for (const auto &atom : encoding.at("Atoms")) {
-        appendItems(atom, quanta[bitType]);
-      }
-      maxItems = max(maxItems, quanta[bitType].size());
-    }
-    if (maxItems > MAX_ITEMS) {
-      errStr = QObject::tr("load: encoding needs %1 timing "
-          "items, max is %2").arg(maxItems).arg(MAX_ITEMS);
+  //null = no toggle. the last position is the "none" marker of the format.
+  const json toggleBit = payload.value("ToggleBit", json());
+  if (!toggleBit.is_null()) {
+    if (!toggleBit.is_number_unsigned()
+        || (toggleBit.get<uint64_t>()
+            >= binary::irProto::TimingSection::TOGGLE_NONE)) {
+      errStr = QObject::tr("load: invalid ToggleBit");
       return false;
     }
+    section.setToggle(toggleBit.get<uint16_t>());
+  }
 
-    //all quanta need the same item count: pad with 0 us items, alternating state
-    binary::irProto::TimingSectionIrPayload data;
-    for (size_t q = 0; q < quantumCount; q++) {
-      Quantum &quantum = quanta[q];
-      bool state = true;
-      if (!quantum.empty()) {
-        state = !quantum.back().first;
-      }
-      while (quantum.size() < maxItems) {
-        quantum.emplace_back(state, static_cast<uint16_t>(0));
-        state = !state;
-      }
-      if (!data.setQuantum(static_cast<uint8_t>(q), quantum)) {
-        errStr = QObject::tr("load: invalid encoding %1").arg(q);
+  //the symbol is the "BitType", not the position in the list
+  const json &encodings = payload.at("Encodings");
+  auto quantumCount = encodings.size();
+  if (quantumCount > MAX_SYMBOLS) {
+    errStr = QObject::tr("load: more than %1 symbols").arg(MAX_SYMBOLS);
+    return false;
+  }
+  if ((quantumCount == 0) && (bitCount.get<uint64_t>() > 0)) {
+    errStr = QObject::tr("load: payload has bits but no symbols");
+    return false;
+  }
+
+  std::vector<Quantum> quanta(quantumCount);
+  std::vector<bool> assigned(quantumCount, false);
+  size_t maxItems = 0;
+
+  for (const auto &encoding : encodings) {
+    auto bitType = encoding.at("BitType").get<size_t>();
+    if ((bitType >= quantumCount) || assigned[bitType]) {
+      errStr = QObject::tr("load: invalid BitType %1").arg(bitType);
+      return false;
+    }
+    assigned[bitType] = true;
+
+    for (const auto &atom : encoding.at("Atoms")) {
+      if (!appendItems(atom, quanta[bitType])) {
         return false;
       }
     }
-    section.setData(data);
+    maxItems = std::max(maxItems, quanta[bitType].size());
+  }
+
+  //all quanta need the same item count: pad with 0 us items, alternating state
+  binary::irProto::TimingSectionIrPayload data;
+  for (size_t q = 0; q < quantumCount; q++) {
+    auto &quantum = quanta[q];
+    auto state = true;
+    if (!quantum.empty()) {
+      state = !quantum.back().first;
+    }
+    while (quantum.size() < maxItems) {
+      quantum.emplace_back(state, static_cast<uint16_t>(0));
+      state = !state;
+    }
+    if (!data.setQuantum(static_cast<uint8_t>(q), quantum)) {
+      errStr = QObject::tr("load: invalid encoding %1").arg(q);
+      return false;
+    }
+  }
+  section.setData(data);
+  return true;
+}
+
+bool ProtocolDatabase::buildSection(const json &segment,
+    binary::irProto::TimingSection &section)
+{
+  //interval is the total frame time. if not given, the pause is coded in the eof (default)
+  const json total = segment.value("TotalLength", json());
+  if (!total.is_null()) {
+    //the last value is the "pause in eof" marker of the format
+    if (!total.is_number_unsigned()
+        || (total.get<uint64_t>()
+            >= binary::irProto::TimingSection::PAUSE_IN_EOF)) {
+      errStr = QObject::tr("load: invalid TotalLength");
+      return false;
+    }
+    if (total.get<uint32_t>() > 0) {
+      section.setTiming(total.get<uint32_t>());
+    }
+  }
+
+  //code segments have no payload
+  const json payload = segment.value("Payload", json());
+  if (payload.is_object() && !buildPayload(payload, section)) {
+    return false;
   }
 
   binary::irProto::TimingSectionIrHeader sof;
@@ -437,64 +501,92 @@ bool ProtocolDatabase::buildSection(const json &segment,
   return true;
 }
 
-bool ProtocolDatabase::buildGroup(const QVariantList &elements,
-    const CachedProtocol &protocol, vector<pair<uint8_t, vector<uint8_t>>> &out)
+bool ProtocolDatabase::buildFrame(const QVariant &element,
+    const CachedProtocol &protocol,
+    std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out)
+{
+  std::vector<uint8_t> symbols;
+  auto type = KeyCode::getItemType(element);
+
+  if (type == KeyCode::ItemType::Number) {
+    //section with data. the number in front of the "x" is the protocol section
+    auto number = element.value<KeyCodeNumber>();
+    if ((number.prefix < 0)
+        || (number.prefix >= protocol.proto.getSectionCount())) {
+      errStr = QObject::tr("keycode: section %1 does not exist").arg(
+          number.prefix);
+      return false;
+    }
+
+    if (!buildSymbols(number, protocol.proto.accessSection(number.prefix),
+        symbols)) {
+      return false;
+    }
+    out.emplace_back(static_cast<uint8_t>(number.prefix), symbols);
+    return true;
+  }
+
+  if (type == KeyCode::ItemType::Text) {
+    //word: section without data
+    auto word = normalizeName(element.toString());
+    if (word == QStringLiteral("key")) {
+      errStr = QObject::tr("keycode: key codes (IP) are not supported");
+      return false;
+    }
+
+    const auto section = protocol.keywords.constFind(word);
+    if (section == protocol.keywords.constEnd()) {
+      errStr = QObject::tr("keycode: unknown word \"%1\"").arg(word);
+      return false;
+    }
+    out.emplace_back(section.value(), std::vector<uint8_t>());
+    return true;
+  }
+
+  errStr = QObject::tr("keycode: unexpected element");
+  return false;
+}
+
+bool ProtocolDatabase::buildGroup(const QVariant &item,
+    const CachedProtocol &protocol,
+    std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out)
 {
   //every element is one frame, in the given order. a section can be left out or used multiple times.
-  for (const QVariant &element : elements) {
-    const KeyCode::ItemType type = KeyCode::getItemType(element);
-
-    if (type == KeyCode::ItemType::Number) {
-      //section with data. the number in front of the "x" is the protocol section
-      const KeyCodeNumber number = element.value<KeyCodeNumber>();
-      if ((number.prefix < 0)
-          || (number.prefix >= protocol.proto.getSectionCount())) {
-        errStr = QObject::tr("keycode: section %1 does not exist").arg(
-            number.prefix);
-        return false;
+  switch (KeyCode::getItemType(item)) {
+    case KeyCode::ItemType::Empty:
+      //"()": nothing to send in this group
+      return true;
+    case KeyCode::ItemType::Array:
+      //"a_b_c": a list of frames
+      for (const auto &element : item.toList()) {
+        if (!buildFrame(element, protocol, out)) {
+          return false;
+        }
       }
-
-      vector<uint8_t> symbols;
-      if (!buildSymbols(number, protocol.proto.accessSection(number.prefix),
-          symbols)) {
-        return false;
-      }
-      out.emplace_back(static_cast<uint8_t>(number.prefix), symbols);
-    }
-
-    if (type == KeyCode::ItemType::Text) {
-      //word: section without data
-      const QString word = normalizeName(element.toString());
-      if (word == QStringLiteral("key")) {
-        errStr = QObject::tr("keycode: key codes (IP) are not supported");
-        return false;
-      }
-
-      const auto section = protocol.keywords.constFind(word);
-      if (section == protocol.keywords.constEnd()) {
-        errStr = QObject::tr("keycode: unknown word \"%1\"").arg(word);
-        return false;
-      }
-      out.emplace_back(section.value(), vector<uint8_t>());
-    }
+      return true;
+    case KeyCode::ItemType::Number:
+    case KeyCode::ItemType::Text:
+      //single frame
+      return buildFrame(item, protocol, out);
   }
-  return true;
+  return false;
 }
 
 bool ProtocolDatabase::buildSymbols(const KeyCodeNumber &number,
     const binary::irProto::TimingSection &section, vector<uint8_t> &symbols)
 {
-  const int bitCount = section.getBitCount();
-  const int quantums = section.getData().getQuantisation();
-  const int digitCount = static_cast<int>(number.digits.size());
+  vector<uint8_t> value;
+
+  auto bitCount = section.getBitCount();
+  auto quantums = section.getData().getQuantisation();
+  auto digitCount = static_cast<int>(number.digits.size());
   symbols.clear();
 
   //value as symbol list, msb first
-  vector<uint8_t> value;
   if (quantums == 2) {
     //bool: every hex digit is 4 bits
     for (int i = 0; i < digitCount; i++) {
-      const int digit = KeyCode::getHexSymbol(number, i);
+      auto digit = KeyCode::getHexSymbol(number, i);
       if (digit < 0) {
         errStr = QObject::tr("keycode: invalid digit in %1").arg(number.digits);
         return false;
@@ -530,7 +622,7 @@ bool ProtocolDatabase::buildSymbols(const KeyCodeNumber &number,
   while ((first < value.size()) && (value[first] == 0)) {
     first++;
   }
-  const size_t significant = value.size() - first;
+  auto significant = value.size() - first;
   if (significant > static_cast<size_t>(bitCount)) {
     errStr = QObject::tr("keycode: value %1 does not fit into %2 symbols").arg(
         number.digits).arg(bitCount);

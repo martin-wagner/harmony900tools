@@ -60,26 +60,31 @@ class ProtocolDatabase {
 
     /** longest timing a single item can hold */
     static constexpr uint32_t MAX_SINGLE_TIMING = 0x7fff;
-    /** item count is stored in one byte */
-    static constexpr size_t MAX_ITEMS = 255;
-    /** section index is stored in one byte */
-    static constexpr size_t MAX_SECTIONS = 255;
+    /** longest allowed pause (space) in us. */
+    static constexpr uint32_t MAX_PAUSE = 1000000;
+    /** some limits because further on values are stored in 1 / 2 bytes */
+    static constexpr size_t MAX_ITEMS = 0xff;
+    static constexpr size_t MAX_SECTIONS = 0xff;
+    static constexpr size_t MAX_SYMBOLS = 0xff;
+    static constexpr uint64_t MAX_BIT_COUNT = 0xffff;
+    static constexpr size_t MAX_PROTOCOL_SIZE = 0xffff;
 
     void clear();
     bool loadFailed(const QString &message);
     static QString normalizeName(const QString &name);
     uint32_t findId(const QString &name) const;
+    //protocol
     const CachedProtocol *loadProtocol(uint32_t id);
     bool buildProtocol(const nlohmann::json &jp, CachedProtocol &entry);
     static QString getKeyword(const QString &protocolName, const QString &segmentName);
-    static QVariantList elementsOf(const QVariant &item);
-    static void appendItems(const nlohmann::json &atom, std::vector<binary::irProto::Item> &out);
+    bool appendItems(const nlohmann::json &atom, std::vector<binary::irProto::Item> &out);
     bool buildHeader(const nlohmann::json &atoms, binary::irProto::TimingSectionIrHeader &header);
+    bool buildPayload(const nlohmann::json &payload, binary::irProto::TimingSection &section);
     bool buildSection(const nlohmann::json &segment, binary::irProto::TimingSection &section);
-    bool buildGroup(const QVariantList &elements, const CachedProtocol &protocol,
-        std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out);
-    bool buildSymbols(const KeyCodeNumber &number, const binary::irProto::TimingSection &section,
-        std::vector<uint8_t> &symbols);
+    //code
+    bool buildFrame(const QVariant &element, const CachedProtocol &protocol, std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out);
+    bool buildGroup(const QVariant &item, const CachedProtocol &protocol, std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out);
+    bool buildSymbols(const KeyCodeNumber &number, const binary::irProto::TimingSection &section, std::vector<uint8_t> &symbols);
 
     QString path;
     QString errStr = "OK";
