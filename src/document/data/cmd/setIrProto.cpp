@@ -28,7 +28,7 @@ void SetIrProtoLibCommand::undo()
   emit dirtyChanged(true);
 }
 
-AppendIrProtoLibItemCommand::AppendIrProtoLibItemCommand(ConfigData &c,
+AppendLocalIrProtoLibItemCommand::AppendLocalIrProtoLibItemCommand(ConfigData &c,
     const Enum<CodeType> &t, QUndoCommand *parent) :
     BaseCommand(QObject::tr("Append IR Proto Lib item"), parent), c(c), t(t)
 {
@@ -48,7 +48,7 @@ AppendIrProtoLibItemCommand::AppendIrProtoLibItemCommand(ConfigData &c,
   isValid = true;
 }
 
-void AppendIrProtoLibItemCommand::redo()
+void AppendLocalIrProtoLibItemCommand::redo()
 {
   if (!isValid || (exists >= 0)) {
     return;
@@ -61,7 +61,7 @@ void AppendIrProtoLibItemCommand::redo()
   emit dirtyChanged(true);
 }
 
-void AppendIrProtoLibItemCommand::undo()
+void AppendLocalIrProtoLibItemCommand::undo()
 {
   if (!isValid || (exists >= 0)) {
     return;
@@ -74,12 +74,66 @@ void AppendIrProtoLibItemCommand::undo()
   emit dirtyChanged(true);
 }
 
-bool AppendIrProtoLibItemCommand::valid() const
+bool AppendLocalIrProtoLibItemCommand::valid() const
 {
   return isValid;
 }
 
-int AppendIrProtoLibItemCommand::index() const
+int AppendLocalIrProtoLibItemCommand::index() const
+{
+  return pos;
+}
+
+AppendDatabaseIrProtoLibItemCommand::AppendDatabaseIrProtoLibItemCommand(
+    ConfigData &c, const string &t, const binary::irProto::IrProto &proto,
+    QUndoCommand *parent) :
+    BaseCommand(QObject::tr("Append IR Proto Lib item"), parent), c(c), t(t)
+{
+  exists = c.getProprietaryPrococolLibIndex(t);
+  if (exists >= 0) {
+    //already exists. don't do anything
+    pos = exists;
+    isValid = true;
+    return;
+  }
+
+  protocol = proto;
+  pos = c.getProtocolLib().getProtocolCount();
+  isValid = true;
+}
+
+void AppendDatabaseIrProtoLibItemCommand::redo()
+{
+  if (!isValid || (exists >= 0)) {
+    return;
+  }
+
+  emit itemAboutToBeAdded(Item::IR_PROTO_LIB, pos);
+  c.getProtocolLib().insertProtocol(protocol, pos);
+  c.addProprietaryProtocolLibListItem(t, pos);
+  emit itemAdded(Item::IR_PROTO_LIB, pos);
+  emit dirtyChanged(true);
+}
+
+void AppendDatabaseIrProtoLibItemCommand::undo()
+{
+  if (!isValid || (exists >= 0)) {
+    return;
+  }
+
+  emit itemAboutToBeRemoved(Item::IR_PROTO_LIB, pos);
+  c.removeProprietaryPrococolLibListItem(t);
+  c.getProtocolLib().removeProtocol(pos);
+  emit itemRemoved(Item::IR_PROTO_LIB, pos);
+  emit dirtyChanged(true);
+}
+
+bool AppendDatabaseIrProtoLibItemCommand::valid() const
+{
+  return isValid;
+}
+
+int AppendDatabaseIrProtoLibItemCommand::index() const
 {
   return pos;
 }

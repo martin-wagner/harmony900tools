@@ -29,8 +29,9 @@ void fromJsonOld(const ordered_json &in, binary::irProto::TimingSectionIrPayload
 void toJson(ordered_json &out, const binary::irProto::TimingSection &section);
 void fromJson(const ordered_json &in, binary::irProto::TimingSection &section);
 
-void toJson(ordered_json &out, const binary::irProto::IrProto &proto, const std::string &name);
-std::string fromJson(const ordered_json &in, binary::irProto::IrProto &proto);
+void toJson(ordered_json &out, const binary::irProto::IrProto &proto, const std::string &name, const std::string &database);
+void fromJson(const ordered_json &in, binary::irProto::IrProto &proto, std::string &name, std::string &database);
+void fromJson(const ordered_json &in, binary::irProto::IrProto &proto);
 
 }
 }

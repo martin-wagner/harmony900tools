@@ -8,9 +8,9 @@
 #include "lib/qtHelpers.h"
 #include "lib/uid.h"
 #include "importer.h"
-#include "keyCode.h"
 #include "document/data/items/device.h"
 #include "document/data/items/jsonSerialise.h"
+#include "document/config.h"
 
 using namespace nlohmann;
 using namespace std;
@@ -187,7 +187,7 @@ bool Database::setDatabase(const DatabasePaths &paths)
     db.emplace(mnfKey, move(manufacturer));
   }
 
-  return true;
+  return protocolDatabase.setDatabase(paths);
 }
 
 QStringList Database::findManufacturers(const QString &substr) const
@@ -338,13 +338,17 @@ bool document::files::Database::importDevice(const Device &source,
     return false;
   }
 
+  config.beginMacro(tr("Import Device %1").arg(source.name));
   try {
-    return importDevice(j, config, tryConvertProtocol);
+    auto ret = importDevice(j, config, tryConvertProtocol);
+    config.endMacro();
+    return ret;
   } catch (const json::exception &e) {
     emit writeLog(LogLevel::Error,
         tr("load %1: Json error at line %2 [%3]: %4").arg(d.devices).arg(
             source.line).arg(e.id).arg(QString(e.what())),
         ContentType::PlainText);
+    config.endMacro();
     return false;
   }
 }
@@ -387,14 +391,16 @@ bool Database::importDevice(const json &j, document::Config &config,
   auto &jd = j.at("device");
 
   //description
-  data::serialiser::fromJson(jd, "DeviceType", d.type);
+  auto deviceType =
+      static_cast<data::DatabaseDeviceType>(jd.at("DeviceType").get<int>());
+  d.type.set(mapDatabaseDeviceType(deviceType));
   data::serialiser::fromJson(jd, "Manufacturer", d.mnf);
   data::serialiser::fromJson(jd, "Model", d.model);
   data::serialiser::fromJson(jd, "Name", d.label);
 
   //properties
   if (hasPowerFeature) {
-    auto jp = getFeature(j, "ChannelTuningFeature");
+    auto jp = getFeature(j, "PowerFeature");
     data::serialiser::fromJson(jd, "IsPowerAlwaysOn", d.manualPower);
     data::serialiser::fromJson(jd, "IsPoweredOnBetweenActivities", d.alwaysOn);
   }
@@ -402,8 +408,11 @@ bool Database::importDevice(const json &j, document::Config &config,
   if (display) {
     d.isDisplayDevice.set(true).setIncluded(data::Used::YES);
   }
-  auto tuner = hasCapability(jd, Capabilities::HAS_TUNER_INPUT);
-  if (tuner) {
+//  auto tuner = hasCapability(jd, Capabilities::HAS_TUNER_INPUT);
+//  if (tuner) {
+//    d.tunerInput.set(data::TunerInput::Tuner).setIncluded(data::Used::YES);
+//  } todo do we need to check this?
+  if (hasChannelTuningFeature) {
     d.tunerInput.set(data::TunerInput::Tuner).setIncluded(data::Used::YES);
   }
   data::serialiser::fromJson(jd, "IsScartCableSupported", d.scart);
@@ -427,7 +436,7 @@ bool Database::importDevice(const json &j, document::Config &config,
   data::serialiser::fromJson(jd, "HoldInterKeyDelay",
       d.getIrCommands().holdInterKeyMs);
 
-  return true;
+  return ret;
 }
 
 bool document::files::Database::commands(const nlohmann::json &j,
@@ -437,7 +446,10 @@ bool document::files::Database::commands(const nlohmann::json &j,
   bool ret = true;
 
   for (const auto &cmd : j.at("commands")) {
-    if (!cmd.contains("CommandTypeId")) { //hard button enum item, contains buttons we don't have!
+    //CommandTypeId value maps mostly to >>hard button<< enum, but can also contain
+    //buttons we don't have. In this case, a soft button is created instead. Without
+    //it no button can be created.
+    if (!cmd.contains("CommandTypeId")) {
       continue;
     }
     auto res = command(cmd, device, config, tryConvertProtocol);
@@ -461,13 +473,14 @@ bool document::files::Database::command(const nlohmann::json &j,
     data::item::Device &device, document::Config &config,
     bool tryConvertProtocol) const
 {
+  string protocolName;
+  int protocolIndex = -1;
   data::item::ProtoCommand cmd;
-  KeyCode keyCode;
 
   if (j.contains("Raw") && !j.at("Raw").is_null()) {
     //fixme used by 19 of approx. 270000 devices. not worth the effort.
     emit writeLog(LogLevel::Warning,
-        tr("inport %1: RAW commands not supported").arg(
+        tr("import %1: RAW commands not supported").arg(
             qstr(device.label.get())), ContentType::PlainText);
     return false;
   }
@@ -479,79 +492,56 @@ bool document::files::Database::command(const nlohmann::json &j,
   if (boost::iequals(cmd.name.get(), "Unknown")) {
     return false;
   }
+  if (device.getIrCommands().nameExists(cmd.name.get())) {
+    emit writeLog(LogLevel::Warning,
+        tr("import %1: COMMAND already exists (%2)").arg(
+            qstr(device.label.get())).arg(qstr(cmd.name.get())),
+        ContentType::PlainText);
+  }
   if (!j.contains("ProtocolId") || !j.at("ProtocolId").is_number_unsigned()
       || !j.contains("KeyCode") || !j.at("KeyCode").is_string()) {
     emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO data missing/invalid").arg(
+        tr("import %1: PROTO data missing/invalid").arg(
             qstr(device.label.get())), ContentType::PlainText);
     return false;
   }
   auto protocolId = j.at("ProtocolId").get<uint32_t>();
-  //todo  createIrProto();
+  auto protocol = protocolDatabase.getProtocol(protocolId, &protocolName);
+  if (protocol.isEmpty()) {
+    //protocol name only valid when parsing succeeds
+    emit writeLog(LogLevel::Warning,
+        tr("import: PROTO import failed (ID %1: %2)").arg(protocolId).arg(
+            protocolDatabase.getErrStr()), ContentType::PlainText);
+    return false;
+  }
 
   auto keyCodeStr = j.at("KeyCode").get<string>();
-  auto res = KeyCode::parse(qstr(keyCodeStr), keyCode);
-  if (res == false) {
+  auto code = protocolDatabase.getCode(qstr(keyCodeStr));
+  if (!code.isValid(true)) {
     emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO KeyCode parser error").arg(
-            qstr(device.label.get())), ContentType::PlainText);
+        tr("import: PROTO code import failed (%1: %2)").arg(qstr(protocolName)).arg(
+            protocolDatabase.getErrStr()), ContentType::PlainText);
     return false;
   }
-  //fixme the following verifies that we actually can encode the data into
-  //irProt.bin / userconfig.xml code fields. this needs a sample for each and every case.
-  //without that, best we _might_ do is serialise and store as raw command
-  if ((keyCode.getGroup() != "G")
-  //|| (keyCode.getTrailer() != 3) //fixme not always 3 -- just ignore for now.
-  ) {
+  //if (tryConvertProtocol) { todo
+  // serialise and throw the timings at ir recognition code...
+  // then create new code / index from that.
+  //} else {
+  protocolIndex = config.modify().appendDatabaseIrProtoLibItem(protocolName,
+      protocol);
+  cmd.codeType.set(data::CodeType::Proprietary);
+  //}
+  if (protocolIndex < 0) {
     emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO header/trailer not supported").arg(
-            qstr(device.label.get())), ContentType::PlainText);
-    return false;
-  }
-//  if (keyCode.isQuadBitType()) {
-//    emit writeLog(LogLevel::Warning,
-//        tr("inport %1: PROTO quad type not supported").arg(
-//            qstr(device.label.get())), ContentType::PlainText);
-//    return false;
-//  }
-//  if (keyCode.isHexBitType()) {
-//    emit writeLog(LogLevel::Warning,
-//        tr("inport %1: PROTO hex type not supported").arg(
-//            qstr(device.label.get())), ContentType::PlainText);
-//    return false;
-//  } todo is it?
-
-  //todo wie das machen...
-  if ((keyCode.getItemType(0) != KeyCode::ItemType::Empty)
-      && (keyCode.getItemType(0) != KeyCode::ItemType::Number)) {
-    emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO item0 %2 not supported").arg(
-            qstr(device.label.get())).arg(keyCode.getItem(0).toString()),
+        tr("import: PROTO code adding failed (%1)").arg(qstr(protocolName)),
         ContentType::PlainText);
     return false;
   }
-  if ((keyCode.getItemType(1) != KeyCode::ItemType::Number)
-      && (keyCode.getItemType(1) != KeyCode::ItemType::Array)
-      && (keyCode.getItemType(1) != KeyCode::ItemType::Text)) {
-    emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO item1 %2 not supported").arg(
-            qstr(device.label.get())).arg(keyCode.getItem(1).toString()),
-        ContentType::PlainText);
-    return false;
-  }
-  if ((keyCode.getItemType(1) != KeyCode::ItemType::Number)
-      && (keyCode.getItemType(1) != KeyCode::ItemType::Array)
-      && (keyCode.getItemType(1) != KeyCode::ItemType::Text)) {
-    emit writeLog(LogLevel::Warning,
-        tr("inport %1: PROTO item1 %2 not supported").arg(
-            qstr(device.label.get())).arg(keyCode.getItem(1).toString()),
-        ContentType::PlainText);
-    return false;
-  }
-
-  //end fixme
-
-  return false;
+  code.changeIndex(protocolIndex);
+  cmd.protocolIndex.set(protocolIndex);
+  cmd.command = code;
+  device.getIrCommands().getProtoCommands().push_back(cmd);
+  return true;
 }
 
 bool document::files::Database::softButton(const nlohmann::json &j,

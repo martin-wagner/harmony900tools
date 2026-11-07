@@ -148,7 +148,7 @@ bool DeviceStorage::importDeviceJson(Config &c)
   auto &worker = c.modify();
   for (const auto &codeTypeStr : lib) {
     auto codeType = data::Enum<data::CodeType>(codeTypeStr);
-    auto protocolIndex = worker.appendIrProtoLibItem(codeType);
+    auto protocolIndex = worker.appendLocalIrProtoLibItem(codeType);
     if (protocolIndex < 0) {
       emit writeLog(LogLevel::Error,
           tr("load %1: adding protocol type %2 failed").arg(file).arg(

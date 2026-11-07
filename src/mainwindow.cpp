@@ -228,7 +228,7 @@ void MainWindow::createWidgets()
   dockManager->addDockWidgetFloating(dockImport);
   dockMenu->addAction(dockImport->toggleViewAction());
 
-  deviceSearchWidget = new database::DeviceSearchWidget(this);
+  deviceSearchWidget = new database::DeviceSearchWidget(*ctx.get(), this);
   deviceSearchWidget->setCatalogue(database);
   dockDeviceSearch = new ads::CDockWidget(dockManager, tr("Search database"));
   dockDeviceSearch->setWidget(deviceSearchWidget);
@@ -455,6 +455,11 @@ void MainWindow::createActions()
       &MainWindow::documentWasModified);
   connect(config, &document::Config::writeLog, log, &LogViewer::addEntry);
   connect(config, &document::Config::writeMsg, log, &LogViewer::addMessage);
+
+  connect(database, &document::files::Database::writeLog, log,
+      &LogViewer::addEntry);
+  connect(database, &document::files::Database::writeMsg, log,
+      &LogViewer::addMessage);
 
   connect(qApp, &QGuiApplication::commitDataRequest, this,
       &MainWindow::commitData);

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "database.h"
+#include "jsonProtocols.h"
 #include "bin/irProto/file.h"
 
 class QNetworkAccessManager;
@@ -61,14 +62,26 @@ class Database: public QObject
     /** get info to exactly one device. if not found ret.device.name is empty */
     Device getDeviceInfo(const QString &manufacturerName, const QString &deviceName) const;
 
-    /** create data for importing exactly one device
+    /** import exactly one device
+     *
+     * @remark as long as something valid is found, an import is done. the
+     * method prefers an incomplete import over nothing
+     *
      * @param tryConvertProtocol tries to convert the proprietary protocols
-     * to one of ours, so edting will be possible */
+     * to one of ours, so edting will be possible
+     * @return false something didn't import properly
+     */
     bool importDevice(const QString &manufacturerName, const QString &deviceName, document::Config &config, bool tryConvertProtocol = true) const;
 
-    /** create data for importing for exactly one device
+    /** import for exactly one device
+     *
+     * @remark as long as something valid is found, an import is done. the
+     * method prefers an incomplete import over nothing
+     *
      * @param tryConvertProtocol tries to convert the proprietary protocols
-     * to one of ours, so edting will be possible */
+     * to one of ours, so edting will be possible
+     * @return false something didn't import properly
+     */
     bool importDevice(const Device &source, document::Config &config, bool tryConvertProtocol = true) const;
 
   signals:
@@ -88,6 +101,8 @@ class Database: public QObject
     uint64_t deviceCount;
     //lowercase/stripped mnf name / devices
     std::unordered_map<QString, Manufacturer> db;
+
+    ProtocolDatabase protocolDatabase;
 
   private:
     //ai did some guessing...

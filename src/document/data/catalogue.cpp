@@ -625,8 +625,8 @@ bool CmdCatalogue::removeDeviceButtonCommand(uint32_t devicePos,
   return ret;
 }
 
-bool CmdCatalogue::setDeviceButtonAction(const std::string &v,
-    uint32_t devicePos, item::ButtonType t, int buttonPos)
+bool CmdCatalogue::setDeviceButtonAction(const string &v, uint32_t devicePos,
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
@@ -640,7 +640,7 @@ bool CmdCatalogue::setDeviceButtonAction(const std::string &v,
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonName(const std::string &v, uint32_t devicePos,
+bool CmdCatalogue::setDeviceButtonName(const string &v, uint32_t devicePos,
     item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
@@ -655,7 +655,7 @@ bool CmdCatalogue::setDeviceButtonName(const std::string &v, uint32_t devicePos,
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setDeviceButtonFile(const std::string &v, uint32_t devicePos,
+bool CmdCatalogue::setDeviceButtonFile(const string &v, uint32_t devicePos,
     item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
@@ -728,8 +728,8 @@ bool CmdCatalogue::setDeviceStatemachine(const item::StateMachine &v,
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: statemachine pos %1/%2 edit failed, dropped").arg(
-            devicePos).arg(smPos), ContentType::PlainText);
+        tr("modify: statemachine pos %1/%2 edit failed, dropped").arg(devicePos).arg(
+            smPos), ContentType::PlainText);
     delete cmd;
   }
   return ret;
@@ -1011,7 +1011,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceOp(const Enum<Operation> &v,
   return setProperty<Enum<Operation>>(access);
 }
 
-bool CmdCatalogue::setDeviceNumpadActionSequenceCmd(const std::string &v,
+bool CmdCatalogue::setDeviceNumpadActionSequenceCmd(const string &v,
     uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
 {
   PropertyAccess<string> access =
@@ -1054,7 +1054,7 @@ bool CmdCatalogue::setDeviceNumpadActionSequenceStateName(
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
-bool CmdCatalogue::setDeviceNumpadActionSequenceValue(const std::string &v,
+bool CmdCatalogue::setDeviceNumpadActionSequenceValue(const string &v,
     uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
 {
   PropertyAccess<string> access =
@@ -1739,7 +1739,7 @@ bool CmdCatalogue::removeActivityChannelCommand(uint32_t activityPos,
   return ret;
 }
 
-bool CmdCatalogue::setActivityChannelStation(const std::string &v,
+bool CmdCatalogue::setActivityChannelStation(const string &v,
     uint32_t activityPos, uint32_t chPos)
 {
   PropertyAccess<string> access =
@@ -1784,7 +1784,7 @@ bool CmdCatalogue::setActivityChannelPosition(const uint32_t v,
   return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::setActivityChannelImage(const std::string &v,
+bool CmdCatalogue::setActivityChannelImage(const string &v,
     uint32_t activityPos, uint32_t chPos)
 {
   PropertyAccess<string> access =
@@ -1833,7 +1833,7 @@ bool CmdCatalogue::removeActivityButtonCommand(uint32_t activityPos,
   return ret;
 }
 
-bool CmdCatalogue::setActivityButtonAction(const std::string &v,
+bool CmdCatalogue::setActivityButtonAction(const string &v,
     uint32_t activityPos, item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
@@ -1863,8 +1863,8 @@ bool CmdCatalogue::setActivityButtonDevice(uint32_t v, uint32_t activityPos,
   return setProperty<uint32_t>(access);
 }
 
-bool CmdCatalogue::setActivityButtonName(const std::string &v,
-    uint32_t activityPos, item::ButtonType t, int buttonPos)
+bool CmdCatalogue::setActivityButtonName(const string &v, uint32_t activityPos,
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
@@ -1878,8 +1878,8 @@ bool CmdCatalogue::setActivityButtonName(const std::string &v,
   return setProperty<string>(access);
 }
 
-bool CmdCatalogue::setActivityButtonFile(const std::string &v,
-    uint32_t activityPos, item::ButtonType t, int buttonPos)
+bool CmdCatalogue::setActivityButtonFile(const string &v, uint32_t activityPos,
+    item::ButtonType t, int buttonPos)
 {
   PropertyAccess<string> access =
       {
@@ -1996,7 +1996,7 @@ bool CmdCatalogue::setActivityActionSequenceOp(const Enum<Operation> &v,
   return setProperty<Enum<Operation>>(access);
 }
 
-bool CmdCatalogue::setActivityActionSequenceCmd(const std::string &v,
+bool CmdCatalogue::setActivityActionSequenceCmd(const string &v,
     uint32_t activityPos, item::ActivityAction t, int actionPos,
     uint32_t seqPos)
 {
@@ -2060,7 +2060,7 @@ bool CmdCatalogue::setActivityActionSequenceStateName(
   return setProperty<Enum<StateMachineDeviceType>>(access);
 }
 
-bool CmdCatalogue::setActivityActionSequenceValue(const std::string &v,
+bool CmdCatalogue::setActivityActionSequenceValue(const string &v,
     uint32_t activityPos, item::ActivityAction t, int actionPos,
     uint32_t seqPos)
 {
@@ -2267,11 +2267,11 @@ bool CmdCatalogue::setIrProtoLib(const binary::irProto::File &file)
   return true;
 }
 
-int CmdCatalogue::appendIrProtoLibItem(const Enum<CodeType> &t)
+int CmdCatalogue::appendLocalIrProtoLibItem(const Enum<CodeType> &t)
 {
   int index = -1;
 
-  auto *cmd = new AppendIrProtoLibItemCommand(c, t);
+  auto *cmd = new AppendLocalIrProtoLibItemCommand(c, t);
   auto ret = cmd->valid();
   if (ret == true) {
     index = cmd->index();
@@ -2279,11 +2279,32 @@ int CmdCatalogue::appendIrProtoLibItem(const Enum<CodeType> &t)
     undo.push(cmd);
   } else {
     emit writeLog(LogLevel::Warning,
-        tr("modify: append ir proto to lib failed, dropped"),
+        tr("modify: append ir proto %1 to lib failed, dropped").arg(
+            t.getQString()), ContentType::PlainText);
+    delete cmd;
+  }
+  return index;
+}
+
+int CmdCatalogue::appendDatabaseIrProtoLibItem(const string &t,
+    const binary::irProto::IrProto &proto)
+{
+  int index = -1;
+
+  auto *cmd = new AppendDatabaseIrProtoLibItemCommand(c, t, proto);
+  auto ret = cmd->valid();
+  if (ret == true) {
+    index = cmd->index();
+    connectCommand(cmd);
+    undo.push(cmd);
+  } else {
+    emit writeLog(LogLevel::Warning,
+        tr("modify: append ir proto %1 to lib failed, dropped").arg(qstr(t)),
         ContentType::PlainText);
     delete cmd;
   }
   return index;
+
 }
 
 void CmdCatalogue::connectCommand(BaseCommand *cmd)

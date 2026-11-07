@@ -197,9 +197,12 @@ void fromJson(const ordered_json &in, binary::irProto::TimingSection &section)
 //---------------------------------------------------------------------------
 
 void toJson(ordered_json &out, const binary::irProto::IrProto &proto,
-    const string &name)
+    const string &name, const string &database)
 {
   out["Name"] = name;
+  if (!database.empty()) {
+    out["Database"] = database;
+  }
   out["ClockPeriod"] = proto.getClockPeriod();
 
   ordered_json sectionsArr = ordered_json::array();
@@ -211,9 +214,17 @@ void toJson(ordered_json &out, const binary::irProto::IrProto &proto,
   out["Sections"] = sectionsArr;
 }
 
-string fromJson(const ordered_json &in, binary::irProto::IrProto &proto)
+void fromJson(const ordered_json &in, binary::irProto::IrProto &proto,
+    string &name, string &database)
 {
-  std::vector<binary::irProto::TimingSection> sections;
+  fromJson(in, proto);
+  name = in.value("Name", data::Enum(data::CodeType::Proprietary).getString());
+  database = in.value("Database", "");
+}
+
+void fromJson(const ordered_json &in, binary::irProto::IrProto &proto)
+{
+  vector<binary::irProto::TimingSection> sections;
   auto sectionsIt = in.find("Sections");
   if (sectionsIt != in.end()) {
     for (const auto &sectionJson : *sectionsIt) {
@@ -224,7 +235,6 @@ string fromJson(const ordered_json &in, binary::irProto::IrProto &proto)
   }
   proto = binary::irProto::IrProto(in.value("ClockPeriod", uint16_t(26316)),
       sections);
-  return in.value("Name", data::Enum(data::CodeType::Proprietary).getString());
 }
 
 }

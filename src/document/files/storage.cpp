@@ -59,6 +59,8 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
 {
   int i;
   json j;
+  string name;
+  string database;
 
 #ifdef _WIN32
   ifstream f(QString(wp + "/" + jsonPath).toStdWString().c_str(), ios::binary);
@@ -97,9 +99,16 @@ bool ConfigStorage::readUserConfigJson(data::ConfigData &c)
   //protocols are required for reading devices (commands need them), so pull them in first.
   for (i = 0; i < j["IrProtocols"].size(); i++) {
     binary::irProto::IrProto prot;
-    auto name = data::serialiser::fromJson(j["IrProtocols"][i], prot);
+    data::serialiser::fromJson(j["IrProtocols"][i], prot, name, database);
     auto index = c.getProtocolLib().appendProtocol(prot);
-    c.addProtocolLibListItem(data::Enum<data::CodeType>(name).getValue(), index);
+    if (database.empty()) {
+      //own protocol
+      c.addProtocolLibListItem(data::Enum<data::CodeType>(name).getValue(),
+          index);
+    } else {
+      //proprietary protocol with database entry
+      c.addProprietaryProtocolLibListItem(database, index);
+    }
   }
 
   data::serialiser::fromJson(j["User"], c.getUser());
@@ -150,8 +159,9 @@ bool ConfigStorage::writeUserConfigJson(const data::ConfigData &c)
     if (type != data::CodeType::Unknown) {
       name = data::Enum(type).getString();
     }
+    auto databaseName = c.getProprietaryPrococolLibType(i);
     data::serialiser::toJson(j["IrProtocols"][i],
-        c.getProtocolLib().accessProtocol(i), name);
+        c.getProtocolLib().accessProtocol(i), name, databaseName);
   }
 
 #ifdef _WIN32

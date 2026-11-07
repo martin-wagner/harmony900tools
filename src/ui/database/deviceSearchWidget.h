@@ -4,11 +4,14 @@
 
 #include <QWidget>
 
+#include "context.h"
 #include "document/files/database/importer.h"
 
 class QLabel;
 class QLineEdit;
 class QListWidget;
+class QPushButton;
+class QCheckBox;
 
 namespace document
 {
@@ -30,7 +33,7 @@ class DeviceSearchWidget: public QWidget
   Q_OBJECT
 
   public:
-    explicit DeviceSearchWidget(QWidget *parent = nullptr);
+    explicit DeviceSearchWidget(Context &ctx, QWidget *parent = nullptr);
 
     /** sets the database to search in, nullptr clears the view */
     void setCatalogue(const document::files::Database *catalogue);
@@ -45,6 +48,10 @@ class DeviceSearchWidget: public QWidget
     void onManufacturerSelectionChanged();
     void onDeviceTextChanged(const QString &text);
     void onDeviceSelectionChanged();
+    void onImportClicked();
+
+  protected:
+    Context &ctx;
 
   private:
     void createView();
@@ -53,6 +60,7 @@ class DeviceSearchWidget: public QWidget
     void updateManufacturers();
     void updateDevices();
     void updateDeviceInfo(QStringList *items = nullptr);
+    void updateImportButton();
     QString getSelectedManufacturer() const;
     QString getSelectedDevice() const;
 
@@ -63,6 +71,8 @@ class DeviceSearchWidget: public QWidget
     QLineEdit *deviceEdit = nullptr;
     QListWidget *deviceList = nullptr;
     QLabel *deviceInfoLabel = nullptr;
+    QCheckBox *tryConvertProtocolCheck = nullptr;
+    QPushButton *importButton = nullptr;
 };
 
 }

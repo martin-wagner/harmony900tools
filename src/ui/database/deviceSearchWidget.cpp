@@ -2,10 +2,12 @@
 
 #include "deviceSearchWidget.h"
 
+#include <QCheckBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 using namespace std;
@@ -13,8 +15,8 @@ using namespace std;
 namespace database
 {
 
-DeviceSearchWidget::DeviceSearchWidget(QWidget *parent) :
-    QWidget(parent)
+DeviceSearchWidget::DeviceSearchWidget(Context &ctx, QWidget *parent) :
+    QWidget(parent), ctx(ctx)
 {
   createView();
   createConnections();
@@ -30,6 +32,7 @@ void DeviceSearchWidget::setCatalogue(
   deviceEdit->clear();
   updateDevices();
   updateDeviceInfo();
+  updateImportButton();
 }
 
 void DeviceSearchWidget::onManufacturerTextChanged(const QString &text)
@@ -43,6 +46,7 @@ void DeviceSearchWidget::onManufacturerSelectionChanged()
   deviceEdit->setEnabled(!manufacturerName.isEmpty());
   updateDevices();
   updateDeviceInfo();
+  updateImportButton();
 }
 
 void DeviceSearchWidget::onDeviceTextChanged(const QString &text)
@@ -53,11 +57,45 @@ void DeviceSearchWidget::onDeviceTextChanged(const QString &text)
 void DeviceSearchWidget::onDeviceSelectionChanged()
 {
   updateDeviceInfo();
+  updateImportButton();
 
   const QString manufacturerName = getSelectedManufacturer();
   const QString deviceName = getSelectedDevice();
   if (!manufacturerName.isEmpty() && !deviceName.isEmpty()) {
     emit deviceSelected(manufacturerName, deviceName);
+  }
+}
+
+void DeviceSearchWidget::onImportClicked()
+{
+  const auto manufacturerName = getSelectedManufacturer();
+  const auto deviceName = getSelectedDevice();
+  const auto tryConvertProtocol = tryConvertProtocolCheck->isChecked();
+  auto config = ctx.config();
+  auto ok = false;
+
+  if ((catalogue == nullptr) || (config == nullptr)) {
+    emit writeMsg(tr("import not possible: no database or no document open"));
+    return;
+  }
+  if (manufacturerName.isEmpty() || deviceName.isEmpty()) {
+    return;
+  }
+
+  // needs the catalogue check from above, so it can't be declared earlier
+  const auto source = catalogue->getDeviceInfo(manufacturerName, deviceName);
+  if (source.name.isEmpty()) {
+    emit writeMsg(tr("device not found"));
+    return;
+  }
+
+  ok = catalogue->importDevice(source, *config, tryConvertProtocol);
+  if (ok) {
+    emit writeMsg(tr("imported %1 / %2").arg(manufacturerName, deviceName));
+  } else {
+    emit writeMsg(
+        tr("import of %1 / %2 is incomplete or failed").arg(manufacturerName,
+            deviceName));
   }
 }
 
@@ -79,6 +117,16 @@ void DeviceSearchWidget::createView()
   deviceInfoLabel = new QLabel(this);
   deviceInfoLabel->setWordWrap(true);
 
+  tryConvertProtocolCheck = new QCheckBox(tr("convert protocols"), this);
+  tryConvertProtocolCheck->setChecked(true);
+  tryConvertProtocolCheck->setToolTip(
+      tr("Tries to convert the proprietary protocols of the imported commands "
+          "to one of our own protocol types.\n"
+          "Converted commands can be changed with the editor."));
+
+  importButton = new QPushButton(tr("import selected device"), this);
+  importButton->setEnabled(false);
+
   QVBoxLayout *manufacturerLayout = new QVBoxLayout();
   manufacturerLayout->addWidget(manufacturerEdit);
   manufacturerLayout->addWidget(manufacturerList);
@@ -91,9 +139,15 @@ void DeviceSearchWidget::createView()
   listsLayout->addLayout(manufacturerLayout);
   listsLayout->addLayout(deviceLayout);
 
+  QHBoxLayout *importLayout = new QHBoxLayout();
+  importLayout->addWidget(tryConvertProtocolCheck);
+  importLayout->addStretch();
+  importLayout->addWidget(importButton);
+
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->addLayout(listsLayout);
   mainLayout->addWidget(deviceInfoLabel);
+  mainLayout->addLayout(importLayout);
 }
 
 void DeviceSearchWidget::createConnections()
@@ -106,6 +160,8 @@ void DeviceSearchWidget::createConnections()
       &DeviceSearchWidget::onDeviceTextChanged);
   connect(deviceList, &QListWidget::itemSelectionChanged, this,
       &DeviceSearchWidget::onDeviceSelectionChanged);
+  connect(importButton, &QPushButton::clicked, this,
+      &DeviceSearchWidget::onImportClicked);
 }
 
 void DeviceSearchWidget::updateManufacturers()
@@ -165,6 +221,14 @@ void DeviceSearchWidget::updateDeviceInfo(QStringList *items)
 
   deviceInfoLabel->setText(
       tr("%1 (Database type: %2)").arg(info.name).arg(info.type.getQString()));
+}
+
+void DeviceSearchWidget::updateImportButton()
+{
+  const bool hasSelection = (!getSelectedManufacturer().isEmpty())
+      && (!getSelectedDevice().isEmpty());
+
+  importButton->setEnabled((catalogue != nullptr) && hasSelection);
 }
 
 QString DeviceSearchWidget::getSelectedManufacturer() const

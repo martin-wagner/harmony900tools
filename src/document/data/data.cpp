@@ -181,6 +181,44 @@ void ConfigData::removePrococolLibListItem(CodeType t)
   protocolIndices.left.erase(t);
 }
 
+int ConfigData::getProprietaryPrococolLibIndex(std::string t) const
+{
+  auto search = proprietaryProtocolIndices.left.find(t);
+  if (search != proprietaryProtocolIndices.left.end()) {
+    return search->second;
+  }
+  return -1;
+}
+
+std::string ConfigData::getProprietaryPrococolLibType(int index) const
+{
+  auto search = proprietaryProtocolIndices.right.find(index);
+  if (search != proprietaryProtocolIndices.right.end()) {
+    return search->second;
+  }
+  return "";
+}
+
+void ConfigData::addProprietaryProtocolLibListItem(std::string t, int index)
+{
+  if (t.empty() || (index < 0)) {
+    return;
+  }
+  protocolIndices.insert( { CodeType::Proprietary, index }); //if not already done
+  proprietaryProtocolIndices.insert( { t, index });
+}
+
+void ConfigData::removeProprietaryPrococolLibListItem(std::string t)
+{
+  int index;
+
+  auto it = proprietaryProtocolIndices.left.find(t);
+  if (it != proprietaryProtocolIndices.left.end()) {
+    proprietaryProtocolIndices.left.erase(it);
+    protocolIndices.right.erase(it->second);
+  }
+}
+
 const files::ProtocolCatalogue& ConfigData::getProtocolCatalogue() const
 {
   return protocolCatalogue;

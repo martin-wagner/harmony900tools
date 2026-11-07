@@ -53,10 +53,16 @@ class ConfigData
 
     const binary::irProto::File& getProtocolLib() const;
     binary::irProto::File& getProtocolLib();
+
     int getPrococolLibIndex(CodeType t) const;
     CodeType getPrococolLibType(int index) const;
     void addProtocolLibListItem(CodeType t, int index);
     void removePrococolLibListItem(CodeType t);
+
+    int getProprietaryPrococolLibIndex(std::string t) const;
+    std::string getProprietaryPrococolLibType(int index) const;
+    void addProprietaryProtocolLibListItem(std::string t, int index);
+    void removeProprietaryPrococolLibListItem(std::string t);
 
     const files::ProtocolCatalogue &getProtocolCatalogue() const;
 
@@ -80,6 +86,7 @@ class ConfigData
     /** ir command protocol lib */
     binary::irProto::File protocolLib; // command-to-stream encoder data
     boost::bimap<CodeType, int> protocolIndices; //map code to index for our own protocol data
+    boost::bimap<std::string, int> proprietaryProtocolIndices; //map name to index for imported protocol data, where the type is known.
     const files::ProtocolCatalogue protocolCatalogue; //generally available code data
 };
 

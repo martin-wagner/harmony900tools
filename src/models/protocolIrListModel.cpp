@@ -427,7 +427,7 @@ bool models::ProtocolIrModel::setCommandType(
   auto cmd = getCmds(&devicePos).at(row);
   cmd.codeType.set(value.toString());
   if (cmd.codeType.get().getValue() != document::data::CodeType::None) {
-    index = worker.appendIrProtoLibItem(cmd.codeType.get());
+    index = worker.appendLocalIrProtoLibItem(cmd.codeType.get());
     if (index < 0) {
       config.endMacro();
       return false;

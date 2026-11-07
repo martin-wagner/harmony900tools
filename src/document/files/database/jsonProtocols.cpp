@@ -86,7 +86,7 @@ bool ProtocolDatabase::setDatabase(const DatabasePaths &paths)
 }
 
 binary::irProto::IrProto ProtocolDatabase::getProtocol(uint32_t id,
-    string *name)
+    string *name) const
 {
   errStr = "OK";
 
@@ -100,7 +100,8 @@ binary::irProto::IrProto ProtocolDatabase::getProtocol(uint32_t id,
   return cached->proto;
 }
 
-binary::irProto::Code ProtocolDatabase::getCode(const QString &keyCodeLine)
+binary::irProto::Code ProtocolDatabase::getCode(
+    const QString &keyCodeLine) const
 {
   errStr = "OK";
 
@@ -178,7 +179,7 @@ uint32_t ProtocolDatabase::findId(const QString &name) const
 }
 
 const ProtocolDatabase::CachedProtocol* ProtocolDatabase::loadProtocol(
-    uint32_t id)
+    uint32_t id) const
 {
   CachedProtocol entry;
 
@@ -217,7 +218,8 @@ const ProtocolDatabase::CachedProtocol* ProtocolDatabase::loadProtocol(
   return &ret.first->second;
 }
 
-bool ProtocolDatabase::buildProtocol(const json &jp, CachedProtocol &entry)
+bool ProtocolDatabase::buildProtocol(const json &jp,
+    CachedProtocol &entry) const
 {
   vector<binary::irProto::TimingSection> sections;
 
@@ -325,7 +327,7 @@ QString ProtocolDatabase::getKeyword(const QString &protocolName,
 }
 
 bool ProtocolDatabase::appendItems(const json &atom,
-    std::vector<binary::irProto::Item> &out)
+    std::vector<binary::irProto::Item> &out) const
 {
   //everything has to fit into the IrProto format, there is no "almost"
   const json &type = atom.at("Type");
@@ -369,7 +371,7 @@ bool ProtocolDatabase::appendItems(const json &atom,
 }
 
 bool ProtocolDatabase::buildHeader(const json &atoms,
-    binary::irProto::TimingSectionIrHeader &header)
+    binary::irProto::TimingSectionIrHeader &header) const
 {
   std::vector<binary::irProto::Item> items;
   for (const auto &atom : atoms) {
@@ -385,7 +387,7 @@ bool ProtocolDatabase::buildHeader(const json &atoms,
 }
 
 bool ProtocolDatabase::buildPayload(const json &payload,
-    binary::irProto::TimingSection &section)
+    binary::irProto::TimingSection &section) const
 {
   using Quantum = binary::irProto::TimingSectionIrPayload::Quantum;
 
@@ -463,7 +465,7 @@ bool ProtocolDatabase::buildPayload(const json &payload,
 }
 
 bool ProtocolDatabase::buildSection(const json &segment,
-    binary::irProto::TimingSection &section)
+    binary::irProto::TimingSection &section) const
 {
   //interval is the total frame time. if not given, the pause is coded in the eof (default)
   const json total = segment.value("TotalLength", json());
@@ -503,7 +505,7 @@ bool ProtocolDatabase::buildSection(const json &segment,
 
 bool ProtocolDatabase::buildFrame(const QVariant &element,
     const CachedProtocol &protocol,
-    std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out)
+    std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out) const
 {
   std::vector<uint8_t> symbols;
   auto type = KeyCode::getItemType(element);
@@ -549,7 +551,7 @@ bool ProtocolDatabase::buildFrame(const QVariant &element,
 
 bool ProtocolDatabase::buildGroup(const QVariant &item,
     const CachedProtocol &protocol,
-    std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out)
+    std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out) const
 {
   //every element is one frame, in the given order. a section can be left out or used multiple times.
   switch (KeyCode::getItemType(item)) {
@@ -573,7 +575,8 @@ bool ProtocolDatabase::buildGroup(const QVariant &item,
 }
 
 bool ProtocolDatabase::buildSymbols(const KeyCodeNumber &number,
-    const binary::irProto::TimingSection &section, vector<uint8_t> &symbols)
+    const binary::irProto::TimingSection &section,
+    vector<uint8_t> &symbols) const
 {
   vector<uint8_t> value;
 

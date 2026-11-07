@@ -41,10 +41,10 @@ class ProtocolDatabase {
 
     /** get protocol by "Id-" value. check prot.isEmpty() for failure.
      * name (optional) receives the protocol name */
-    binary::irProto::IrProto getProtocol(uint32_t id, std::string *name = nullptr);
+    binary::irProto::IrProto getProtocol(uint32_t id, std::string *name = nullptr) const;
 
     /** create code from a keycode line. check code.isValid() for failure */
-    binary::irProto::Code getCode(const QString &keyCodeLine);
+    binary::irProto::Code getCode(const QString &keyCodeLine) const;
 
     /** get last error. every call of the functions above resets it */
     QString getErrStr() const { return errStr; }
@@ -74,20 +74,20 @@ class ProtocolDatabase {
     static QString normalizeName(const QString &name);
     uint32_t findId(const QString &name) const;
     //protocol
-    const CachedProtocol *loadProtocol(uint32_t id);
-    bool buildProtocol(const nlohmann::json &jp, CachedProtocol &entry);
+    const CachedProtocol *loadProtocol(uint32_t id) const;
+    bool buildProtocol(const nlohmann::json &jp, CachedProtocol &entry) const;
     static QString getKeyword(const QString &protocolName, const QString &segmentName);
-    bool appendItems(const nlohmann::json &atom, std::vector<binary::irProto::Item> &out);
-    bool buildHeader(const nlohmann::json &atoms, binary::irProto::TimingSectionIrHeader &header);
-    bool buildPayload(const nlohmann::json &payload, binary::irProto::TimingSection &section);
-    bool buildSection(const nlohmann::json &segment, binary::irProto::TimingSection &section);
+    bool appendItems(const nlohmann::json &atom, std::vector<binary::irProto::Item> &out) const;
+    bool buildHeader(const nlohmann::json &atoms, binary::irProto::TimingSectionIrHeader &header) const;
+    bool buildPayload(const nlohmann::json &payload, binary::irProto::TimingSection &section) const;
+    bool buildSection(const nlohmann::json &segment, binary::irProto::TimingSection &section) const;
     //code
-    bool buildFrame(const QVariant &element, const CachedProtocol &protocol, std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out);
-    bool buildGroup(const QVariant &item, const CachedProtocol &protocol, std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out);
-    bool buildSymbols(const KeyCodeNumber &number, const binary::irProto::TimingSection &section, std::vector<uint8_t> &symbols);
+    bool buildFrame(const QVariant &element, const CachedProtocol &protocol, std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out) const;
+    bool buildGroup(const QVariant &item, const CachedProtocol &protocol, std::vector<std::pair<uint8_t, std::vector<uint8_t>>> &out) const;
+    bool buildSymbols(const KeyCodeNumber &number, const binary::irProto::TimingSection &section, std::vector<uint8_t> &symbols) const;
 
     QString path;
-    QString errStr = "OK";
+    mutable QString errStr = "OK";
 
     nlohmann::json j;
 
@@ -96,7 +96,7 @@ class ProtocolDatabase {
     //normalized name, Id-
     QHash<QString, uint32_t> nameToId;
     //Id-, protocol. node based, references stay valid when entries are added.
-    std::unordered_map<uint32_t, CachedProtocol> irProtoCache;
+    mutable std::unordered_map<uint32_t, CachedProtocol> irProtoCache;
 };
 
 }

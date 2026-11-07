@@ -206,7 +206,8 @@ class CmdCatalogue : public QObject
     //irproto binary lib. lib can be added and protocols appended.
     //items can't be removed, as this would require re-mapping of all consumers (not implemented)
     bool setIrProtoLib(const binary::irProto::File &file);
-    int appendIrProtoLibItem(const Enum<CodeType> &t); //check if exists, append if not
+    int appendLocalIrProtoLibItem(const Enum<CodeType> &t); //check if exists, append if not
+    int appendDatabaseIrProtoLibItem(const std::string &t, const binary::irProto::IrProto &proto); //check if exists, append if not
 
   protected:
     //template for setting a property inside user data that uses the Property<x> template.
