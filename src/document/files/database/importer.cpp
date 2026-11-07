@@ -418,14 +418,6 @@ bool Database::importDevice(const json &j, document::Config &config,
   data::serialiser::fromJson(jd, "IsScartCableSupported", d.scart);
   //fixme more?
 
-  if (j.contains("commands") && j.at("commands").is_array()) {
-    ret &= commands(j, d, config, tryConvertProtocol);
-  }
-
-  //todo state machines
-
-  //todo numpad
-
   //delays
   data::serialiser::fromJson(jd, "InterDeviceDelay",
       d.getIrCommands().pressPreSilenceMs);
@@ -435,6 +427,16 @@ bool Database::importDevice(const json &j, document::Config &config,
       d.getIrCommands().holdPreSilenceMs);
   data::serialiser::fromJson(jd, "HoldInterKeyDelay",
       d.getIrCommands().holdInterKeyMs);
+
+  //data
+  if (j.contains("commands") && j.at("commands").is_array()) {
+    ret &= commands(j, d, config, tryConvertProtocol);
+  }
+  ret &= readChannelTuningFeature(j, d, config, hasChannelTuningFeature);
+  ret &= readInputFeature(j, d, config, hasInputFeature);
+  ret &= readPowerFeature(j, d, config, hasPowerFeature);
+  ret &= readInternalStateFeatures(j, d, config, hasInternalStateFeature);
+  ret &= readOutputFeature(j, d, config, hasOutputFeature);
 
   return ret;
 }
@@ -623,6 +625,186 @@ const json& document::files::Database::Database::getFeature(const json &j,
   }
 
   throw runtime_error("feature not found: " + type);
+}
+
+bool Database::readChannelTuningFeature(const nlohmann::json &j,
+    data::item::Device &device, document::Config &config, bool hasFeature) const
+{
+  data::item::Numpad num;
+  data::item::Digits digits;
+
+  //this only verifies that the entry in the json exists.
+  if (!hasFeature) {
+    return true;
+  }
+  auto jct = getFeature(j, "ChannelTuningFeature");
+
+  //this verifies that we actually support it.
+  auto haveChannels = jct.at("State").get<int>();
+  if (haveChannels != 1) {
+    return true;
+  }
+  //this verifies that we have the commands 0 ... 9. this also builds the digits
+  //actions, those use the same data for all entries.
+  for (int i = 0; i < digits.size(); i++) {
+    auto cmd = device.getIrCommands().getProtoCommand(to_string(i));
+    if (cmd == nullptr) {
+      //at least one command is missing. assume invalid data.
+      return false;
+    }
+    //the action is always sequence size 1 with the number button press
+    //beging the item.
+    data::item::SequenceItem item;
+    item.opcode.set(data::Operation::SendCommand);
+    item.cmd.set(to_string(i)).setIncluded(data::Used::YES);
+    item.mod.set(data::Modifier::Press).setIncluded(data::Used::YES);
+    digits[i].sequence.push_back(item);
+  }
+  if (jct.at("FixedDigits").is_null()) {
+    num.fixedDigits.set(0).setIncluded(data::Used::YES);
+    num.first = digits;
+  } else {
+    data::serialiser::fromJson(j, "FixedDigits", num.fixedDigits);
+    num.first = digits;
+    num.middle = digits;
+    num.last = digits;
+  }
+
+  if (jct.contains("StartActions") && jct.at("StartActions").is_array()
+      && !jct.at("StartActions").empty()) {
+    auto jsa = jct.at("StartActions");
+    data::item::DeviceAction a;
+    auto res = readActionSequences(jsa, a);
+    if (res == true) {
+      num.start = a;
+    }
+  }
+
+  if (jct.contains("GreaterTenActions")
+      && jct.at("GreaterTenActions").is_array()
+      && !jct.at("GreaterTenActions").empty()) {
+    auto jsa = jct.at("GreaterTenActions");
+    data::item::DeviceAction a;
+    auto res = readActionSequences(jsa, a);
+    if (res == true) {
+      num.greaterTen = a;
+    }
+  }
+
+  if (jct.contains("GreaterHundredActions")
+      && jct.at("GreaterHundredActions").is_array()
+      && !jct.at("GreaterHundredActions").empty()) {
+    auto jsa = jct.at("GreaterHundredActions");
+    data::item::DeviceAction a;
+    auto res = readActionSequences(jsa, a);
+    if (res == true) {
+      num.greaterHundred = a;
+    }
+  }
+
+  if (jct.contains("FinishActions") && jct.at("FinishActions").is_array()
+      && !jct.at("FinishActions").empty()) {
+    auto jsa = jct.at("FinishActions");
+    data::item::DeviceAction a;
+    auto res = readActionSequences(jsa, a);
+    if (res == true) {
+      num.finish = a;
+    }
+  }
+  device.getNumpad() = num;
+  return true;
+}
+
+bool Database::readInputFeature(const nlohmann::json &j,
+    data::item::Device &device, document::Config &config, bool hasFeature) const
+{
+  return true;
+}
+
+bool Database::readPowerFeature(const nlohmann::json &j,
+    data::item::Device &device, document::Config &config, bool hasFeature) const
+{
+  return true;
+}
+
+bool Database::readInternalStateFeatures(const nlohmann::json &j,
+    data::item::Device &device, document::Config &config, bool hasFeature) const
+{
+  return true;
+}
+
+bool Database::readInternalStateFeature(const nlohmann::json &j,
+    data::item::Device &device, document::Config &config, bool hasFeature) const
+{
+  return true;
+}
+
+bool Database::readOutputFeature(const nlohmann::json &j,
+    data::item::Device &device, document::Config &config, bool hasFeature) const
+{
+  return true;
+}
+
+bool Database::readActionSequences(const nlohmann::json &j,
+    data::item::DeviceAction &out) const
+{
+  if (!j.is_array()) {
+    return false;
+  }
+
+  for (const auto &action : j) {
+    data::item::SequenceItem item;
+    if (!readActionSequence(action, item)) {
+      return false;
+    }
+    out.sequence.push_back(std::move(item));
+  }
+  return true;
+}
+
+bool Database::readActionSequence(const nlohmann::json &j,
+    data::item::SequenceItem &out) const
+{
+  data::PropertyEnum<data::DatabaseOperation> dbOperation(
+      data::DatabaseOperation::Unknown);
+
+  if (!j.is_object() || !j.contains("__type") || !j["__type"].is_string()) {
+    emit writeLog(LogLevel::Warning,
+        tr("import: ACTION import failed (__type missing)"),
+        ContentType::PlainText);
+    return false;
+  }
+  data::serialiser::fromJson(j, "__type", dbOperation);
+  if (dbOperation.get().getValue() == data::DatabaseOperation::Unknown) {
+    emit writeLog(LogLevel::Warning,
+        tr("import: ACTION import failed (__type %1 unknown)").arg(
+            dbOperation.get().getQString()), ContentType::PlainText);
+  }
+  switch (dbOperation.get().getValue()) {
+    case data::DatabaseOperation::IRPressAction:
+      out.opcode.set(data::Operation::SendCommand);
+      out.mod.set(data::Modifier::Press).setIncluded(data::Used::YES);
+      //fixme ignore "Duration" -- nowhere to place...
+      break;
+    case data::DatabaseOperation::IRDelayAction:
+      out.opcode.set(data::Operation::SendDelay);
+      break;
+    case data::DatabaseOperation::IRHoldAction:
+      out.opcode.set(data::Operation::SendCommand);
+      out.mod.set(data::Modifier::Hold).setIncluded(data::Used::YES);
+      break;
+    case data::DatabaseOperation::IRDevAction:
+      out.opcode.set(data::Operation::ForceValue);
+      break;
+    default:
+      return false;
+  }
+
+  data::serialiser::fromJson(j, "IRCommandName", out.cmd);
+  data::serialiser::fromJson(j, "Delay", out.delayMs);
+  data::serialiser::fromJson(j, "StateName", out.stateName); //there are _many_ more than the enum values!
+  data::serialiser::fromJson(j, "StateValue", out.value);
+  return true;
 }
 
 bool document::files::Database::hasCapability(const nlohmann::json &j,

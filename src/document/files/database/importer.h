@@ -5,6 +5,7 @@
 #include "database.h"
 #include "jsonProtocols.h"
 #include "bin/irProto/file.h"
+#include "document/data/items/action.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -126,6 +127,15 @@ class Database: public QObject
     bool hardButton(const nlohmann::json &j, const std::string &type, data::item::Device &device) const;
     void detectDeviceFeatures(const nlohmann::json &j, bool &hasChannelTuningFeature, bool &hasInputFeature, bool &hasPowerFeature, bool &hasInternalStateFeature, bool &hasOutputFeature) const;
     const nlohmann::json &getFeature(const nlohmann::json &j, const std::string &type) const;
+    bool readChannelTuningFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readInputFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readPowerFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readInternalStateFeatures(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readInternalStateFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readOutputFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readActionSequences(const nlohmann::json &j, data::item::DeviceAction &out) const;
+    bool readActionSequence(const nlohmann::json &j, data::item::SequenceItem &out) const;
+
     bool hasCapability(const nlohmann::json &j, Capabilities capability) const;
     static data::DeviceType mapDatabaseDeviceType(data::DatabaseDeviceType source);
 

@@ -47,6 +47,7 @@ enum class DatabaseDeviceType { Television = 1, VCR = 2, CDPlayer = 3, DVD = 4,
 enum class StateMachineDeviceType { Power, Input, InputType, Screen, TVInput, AntennaOutput, User1, User2, User3, User4, User5, Unknown };
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
+enum class DatabaseOperation { IRPressAction, IRDelayAction, IRDevAction, IRHoldAction, Unknown };
 enum class Modifier { None, Press, Hold, Unknown };
 enum class ActivityType { VirtualCdJukebox, VirtualCdMulti, VirtualDvd, VirtualGameConsole, VirtualGeneric,
     VirtualLaserdisc, VirtualMediaCenterMusic, VirtualMediaCenterPictures, VirtualMediaCenterTv,
@@ -136,6 +137,7 @@ template class Enum<DatabaseDeviceType>;
 template class Enum<StateMachineDeviceType>;
 template class Enum<ActionType>;
 template class Enum<Operation>;
+template class Enum<DatabaseOperation>;
 template class Enum<Modifier>;
 template class Enum<ActivityType>;
 template class Enum<DeviceRole>;

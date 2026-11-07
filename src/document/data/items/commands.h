@@ -110,6 +110,16 @@ class Commands
       return protoCommands;
     }
 
+    const ProtoCommand *getProtoCommand(const std::string &name)
+    {
+      for (const ProtoCommand &cmd : protoCommands) {
+        if (cmd.name.get() == name) {
+          return &cmd;
+        }
+      }
+      return nullptr;
+    }
+
     bool nameExists(const std::string &name) const
     {
       for (const RawCommand &cmd : rawCommands) {

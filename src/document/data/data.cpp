@@ -210,8 +210,6 @@ void ConfigData::addProprietaryProtocolLibListItem(std::string t, int index)
 
 void ConfigData::removeProprietaryPrococolLibListItem(std::string t)
 {
-  int index;
-
   auto it = proprietaryProtocolIndices.left.find(t);
   if (it != proprietaryProtocolIndices.left.end()) {
     proprietaryProtocolIndices.left.erase(it);
