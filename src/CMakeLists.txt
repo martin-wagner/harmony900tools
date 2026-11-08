@@ -43,30 +43,23 @@ set(sources ${sources}
   document/data/catalogue.cpp
   document/data/data.cpp
   document/data/enum.cpp
+  document/data/cmd/activity.cpp
   document/data/cmd/activityAction.cpp
   document/data/cmd/base.cpp
-  document/data/cmd/statemachine.cpp
-  document/data/cmd/state.cpp
-  document/data/cmd/addActivity.cpp
-  document/data/cmd/addButton.cpp
-  document/data/cmd/addDevice.cpp
-  document/data/cmd/addPowerOnDevice.cpp
+  document/data/cmd/button.cpp
   document/data/cmd/channel.cpp
-  document/data/cmd/moveActivity.cpp
+  document/data/cmd/controllerMetadata.cpp
+  document/data/cmd/device.cpp
+  document/data/cmd/id.cpp
+  document/data/cmd/ir.cpp
+  document/data/cmd/irProto.cpp
   document/data/cmd/numpad.cpp
-  document/data/cmd/setIr.cpp
-  document/data/cmd/setIrProto.cpp
-  document/data/cmd/setRole.cpp
-  document/data/cmd/setId.cpp
-  document/data/cmd/removeActivity.cpp
-  document/data/cmd/removeButton.cpp
-  document/data/cmd/removeDevice.cpp
-  document/data/cmd/removeIr.cpp
-  document/data/cmd/removePowerOnDevice.cpp
-  document/data/cmd/removeRole.cpp
-  document/data/cmd/setControllerMetadata.cpp
-  document/data/cmd/setUnknownProperty.cpp
-  document/data/cmd/setUserData.cpp
+  document/data/cmd/powerOnDevice.cpp
+  document/data/cmd/role.cpp
+  document/data/cmd/state.cpp
+  document/data/cmd/statemachine.cpp
+  document/data/cmd/unknownProperty.cpp
+  document/data/cmd/userData.cpp
   document/data/items/button.cpp
   document/data/items/activityJson.cpp
   document/data/items/codeJson.cpp

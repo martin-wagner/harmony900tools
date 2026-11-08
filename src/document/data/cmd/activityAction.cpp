@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "setActionData.h"
+#include "getActionData.h"
 #include "activityAction.h"
 
 using namespace std;

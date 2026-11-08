@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "lib/timestamp.h"
-#include "setUnknownProperty.h"
-#include "setActionData.h"
+#include "unknownProperty.h"
+#include "getActionData.h"
 
 using namespace std;
 

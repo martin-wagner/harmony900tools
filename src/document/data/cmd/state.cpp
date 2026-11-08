@@ -2,7 +2,7 @@
 
 #include <QMessageBox>
 
-#include "setActionData.h"
+#include "getActionData.h"
 #include "state.h"
 
 using namespace std;
