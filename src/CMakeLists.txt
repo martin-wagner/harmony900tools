@@ -43,30 +43,25 @@ set(sources ${sources}
   document/data/catalogue.cpp
   document/data/data.cpp
   document/data/enum.cpp
+  document/data/cmd/activityAction.cpp
   document/data/cmd/base.cpp
   document/data/cmd/statemachine.cpp
   document/data/cmd/state.cpp
-  document/data/cmd/addActionSequence.cpp
   document/data/cmd/addActivity.cpp
-  document/data/cmd/addActivityAction.cpp
   document/data/cmd/addButton.cpp
-  document/data/cmd/addChannel.cpp
   document/data/cmd/addDevice.cpp
-  document/data/cmd/addNumpad.cpp
   document/data/cmd/addPowerOnDevice.cpp
+  document/data/cmd/channel.cpp
   document/data/cmd/moveActivity.cpp
+  document/data/cmd/numpad.cpp
   document/data/cmd/setIr.cpp
   document/data/cmd/setIrProto.cpp
   document/data/cmd/setRole.cpp
   document/data/cmd/setId.cpp
-  document/data/cmd/removeActionSequence.cpp
   document/data/cmd/removeActivity.cpp
-  document/data/cmd/removeActivityAction.cpp
   document/data/cmd/removeButton.cpp
-  document/data/cmd/removeChannel.cpp  
   document/data/cmd/removeDevice.cpp
   document/data/cmd/removeIr.cpp
-  document/data/cmd/removeNumpad.cpp
   document/data/cmd/removePowerOnDevice.cpp
   document/data/cmd/removeRole.cpp
   document/data/cmd/setControllerMetadata.cpp

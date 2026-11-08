@@ -27,7 +27,7 @@ inline item::Button* getDeviceButton(ConfigData &c, uint32_t devicePos, item::Bu
   return nullptr;
 }
 
-Item toDeviceItem(item::ButtonType t)
+inline Item toDeviceItem(item::ButtonType t)
 {
   switch (t) {
     case item::ButtonType::Hard:
@@ -55,7 +55,7 @@ inline item::Button* getActivitiesButton(ConfigData &c, uint32_t activityPos, it
   return nullptr;
 }
 
-Item toActivityItem(item::ButtonType t)
+inline Item toActivityItem(item::ButtonType t)
 {
   switch (t) {
     case item::ButtonType::Hard:

@@ -74,13 +74,11 @@ class H900userconfig : public QObject
     bool readDiscreteAction(pugi::xml_node &action);
     bool readRelativeActions(pugi::xml_node &state);
     bool readRelativeAction(pugi::xml_node &action);
-    bool readActionSequences(pugi::xml_node &action, data::item::DeviceAction &out);
-    bool readActionSequence(pugi::xml_node &sequence, data::item::DeviceAction &out);
+    bool readActionSequences(pugi::xml_node &action, data::item::DeviceAction &out, bool storeDeviceId = false);
+    bool readActionSequence(pugi::xml_node &sequence, data::item::DeviceAction &out, bool storeDeviceId);
     bool readNumeric(pugi::xml_node &numeric);
     bool readNumericActions(pugi::xml_node &actions, data::item::DigitSection s);
     bool readNumericActionSequences(pugi::xml_node &action, uint32_t devicePos, data::item::DigitSection s, uint32_t digit);
-    bool readNumericActionSequence(pugi::xml_node &sequence, uint32_t devicePos, data::item::DigitSection s, uint32_t digit);
-    bool readActionSequenceData(pugi::xml_node &sequence, uint32_t devicePos, data::item::DigitSection s, uint32_t digit, uint32_t seqPos);
     bool readIrList(pugi::xml_node &commands);
     bool readIr(pugi::xml_node &command);
     bool readActivities(pugi::xml_node &root);
@@ -93,9 +91,6 @@ class H900userconfig : public QObject
     bool readActivitySoftButton(pugi::xml_node &button, int activityPos, int uiPos);
     bool addDummyActivitySoftButton(int activityPos, int pos);
     bool readActivityAction(pugi::xml_node &actions, data::item::ActivityAction t);
-    bool readActivityActionSequences(pugi::xml_node &action, data::item::ActivityAction t);
-    bool readActivityActionSequence(pugi::xml_node &sequence, data::item::ActivityAction t);
-    bool readActivityActionSequenceData(pugi::xml_node &sequence, uint32_t activityPos, uint32_t actionPos, data::item::ActivityAction t, uint32_t seqPos);
     bool readActivityRoles(pugi::xml_node &activity);
     bool readActivityRole(pugi::xml_node &role);
     bool readActivityPowerStateDevices(pugi::xml_node &power);

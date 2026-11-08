@@ -107,17 +107,7 @@ class CmdCatalogue : public QObject
     bool removeDeviceNumpadDigitsCommand(uint32_t devicePos, item::DigitSection s);
     bool setDeviceNumpadFixedDigits(uint32_t v, uint32_t devicePos);
     //numpad actions
-    bool setDeviceNumpadActionRepeatWillNotHarm(bool v, uint32_t devicePos, item::DigitSection s, uint32_t digit = 0);
-    //numpad action list items
-    bool addDeviceNumpadActionSequenceCommand(uint32_t devicePos, item::DigitSection s, uint32_t digit, int seqPos);
-    bool removeDeviceNumpadActionSequenceCommand(uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceOp(const Enum<Operation> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceCmd(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceDelayMs(uint32_t v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceValue(const std::string &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionSequenceMod(const Enum<Modifier> &v, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
-    bool setDeviceNumpadActionUnknownParam(const data::item::UnknownElement& value, uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos);
+    bool setDeviceNumpadAction(const item::DeviceAction &v, uint32_t devicePos, item::DigitSection s, uint32_t digit);
     //commands
     bool setIrPressPreSilenceMs(uint32_t v, uint32_t devicePos);
     bool setIrPressInterKeyMs(uint32_t v, uint32_t devicePos);
@@ -180,17 +170,7 @@ class CmdCatalogue : public QObject
     //activity actions
     bool addActivityActionCommand(uint32_t activityPos, item::ActivityAction t, int actionPos);
     bool removActivityActionCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos);
-    //activity action list items
-    bool addActivityActionSequenceCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos, int seqPos);
-    bool removeActivityActionSequenceCommand(uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceOp(const Enum<Operation> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceCmd(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceDeviceId(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceDelayMs(uint32_t v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceStateName(const Enum<StateMachineDeviceType> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceValue(const std::string &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionSequenceMod(const Enum<Modifier> &v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
-    bool setActivityActionUnknownParam(const data::item::UnknownElement& v, uint32_t activityPos,  item::ActivityAction t, int actionPos, uint32_t seqPos);
+    bool setActivityAction(const item::DeviceAction &v, uint32_t activityPos, item::ActivityAction t, int actionPos);
     //activity roles
     bool setActivityRoleCommand(uint32_t activityPos, item::Role &role, int rolePos = -1, bool overwrite = false);
     bool removeActivityRoleCommand(uint32_t activityPos, uint32_t rolePos);

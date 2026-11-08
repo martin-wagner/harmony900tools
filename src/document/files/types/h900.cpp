@@ -774,18 +774,18 @@ bool H900userconfig::readRelativeAction(pugi::xml_node &action)
 }
 
 bool H900userconfig::readActionSequences(pugi::xml_node &action,
-    item::DeviceAction &out)
+    item::DeviceAction &out, bool storeDeviceId)
 {
   auto ret = true;
 
   for (pugi::xml_node prop : action.children("Action")) {
-    ret &= readActionSequence(prop, out);
+    ret &= readActionSequence(prop, out, storeDeviceId);
   }
   return ret;
 }
 
 bool H900userconfig::readActionSequence(pugi::xml_node &sequence,
-    item::DeviceAction &out)
+    item::DeviceAction &out, bool storeDeviceId)
 {
   item::SequenceItem seq;
 
@@ -806,7 +806,10 @@ bool H900userconfig::readActionSequence(pugi::xml_node &sequence,
         seq.deviceId.set(prop.text().as_uint()).setIncluded(Used::YES);
         break;
       case "DeviceId"_hash:
-        //don't store redundant data
+        if (storeDeviceId) {
+          seq.deviceId.set(prop.text().as_uint()).setIncluded(Used::YES);
+        }
+        //else don't store redundant data
         break;
       case "Command"_hash:
         seq.cmd.set(prop.text().as_string()).setIncluded(Used::YES);
@@ -932,102 +935,13 @@ bool H900userconfig::readNumericActions(pugi::xml_node &actions,
 bool H900userconfig::readNumericActionSequences(pugi::xml_node &action,
     uint32_t devicePos, item::DigitSection s, uint32_t digit)
 {
-  auto ret = true;
+  item::DeviceAction out;
 
-  for (pugi::xml_node prop : action.children("Action")) {
-    ret &= readNumericActionSequence(prop, devicePos, s, digit);
-  }
-  return ret;
-}
-
-bool H900userconfig::readNumericActionSequence(pugi::xml_node &sequence,
-    uint32_t devicePos, item::DigitSection s, uint32_t digit)
-{
-  uint32_t seqPos;
-
-  worker->addDeviceNumpadActionSequenceCommand(devicePos, s, digit, -1); //append
-  auto &num = c->getDevices()[devicePos].getNumpad().value();
-  switch (s) {
-    case item::DigitSection::First:
-      seqPos = num.first->at(digit).sequence.size() - 1;
-      break;
-    case item::DigitSection::Middle:
-      seqPos = num.middle->at(digit).sequence.size() - 1;
-      break;
-    case item::DigitSection::Last:
-      seqPos = num.last->at(digit).sequence.size() - 1;
-      break;
-    default:
-      seqPos = 0;
-      break;
-  }
-  return readActionSequenceData(sequence, devicePos, s, digit, seqPos);
-}
-
-bool H900userconfig::readActionSequenceData(pugi::xml_node &sequence,
-    uint32_t devicePos, item::DigitSection s, uint32_t digit, uint32_t seqPos)
-{
-  auto target = sequence.child("Target").text().as_string();
-  if (string(target) != "Device") {
-    emit writeLog(LogLevel::Warning,
-        tr("xml: Action Target != Device in %1. This is not supported").arg(
-            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
+  auto ret = readActionSequences(action, out);
+  if (!ret) {
     return false;
   }
-  auto operation = sequence.child("Operation");
-  auto opcode = operation.child("Name").text().as_string();
-  worker->setDeviceNumpadActionSequenceOp(Enum<Operation>(opcode), devicePos, s,
-      digit, seqPos);
-  for (pugi::xml_node prop : operation.children("Parameter")) {
-    auto name = string(prop.attribute("name").as_string());
-    auto h = lib::hash_fnv1a(name.data(), name.size());
-    switch (h) {
-      case "DeviceId"_hash:
-        //don't store redundant data
-        break;
-      case "Command"_hash: {
-        auto val = prop.text().as_string();
-        worker->setDeviceNumpadActionSequenceCmd(val, devicePos, s, digit,
-            seqPos);
-        break;
-      }
-      case "Modifier"_hash: {
-        auto val = prop.text().as_string();
-        worker->setDeviceNumpadActionSequenceMod(Enum<Modifier>(val), devicePos,
-            s, digit, seqPos);
-        break;
-      }
-      case "DelayValue"_hash: {
-        auto val = prop.text().as_uint();
-        worker->setDeviceNumpadActionSequenceDelayMs(val, devicePos, s, digit,
-            seqPos);
-        break;
-      }
-      case "State"_hash:
-      case "StateName"_hash: {
-        auto val = prop.text().as_string();
-        worker->setDeviceNumpadActionSequenceStateName(
-            Enum<StateMachineDeviceType>(val), devicePos, s, digit, seqPos);
-        break;
-      }
-      case "Value"_hash: {
-        auto val = prop.text().as_string();
-        worker->setDeviceNumpadActionSequenceValue(val, devicePos, s, digit,
-            seqPos);
-        break;
-      }
-      default: {
-        auto unknown = toUnknownElement(prop);
-        emit writeLog(LogLevel::Debug,
-            tr("import device action: unknown property (name = %1, value = %2)").arg(
-                qstr(name)).arg(qstr(unknown.text)), ContentType::PlainText);
-        worker->setDeviceNumpadActionUnknownParam(unknown, devicePos, s, digit,
-            seqPos);
-        break;
-      }
-    }
-  }
-  return true;
+  return worker->setDeviceNumpadAction(out, devicePos, s, digit);
 }
 
 bool H900userconfig::readIrList(pugi::xml_node &commands)
@@ -1488,127 +1402,30 @@ bool H900userconfig::addDummyActivitySoftButton(int activityPos, int pos)
 bool H900userconfig::readActivityAction(pugi::xml_node &actions,
     item::ActivityAction t)
 {
+  uint32_t actionPos;
+  item::DeviceAction out;
   auto activityPos = c->getActivities().size() - 1;
 
   auto ret = worker->addActivityActionCommand(activityPos, t, -1); //append
   if (!ret) {
     return false;
   }
-  return readActivityActionSequences(actions, t);
-}
-
-bool H900userconfig::readActivityActionSequences(pugi::xml_node &action,
-    item::ActivityAction t)
-{
-  auto ret = true;
-
-  for (pugi::xml_node prop : action.children("Action")) {
-    ret &= readActivityActionSequence(prop, t);
-  }
-  return ret;
-}
-
-bool H900userconfig::readActivityActionSequence(pugi::xml_node &sequence,
-    item::ActivityAction t)
-{
-  uint32_t actionPos;
-  uint32_t seqPos;
-
-  auto activityPos = c->getActivities().size() - 1;
   switch (t) {
     case item::ActivityAction::Enter:
       actionPos = c->getActivities()[activityPos].getEnterActions().size() - 1;
-      seqPos =
-          c->getActivities()[activityPos].getEnterActions()[actionPos].sequence.size(); //before append -- not "-1"
       break;
     case item::ActivityAction::Leave:
       actionPos = c->getActivities()[activityPos].getLeaveActions().size() - 1;
-      seqPos =
-          c->getActivities()[activityPos].getLeaveActions()[actionPos].sequence.size(); //before append -- not "-1"
       break;
     default:
       return false;
   }
-  auto ret = worker->addActivityActionSequenceCommand(activityPos, t, actionPos,
-      -1); //append
+
+  ret &= readActionSequences(actions, out, true);
   if (!ret) {
     return false;
   }
-
-  return readActivityActionSequenceData(sequence, activityPos, actionPos, t,
-      seqPos);
-}
-
-bool H900userconfig::readActivityActionSequenceData(pugi::xml_node &sequence,
-    uint32_t activityPos, uint32_t actionPos, item::ActivityAction t,
-    uint32_t seqPos)
-{
-  auto target = sequence.child("Target").text().as_string();
-  if (string(target) != "Device") {
-    emit writeLog(LogLevel::Warning,
-        tr("xml: Action Target != Device in %1. This is not supported").arg(
-            qstr(c->getDevices().back().label.get())), ContentType::PlainText);
-    return false;
-  }
-  auto operation = sequence.child("Operation");
-  auto opcode = operation.child("Name").text().as_string();
-  worker->setActivityActionSequenceOp(Enum<Operation>(opcode), activityPos, t,
-      actionPos, seqPos);
-  for (pugi::xml_node prop : operation.children("Parameter")) {
-    auto name = string(prop.attribute("name").as_string());
-    auto h = lib::hash_fnv1a(name.data(), name.size());
-    switch (h) {
-      case "DeviceId"_hash: {
-        auto val = prop.text().as_uint();
-        worker->setActivityActionSequenceDeviceId(val, activityPos, t,
-            actionPos, seqPos);
-        break;
-      }
-      case "Command"_hash: {
-        auto val = prop.text().as_string();
-        worker->setActivityActionSequenceCmd(val, activityPos, t, actionPos,
-            seqPos);
-        break;
-      }
-      case "Modifier"_hash: {
-        auto val = prop.text().as_string();
-        worker->setActivityActionSequenceMod(Enum<Modifier>(val), activityPos,
-            t, actionPos, seqPos);
-        break;
-      }
-      case "DelayValue"_hash: {
-        auto val = prop.text().as_uint();
-        worker->setActivityActionSequenceDelayMs(val, activityPos, t, actionPos,
-            seqPos);
-        break;
-      }
-      case "State"_hash:
-      case "StateName"_hash: {
-        auto val = prop.text().as_string();
-        worker->setActivityActionSequenceStateName(
-            Enum<StateMachineDeviceType>(val), activityPos, t, actionPos,
-            seqPos);
-        break;
-      }
-      case "Value"_hash: {
-        auto val = prop.text().as_string();
-        worker->setActivityActionSequenceValue(val, activityPos, t, actionPos,
-            seqPos);
-        break;
-      }
-      default: {
-        auto unknown = toUnknownElement(prop);
-        emit writeLog(LogLevel::Debug,
-            tr("import activity action: unknown property (name = %1, "
-                "value = %2)").arg(qstr(name)).arg(qstr(unknown.text)),
-            ContentType::PlainText);
-        worker->setActivityActionUnknownParam(unknown, activityPos, t,
-            actionPos, seqPos);
-        break;
-      }
-    }
-  }
-  return true;
+  return worker->setActivityAction(out, activityPos, t, actionPos);
 }
 
 bool H900userconfig::readActivityRoles(pugi::xml_node &activity)
