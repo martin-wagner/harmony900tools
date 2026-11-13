@@ -711,8 +711,8 @@ bool Database::readInputFeature(const nlohmann::json &j,
   //pull base data
   sm.smType.set(data::StateMachineDeviceType::Input);
   auto inputDelay = jif.at("InputDelay").get<int>();
-  if (inputDelay < 100) {
-    inputDelay = 100;
+  if (inputDelay < MIN_INPUT_DELAY_MS) {
+    inputDelay = MIN_INPUT_DELAY_MS;
   }
   sm.delayMs.set(inputDelay).setIncluded(data::Used::YES);
 
@@ -777,6 +777,61 @@ bool Database::readInputFeature(const nlohmann::json &j,
 bool Database::readPowerFeature(const nlohmann::json &j,
     data::item::Device &device, document::Config &config, bool hasFeature) const
 {
+  data::item::StateMachine sm;
+  data::item::DeviceAction a;
+  bool res;
+
+  if (!hasFeature) {
+    return true;
+  }
+  auto jpf = getFeature(j, "PowerFeature");
+
+  //pull base data
+  sm.smType.set(data::StateMachineDeviceType::Power);
+  auto inputDelay = jpf.at("PowerOnDelay").get<int>();
+  if (inputDelay < MIN_POWER_DELAY_MS) {
+    inputDelay = MIN_POWER_DELAY_MS;
+  }
+  sm.delayMs.set(inputDelay).setIncluded(data::Used::YES);
+
+  //pull power info
+  auto powerType = jpf.at("PowerTypeId").get<int>();
+  switch (powerType) {
+    case 1: { //discrete on/off
+      res = checkReadActionSequences("PowerOffActions", jpf, a);
+      if (res != true) {
+        return false;
+      }
+      sm.discrete.states.push_back("Off");
+      sm.discrete.enterStateAction.push_back(a);
+
+      res = checkReadActionSequences("PowerOnActions", jpf, a);
+      if (res != true) {
+        return false;
+      }
+      sm.discrete.states.push_back("On");
+      sm.discrete.enterStateAction.push_back(a);
+      break;
+    }
+    case 2: { //relative toggle
+      sm.relative.states.push_back("Off");
+      sm.relative.states.push_back("On");
+      res = checkReadActionSequences("PowerToggleActions", jpf, a);
+      if (res != true) {
+        return false;
+      }
+      sm.relative.nextStateAction = a;
+      res = checkReadActionSequences("PowerOnResetActions", jpf, a);
+      if (res == true) {
+        sm.relative.resetAction = a;
+      }
+      break;
+    }
+    default:
+      //no power
+      return true;
+  }
+  device.getStateMachines().push_back(sm);
   return true;
 }
 

@@ -28,6 +28,10 @@ class Database: public QObject
       uint64_t line;
     };
 
+    //just assumptions...
+    static constexpr int MIN_INPUT_DELAY_MS = 100;
+    static constexpr int MIN_POWER_DELAY_MS = 1000;
+
   public:
     Database(QObject *parent = nullptr);
 
