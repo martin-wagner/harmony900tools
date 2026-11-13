@@ -133,6 +133,7 @@ class Database: public QObject
     bool readInternalStateFeatures(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
     bool readInternalStateFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
     bool readOutputFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool checkReadActionSequences(const std::string &key, const nlohmann::json &j, data::item::DeviceAction &out) const;
     bool readActionSequences(const nlohmann::json &j, data::item::DeviceAction &out) const;
     bool readActionSequence(const nlohmann::json &j, data::item::SequenceItem &out) const;
 

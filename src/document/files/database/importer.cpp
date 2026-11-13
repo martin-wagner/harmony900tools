@@ -632,15 +632,16 @@ bool Database::readChannelTuningFeature(const nlohmann::json &j,
 {
   data::item::Numpad num;
   data::item::Digits digits;
+  data::item::DeviceAction a;
 
   //this only verifies that the entry in the json exists.
   if (!hasFeature) {
     return true;
   }
-  auto jct = getFeature(j, "ChannelTuningFeature");
+  auto jctf = getFeature(j, "ChannelTuningFeature");
 
   //this verifies that we actually support it.
-  auto haveChannels = jct.at("State").get<int>();
+  auto haveChannels = jctf.at("State").get<int>();
   if (haveChannels != 1) {
     return true;
   }
@@ -660,7 +661,7 @@ bool Database::readChannelTuningFeature(const nlohmann::json &j,
     item.mod.set(data::Modifier::Press).setIncluded(data::Used::YES);
     digits[i].sequence.push_back(item);
   }
-  if (jct.at("FixedDigits").is_null()) {
+  if (jctf.at("FixedDigits").is_null()) {
     num.fixedDigits.set(0).setIncluded(data::Used::YES);
     num.first = digits;
   } else {
@@ -670,46 +671,21 @@ bool Database::readChannelTuningFeature(const nlohmann::json &j,
     num.last = digits;
   }
 
-  if (jct.contains("StartActions") && jct.at("StartActions").is_array()
-      && !jct.at("StartActions").empty()) {
-    auto jsa = jct.at("StartActions");
-    data::item::DeviceAction a;
-    auto res = readActionSequences(jsa, a);
-    if (res == true) {
-      num.start = a;
-    }
+  auto res = checkReadActionSequences("StartActions", jctf, a);
+  if (res == true) {
+    num.start = a;
   }
-
-  if (jct.contains("GreaterTenActions")
-      && jct.at("GreaterTenActions").is_array()
-      && !jct.at("GreaterTenActions").empty()) {
-    auto jsa = jct.at("GreaterTenActions");
-    data::item::DeviceAction a;
-    auto res = readActionSequences(jsa, a);
-    if (res == true) {
-      num.greaterTen = a;
-    }
+  res = checkReadActionSequences("GreaterTenActions", jctf, a);
+  if (res == true) {
+    num.greaterTen = a;
   }
-
-  if (jct.contains("GreaterHundredActions")
-      && jct.at("GreaterHundredActions").is_array()
-      && !jct.at("GreaterHundredActions").empty()) {
-    auto jsa = jct.at("GreaterHundredActions");
-    data::item::DeviceAction a;
-    auto res = readActionSequences(jsa, a);
-    if (res == true) {
-      num.greaterHundred = a;
-    }
+  res = checkReadActionSequences("GreaterHundredActions", jctf, a);
+  if (res == true) {
+    num.greaterHundred = a;
   }
-
-  if (jct.contains("FinishActions") && jct.at("FinishActions").is_array()
-      && !jct.at("FinishActions").empty()) {
-    auto jsa = jct.at("FinishActions");
-    data::item::DeviceAction a;
-    auto res = readActionSequences(jsa, a);
-    if (res == true) {
-      num.finish = a;
-    }
+  res = checkReadActionSequences("FinishActions", jctf, a);
+  if (res == true) {
+    num.finish = a;
   }
   device.getNumpad() = num;
   return true;
@@ -718,6 +694,83 @@ bool Database::readChannelTuningFeature(const nlohmann::json &j,
 bool Database::readInputFeature(const nlohmann::json &j,
     data::item::Device &device, document::Config &config, bool hasFeature) const
 {
+  data::item::StateMachine sm;
+  data::item::DeviceAction a;
+  bool res;
+
+  if (!hasFeature) {
+    return true;
+  }
+  auto jif = getFeature(j, "InputFeature");
+
+  if (!jif.contains("Inputs") || !jif.at("Inputs").is_array()
+      || jif.at("Inputs").empty()) {
+    //no inputs available
+    return true;
+  }
+  //pull base data
+  sm.smType.set(data::StateMachineDeviceType::Input);
+  auto inputDelay = jif.at("InputDelay").get<int>();
+  if (inputDelay < 100) {
+    inputDelay = 100;
+  }
+  sm.delayMs.set(inputDelay).setIncluded(data::Used::YES);
+
+  //pull the inputs
+  for (const auto &ji : jif.at("Inputs")) {
+    //fixme contains "InputOrder". verify order using this value. currently we rely on the order in the json.
+    auto name = ji.at("InputName").get<string>();
+    if (name.empty()) {
+      continue;
+    }
+    res = checkReadActionSequences("Actions", ji, a);
+    if (res == true) {
+      //discrete action (has action assigned to input)
+      sm.discrete.states.push_back(name);
+      sm.discrete.enterStateAction.push_back(a);
+    } else {
+      //relative action (uses general actions)
+      sm.relative.states.push_back(name);
+    }
+  }
+
+  if (sm.discrete.states.empty() && sm.relative.states.empty()) {
+    //inputs contain no usable data
+    emit writeLog(LogLevel::Debug, tr("import: INPUTS data missing"),
+        ContentType::PlainText);
+    return true; //source data has low quality -- many devices end up here
+  }
+
+  //pull non-input related actions
+  res = checkReadActionSequences("StartActions", jif, a);
+  if (res == true) {
+    sm.startAction = a;
+  }
+  res = checkReadActionSequences("FinishActions", jif, a);
+  if (res == true) {
+    sm.finishAction = a;
+  }
+  res = checkReadActionSequences("ResetActions", jif, a);
+  if (res == true) {
+    sm.relative.resetAction = a;
+  }
+  res = checkReadActionSequences("NextActions", jif, a);
+  if (res == true) {
+    sm.relative.nextStateAction = a;
+  }
+  res = checkReadActionSequences("PreviousActions", jif, a);
+  if (res == true) {
+    sm.relative.prevStateAction = a;
+  }
+  if (!sm.startAction.has_value() && !sm.finishAction.has_value()
+      && !sm.relative.resetAction.has_value()
+      && !sm.relative.nextStateAction.has_value()
+      && !sm.relative.prevStateAction.has_value()
+      && sm.discrete.enterStateAction.empty()) {
+    //no actions available
+    return true; //source data has low quality -- many devices end up here
+  }
+  device.getStateMachines().push_back(sm);
   return true;
 }
 
@@ -743,6 +796,19 @@ bool Database::readOutputFeature(const nlohmann::json &j,
     data::item::Device &device, document::Config &config, bool hasFeature) const
 {
   return true;
+}
+
+bool document::files::Database::checkReadActionSequences(const std::string &key,
+    const nlohmann::json &j, data::item::DeviceAction &out) const
+{
+  data::item::DeviceAction a;
+  bool ret = false;
+
+  if (j.contains(key) && j.at(key).is_array() && !j.at(key).empty()) {
+    ret = readActionSequences(j.at(key), a);
+  }
+  out = a;
+  return ret;
 }
 
 bool Database::readActionSequences(const nlohmann::json &j,
