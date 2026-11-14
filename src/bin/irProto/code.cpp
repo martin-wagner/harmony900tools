@@ -381,7 +381,7 @@ const IrProto::Data Code::getData(bool forceOneRepeat) const
   IrProto::Data data;
   uint8_t tx = repeats;
 
-  if (!isValid()) {
+  if (!isValid(true)) {
     return data;
   }
 

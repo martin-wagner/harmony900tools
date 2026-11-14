@@ -8,6 +8,8 @@
 #include "lib/qtHelpers.h"
 #include "lib/uid.h"
 #include "importer.h"
+#include "bin/codec/decode.h"
+#include "bin/codec/encode.h"
 #include "document/data/items/device.h"
 #include "document/data/items/jsonSerialise.h"
 #include "document/config.h"
@@ -259,9 +261,8 @@ Database::Device Database::getDeviceInfo(const QString &manufacturerName,
   }
 }
 
-bool document::files::Database::importDevice(const QString &manufacturerName,
-    const QString &deviceName, document::Config &config,
-    bool tryConvertProtocol) const
+bool files::Database::importDevice(const QString &manufacturerName,
+    const QString &deviceName, Config &config, bool tryConvertProtocol) const
 {
   auto source = getDeviceInfo(manufacturerName, deviceName);
   if (source.name.isEmpty()) {
@@ -270,8 +271,8 @@ bool document::files::Database::importDevice(const QString &manufacturerName,
   return importDevice(source, config, tryConvertProtocol);
 }
 
-bool document::files::Database::importDevice(const Device &source,
-    document::Config &config, bool tryConvertProtocol) const
+bool files::Database::importDevice(const Device &source, Config &config,
+    bool tryConvertProtocol) const
 {
   json j;
   string line;
@@ -374,7 +375,7 @@ QString Database::normaliseKey(const QString &s)
   return result;
 }
 
-bool Database::importDevice(const json &j, document::Config &config,
+bool Database::importDevice(const json &j, Config &config,
     bool tryConvertProtocol) const
 {
   bool ret = true;
@@ -443,9 +444,8 @@ bool Database::importDevice(const json &j, document::Config &config,
   return ret;
 }
 
-bool document::files::Database::commands(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config,
-    bool tryConvertProtocol) const
+bool files::Database::commands(const nlohmann::json &j,
+    data::item::Device &device, Config &config, bool tryConvertProtocol) const
 {
   bool ret = true;
 
@@ -473,12 +473,12 @@ bool document::files::Database::commands(const nlohmann::json &j,
   return ret;
 }
 
-bool document::files::Database::command(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config,
-    bool tryConvertProtocol) const
+bool files::Database::command(const nlohmann::json &j,
+    data::item::Device &device, Config &config, bool tryConvertProtocol) const
 {
   string protocolName;
   int protocolIndex = -1;
+  bool success;
   data::item::ProtoCommand cmd;
 
   if (j.contains("Raw") && !j.at("Raw").is_null()) {
@@ -527,29 +527,73 @@ bool document::files::Database::command(const nlohmann::json &j,
             protocolDatabase.getErrStr()), ContentType::PlainText);
     return false;
   }
-  //if (tryConvertProtocol) { todo
-  // serialise and throw the timings at ir recognition code...
-  // then create new code / index from that.
-  //} else {
-  protocolIndex = config.modify().appendDatabaseIrProtoLibItem(protocolName,
-      protocol);
-  cmd.codeType.set(data::CodeType::Proprietary);
-  //}
+  success = false;
+  if (tryConvertProtocol) {
+    binary::TimingStream timingData;
+    // we "learn" the command: serialise and throw the timings at the IR recognition code
+    // then create new code / index from that.
+    auto binaryData = code.getData(true);
+    auto res = protocol.serialiseIrStream(timingData, binaryData);
+    if (res == binary::irProto::Status::OK) {
+      auto decoder = binary::codec::Decode(timingData,
+          static_cast<int>(protocol.getClock()));
+      auto &data = decoder.getData();
+      if (data.decoded == binary::codec::Status::OK) {
+        //the following:
+        // - places the protocol in the project
+        // - replaces the protocol variable with the detected one
+        // - replaces the code variable with the converted code
+        protocolIndex = config.modify().appendLocalIrProtoLibItem(
+            data.codeType);
+        if (protocolIndex >= 0) {
+          //from here we are doomed to succeed
+          cmd.codeType.set(data.codeType);
+          cmd.libName.set(data.codeString);
+          cmd.irAddress.set(data.address);
+          cmd.irCommand.set(data.command);
+          cmd.irBitCount.set(data.data.size());
+          cmd.irBitData.set(binary::irProto::Code::listToU64bits(data.data));
+          protocol = config.data().getProtocolLib().accessProtocol(
+              protocolIndex);
+          code = binary::codec::encode(protocolIndex, protocol, data.codeType,
+              data.codeString, data.address, data.command, data.data);
+          if (!code.isValid()) {
+            emit writeLog(LogLevel::Warning,
+                tr("import: PROTO code converting failed"),
+                ContentType::PlainText);
+            return false;
+          }
+        }
+        success = true;
+      } else {
+        emit writeLog(LogLevel::Debug,
+            tr("import: PROTO code %1 not supported (%2), using proprietary").arg(
+                qstr(protocolName)).arg((int) data.decoded),
+            ContentType::PlainText);
+      }
+    }
+  }
+  if (!tryConvertProtocol || !success) {
+    //use as-is
+    protocolIndex = config.modify().appendDatabaseIrProtoLibItem(protocolName,
+        protocol);
+    code.changeIndex(protocolIndex);
+    cmd.codeType.set(data::CodeType::Proprietary);
+  }
   if (protocolIndex < 0) {
     emit writeLog(LogLevel::Warning,
         tr("import: PROTO code adding failed (%1)").arg(qstr(protocolName)),
         ContentType::PlainText);
     return false;
   }
-  code.changeIndex(protocolIndex);
   cmd.protocolIndex.set(protocolIndex);
   cmd.command = code;
   device.getIrCommands().getProtoCommands().push_back(cmd);
   return true;
 }
 
-bool document::files::Database::softButton(const nlohmann::json &j,
-    const string &type, data::item::Device &device) const
+bool files::Database::softButton(const nlohmann::json &j, const string &type,
+    data::item::Device &device) const
 {
   data::item::Button button;
 
@@ -563,8 +607,8 @@ bool document::files::Database::softButton(const nlohmann::json &j,
   return true;
 }
 
-bool document::files::Database::hardButton(const nlohmann::json &j,
-    const string &type, data::item::Device &device) const
+bool files::Database::hardButton(const nlohmann::json &j, const string &type,
+    data::item::Device &device) const
 {
   data::item::Button button;
 
@@ -612,7 +656,7 @@ void Database::detectDeviceFeatures(const json &j,
   }
 }
 
-const json& document::files::Database::Database::getFeature(const json &j,
+const json& files::Database::Database::getFeature(const json &j,
     const string &type, int index) const
 {
   int count;
@@ -637,7 +681,7 @@ const json& document::files::Database::Database::getFeature(const json &j,
 }
 
 bool Database::readChannelTuningFeature(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config, bool hasFeature) const
+    data::item::Device &device, Config &config, bool hasFeature) const
 {
   data::item::Numpad num;
   data::item::Digits digits;
@@ -701,7 +745,7 @@ bool Database::readChannelTuningFeature(const nlohmann::json &j,
 }
 
 bool Database::readInputFeature(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config, bool hasFeature) const
+    data::item::Device &device, Config &config, bool hasFeature) const
 {
   data::item::StateMachine sm;
   data::item::DeviceAction a;
@@ -738,7 +782,7 @@ bool Database::readInputFeature(const nlohmann::json &j,
 }
 
 bool Database::readPowerFeature(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config, bool hasFeature) const
+    data::item::Device &device, Config &config, bool hasFeature) const
 {
   data::item::StateMachine sm;
   data::item::DeviceAction a;
@@ -799,7 +843,7 @@ bool Database::readPowerFeature(const nlohmann::json &j,
 }
 
 bool Database::readInternalStateFeatures(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config, bool hasFeature) const
+    data::item::Device &device, Config &config, bool hasFeature) const
 {
   bool ret = true;
 
@@ -822,7 +866,7 @@ bool Database::readInternalStateFeatures(const nlohmann::json &j,
 }
 
 bool Database::readInternalStateFeature(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config) const
+    data::item::Device &device, Config &config) const
 {
   data::item::StateMachine sm;
   data::item::DeviceAction a;
@@ -859,7 +903,7 @@ bool Database::readInternalStateFeature(const nlohmann::json &j,
 }
 
 bool Database::readOutputFeature(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config, bool hasFeature) const
+    data::item::Device &device, Config &config, bool hasFeature) const
 {
   //no idea what this is used for.
   return true;
@@ -941,7 +985,7 @@ bool Database::readStateMachine(const std::string &keyArray,
   return true;
 }
 
-bool document::files::Database::checkReadActionSequences(const std::string &key,
+bool files::Database::checkReadActionSequences(const std::string &key,
     const nlohmann::json &j, data::item::DeviceAction &out) const
 {
   data::item::DeviceAction a;
@@ -1016,7 +1060,7 @@ bool Database::readActionSequence(const nlohmann::json &j,
   return true;
 }
 
-bool document::files::Database::hasCapability(const nlohmann::json &j,
+bool files::Database::hasCapability(const nlohmann::json &j,
     Capabilities capability) const
 {
   for (const auto &capabilities : j.at("DeviceCapabilitiesWithPriority")) {
