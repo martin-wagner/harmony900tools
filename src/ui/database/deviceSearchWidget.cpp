@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPushButton>
+#include <QSignalBlocker>
 #include <QVBoxLayout>
 
 using namespace std;
@@ -42,8 +43,6 @@ void DeviceSearchWidget::onManufacturerTextChanged(const QString &text)
 
 void DeviceSearchWidget::onManufacturerSelectionChanged()
 {
-  const QString manufacturerName = getSelectedManufacturer();
-  deviceEdit->setEnabled(!manufacturerName.isEmpty());
   updateDevices();
   updateDeviceInfo();
   updateImportButton();
@@ -56,11 +55,17 @@ void DeviceSearchWidget::onDeviceTextChanged(const QString &text)
 
 void DeviceSearchWidget::onDeviceSelectionChanged()
 {
+  QString manufacturerName = getSelectedManufacturer();
+  const QString deviceName = getSelectedDevice();
+
+  if (manufacturerName.isEmpty() && !deviceName.isEmpty()) {
+    selectManufacturerOfDevice(deviceName);
+    manufacturerName = getSelectedManufacturer();
+  }
+
   updateDeviceInfo();
   updateImportButton();
 
-  const QString manufacturerName = getSelectedManufacturer();
-  const QString deviceName = getSelectedDevice();
   if (!manufacturerName.isEmpty() && !deviceName.isEmpty()) {
     emit deviceSelected(manufacturerName, deviceName);
   }
@@ -99,17 +104,25 @@ void DeviceSearchWidget::onImportClicked()
   }
 }
 
+void DeviceSearchWidget::onClearManufacturerClicked()
+{
+  manufacturerList->clearSelection();
+  manufacturerEdit->clear();
+}
+
 void DeviceSearchWidget::createView()
 {
   manufacturerEdit = new QLineEdit(this);
   manufacturerEdit->setPlaceholderText(tr("search manufacturer"));
+
+  clearManufacturerButton = new QPushButton(tr("all"), this);
+  clearManufacturerButton->setToolTip(tr("Deselect the manufacturer"));
 
   manufacturerList = new QListWidget(this);
   manufacturerList->setSelectionMode(QAbstractItemView::SingleSelection);
 
   deviceEdit = new QLineEdit(this);
   deviceEdit->setPlaceholderText(tr("search device"));
-  deviceEdit->setEnabled(false);
 
   deviceList = new QListWidget(this);
   deviceList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -127,8 +140,12 @@ void DeviceSearchWidget::createView()
   importButton = new QPushButton(tr("import selected device"), this);
   importButton->setEnabled(false);
 
+  QHBoxLayout *manufacturerEditLayout = new QHBoxLayout();
+  manufacturerEditLayout->addWidget(manufacturerEdit);
+  manufacturerEditLayout->addWidget(clearManufacturerButton);
+
   QVBoxLayout *manufacturerLayout = new QVBoxLayout();
-  manufacturerLayout->addWidget(manufacturerEdit);
+  manufacturerLayout->addLayout(manufacturerEditLayout);
   manufacturerLayout->addWidget(manufacturerList);
 
   QVBoxLayout *deviceLayout = new QVBoxLayout();
@@ -162,6 +179,8 @@ void DeviceSearchWidget::createConnections()
       &DeviceSearchWidget::onDeviceSelectionChanged);
   connect(importButton, &QPushButton::clicked, this,
       &DeviceSearchWidget::onImportClicked);
+  connect(clearManufacturerButton, &QPushButton::clicked, this,
+      &DeviceSearchWidget::onClearManufacturerClicked);
 }
 
 void DeviceSearchWidget::updateManufacturers()
@@ -179,13 +198,19 @@ void DeviceSearchWidget::updateManufacturers()
 
 void DeviceSearchWidget::updateDevices()
 {
-  deviceList->clear();
   const QString manufacturerName = getSelectedManufacturer();
-  if (catalogue == nullptr || manufacturerName.isEmpty()) {
+  auto matches = QStringList();
+
+  deviceList->clear();
+  if (catalogue == nullptr) {
     return;
   }
 
-  auto matches = catalogue->findDevices(manufacturerName, deviceEdit->text());
+  if (manufacturerName.isEmpty()) {
+    matches = catalogue->findDevices(deviceEdit->text());
+  } else {
+    matches = catalogue->findDevices(manufacturerName, deviceEdit->text());
+  }
   matches.sort(Qt::CaseInsensitive);
   updateDeviceInfo(&matches);
   deviceList->addItems(matches);
@@ -205,6 +230,11 @@ void DeviceSearchWidget::updateDeviceInfo(QStringList *items)
 
   const QString manufacturerName = getSelectedManufacturer();
   const QString deviceName = getSelectedDevice();
+  if (manufacturerName.isEmpty() && !deviceName.isEmpty()) {
+    deviceInfoLabel->setText(tr("device name is used by several manufacturers, "
+        "select a manufacturer"));
+    return;
+  }
   if (manufacturerName.isEmpty() || deviceName.isEmpty()) {
     deviceInfoLabel->setText(
         tr("no device selected (%1 available)").arg(
@@ -249,6 +279,77 @@ QString DeviceSearchWidget::getSelectedDevice() const
   }
 
   return items.first()->text();
+}
+
+QString DeviceSearchWidget::findManufacturerOfDevice(
+    const QString &deviceName) const
+{
+  QStringList manufacturers;
+  QStringList matches;
+  QString result;
+  int count = 0;
+
+  if (catalogue == nullptr) {
+    return QString();
+  }
+
+  manufacturers = catalogue->findManufacturers(QString());
+  for (const auto &manufacturerName : manufacturers) {
+    matches = catalogue->findDevices(manufacturerName, deviceName);
+    if (matches.contains(deviceName)) {
+      result = manufacturerName;
+      count++;
+    }
+  }
+
+  if (count != 1) {
+    return QString();
+  }
+
+  return result;
+}
+
+void DeviceSearchWidget::selectManufacturerOfDevice(const QString &deviceName)
+{
+  const QString manufacturerName = findManufacturerOfDevice(deviceName);
+  QList<QListWidgetItem*> manufacturerItems;
+  QList<QListWidgetItem*> deviceItems;
+
+  if (manufacturerName.isEmpty()) {
+    return;
+  }
+
+  manufacturerItems = manufacturerList->findItems(manufacturerName,
+      Qt::MatchExactly);
+  if (manufacturerItems.isEmpty()) {
+    // the manufacturer is hidden by the manufacturer filter
+    {
+      const QSignalBlocker editBlocker(manufacturerEdit);
+      manufacturerEdit->clear();
+    }
+    updateManufacturers();
+    manufacturerItems = manufacturerList->findItems(manufacturerName,
+        Qt::MatchExactly);
+  }
+  if (manufacturerItems.isEmpty()) {
+    return;
+  }
+
+  {
+    // rebuilding the device list must not trigger our own slots again
+    const QSignalBlocker manufacturerBlocker(manufacturerList);
+    const QSignalBlocker deviceBlocker(deviceList);
+
+    manufacturerList->setCurrentItem(manufacturerItems.first());
+    manufacturerList->scrollToItem(manufacturerItems.first());
+    updateDevices();
+
+    deviceItems = deviceList->findItems(deviceName, Qt::MatchExactly);
+    if (!deviceItems.isEmpty()) {
+      deviceList->setCurrentItem(deviceItems.first());
+      deviceList->scrollToItem(deviceItems.first());
+    }
+  }
 }
 
 }

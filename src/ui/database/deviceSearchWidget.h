@@ -26,7 +26,8 @@ namespace database
 
 /**
  * search widget for the device database: manufacturer filter, device filter
- * and device info. the device filter is enabled after a manufacturer is selected.
+ * and device info. without a selected manufacturer the device filter searches
+ * all manufacturers, selecting a device then selects its manufacturer.
  */
 class DeviceSearchWidget: public QWidget
 {
@@ -49,6 +50,7 @@ class DeviceSearchWidget: public QWidget
     void onDeviceTextChanged(const QString &text);
     void onDeviceSelectionChanged();
     void onImportClicked();
+    void onClearManufacturerClicked();
 
   protected:
     Context &ctx;
@@ -63,6 +65,8 @@ class DeviceSearchWidget: public QWidget
     void updateImportButton();
     QString getSelectedManufacturer() const;
     QString getSelectedDevice() const;
+    QString findManufacturerOfDevice(const QString &deviceName) const;
+    void selectManufacturerOfDevice(const QString &deviceName);
 
     const document::files::Database *catalogue = nullptr;
 
@@ -73,6 +77,7 @@ class DeviceSearchWidget: public QWidget
     QLabel *deviceInfoLabel = nullptr;
     QCheckBox *tryConvertProtocolCheck = nullptr;
     QPushButton *importButton = nullptr;
+    QPushButton *clearManufacturerButton = nullptr;
 };
 
 }
