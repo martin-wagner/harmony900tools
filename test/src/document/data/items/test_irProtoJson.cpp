@@ -396,7 +396,7 @@ TEST(IrProtoJson, ClockPeriodRoundTrips)
   IrProto proto(26316, std::vector<TimingSection>());
 
   serialiser::ordered_json j;
-  serialiser::toJson(j, proto, "Test");
+  serialiser::toJson(j, proto, "Test", "");
 
   EXPECT_EQ(j["ClockPeriod"], 26316);
 
@@ -411,12 +411,14 @@ TEST(IrProtoJson, NameRoundTrips)
   IrProto proto(26316, std::vector<TimingSection>());
 
   serialiser::ordered_json j;
-  serialiser::toJson(j, proto, "MyProto");
+  serialiser::toJson(j, proto, "MyProto", "");
 
   EXPECT_EQ(j["Name"], "MyProto");
 
   IrProto proto2;
-  std::string name = serialiser::fromJson(j, proto2);
+  std::string db;
+  std::string name;
+  serialiser::fromJson(j, proto2, name, db);
 
   EXPECT_EQ(name, "MyProto");
 }
@@ -438,7 +440,7 @@ TEST(IrProtoJson, SectionsRoundTrip)
   IrProto proto(1234, std::vector<TimingSection>{section});
 
   serialiser::ordered_json j;
-  serialiser::toJson(j, proto, "Test");
+  serialiser::toJson(j, proto, "Test", "");
 
   ASSERT_TRUE(j["Sections"].is_array());
   EXPECT_EQ(j["Sections"].size(), 1u);
@@ -454,6 +456,7 @@ TEST(IrProtoJson, LegacySections)
 {
   serialiser::ordered_json j = serialiser::ordered_json::parse(R"({
     "Name": "Legacy",
+    "Database": "Proprietary123",
     "ClockPeriod": 26316,
     "Sections": [
       {
@@ -505,9 +508,12 @@ TEST(IrProtoJson, LegacySections)
   })");
 
   IrProto proto;
-  std::string name = serialiser::fromJson(j, proto);
+  std::string db;
+  std::string name;
+  serialiser::fromJson(j, proto, name, db);
 
   EXPECT_EQ(name, "Legacy");
+  EXPECT_EQ(db, "Proprietary123");
   ASSERT_EQ(proto.getSectionCount(), 2);
 
   const TimingSection &dataFrame = proto.accessSection(0);
