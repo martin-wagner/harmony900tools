@@ -6,6 +6,7 @@
 #include "jsonProtocols.h"
 #include "bin/irProto/file.h"
 #include "document/data/items/action.h"
+#include "document/data/items/state.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -31,6 +32,7 @@ class Database: public QObject
     //just assumptions...
     static constexpr int MIN_INPUT_DELAY_MS = 100;
     static constexpr int MIN_POWER_DELAY_MS = 1000;
+    static constexpr int MIN_INTERNAL_DELAY_MS = 100;
 
   public:
     Database(QObject *parent = nullptr);
@@ -130,13 +132,14 @@ class Database: public QObject
     bool softButton(const nlohmann::json &j, const std::string &type, data::item::Device &device) const;
     bool hardButton(const nlohmann::json &j, const std::string &type, data::item::Device &device) const;
     void detectDeviceFeatures(const nlohmann::json &j, bool &hasChannelTuningFeature, bool &hasInputFeature, bool &hasPowerFeature, bool &hasInternalStateFeature, bool &hasOutputFeature) const;
-    const nlohmann::json &getFeature(const nlohmann::json &j, const std::string &type) const;
+    const nlohmann::json &getFeature(const nlohmann::json &j, const std::string &type, int index = 0) const;
     bool readChannelTuningFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
     bool readInputFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
     bool readPowerFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
     bool readInternalStateFeatures(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
-    bool readInternalStateFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readInternalStateFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config) const;
     bool readOutputFeature(const nlohmann::json &j, data::item::Device &device, document::Config &config, bool hasFeature) const;
+    bool readStateMachine(const std::string &keyArray, const std::string &keyName, const nlohmann::json &j, data::item::StateMachine &sm) const;
     bool checkReadActionSequences(const std::string &key, const nlohmann::json &j, data::item::DeviceAction &out) const;
     bool readActionSequences(const nlohmann::json &j, data::item::DeviceAction &out) const;
     bool readActionSequence(const nlohmann::json &j, data::item::SequenceItem &out) const;

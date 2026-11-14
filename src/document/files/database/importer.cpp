@@ -611,20 +611,27 @@ void Database::detectDeviceFeatures(const json &j,
 }
 
 const json& document::files::Database::Database::getFeature(const json &j,
-    const string &type) const
+    const string &type, int index) const
 {
+  int count;
+
   if (!j.contains("features") || !j.at("features").is_array()) {
     throw runtime_error("features array missing");
   }
 
+  count = 0;
   for (const auto &feature : j.at("features")) {
     if (feature.contains("__type")
         && feature.at("__type").get<string>() == type) {
-      return feature;
+      if (count == index) {
+        return feature;
+      }
+      count++;
     }
   }
 
-  throw runtime_error("feature not found: " + type);
+  throw runtime_error(
+      "feature not found: " + type + " at index " + to_string(index));
 }
 
 bool Database::readChannelTuningFeature(const nlohmann::json &j,
@@ -716,61 +723,15 @@ bool Database::readInputFeature(const nlohmann::json &j,
   }
   sm.delayMs.set(inputDelay).setIncluded(data::Used::YES);
 
-  //pull the inputs
-  for (const auto &ji : jif.at("Inputs")) {
-    //fixme contains "InputOrder". verify order using this value. currently we rely on the order in the json.
-    auto name = ji.at("InputName").get<string>();
-    if (name.empty()) {
-      continue;
-    }
-    res = checkReadActionSequences("Actions", ji, a);
-    if (res == true) {
-      //discrete action (has action assigned to input)
-      sm.discrete.states.push_back(name);
-      sm.discrete.enterStateAction.push_back(a);
-    } else {
-      //relative action (uses general actions)
-      sm.relative.states.push_back(name);
-    }
-  }
-
-  if (sm.discrete.states.empty() && sm.relative.states.empty()) {
-    //inputs contain no usable data
-    emit writeLog(LogLevel::Debug, tr("import: INPUTS data missing"),
-        ContentType::PlainText);
-    return true; //source data has low quality -- many devices end up here
-  }
-
-  //pull non-input related actions
-  res = checkReadActionSequences("StartActions", jif, a);
+  //pull the states / actions
+  res = readStateMachine("Inputs", "InputName", jif, sm);
   if (res == true) {
-    sm.startAction = a;
+    device.getStateMachines().push_back(sm);
+  } else {
+    emit writeLog(LogLevel::Debug,
+        tr("import: Input %1 empty or invalid").arg(
+            sm.smType.get().getQString()), ContentType::PlainText);
   }
-  res = checkReadActionSequences("FinishActions", jif, a);
-  if (res == true) {
-    sm.finishAction = a;
-  }
-  res = checkReadActionSequences("ResetActions", jif, a);
-  if (res == true) {
-    sm.relative.resetAction = a;
-  }
-  res = checkReadActionSequences("NextActions", jif, a);
-  if (res == true) {
-    sm.relative.nextStateAction = a;
-  }
-  res = checkReadActionSequences("PreviousActions", jif, a);
-  if (res == true) {
-    sm.relative.prevStateAction = a;
-  }
-  if (!sm.startAction.has_value() && !sm.finishAction.has_value()
-      && !sm.relative.resetAction.has_value()
-      && !sm.relative.nextStateAction.has_value()
-      && !sm.relative.prevStateAction.has_value()
-      && sm.discrete.enterStateAction.empty()) {
-    //no actions available
-    return true; //source data has low quality -- many devices end up here
-  }
-  device.getStateMachines().push_back(sm);
   return true;
 }
 
@@ -838,18 +799,143 @@ bool Database::readPowerFeature(const nlohmann::json &j,
 bool Database::readInternalStateFeatures(const nlohmann::json &j,
     data::item::Device &device, document::Config &config, bool hasFeature) const
 {
-  return true;
+  bool ret = true;
+
+  if (!hasFeature) {
+    return true;
+  }
+
+  for (int i = 0; i < 100; i++) {
+    json jisf;
+    try {
+      jisf = getFeature(j, "InternalStateFeature", i);
+    } catch (const runtime_error&) {
+      //done
+      break;
+    }
+    ret &= readInternalStateFeature(jisf, device, config); //outside try/catch!
+  }
+
+  return ret;
 }
 
 bool Database::readInternalStateFeature(const nlohmann::json &j,
-    data::item::Device &device, document::Config &config, bool hasFeature) const
+    data::item::Device &device, document::Config &config) const
 {
+  data::item::StateMachine sm;
+  data::item::DeviceAction a;
+  int valueDelay = 0;
+  bool res;
+
+  auto name = j.at("StateName").get<string>();
+  if (name.empty()) {
+    emit writeLog(LogLevel::Debug, tr("import: InternalStateFeature "
+        "without name"), ContentType::PlainText);
+    return false;
+  }
+
+  //pull base data
+  sm.smType = data::Enum<data::StateMachineDeviceType>(name); //might not be one of the named types -- Enum<x> uses string if unknown.
+  if (j.contains("ValueDelay") && j.at("ValueDelay").is_number_integer()) {
+    valueDelay = j.at("ValueDelay").get<int>();
+  }
+  if (valueDelay < MIN_INTERNAL_DELAY_MS) {
+    valueDelay = MIN_INTERNAL_DELAY_MS;
+  }
+  sm.delayMs.set(valueDelay).setIncluded(data::Used::YES);
+
+  //pull the states / actions
+  res = readStateMachine("StateValues", "StateValueName", j, sm);
+  if (res == true) {
+    device.getStateMachines().push_back(sm);
+  } else {
+    emit writeLog(LogLevel::Debug,
+        tr("import: State %1 empty or invalid").arg(
+            sm.smType.get().getQString()), ContentType::PlainText);
+  }
   return true;
 }
 
 bool Database::readOutputFeature(const nlohmann::json &j,
     data::item::Device &device, document::Config &config, bool hasFeature) const
 {
+  //no idea what this is used for.
+  return true;
+}
+
+bool Database::readStateMachine(const std::string &keyArray,
+    const std::string &keyName, const nlohmann::json &j,
+    data::item::StateMachine &sm) const
+{
+  bool res;
+  data::item::DeviceAction a;
+
+  //pull the states
+  for (const auto &js : j.at(keyArray)) {
+    //fixme _inputs_ contain "InputOrder", _internals_ not. We currently rely on the order in the json.
+    auto name = js.at(keyName).get<string>();
+    if (name.empty()) {
+      continue;
+    }
+    res = checkReadActionSequences("Actions", js, a);
+    if (res == true) {
+      //discrete action (has action assigned to input)
+      sm.discrete.states.push_back(name);
+      sm.discrete.enterStateAction.push_back(a);
+    } else {
+      //relative action (uses general actions)
+      sm.relative.states.push_back(name);
+    }
+  }
+  //de-duplicate, prefer discrete
+  for (int i = 0; i < sm.relative.states.size();) {
+    if (find(sm.discrete.states.begin(), sm.discrete.states.end(),
+        sm.relative.states[i]) != sm.discrete.states.end()) {
+      sm.relative.states.erase(sm.relative.states.begin() + i);
+    } else {
+      i++;
+    }
+  }
+
+  if (sm.discrete.states.empty() && sm.relative.states.empty()) {
+    //inputs contain no usable data
+    emit writeLog(LogLevel::Debug, tr("import: INPUTS data missing"),
+        ContentType::PlainText);
+    return false;
+  }
+
+  //pull non-input related actions
+  res = checkReadActionSequences("StartActions", j, a);
+  if (res == true) {
+    sm.startAction = a;
+  }
+  res = checkReadActionSequences("FinishActions", j, a);
+  if (res == true) {
+    sm.finishAction = a;
+  }
+  res = checkReadActionSequences("ResetActions", j, a);
+  if (res == true) {
+    sm.relative.resetAction = a;
+  }
+  res = checkReadActionSequences("NextActions", j, a);
+  if (res == true) {
+    sm.relative.nextStateAction = a;
+  }
+  res = checkReadActionSequences("PreviousActions", j, a);
+  if (res == true) {
+    sm.relative.prevStateAction = a;
+  }
+  if (!sm.startAction.has_value() && !sm.finishAction.has_value()
+      && !sm.relative.resetAction.has_value()
+      && !sm.relative.nextStateAction.has_value()
+      && !sm.relative.prevStateAction.has_value()
+      && sm.discrete.enterStateAction.empty()) {
+    //no actions available. this is still a valid state machine, as other states
+    //might reference it. doing nothing is OK.
+    emit writeLog(LogLevel::Debug,
+        tr("import: State machine %1 has no actions").arg(
+            sm.smType.get().getQString()), ContentType::PlainText);
+  }
   return true;
 }
 
