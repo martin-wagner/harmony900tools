@@ -387,7 +387,8 @@ bool Database::importDevice(const json &j, document::Config &config,
   detectDeviceFeatures(j, hasChannelTuningFeature, hasInputFeature,
       hasPowerFeature, hasInternalStateFeature, hasOutputFeature);
 
-  data::item::Device d(lib::UidGenerator::getInstance().generate()); //don't use devices own id, create instance id
+  //don't use devices id from database, create instance id when adding to project
+  data::item::Device d(0);
   auto &jd = j.at("device");
 
   //description
@@ -433,11 +434,12 @@ bool Database::importDevice(const json &j, document::Config &config,
     ret &= commands(j, d, config, tryConvertProtocol);
   }
   ret &= readChannelTuningFeature(j, d, config, hasChannelTuningFeature);
-  ret &= readInputFeature(j, d, config, hasInputFeature);
   ret &= readPowerFeature(j, d, config, hasPowerFeature);
+  ret &= readInputFeature(j, d, config, hasInputFeature);
   ret &= readInternalStateFeatures(j, d, config, hasInternalStateFeature);
   ret &= readOutputFeature(j, d, config, hasOutputFeature);
 
+  ret &= config.modify().addDeviceCommand(d, -1);
   return ret;
 }
 
