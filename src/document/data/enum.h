@@ -44,7 +44,8 @@ enum class DatabaseDeviceType { Television = 1, VCR = 2, CDPlayer = 3, DVD = 4,
     DVDRVCR = 47, TVHDD = 48, TVCamera = 49, AppleTV = 51, Roku = 52, AutomationGateway = 53,
     Controller = 57, Thermostat = 59, Camera = 60, MediaPlayer = 63, Plug = 66, Default = 999, Unknown = 0
 };
-enum class StateMachineDeviceType { Power, Input, InputType, Screen, TVInput, AntennaOutput, User1, User2, User3, User4, User5, Unknown };
+enum class StateMachineDeviceType { Power, Input, InputType, Screen, TVInput, AVInput, AuxInput, TunerInput,
+    VideoInput, HDMIInput, InputMode, MENU, AntennaOutput, User1, User2, User3, User4, User5, Unknown }; //not limited to those!
 enum class ActionType { None, StartAction, FinishAction, SetAction, ChangeAction, NextAction, PrevAction, ResetAction, Unknown };
 enum class Operation { ForceValue, SendCommand, SendDelay, SendFlush, SendNumber, SetValue, Unknown };
 enum class DatabaseOperation { IRPressAction, IRDelayAction, IRDevAction, IRHoldAction, Unknown };
