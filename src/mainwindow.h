@@ -13,6 +13,7 @@
 #include "ui/activities/activityEditor.h"
 #include "ui/database/deviceSearchWidget.h"
 #include "ui/database/importWidget.h"
+#include "ui/updatechecker.h"
 #include "lib/users.h"
 #include "lib/undo.h"
 #include "context.h"
@@ -61,6 +62,7 @@ class MainWindow: public QMainWindow
     void showDatabaseDownloader();
     void updateDatabase(const document::files::DatabasePaths &paths);
     void showDatabaseSearch();
+    void checkForUpdate();
     //ads view stuff
     void onLockUI(bool locked);
     void onSaveView();
@@ -119,6 +121,8 @@ class MainWindow: public QMainWindow
     database::DeviceSearchWidget *deviceSearchWidget = nullptr;
 
     ConcordConnection *concordConnection;
+
+    UpdateChecker *updateChecker = nullptr;
 
   private:
     QAction *queryAct = nullptr;

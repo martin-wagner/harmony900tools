@@ -113,6 +113,7 @@ set(sources ${sources}
   ui/concordConnection.cpp
   ui/logViewer.cpp
   ui/settings.cpp
+  ui/updatechecker.cpp
   wrappers/concordWrapper.cpp
 )
 

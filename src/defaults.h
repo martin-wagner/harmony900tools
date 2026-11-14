@@ -101,6 +101,23 @@ inline const SettingDef loadLastUsed()
   return s;
 };
 
+inline const SettingDef checkUpdate()
+{
+  QList<QPair<QString, QVariant>> options;
+  SettingDef s;
+
+  s.key = "checkupdate";
+  s.label = QObject::tr("Check for update");
+  s.helpText = QObject::tr("Checks if an update is available on program start");
+  s.type = SettingType::Bool;
+  s.defaultValue = true;
+  s.tab = "";
+  s.minValue = QVariant { };
+  s.maxValue = QVariant { };
+
+  return s;
+};
+
 static constexpr int DEFAULT_COLUMN_WIDTH = 100;
 inline const SettingDef columWithFactor()
 {

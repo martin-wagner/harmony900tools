@@ -37,6 +37,10 @@ MainWindow::MainWindow(bool haveLogLevel, int logLevel)
   }
 
   log->addMessage("Ready!");
+
+  if (settings->value(defaults::checkUpdate().key).toBool() == true) {
+    checkForUpdate();
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -260,6 +264,8 @@ void MainWindow::createWidgets()
   } else {
     onLoadDefaultView();
   }
+
+  updateChecker = new UpdateChecker(this);
 }
 
 void MainWindow::createActions()
@@ -437,11 +443,12 @@ void MainWindow::createActions()
   QAction *aboutAct = helpMenu->addAction(tr("&About project"), this,
       &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
-
   QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp,
       &QApplication::aboutQt);
   aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
-
+  QAction *updateAct = helpMenu->addAction(tr("Check for update"), this,
+      &MainWindow::checkForUpdate);
+  updateAct->setStatusTip(tr("Check github release page for updates"));
   //signal / slot
 
 //  cutAct->setEnabled(false);
@@ -529,6 +536,7 @@ void MainWindow::readSettings()
     curFile = qsettings.value("file").toString();
   }
 
+  settings->addSetting(defaults::checkUpdate());
   settings->addSetting(defaults::columWithFactor());
   settings->addSetting(defaults::stackedView());
 
@@ -762,6 +770,13 @@ void MainWindow::showDatabaseSearch()
   if (dockDeviceSearch != nullptr) {
     dockDeviceSearch->toggleView(true);
   }
+}
+
+void MainWindow::checkForUpdate()
+{
+  QTimer::singleShot(3000, this, [this]() {
+    updateChecker->checkForUpdates();
+  });
 }
 
 void MainWindow::applySettings()
