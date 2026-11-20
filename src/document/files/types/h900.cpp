@@ -2256,8 +2256,6 @@ bool H900userconfig::writeActivityRoles(pugi::xml_node &activity,
 {
   bool ret = true;
 
-  return true;
-
   for (const auto &item : data) {
     ret &= writeActivityRole(activity, item);
   }
