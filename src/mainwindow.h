@@ -11,6 +11,7 @@
 #include "ui/concordConnection.h"
 #include "ui/devices/deviceEditor.h"
 #include "ui/activities/activityEditor.h"
+#include "ui/database/devicePickaxeWidget.h"
 #include "ui/database/deviceSearchWidget.h"
 #include "ui/database/importWidget.h"
 #include "ui/updatechecker.h"
@@ -62,6 +63,7 @@ class MainWindow: public QMainWindow
     void showDatabaseDownloader();
     void updateDatabase(const document::files::DatabasePaths &paths);
     void showDatabaseSearch();
+    void showDatabasePickaxe();
     void checkForUpdate();
     //ads view stuff
     void onLockUI(bool locked);
@@ -90,6 +92,7 @@ class MainWindow: public QMainWindow
     void setTitle(const QString &append = "");
     bool importData(const std::vector<uint8_t> &data);
     void enableQueryButton();
+    void enablePickaxeButton();
 
   private:
     ads::CDockManager* dockManager;
@@ -119,6 +122,8 @@ class MainWindow: public QMainWindow
 
     ads::CDockWidget *dockDeviceSearch = nullptr;
     database::DeviceSearchWidget *deviceSearchWidget = nullptr;
+    ads::CDockWidget *dockDevicePickaxe = nullptr;
+    database::DevicePickaxeWidget *devicePickaxeWidget = nullptr;
 
     ConcordConnection *concordConnection;
 
@@ -126,5 +131,6 @@ class MainWindow: public QMainWindow
 
   private:
     QAction *queryAct = nullptr;
+    QAction *pickaxeAct = nullptr;
 };
 

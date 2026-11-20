@@ -91,6 +91,7 @@ set(sources ${sources}
   ui/activities/activityEditor.cpp
   ui/activities/activityTreeView.cpp
   ui/activities/activityEditor.cpp
+  ui/database/devicePickaxeWidget.cpp
   ui/database/deviceSearchWidget.cpp
   ui/database/importWidget.cpp
   ui/database/sourceRow.cpp
@@ -166,6 +167,7 @@ set(${programName}_resource_files
     ${resourcePath}/harmony-900-color-screen.png
     ${resourcePath}/ir_protocols.json
     ${resourcePath}/wizard.jpeg
+    ${resourcePath}/pickaxe.png
     ${iconPath}/actions/edit-copy.png
     ${iconPath}/actions/edit-paste.png
     ${iconPath}/actions/edit-cut.png

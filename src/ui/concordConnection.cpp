@@ -431,7 +431,7 @@ void ConcordConnection::createWidgets()
 void ConcordConnection::createActions()
 {
   actionConnect = new QAction(tr("Connect"), this);
-  actionConnect->setStatusTip(tr("Connect to remote"));
+  actionConnect->setToolTip(tr("Connect to remote"));
   actionConnect->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/actions/network-connect.png"));
@@ -439,7 +439,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onOpenConnection);
 
   actionDisconnect = new QAction(tr("Disconnect"), this);
-  actionDisconnect->setStatusTip(tr("Disconnect from remote"));
+  actionDisconnect->setToolTip(tr("Disconnect from remote"));
   actionDisconnect->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/actions/network-disconnect.png"));
@@ -447,7 +447,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onCloseConnection);
 
   actionGetInfo = new QAction(tr("Remote Info"), this);
-  actionGetInfo->setStatusTip(tr("Show remote device information"));
+  actionGetInfo->setToolTip(tr("Show remote device information"));
   actionGetInfo->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/status/dialog-information.png",
@@ -456,7 +456,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onGetInfo);
 
   actionSetTime = new QAction(tr("Set Time"), this);
-  actionSetTime->setStatusTip(tr("Sync remote time to system time"));
+  actionSetTime->setToolTip(tr("Sync remote time to system time"));
   actionSetTime->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/misc/org.kde.plasma.analogclock.png",
@@ -465,7 +465,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onSetTime);
 
   actionReadConfig = new QAction(tr("Read Config from remote"), this);
-  actionReadConfig->setStatusTip(tr("Read configuration from remote"));
+  actionReadConfig->setToolTip(tr("Read configuration from remote"));
   actionReadConfig->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/actions/edit-download.png"));
@@ -473,7 +473,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onReadConfig);
 
   actionWriteConfig = new QAction(tr("Write Config to remote"), this);
-  actionWriteConfig->setStatusTip(tr("Write configuration to remote"));
+  actionWriteConfig->setToolTip(tr("Write configuration to remote"));
   actionWriteConfig->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/actions/kt-set-max-upload-speed.png"));
@@ -481,7 +481,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onWriteConfig);
 
   actionLearnIrSingle = new QAction(tr("Learn IR"), this);
-  actionLearnIrSingle->setStatusTip(tr("Learn a single IR command"));
+  actionLearnIrSingle->setToolTip(tr("Learn a single IR command"));
   actionLearnIrSingle->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/actions/media-record.png"));
@@ -489,7 +489,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onLearnIrSingle);
 
   actionLearnIrStream = new QAction(tr("Learn IR Stream"), this);
-  actionLearnIrStream->setStatusTip(tr("Learn an IR command stream"));
+  actionLearnIrStream->setToolTip(tr("Learn an IR command stream"));
   actionLearnIrStream->setIcon(
       lib::getIcon(
           ":/res/icons/BreezeConverted/64x64/actions/keyframe-record.png"));
@@ -497,7 +497,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onLearnIrStream);
 
   actionBackupConfig = new QAction(tr("Create remote backup"), this);
-  actionBackupConfig->setStatusTip(
+  actionBackupConfig->setToolTip(
       tr("Backup configuration from remote to a file"));
   actionBackupConfig->setIcon(
       lib::getIcon(":/res/icons/BreezeConverted/64x64/actions/backup.png"));
@@ -505,7 +505,7 @@ void ConcordConnection::createActions()
       &ConcordConnection::onBackupConfig);
 
   actionBackupConfigRestore = new QAction(tr("Restore Backup"), this);
-  actionBackupConfigRestore->setStatusTip(
+  actionBackupConfigRestore->setToolTip(
       tr("Restore remote from previous backup"));
   connect(actionBackupConfigRestore, &QAction::triggered, this,
       &ConcordConnection::onBackupConfigRestore);

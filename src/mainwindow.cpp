@@ -175,6 +175,7 @@ void MainWindow::createData()
       settings->value(defaults::databaseProtocols().key).toString();
   database->setDatabase(paths);
   enableQueryButton();
+  enablePickaxeButton();
 }
 
 void MainWindow::createAds()
@@ -238,6 +239,14 @@ void MainWindow::createWidgets()
   dockDeviceSearch->setWidget(deviceSearchWidget);
   dockManager->addDockWidgetFloating(dockDeviceSearch);
   dockMenu->addAction(dockDeviceSearch->toggleViewAction());
+
+  devicePickaxeWidget = new database::DevicePickaxeWidget(*ctx.get(), this);
+  devicePickaxeWidget->setCatalogue(database);
+  dockDevicePickaxe = new ads::CDockWidget(dockManager,
+      tr("Deep search database"));
+  dockDevicePickaxe->setWidget(devicePickaxeWidget);
+  dockManager->addDockWidgetFloating(dockDevicePickaxe);
+  dockMenu->addAction(dockDevicePickaxe->toggleViewAction());
 
   QUndoView *undoView = new QUndoView(undo.getStack());
   undoView->setCleanIcon(
@@ -391,16 +400,23 @@ void MainWindow::createActions()
       ":/res/icons/BreezeConverted/64x64/status/state-download.png");
   QAction *downloadAct = new QAction(downloadIcon, tr("Download database"),
       this);
-  downloadAct->setStatusTip(tr("Download / import device database"));
+  downloadAct->setToolTip(tr("Download / import device database"));
   connect(downloadAct, &QAction::triggered, this,
       &MainWindow::showDatabaseDownloader);
   databaseToolBar->addAction(downloadAct);
   const QIcon queryIcon = lib::getIcon(
       ":/res/icons/BreezeConverted/64x64/actions/system-search.png");
   queryAct = new QAction(queryIcon, tr("Search database"), this);
-  queryAct->setStatusTip(tr("Search for devices in device database"));
+  queryAct->setToolTip(tr("Search for devices in device database"));
   connect(queryAct, &QAction::triggered, this, &MainWindow::showDatabaseSearch);
   databaseToolBar->addAction(queryAct);
+  const QIcon axeIcon = lib::getIcon(":/res/pickaxe.png");
+  pickaxeAct = new QAction(axeIcon, tr("Deep search database"), this);
+  pickaxeAct->setToolTip(tr("Needs active connection!\n\n"
+      "Use learned IR commands to search for devices in device database"));
+  connect(pickaxeAct, &QAction::triggered, this,
+      &MainWindow::showDatabasePickaxe);
+  databaseToolBar->addAction(pickaxeAct);
 
   //connection
   QMenu *connectMenu = menuBar()->addMenu(tr("&Connection"));
@@ -510,6 +526,11 @@ void MainWindow::createActions()
   connect(deviceSearchWidget, &database::DeviceSearchWidget::writeLog, log,
       &LogViewer::addEntry);
   connect(deviceSearchWidget, &database::DeviceSearchWidget::writeMsg, log,
+      &LogViewer::addMessage);
+
+  connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeLog, log,
+      &LogViewer::addEntry);
+  connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeMsg, log,
       &LogViewer::addMessage);
 }
 
@@ -763,12 +784,20 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
   settings->save();
   database->setDatabase(paths);
   enableQueryButton();
+  enablePickaxeButton();
 }
 
 void MainWindow::showDatabaseSearch()
 {
   if (dockDeviceSearch != nullptr) {
     dockDeviceSearch->toggleView(true);
+  }
+}
+
+void MainWindow::showDatabasePickaxe()
+{
+  if (dockDevicePickaxe != nullptr) {
+    dockDevicePickaxe->toggleView(true);
   }
 }
 
@@ -800,6 +829,7 @@ void MainWindow::applySettings()
       settings->value(defaults::databaseProtocols().key).toString();
   database->setDatabase(paths);
   enableQueryButton();
+  enablePickaxeButton();
 
   //todo weitere
 }
@@ -910,4 +940,17 @@ void MainWindow::enableQueryButton()
   }
   deviceSearchWidget->setCatalogue(database);
   queryAct->setEnabled(true);
+}
+
+void MainWindow::enablePickaxeButton()
+{
+  if ((pickaxeAct == nullptr) || (concord == nullptr)) {
+    return;
+  }
+  if ((database == nullptr) || (database->getDeviceCount() <= 0)) {
+    pickaxeAct->setEnabled(false);
+    return;
+  }
+  deviceSearchWidget->setCatalogue(database);
+  pickaxeAct->setEnabled(true);
 }
