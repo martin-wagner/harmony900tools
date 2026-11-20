@@ -601,7 +601,7 @@ bool files::Database::softButton(const nlohmann::json &j, const string &type,
   //validity check in "command()"
   button.name = button.action.get(); //both the same
   button.name.setIncluded(data::Used::YES);
-  button.position.set(device.getSoftButtons().size() + 1).setIncluded(
+  button.position.set(device.getSoftButtons().size()).setIncluded(
       data::Used::YES);
   device.getSoftButtons().push_back(button);
   return true;
@@ -763,6 +763,10 @@ bool Database::readInputFeature(const nlohmann::json &j,
   }
   //pull base data
   sm.smType.set(data::StateMachineDeviceType::Input);
+  if (!jif.contains("InputDelay")
+      || !jif.at("InputDelay").is_number_integer()) {
+    return true;
+  }
   auto inputDelay = jif.at("InputDelay").get<int>();
   if (inputDelay < MIN_INPUT_DELAY_MS) {
     inputDelay = MIN_INPUT_DELAY_MS;
@@ -795,11 +799,15 @@ bool Database::readPowerFeature(const nlohmann::json &j,
 
   //pull base data
   sm.smType.set(data::StateMachineDeviceType::Power);
-  auto inputDelay = jpf.at("PowerOnDelay").get<int>();
-  if (inputDelay < MIN_POWER_DELAY_MS) {
-    inputDelay = MIN_POWER_DELAY_MS;
+  if (!jpf.contains("PowerOnDelay")
+      || !jpf.at("PowerOnDelay").is_number_integer()) {
+    return true;
   }
-  sm.delayMs.set(inputDelay).setIncluded(data::Used::YES);
+  auto powerOnDelay = jpf.at("PowerOnDelay").get<int>();
+  if (powerOnDelay < MIN_POWER_DELAY_MS) {
+    powerOnDelay = MIN_POWER_DELAY_MS;
+  }
+  sm.delayMs.set(powerOnDelay).setIncluded(data::Used::YES);
 
   //pull power info
   auto powerType = jpf.at("PowerTypeId").get<int>();
