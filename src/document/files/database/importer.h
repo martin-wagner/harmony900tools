@@ -2,9 +2,14 @@
 
 #pragma once
 
+#include <cstdint>
+#include <map>
+#include <string>
+
 #include "database.h"
 #include "jsonProtocols.h"
 #include "bin/irProto/file.h"
+#include "bin/timing.h"
 #include "document/data/items/action.h"
 #include "document/data/items/state.h"
 
@@ -27,6 +32,12 @@ class Database: public QObject
       data::Enum<data::DatabaseDeviceType> type = data::DatabaseDeviceType::Unknown;
       uint64_t id;
       uint64_t line;
+    };
+
+    /** one learned ir command */
+    struct LearnedCommand {
+      binary::TimingStream timing;
+      uint32_t carrier = 0;
     };
 
     //just assumptions...
@@ -91,7 +102,25 @@ class Database: public QObject
      */
     bool importDevice(const Device &source, document::Config &config, bool tryConvertProtocol = true) const;
 
+    /**
+     * pickaxe search: finds the devices of one manufacturer whose commands
+     * match the learned commands.
+     *
+     * @remark BLOCKING, call it from a worker thread. emits pickaxeProgress
+     * from the calling thread.
+     *
+     * @param manufacturerName manufacturer of all devices to check
+     * @param deviceNames devices to check
+     * @param commands learned commands, key is the HardButtons string
+     * (additionally "Power", which is not part of the enum)
+     * @return the devices that match
+     */
+    QList<Device> pickaxe(const QString &manufacturerName, const QStringList &deviceNames, const std::map<std::string, LearnedCommand> &commands) const {};
+
   signals:
+    /** pickaxe progress, checked of total devices */
+    void pickaxeProgress(int checked, int total) const;
+
     void writeLog(LogLevel level, const QString &message, ContentType contentType) const;
     void writeMsg(const QString &message) const;
 

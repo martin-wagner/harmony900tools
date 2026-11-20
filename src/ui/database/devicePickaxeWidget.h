@@ -2,32 +2,35 @@
 
 #pragma once
 
+#include <array>
+#include <cstdint>
+#include <optional>
+
+#include <QFutureWatcher>
+#include <QList>
 #include <QWidget>
 
 #include "context.h"
 #include "document/files/database/importer.h"
 
+class QCheckBox;
+class QComboBox;
 class QLabel;
 class QLineEdit;
 class QListWidget;
+class QProgressBar;
 class QPushButton;
-class QCheckBox;
-
-namespace document
-{
-namespace files
-{
-class Database;
-}
-}
 
 namespace database
 {
 
 /**
- * search widget for the device database: manufacturer filter, device filter
- * and device info. without a selected manufacturer the device filter searches
- * all manufacturers, selecting a device then selects its manufacturer.
+ * pickaxe search for the device database.
+ *
+ * the user selects a manufacturer (mandatory), optionally filters/selects
+ * devices and learns three commands from a remote. the database then checks
+ * which of the devices contain matching commands. matching devices are listed
+ * and can be imported.
  */
 class DevicePickaxeWidget: public QWidget
 {
@@ -35,20 +38,40 @@ class DevicePickaxeWidget: public QWidget
 
   public:
     explicit DevicePickaxeWidget(Context &ctx, QWidget *parent = nullptr);
+    ~DevicePickaxeWidget() override;
 
     /** sets the database to search in, nullptr clears the view */
     void setCatalogue(const document::files::Database *catalogue);
+
+  public slots:
+    /** enables learning, call with the connection state of the remote */
+    void setLearningAvailable(bool available);
+
+    /** answer to requestLearn(). ignored if we are not waiting for one */
+    void onLearnedCommand(const binary::TimingStream &timing, uint32_t carrier);
+
+    /** learning failed (e.g. timeout). ignored if we are not waiting for one */
+    void onLearnFailed(const QString &message);
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType) const;
     void writeMsg(const QString &message) const;
     void deviceSelected(const QString &manufacturerName, const QString &deviceName);
 
+    /** asks the remote to learn one ir frame, answer via onLearnedCommand / onLearnFailed */
+    void requestLearn();
+
   private slots:
     void onManufacturerTextChanged(const QString &text);
     void onManufacturerSelectionChanged();
     void onDeviceTextChanged(const QString &text);
     void onDeviceSelectionChanged();
+    void onResultSelectionChanged();
+    void onButtonChanged(int row);
+    void onLearnClicked(int row);
+    void onPickaxeClicked();
+    void onPickaxeProgress(int checked, int total);
+    void onPickaxeFinished();
     void onImportClicked();
     void onClearManufacturerClicked();
 
@@ -56,28 +79,56 @@ class DevicePickaxeWidget: public QWidget
     Context &ctx;
 
   private:
+    static constexpr int COMMAND_COUNT = 3;
+    static constexpr const char *POWER_BUTTON = "Power Toggle";
+
+  private:
     void createView();
     void createConnections();
 
     void updateManufacturers();
     void updateDevices();
-    void updateDeviceInfo(QStringList *items = nullptr);
+    void updateDeviceInfo();
+    void updateHint();
+    void updateButtonChoices();
+    void updateLearnControls();
+    void updatePickaxeButton();
     void updateImportButton();
+    void setSearchRunning(bool running);
     QString getSelectedManufacturer() const;
-    QString getSelectedDevice() const;
-    QString findManufacturerOfDevice(const QString &deviceName) const;
-    void selectManufacturerOfDevice(const QString &deviceName);
+    QStringList getDevicesToCheck() const;
+    QString getSelectedResult() const;
 
     const document::files::Database *catalogue = nullptr;
 
+    /** manufacturer of the entries in resultList */
+    QString resultManufacturer;
+    bool searchRunning = false;
+    bool learningAvailable = false;
+    /** row we wait for a learn answer, -1 if none */
+    int learningRow = -1;
+    std::array<std::optional<document::files::Database::LearnedCommand>, COMMAND_COUNT> learned;
+
+    QFutureWatcher<QList<document::files::Database::Device>> *pickaxeWatcher = nullptr;
+
     QLineEdit *manufacturerEdit = nullptr;
+    QPushButton *clearManufacturerButton = nullptr;
     QListWidget *manufacturerList = nullptr;
     QLineEdit *deviceEdit = nullptr;
     QListWidget *deviceList = nullptr;
+    QListWidget *resultList = nullptr;
+
+    std::array<QComboBox*, COMMAND_COUNT> buttonCombo{};
+    std::array<QPushButton*, COMMAND_COUNT> learnButton{};
+    std::array<QLabel*, COMMAND_COUNT> learnStatus{};
+
+    QPushButton *pickaxeButton = nullptr;
+    QProgressBar *progressBar = nullptr;
+
+    QLabel *hintLabel = nullptr;
     QLabel *deviceInfoLabel = nullptr;
     QCheckBox *tryConvertProtocolCheck = nullptr;
     QPushButton *importButton = nullptr;
-    QPushButton *clearManufacturerButton = nullptr;
 };
 
 }
