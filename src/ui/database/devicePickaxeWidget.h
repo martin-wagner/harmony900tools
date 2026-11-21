@@ -44,7 +44,7 @@ class DevicePickaxeWidget: public QWidget
     void setCatalogue(const document::files::Database *catalogue);
 
   public slots:
-    /** enables learning, call with the connection state of the remote */
+    /** connection state of the remote. without a remote the widget is disabled */
     void setLearningAvailable(bool available);
 
     /** answer to requestLearn(). ignored if we are not waiting for one */
@@ -67,7 +67,7 @@ class DevicePickaxeWidget: public QWidget
     void onDeviceTextChanged(const QString &text);
     void onDeviceSelectionChanged();
     void onResultSelectionChanged();
-    void onButtonChanged(int row);
+    void onButtonSelectionChanged(int row);
     void onLearnClicked(int row);
     void onPickaxeClicked();
     void onPickaxeProgress(int checked, int total);
@@ -80,7 +80,7 @@ class DevicePickaxeWidget: public QWidget
 
   private:
     static constexpr int COMMAND_COUNT = 3;
-    static constexpr const char *POWER_BUTTON = "Power Toggle";
+    inline static const QString POWER_BUTTON = "Power Toggle";
 
   private:
     void createView();
@@ -101,7 +101,6 @@ class DevicePickaxeWidget: public QWidget
 
     const document::files::Database *catalogue = nullptr;
 
-    /** manufacturer of the entries in resultList */
     QString resultManufacturer;
     bool searchRunning = false;
     bool learningAvailable = false;
@@ -125,7 +124,9 @@ class DevicePickaxeWidget: public QWidget
     QPushButton *pickaxeButton = nullptr;
     QProgressBar *progressBar = nullptr;
 
+    QLabel *explanationLabel = nullptr;
     QLabel *hintLabel = nullptr;
+    QWidget *contentWidget = nullptr;
     QLabel *deviceInfoLabel = nullptr;
     QCheckBox *tryConvertProtocolCheck = nullptr;
     QPushButton *importButton = nullptr;

@@ -20,6 +20,8 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
+#include "lib/qtHelpers.h"
+#include "lib/icon.h"
 #include "document/data/enum.h"
 
 using namespace std;
@@ -51,6 +53,11 @@ DevicePickaxeWidget::~DevicePickaxeWidget()
 
 void DevicePickaxeWidget::setCatalogue(const Database *catalogue)
 {
+  if (this->catalogue == catalogue) {
+    //lazy compare
+    return;
+  }
+
   // TODO: a running search still uses the old catalogue. the caller must not
   // delete it while searching (the widgets are disabled meanwhile)
   if (this->catalogue != nullptr) {
@@ -81,6 +88,9 @@ void DevicePickaxeWidget::setLearningAvailable(bool available)
   if (!learningAvailable) {
     learningRow = -1;
   }
+
+  // without a remote nothing can be done, the hint label says so
+  contentWidget->setEnabled(learningAvailable);
   updateLearnControls();
   updatePickaxeButton();
 }
@@ -151,9 +161,8 @@ void DevicePickaxeWidget::onResultSelectionChanged()
   }
 }
 
-void DevicePickaxeWidget::onButtonChanged(int row)
+void DevicePickaxeWidget::onButtonSelectionChanged(int row)
 {
-  // a learned command belongs to its button
   learned[row].reset();
   updateButtonChoices();
   updateLearnControls();
@@ -171,7 +180,6 @@ void DevicePickaxeWidget::onLearnClicked(int row)
   updateLearnControls();
   updatePickaxeButton();
 
-  // main window connects this to ConcordConnection::onLearnIrSingle
   emit requestLearn();
 }
 
@@ -190,20 +198,20 @@ void DevicePickaxeWidget::onPickaxeClicked()
     if (!learned[i].has_value()) {
       return;
     }
-    // key is the HardButtons string, "Power" is not part of the enum
+    // key is the HardButtons string, "Power Toggle" is not part of the enum
     commands[buttonCombo[i]->currentText().toStdString()] = learned[i].value();
   }
 
   resultList->clear();
-  resultManufacturer.clear();
+  resultManufacturer = manufacturerName;
   progressBar->setRange(0, deviceCount);
   progressBar->setValue(0);
   progressBar->setTextVisible(true);
   setSearchRunning(true);
 
   // blocking call, so it runs in a worker thread. result: onPickaxeFinished
-  pickaxeWatcher->setFuture(
-      QtConcurrent::run([db, manufacturerName, devices, commands]() {
+  pickaxeWatcher->setFuture(QtConcurrent::run(
+      [db, manufacturerName, devices, commands]() {
         return db->pickaxe(manufacturerName, devices, commands);
       }));
 }
@@ -216,17 +224,15 @@ void DevicePickaxeWidget::onPickaxeProgress(int checked, int total)
 
 void DevicePickaxeWidget::onPickaxeFinished()
 {
+  QStringList names;
   const auto matches = pickaxeWatcher->result();
   const auto total = progressBar->maximum();
-  QStringList names;
 
   for (const auto &device : matches) {
     names.append(device.name);
   }
   names.sort(Qt::CaseInsensitive);
 
-  // the manufacturer list was disabled while searching
-  resultManufacturer = getSelectedManufacturer();
   resultList->addItems(names);
   progressBar->setValue(total);
   setSearchRunning(false);
@@ -279,19 +285,35 @@ void DevicePickaxeWidget::onClearManufacturerClicked()
 void DevicePickaxeWidget::createView()
 {
   QStringList buttonNames;
-  const array<const char*, COMMAND_COUNT> defaultButtons = {
+
+  // power toggle has no enum value, the other defaults come from HardButtons
+  const array<QString, COMMAND_COUNT> defaultButtons = {
     POWER_BUTTON,
-    "Select",
-    "Number3" };
+    Enum<HardButtons>::toQString(HardButtons::Select),
+    Enum<HardButtons>::toQString(HardButtons::Number3) };
   const auto hardButtons = Enum<HardButtons>::toStringList();
 
   // power toggle is not part of HardButtons, so it is added here
-  buttonNames.append(QString::fromLatin1(POWER_BUTTON));
+  buttonNames.append(POWER_BUTTON);
   for (const auto &name : hardButtons) {
-    if (name != "Unknown") {
-      buttonNames.append(QString::fromStdString(name));
+    if (name != Enum<HardButtons>::toString(HardButtons::Unknown)) {
+      buttonNames.append(qstr(name));
     }
   }
+
+  explanationLabel = new QLabel(
+      tr("Finds the devices in the database that respond to the same three "
+          "IR commands as your source remote. Connect your Harmony, select a "
+          "manufacturer, optionally select the devices to check, learn three "
+          "commands, run the pickaxe search, then select a matching device and "
+          "import it."), this);
+  explanationLabel->setWordWrap(true);
+
+  hintLabel = new QLabel(this);
+  hintLabel->setWordWrap(true);
+  auto hintFont = hintLabel->font();
+  hintFont.setBold(true);
+  hintLabel->setFont(hintFont);
 
   manufacturerEdit = new QLineEdit(this);
   manufacturerEdit->setPlaceholderText(tr("search manufacturer"));
@@ -311,17 +333,13 @@ void DevicePickaxeWidget::createView()
   deviceList = new QListWidget(this);
   deviceList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-  resultList = new QListWidget(this);
-  resultList->setSelectionMode(QAbstractItemView::SingleSelection);
-
   auto *learnBox = new QGroupBox(tr("commands to match"), this);
   auto *learnLayout = new QGridLayout(learnBox);
   for (auto i = 0; i < COMMAND_COUNT; i++) {
     buttonCombo[i] = new QComboBox(this);
     buttonCombo[i]->addItems(buttonNames);
     buttonCombo[i]->setCurrentIndex(
-        max(0,
-            buttonCombo[i]->findText(QString::fromLatin1(defaultButtons[i]))));
+        max(0, buttonCombo[i]->findText(defaultButtons[i])));
     buttonCombo[i]->setToolTip(tr("The button you will press on the remote"));
 
     learnButton[i] = new QPushButton(tr("learn"), this);
@@ -335,7 +353,8 @@ void DevicePickaxeWidget::createView()
   }
   learnLayout->setColumnStretch(2, 1);
 
-  pickaxeButton = new QPushButton(tr("pickaxe search"), this);
+  const QIcon axeIcon = lib::getIcon(":/res/pickaxe.png");
+  pickaxeButton = new QPushButton(axeIcon, tr(" start deep search"), this);
   pickaxeButton->setEnabled(false);
 
   progressBar = new QProgressBar(this);
@@ -346,11 +365,8 @@ void DevicePickaxeWidget::createView()
 
   pickaxeWatcher = new QFutureWatcher<QList<Database::Device>>(this);
 
-  hintLabel = new QLabel(this);
-  hintLabel->setWordWrap(true);
-  auto hintFont = hintLabel->font();
-  hintFont.setBold(true);
-  hintLabel->setFont(hintFont);
+  resultList = new QListWidget(this);
+  resultList->setSelectionMode(QAbstractItemView::SingleSelection);
 
   deviceInfoLabel = new QLabel(this);
   deviceInfoLabel->setWordWrap(true);
@@ -397,12 +413,20 @@ void DevicePickaxeWidget::createView()
   resultLayout->addWidget(deviceInfoLabel);
   resultLayout->addLayout(importLayout);
 
+  // everything below the hint is locked until the remote is connected
+  contentWidget = new QWidget(this);
+  contentWidget->setEnabled(false);
+  auto *contentLayout = new QVBoxLayout(contentWidget);
+  contentLayout->setContentsMargins(0, 0, 0, 0);
+  contentLayout->addLayout(listsLayout, 3);
+  contentLayout->addWidget(learnBox);
+  contentLayout->addLayout(pickaxeLayout);
+  contentLayout->addWidget(resultBox, 2);
+
   auto *mainLayout = new QVBoxLayout(this);
+  mainLayout->addWidget(explanationLabel);
   mainLayout->addWidget(hintLabel);
-  mainLayout->addLayout(listsLayout, 3);
-  mainLayout->addWidget(learnBox);
-  mainLayout->addLayout(pickaxeLayout);
-  mainLayout->addWidget(resultBox, 2);
+  mainLayout->addWidget(contentWidget, 1);
 }
 
 void DevicePickaxeWidget::createConnections()
@@ -423,7 +447,7 @@ void DevicePickaxeWidget::createConnections()
   for (auto i = 0; i < COMMAND_COUNT; i++) {
     connect(buttonCombo[i], QOverload<int>::of(&QComboBox::currentIndexChanged),
         this, [this, i]() {
-          onButtonChanged(i);
+          onButtonSelectionChanged(i);
         });
     connect(learnButton[i], &QPushButton::clicked, this, [this, i]() {
       onLearnClicked(i);
@@ -496,29 +520,30 @@ void DevicePickaxeWidget::updateHint()
     }
   }
 
-  // tells the user what to do next
+  // tells the user what to do next, the workflow order is fixed except for
+  // manufacturer/devices vs. learning, which can be done in any order
   if (searchRunning) {
     hintLabel->setText(tr("searching..."));
   } else if (catalogue == nullptr) {
     hintLabel->setText(tr("No devices available!"));
+  } else if (!learningAvailable) {
+    hintLabel->setText(tr("next: connect your harmony remote"));
   } else if (getSelectedManufacturer().isEmpty()) {
     hintLabel->setText(tr("next: select a manufacturer"));
   } else if (learningRow >= 0) {
     hintLabel->setText(tr("next: press the button on the remote"));
-  } else if ((learnedCount < COMMAND_COUNT) && !learningAvailable) {
-    hintLabel->setText(tr("next: connect the remote to learn the commands"));
+  } else if (deviceList->count() == 0) {
+    hintLabel->setText(tr("no device matches the filter"));
   } else if (learnedCount < COMMAND_COUNT) {
     hintLabel->setText(
         tr("next: learn the commands (%1 of %2 learned)").arg(learnedCount).arg(
             COMMAND_COUNT));
-  } else if (deviceList->count() == 0) {
-    hintLabel->setText(tr("no device matches the filter"));
   } else if (resultList->count() > 0) {
     hintLabel->setText(
         tr("next: select a matching device to import it, or search again"));
   } else {
     hintLabel->setText(
-        tr("next: press pickaxe search (%1 device(s) will be checked)").arg(
+        tr("next: press search (%1 device(s) will be checked)").arg(
             getDevicesToCheck().size()));
   }
 }
@@ -531,7 +556,7 @@ void DevicePickaxeWidget::updateButtonChoices()
       continue;
     }
 
-    // every button can be used once: disable what the other rows use
+    // every button type can be used once: disable what the other rows use
     for (auto item = 0; item < model->rowCount(); item++) {
       const auto text = buttonCombo[i]->itemText(item);
       auto usedElsewhere = false;

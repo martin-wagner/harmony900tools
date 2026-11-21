@@ -115,7 +115,7 @@ class Database: public QObject
      * (additionally "Power", which is not part of the enum)
      * @return the devices that match
      */
-    QList<Device> pickaxe(const QString &manufacturerName, const QStringList &deviceNames, const std::map<std::string, LearnedCommand> &commands) const {};
+    QList<Device> pickaxe(const QString &manufacturerName, const QStringList &deviceNames, const std::map<std::string, LearnedCommand> &commands) const { return QList<Device>();};
 
   signals:
     /** pickaxe progress, checked of total devices */
