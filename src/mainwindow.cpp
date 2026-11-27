@@ -157,16 +157,25 @@ void MainWindow::createLog()
 
 void MainWindow::createData()
 {
-  document::files::DatabasePaths paths;
-
   ctx = make_unique<Context>(*settings, *user, undo);
-
   concord = new Concord(*ctx, this);
   ctx->setConcord(concord);
   config = new document::Config(*ctx, false, this);
   ctx->setConfig(config);
+}
 
+document::files::Database* MainWindow::ensureDatabase()
+{
+  document::files::DatabasePaths paths;
+
+  if (database != nullptr) {
+    return database;
+  }
   database = new document::files::Database(this);
+  connect(database, &document::files::Database::writeLog, log,
+      &LogViewer::addEntry);
+  connect(database, &document::files::Database::writeMsg, log,
+      &LogViewer::addMessage);
   paths.catalogue =
       settings->value(defaults::databaseCatalogue().key).toString();
   paths.raw = settings->value(defaults::databaseRaw().key).toString();
@@ -176,6 +185,45 @@ void MainWindow::createData()
   database->setDatabase(paths);
   enableQueryButton();
   enablePickaxeButton();
+  return database;
+}
+
+void MainWindow::createDeviceSearchWidget()
+{
+  if (deviceSearchWidget != nullptr) {
+    return;
+  }
+
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  document::files::Database *catalogue = ensureDatabase();
+  deviceSearchWidget = new database::DeviceSearchWidget(*ctx, this);
+  deviceSearchWidget->setCatalogue(catalogue);
+  deviceSearchLayout->addWidget(deviceSearchWidget);
+  connect(deviceSearchWidget, &database::DeviceSearchWidget::writeLog, log,
+      &LogViewer::addEntry);
+  connect(deviceSearchWidget, &database::DeviceSearchWidget::writeMsg, log,
+      &LogViewer::addMessage);
+  deviceSearchWidget->show();
+  QApplication::restoreOverrideCursor();
+}
+
+void MainWindow::createDevicePickaxeWidget()
+{
+  if (devicePickaxeWidget != nullptr) {
+    return;
+  }
+
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  document::files::Database *catalogue = ensureDatabase();
+  devicePickaxeWidget = new database::DevicePickaxeWidget(*ctx, this);
+  devicePickaxeWidget->setCatalogue(catalogue);
+  devicePickaxeLayout->addWidget(devicePickaxeWidget);
+  connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeLog, log,
+      &LogViewer::addEntry);
+  connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeMsg, log,
+      &LogViewer::addMessage);
+  devicePickaxeWidget->show();
+  QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::createAds()
@@ -233,20 +281,35 @@ void MainWindow::createWidgets()
   dockManager->addDockWidgetFloating(dockImport);
   dockMenu->addAction(dockImport->toggleViewAction());
 
-  deviceSearchWidget = new database::DeviceSearchWidget(*ctx.get(), this);
-  deviceSearchWidget->setCatalogue(database);
   dockDeviceSearch = new ads::CDockWidget(dockManager, tr("Search database"));
-  dockDeviceSearch->setWidget(deviceSearchWidget);
+  QWidget *deviceSearchContainer = new QWidget;
+  deviceSearchLayout = new QVBoxLayout(deviceSearchContainer);
+  deviceSearchLayout->setContentsMargins(0, 0, 0, 0);
+  dockDeviceSearch->setWidget(deviceSearchContainer);
   dockManager->addDockWidgetFloating(dockDeviceSearch);
+  dockDeviceSearch->toggleView(false);
   dockMenu->addAction(dockDeviceSearch->toggleViewAction());
+  connect(dockDeviceSearch, &ads::CDockWidget::visibilityChanged, this,
+      [this](bool visible) {
+        if (visible) {
+          createDeviceSearchWidget();
+        }
+      });
 
-  devicePickaxeWidget = new database::DevicePickaxeWidget(*ctx.get(), this);
-  devicePickaxeWidget->setCatalogue(database);
-  dockDevicePickaxe = new ads::CDockWidget(dockManager,
-      tr("Deep search database"));
-  dockDevicePickaxe->setWidget(devicePickaxeWidget);
+  dockDevicePickaxe = new ads::CDockWidget(dockManager, tr("Pickaxe database"));
+  QWidget *devicePickaxeContainer = new QWidget;
+  devicePickaxeLayout = new QVBoxLayout(devicePickaxeContainer);
+  devicePickaxeLayout->setContentsMargins(0, 0, 0, 0);
+  dockDevicePickaxe->setWidget(devicePickaxeContainer);
   dockManager->addDockWidgetFloating(dockDevicePickaxe);
+  dockDevicePickaxe->toggleView(false);
   dockMenu->addAction(dockDevicePickaxe->toggleViewAction());
+  connect(dockDevicePickaxe, &ads::CDockWidget::visibilityChanged, this,
+      [this](bool visible) {
+        if (visible) {
+          createDevicePickaxeWidget();
+        }
+      });
 
   QUndoView *undoView = new QUndoView(undo.getStack());
   undoView->setCleanIcon(
@@ -479,11 +542,6 @@ void MainWindow::createActions()
   connect(config, &document::Config::writeLog, log, &LogViewer::addEntry);
   connect(config, &document::Config::writeMsg, log, &LogViewer::addMessage);
 
-  connect(database, &document::files::Database::writeLog, log,
-      &LogViewer::addEntry);
-  connect(database, &document::files::Database::writeMsg, log,
-      &LogViewer::addMessage);
-
   connect(qApp, &QGuiApplication::commitDataRequest, this,
       &MainWindow::commitData);
 
@@ -521,16 +579,6 @@ void MainWindow::createActions()
   connect(importWidget, &database::ImportWidget::writeLog, log,
       &LogViewer::addEntry);
   connect(importWidget, &database::ImportWidget::writeMsg, log,
-      &LogViewer::addMessage);
-
-  connect(deviceSearchWidget, &database::DeviceSearchWidget::writeLog, log,
-      &LogViewer::addEntry);
-  connect(deviceSearchWidget, &database::DeviceSearchWidget::writeMsg, log,
-      &LogViewer::addMessage);
-
-  connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeLog, log,
-      &LogViewer::addEntry);
-  connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeMsg, log,
       &LogViewer::addMessage);
 }
 
@@ -782,7 +830,9 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
   settings->setValue(defaults::databaseDevices().key, paths.devices);
   settings->setValue(defaults::databaseProtocols().key, paths.protocols);
   settings->save();
-  database->setDatabase(paths);
+  if (database != nullptr) {
+    database->setDatabase(paths);
+  }
   enableQueryButton();
   enablePickaxeButton();
 }
@@ -790,6 +840,7 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
 void MainWindow::showDatabaseSearch()
 {
   if (dockDeviceSearch != nullptr) {
+    createDeviceSearchWidget();
     dockDeviceSearch->toggleView(true);
   }
 }
@@ -797,6 +848,7 @@ void MainWindow::showDatabaseSearch()
 void MainWindow::showDatabasePickaxe()
 {
   if (dockDevicePickaxe != nullptr) {
+    createDevicePickaxeWidget();
     dockDevicePickaxe->toggleView(true);
   }
 }
@@ -827,7 +879,9 @@ void MainWindow::applySettings()
   paths.devices = settings->value(defaults::databaseDevices().key).toString();
   paths.protocols =
       settings->value(defaults::databaseProtocols().key).toString();
-  database->setDatabase(paths);
+  if (database != nullptr) {
+    database->setDatabase(paths);
+  }
   enableQueryButton();
   enablePickaxeButton();
 
@@ -934,12 +988,18 @@ void MainWindow::enableQueryButton()
   if (queryAct == nullptr) {
     return;
   }
-  if ((database == nullptr) || (database->getDeviceCount() <= 0)) {
-    queryAct->setEnabled(false);
+  if (database == nullptr) {
+    const QString devicesPath =
+        settings->value(defaults::databaseDevices().key).toString();
+    queryAct->setEnabled(
+        !devicesPath.isEmpty() && QFileInfo::exists(devicesPath));
     return;
   }
-  deviceSearchWidget->setCatalogue(database);
-  queryAct->setEnabled(true);
+  const bool hasDevices = database->getDeviceCount() > 0;
+  queryAct->setEnabled(hasDevices);
+  if (hasDevices && (deviceSearchWidget != nullptr)) {
+    deviceSearchWidget->setCatalogue(database);
+  }
 }
 
 void MainWindow::enablePickaxeButton()
@@ -947,14 +1007,18 @@ void MainWindow::enablePickaxeButton()
   if ((pickaxeAct == nullptr) || (concord == nullptr)) {
     return;
   }
-  if ((database == nullptr) || (database->getDeviceCount() <= 0)) {
-    pickaxeAct->setEnabled(false);
+  if (database == nullptr) {
+    const QString devicesPath =
+        settings->value(defaults::databaseDevices().key).toString();
+    pickaxeAct->setEnabled(
+        !devicesPath.isEmpty() && QFileInfo::exists(devicesPath));
     return;
   }
-  devicePickaxeWidget->setCatalogue(database);
-  pickaxeAct->setEnabled(true);
-
-  //todo connect to concord connection state. for testing remove again!!
-  devicePickaxeWidget->setLearningAvailable(true);
-
+  const bool hasDevices = database->getDeviceCount() > 0;
+  pickaxeAct->setEnabled(hasDevices);
+  if (hasDevices && (devicePickaxeWidget != nullptr)) {
+    devicePickaxeWidget->setCatalogue(database);
+    //**todo** connect to concord connection state. for testing remove again!!
+    devicePickaxeWidget->setLearningAvailable(true);
+  }
 }

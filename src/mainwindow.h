@@ -28,6 +28,8 @@ class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QSessionManager;
+class QVBoxLayout;
+
 class Concord;
 
 class MainWindow: public QMainWindow
@@ -94,6 +96,10 @@ class MainWindow: public QMainWindow
     void enableQueryButton();
     void enablePickaxeButton();
 
+    document::files::Database* ensureDatabase();
+    void createDeviceSearchWidget();
+    void createDevicePickaxeWidget();
+
   private:
     ads::CDockManager* dockManager;
     QMenu *dockMenu;
@@ -110,6 +116,8 @@ class MainWindow: public QMainWindow
     Concord *concord;
     document::Config *config;
     QString curFile;
+
+    // Created on first use by either database search widget.
     document::files::Database *database = nullptr;
 
     editors::DeviceEditor *deviceEditor = nullptr;
@@ -122,8 +130,11 @@ class MainWindow: public QMainWindow
 
     ads::CDockWidget *dockDeviceSearch = nullptr;
     database::DeviceSearchWidget *deviceSearchWidget = nullptr;
+    QVBoxLayout *deviceSearchLayout = nullptr;
+
     ads::CDockWidget *dockDevicePickaxe = nullptr;
     database::DevicePickaxeWidget *devicePickaxeWidget = nullptr;
+    QVBoxLayout *devicePickaxeLayout = nullptr;
 
     ConcordConnection *concordConnection;
 
@@ -133,4 +144,3 @@ class MainWindow: public QMainWindow
     QAction *queryAct = nullptr;
     QAction *pickaxeAct = nullptr;
 };
-
