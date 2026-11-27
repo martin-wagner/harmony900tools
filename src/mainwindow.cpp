@@ -215,13 +215,23 @@ void MainWindow::createDevicePickaxeWidget()
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
   document::files::Database *catalogue = ensureDatabase();
-  devicePickaxeWidget = new database::DevicePickaxeWidget(*ctx, this);
+  devicePickaxeWidget = new database::DevicePickaxeWidget(*ctx,
+      concordConnection->getLearnSingleAction(),
+      concordConnection->getLearnStreamActiion(), this);
   devicePickaxeWidget->setCatalogue(catalogue);
   devicePickaxeLayout->addWidget(devicePickaxeWidget);
   connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeLog, log,
       &LogViewer::addEntry);
   connect(devicePickaxeWidget, &database::DevicePickaxeWidget::writeMsg, log,
       &LogViewer::addMessage);
+  connect(concordConnection, &ConcordConnection::ready, devicePickaxeWidget,
+      &database::DevicePickaxeWidget::setLearningAvailable);
+  connect(concordConnection, &ConcordConnection::externalLearnSucceeded,
+      devicePickaxeWidget, &database::DevicePickaxeWidget::onLearnedCommand);
+  connect(concordConnection, &ConcordConnection::externalLearnFailed, this,
+      [this](ConcordConnection::LearnedCommandMode m, const QString &reason) {
+        devicePickaxeWidget->onLearnFailed(reason);
+      });
   devicePickaxeWidget->show();
   QApplication::restoreOverrideCursor();
 }
@@ -292,7 +302,7 @@ void MainWindow::createWidgets()
   connect(dockDeviceSearch, &ads::CDockWidget::visibilityChanged, this,
       [this](bool visible) {
         if (visible) {
-          createDeviceSearchWidget();
+          showDatabaseSearch();
         }
       });
 
@@ -307,7 +317,7 @@ void MainWindow::createWidgets()
   connect(dockDevicePickaxe, &ads::CDockWidget::visibilityChanged, this,
       [this](bool visible) {
         if (visible) {
-          createDevicePickaxeWidget();
+          showDatabasePickaxe();
         }
       });
 
@@ -825,6 +835,8 @@ void MainWindow::showDatabaseDownloader()
 
 void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
 {
+  QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+
   settings->setValue(defaults::databaseCatalogue().key, paths.catalogue);
   settings->setValue(defaults::databaseRaw().key, paths.raw);
   settings->setValue(defaults::databaseDevices().key, paths.devices);
@@ -832,23 +844,34 @@ void MainWindow::updateDatabase(const document::files::DatabasePaths &paths)
   settings->save();
   if (database != nullptr) {
     database->setDatabase(paths);
+    if (devicePickaxeWidget != nullptr) {
+      devicePickaxeWidget->setCatalogue(database);
+    }
+    if (deviceSearchWidget != nullptr) {
+      deviceSearchWidget->setCatalogue(database);
+    }
   }
   enableQueryButton();
   enablePickaxeButton();
+
+  QGuiApplication::restoreOverrideCursor();
 }
 
 void MainWindow::showDatabaseSearch()
 {
+  createDeviceSearchWidget();
+
   if (dockDeviceSearch != nullptr) {
-    createDeviceSearchWidget();
     dockDeviceSearch->toggleView(true);
   }
 }
 
 void MainWindow::showDatabasePickaxe()
 {
+  createDevicePickaxeWidget();
+
   if (dockDevicePickaxe != nullptr) {
-    createDevicePickaxeWidget();
+    devicePickaxeWidget->setLearningAvailable(concordConnection->isReady());
     dockDevicePickaxe->toggleView(true);
   }
 }
@@ -863,6 +886,8 @@ void MainWindow::checkForUpdate()
 void MainWindow::applySettings()
 {
   document::files::DatabasePaths paths;
+
+  QGuiApplication::setOverrideCursor(Qt::WaitCursor);
 
   logLevel = settings->value(defaults::loglevel().key).toInt();
   log->setLoglevel(static_cast<LogLevel>(logLevel));
@@ -881,11 +906,18 @@ void MainWindow::applySettings()
       settings->value(defaults::databaseProtocols().key).toString();
   if (database != nullptr) {
     database->setDatabase(paths);
+    if (devicePickaxeWidget != nullptr) {
+      devicePickaxeWidget->setCatalogue(database);
+    }
+    if (deviceSearchWidget != nullptr) {
+      deviceSearchWidget->setCatalogue(database);
+    }
   }
   enableQueryButton();
   enablePickaxeButton();
 
   //todo weitere
+  QGuiApplication::restoreOverrideCursor();
 }
 
 void MainWindow::onLockUI(bool locked)
@@ -997,9 +1029,6 @@ void MainWindow::enableQueryButton()
   }
   const bool hasDevices = database->getDeviceCount() > 0;
   queryAct->setEnabled(hasDevices);
-  if (hasDevices && (deviceSearchWidget != nullptr)) {
-    deviceSearchWidget->setCatalogue(database);
-  }
 }
 
 void MainWindow::enablePickaxeButton()
@@ -1016,9 +1045,5 @@ void MainWindow::enablePickaxeButton()
   }
   const bool hasDevices = database->getDeviceCount() > 0;
   pickaxeAct->setEnabled(hasDevices);
-  if (hasDevices && (devicePickaxeWidget != nullptr)) {
-    devicePickaxeWidget->setCatalogue(database);
-    //**todo** connect to concord connection state. for testing remove again!!
-    devicePickaxeWidget->setLearningAvailable(true);
-  }
 }
+

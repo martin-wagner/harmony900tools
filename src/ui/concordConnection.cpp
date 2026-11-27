@@ -80,6 +80,7 @@ void ConcordConnection::enableLearnMode(bool start)
 void ConcordConnection::onOpenConnection()
 {
   if (concord.isInitialised()) {
+    emit ready(true);
     return;
   }
   cleanup();
@@ -90,16 +91,20 @@ void ConcordConnection::onOpenConnection()
   if (ret) {
     updateActionStates();
     labelConnection->setText(tr("connected"));
+    ready(true);
   } else {
     progressBar->setRange(0, 100);
     progressBar->setFormat(tr("Error opening connection"));
     emit writeMsg(tr("Error opening connection"));
     labelConnection->setText(tr("Error opening connection"));
+    ready(false);
   }
 }
 
 void ConcordConnection::onCloseConnection()
 {
+  ready(false);
+
   concord.disconnectRemote();
   cleanup();
   updateActionStates();
@@ -208,22 +213,22 @@ void ConcordConnection::onBackupConfigRestore()
 
 void ConcordConnection::onLearnIrSingle()
 {
-  onUpdateProgress("Learn command...", 0, 0);
-
-  learnMode = LearnedCommandMode::IR_FRAME;
-  updateActionStates(true);
-  concord.learnCommand();
+  startLearn(LearnedCommandMode::IR_FRAME, LearnSource::BUILTIN);
 }
 
 void ConcordConnection::onLearnIrStream()
 {
-  onUpdateProgress("Learn command...", 0, 0);
+  startLearn(LearnedCommandMode::IR_STREAM, LearnSource::BUILTIN);
+}
 
-  learnMode = LearnedCommandMode::IR_STREAM;
-  auto timeout =
-      ctx.settings().value(defaults::learnStreamTimeout().key).toInt();
-  updateActionStates(true);
-  concord.learnStream(timeout);
+void ConcordConnection::onLearnExternalSingle()
+{
+  startLearn(LearnedCommandMode::IR_FRAME, LearnSource::EXTERNAL);
+}
+
+void ConcordConnection::onLearnExternalStream()
+{
+  startLearn(LearnedCommandMode::IR_STREAM, LearnSource::EXTERNAL);
 }
 
 void ConcordConnection::onUpdateProgress(const QString text, int step, int of)
@@ -297,6 +302,8 @@ void ConcordConnection::onDisconnected(int time_s)
 
 void ConcordConnection::onDone(bool success, const QString &msg)
 {
+  auto source = learnSource;
+
   emit writeMsg(msg);
   labelConnection->setText(msg);
   progressBar->setRange(0, 100);
@@ -308,6 +315,13 @@ void ConcordConnection::onDone(bool success, const QString &msg)
     emit writeLog(LogLevel::Error,
         tr("libconcord error in: %1").arg(progressBar->text()),
         ContentType::PlainText);
+
+    // a failed learn never reaches onLearnDone(), so it ends here.
+    // on success learnDone() follows after done(), source is cleared there.
+    learnSource = LearnSource::NONE;
+    if (source == LearnSource::EXTERNAL) {
+      emit externalLearnFailed(learnMode, msg);
+    }
   }
   updateActionStates();
 }
@@ -341,13 +355,24 @@ void ConcordConnection::onLearnWindowIsOpen(bool waits)
 void ConcordConnection::onLearnDone(const binary::TimingStream &t,
     uint32_t carrier)
 {
+  auto source = learnSource;
+
+  learnSource = LearnSource::NONE;
+
   if (t.timings().size() > 0) {
     emit writeMsg("Learned Command");
     labelConnection->setText("Learned Command");
-    emit learnedCommand(learnMode, t, carrier);
+    if (source == LearnSource::EXTERNAL) {
+      emit externalLearnSucceeded(learnMode, t, carrier);
+    } else {
+      emit learnedCommand(learnMode, t, carrier);
+    }
   } else {
     emit writeMsg("Learn Error");
     labelConnection->setText("Learn Error");
+    if (source == LearnSource::EXTERNAL) {
+      emit externalLearnFailed(learnMode, tr("No IR data received"));
+    }
   }
 }
 
@@ -496,6 +521,22 @@ void ConcordConnection::createActions()
   connect(actionLearnIrStream, &QAction::triggered, this,
       &ConcordConnection::onLearnIrStream);
 
+  actionExternalLearnSingle = new QAction(tr("Learn IR"), this);
+  actionExternalLearnSingle->setToolTip(tr("Learn a single IR command"));
+  actionExternalLearnSingle->setIcon(
+      lib::getIcon(
+          ":/res/icons/BreezeConverted/64x64/actions/media-record.png"));
+  connect(actionExternalLearnSingle, &QAction::triggered, this,
+      &ConcordConnection::onLearnExternalSingle);
+
+  actionExternalLearnStream = new QAction(tr("Learn IR Stream"), this);
+  actionExternalLearnStream->setToolTip(tr("Learn an IR command stream"));
+  actionExternalLearnStream->setIcon(
+      lib::getIcon(
+          ":/res/icons/BreezeConverted/64x64/actions/keyframe-record.png"));
+  connect(actionExternalLearnStream, &QAction::triggered, this,
+      &ConcordConnection::onLearnExternalStream);
+
   actionBackupConfig = new QAction(tr("Create remote backup"), this);
   actionBackupConfig->setToolTip(
       tr("Backup configuration from remote to a file"));
@@ -568,8 +609,37 @@ void ConcordConnection::updateActionStates(bool setToBusy)
   actionBackupConfigRestore->setEnabled(state);
   actionLearnIrSingle->setEnabled(state & learningEnabled);
   actionLearnIrStream->setEnabled(state & learningEnabled);
+  actionExternalLearnSingle->setEnabled(state);
+  actionExternalLearnStream->setEnabled(state);
   if (!setToBusy) {
     progressBar->setEnabled(state);
+  }
+}
+
+void ConcordConnection::startLearn(LearnedCommandMode mode, LearnSource source)
+{
+  bool started;
+  int timeout;
+
+  onUpdateProgress("Learn command...", 0, 0);
+
+  learnMode = mode;
+  learnSource = source;
+  updateActionStates(true);
+
+  if (mode == LearnedCommandMode::IR_FRAME) {
+    started = concord.learnCommand();
+  } else {
+    timeout = ctx.settings().value(defaults::learnStreamTimeout().key).toInt();
+    started = concord.learnStream(timeout);
+  }
+
+  if (!started) {
+    learnSource = LearnSource::NONE;
+    updateActionStates();
+    if (source == LearnSource::EXTERNAL) {
+      emit externalLearnFailed(mode, tr("Learning could not be started"));
+    }
   }
 }
 
@@ -579,6 +649,7 @@ void ConcordConnection::cleanup()
   dataMode = false;
   busy = false;
   learnMode = LearnedCommandMode::IR_STREAM;
+  learnSource = LearnSource::NONE;
   if (disconnectMsg != nullptr) {
     disconnectMsg->deleteLater();
     disconnectMsg = nullptr;

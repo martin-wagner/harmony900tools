@@ -113,8 +113,8 @@ class MainWindow: public QMainWindow
 
     lib::UndoStack undo;
 
-    Concord *concord;
-    document::Config *config;
+    Concord *concord = nullptr;
+    document::Config *config = nullptr;
     QString curFile;
 
     // Created on first use by either database search widget.

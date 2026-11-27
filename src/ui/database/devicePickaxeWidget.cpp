@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 
+#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
@@ -17,6 +18,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QSignalBlocker>
+#include <QToolButton>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <QtConcurrent>
@@ -34,8 +36,10 @@ using Database = document::files::Database;
 using document::data::Enum;
 using document::data::HardButtons;
 
-DevicePickaxeWidget::DevicePickaxeWidget(Context &ctx, QWidget *parent) :
-    QWidget(parent), ctx(ctx)
+DevicePickaxeWidget::DevicePickaxeWidget(Context &ctx,
+    QAction *actionLearnIrSingle, QAction *actionLearnIrStream, QWidget *parent) :
+    QWidget(parent), ctx(ctx), learnSingleAction(actionLearnIrSingle), learnStreamAction(
+        actionLearnIrStream)
 {
   createView();
   createConnections();
@@ -90,9 +94,19 @@ void DevicePickaxeWidget::setLearningAvailable(bool available)
   contentWidget->setEnabled(learningAvailable);
   updateLearnControls();
   updatePickaxeButton();
+
+  //hide stream in simple mode. fixme -- user level changed slot
+  for (const auto &button : learnStreamButton) {
+    if (ctx.userLevel().getLevel() < lib::UserLevel::Level::Expert) {
+      button->hide();
+    } else {
+      button->show();
+    }
+  }
 }
 
-void DevicePickaxeWidget::onLearnedCommand(const binary::TimingStream &timing,
+void DevicePickaxeWidget::onLearnedCommand(
+    ConcordConnection::LearnedCommandMode m, const binary::TimingStream &timing,
     uint32_t carrier)
 {
   Database::LearnedCommand command;
@@ -166,18 +180,21 @@ void DevicePickaxeWidget::onButtonSelectionChanged(int row)
   updatePickaxeButton();
 }
 
-void DevicePickaxeWidget::onLearnClicked(int row)
+void DevicePickaxeWidget::onLearnTriggered()
 {
-  if (!learningAvailable || searchRunning || (learningRow >= 0)) {
+  if (searchRunning) {
     return;
   }
 
-  learned[row].reset();
-  learningRow = row;
+  learningRow = pendingRow;
+  pendingRow = -1;
+  if (learningRow < 0) {
+    return;
+  }
+
+  learned[learningRow].reset();
   updateLearnControls();
   updatePickaxeButton();
-
-  emit requestLearn();
 }
 
 void DevicePickaxeWidget::onPickaxeClicked()
@@ -353,16 +370,21 @@ void DevicePickaxeWidget::createView()
         max(0, buttonCombo[i]->findText(defaultButtons[i])));
     buttonCombo[i]->setToolTip(tr("The button you will press on the remote"));
 
-    learnButton[i] = new QPushButton(tr("learn"), this);
-    learnButton[i]->setEnabled(false);
+    learnSingleButton[i] = new QToolButton(this);
+    learnSingleButton[i]->setDefaultAction(learnSingleAction);
+    learnSingleButton[i]->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    learnStreamButton[i] = new QToolButton(this);
+    learnStreamButton[i]->setDefaultAction(learnStreamAction);
+    learnStreamButton[i]->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
     learnStatus[i] = new QLabel(this);
 
     learnLayout->addWidget(buttonCombo[i], i, 0);
-    learnLayout->addWidget(learnButton[i], i, 1);
-    learnLayout->addWidget(learnStatus[i], i, 2);
+    learnLayout->addWidget(learnSingleButton[i], i, 1);
+    learnLayout->addWidget(learnStreamButton[i], i, 2);
+    learnLayout->addWidget(learnStatus[i], i, 3);
   }
-  learnLayout->setColumnStretch(2, 1);
+  learnLayout->setColumnStretch(3, 1);
 
   const QIcon axeIcon = lib::getIcon(":/res/pickaxe.png");
   pickaxeButton = new QPushButton(axeIcon, tr(" start deep search"), this);
@@ -460,10 +482,18 @@ void DevicePickaxeWidget::createConnections()
         this, [this, i]() {
           onButtonSelectionChanged(i);
         });
-    connect(learnButton[i], &QPushButton::clicked, this, [this, i]() {
-      onLearnClicked(i);
+    connect(learnSingleButton[i], &QToolButton::pressed, this, [this, i]() {
+      pendingRow = i;
+    });
+    connect(learnStreamButton[i], &QToolButton::pressed, this, [this, i]() {
+      pendingRow = i;
     });
   }
+
+  connect(learnSingleAction, &QAction::triggered, this,
+      &DevicePickaxeWidget::onLearnTriggered);
+  connect(learnStreamAction, &QAction::triggered, this,
+      &DevicePickaxeWidget::onLearnTriggered);
 
   connect(pickaxeButton, &QPushButton::clicked, this,
       &DevicePickaxeWidget::onPickaxeClicked);
@@ -623,15 +653,14 @@ void DevicePickaxeWidget::updateLearnControls()
 
   for (auto i = 0; i < COMMAND_COUNT; i++) {
     buttonCombo[i]->setEnabled(idle);
-    learnButton[i]->setEnabled(idle && learningAvailable);
 
     if (learningRow == i) {
       learnStatus[i]->setText(tr("press the button on the remote..."));
     } else if (learned[i].has_value()) {
       learnStatus[i]->setText(
-          tr("learned (%1 blocks, carrier %2)").arg(
+          tr("learned (%1 blocks, carrier %2 kHz)").arg(
               static_cast<int>(learned[i]->timing.timings().size())).arg(
-              learned[i]->carrier));
+              static_cast<double>(learned[i]->carrier) / 1000.0));
     } else {
       learnStatus[i]->setText(tr("not learned"));
     }

@@ -13,8 +13,10 @@
 
 #include "context.h"
 #include "document/files/database/importer.h"
+#include "ui/concordConnection.h"
 
 class QCheckBox;
+class QAction;
 class QComboBox;
 class QLabel;
 class QLineEdit;
@@ -22,6 +24,7 @@ class QListWidget;
 class QListWidgetItem;
 class QProgressBar;
 class QPushButton;
+class QToolButton;
 
 namespace database
 {
@@ -40,7 +43,9 @@ class DevicePickaxeWidget: public QWidget
   Q_OBJECT
 
   public:
-    explicit DevicePickaxeWidget(Context &ctx, QWidget *parent = nullptr);
+    /** the learn actions are owned by the connection, the widget only uses them */
+    explicit DevicePickaxeWidget(Context &ctx, QAction *actionLearnIrSingle,
+        QAction *actionLearnIrStream, QWidget *parent = nullptr);
     ~DevicePickaxeWidget() override;
 
     /** sets the database to search in, nullptr clears the view */
@@ -50,8 +55,8 @@ class DevicePickaxeWidget: public QWidget
     /** connection state of the remote. without a remote the widget is disabled */
     void setLearningAvailable(bool available);
 
-    /** answer to requestLearn(). ignored if we are not waiting for one */
-    void onLearnedCommand(const binary::TimingStream &timing, uint32_t carrier);
+    /** answer to a learn action. ignored if we are not waiting for one */
+    void onLearnedCommand(ConcordConnection::LearnedCommandMode m, const binary::TimingStream &timing, uint32_t carrier);
 
     /** learning failed (e.g. timeout). ignored if we are not waiting for one */
     void onLearnFailed(const QString &message);
@@ -61,9 +66,6 @@ class DevicePickaxeWidget: public QWidget
     void writeMsg(const QString &message) const;
     void deviceSelected(const QString &manufacturerName, const QString &deviceName);
 
-    /** asks the remote to learn one ir frame, answer via onLearnedCommand / onLearnFailed */
-    void requestLearn();
-
   private slots:
     void onManufacturerTextChanged(const QString &text);
     void onManufacturerSelectionChanged();
@@ -71,7 +73,7 @@ class DevicePickaxeWidget: public QWidget
     void onDeviceSelectionChanged();
     void onResultSelectionChanged();
     void onButtonSelectionChanged(int row);
-    void onLearnClicked(int row);
+    void onLearnTriggered();
     void onPickaxeClicked();
     void onPickaxeProgress(int checked, int total);
     void onPickaxeFinished();
@@ -80,6 +82,8 @@ class DevicePickaxeWidget: public QWidget
 
   protected:
     Context &ctx;
+    QAction *learnSingleAction = nullptr;
+    QAction *learnStreamAction = nullptr;
 
   private:
     static constexpr int COMMAND_COUNT = 3;
@@ -114,6 +118,8 @@ class DevicePickaxeWidget: public QWidget
     bool learningAvailable = false;
     /** row we wait for a learn answer, -1 if none */
     int learningRow = -1;
+    /** row whose learn button was pressed last, -1 if none */
+    int pendingRow = -1;
     std::array<std::optional<document::files::Database::LearnedCommand>, COMMAND_COUNT> learned;
 
     QFutureWatcher<QList<document::files::Database::DeviceKey>> *pickaxeWatcher = nullptr;
@@ -126,7 +132,8 @@ class DevicePickaxeWidget: public QWidget
     QListWidget *resultList = nullptr;
 
     std::array<QComboBox*, COMMAND_COUNT> buttonCombo{};
-    std::array<QPushButton*, COMMAND_COUNT> learnButton{};
+    std::array<QToolButton*, COMMAND_COUNT> learnSingleButton{};
+    std::array<QToolButton*, COMMAND_COUNT> learnStreamButton{};
     std::array<QLabel*, COMMAND_COUNT> learnStatus{};
 
     QPushButton *pickaxeButton = nullptr;

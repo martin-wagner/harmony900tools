@@ -20,16 +20,31 @@ class ConcordConnection: public QWidget
         IR_FRAME
     };
 
+    /** those two connect the same actions. they work together with "enableLearnMode()" */
     void addToToolbar(QToolBar *bar);
     void addToMenu(QMenu *menu);
+    /** those allow >>one<< external consumer to use the learn mode.
+     *  result is reported by externalLearnSucceeded() / externalLearnFailed() */
+    QAction *getLearnSingleAction() { return actionExternalLearnSingle; };
+    QAction *getLearnStreamActiion() { return actionExternalLearnStream; };
+
+    bool isReady() { return concord.isInitialised(); };
 
   signals:
     void writeLog(LogLevel level, const QString &message, ContentType contentType);
     void writeMsg(const QString &message);
 
-    void learnedCommand(LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
+    void ready(bool state);
     void doImport(const std::vector<uint8_t> &data);
     void requestQuit();
+
+    /** result of the toolbar/menu learn actions */
+    void learnedCommand(LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
+
+    /** learning started by one of the external learn actions succeeded */
+    void externalLearnSucceeded(LearnedCommandMode m, const binary::TimingStream &t, uint32_t carrier);
+    /** learning started by one of the external learn actions failed (timeout, error, no data) */
+    void externalLearnFailed(LearnedCommandMode m, const QString &reason);
 
   public slots:
     void enableLearnMode(bool start);
@@ -46,6 +61,8 @@ class ConcordConnection: public QWidget
     void onBackupConfigRestore();
     void onLearnIrSingle();
     void onLearnIrStream();
+    void onLearnExternalSingle();
+    void onLearnExternalStream();
 
     void onUpdateProgress(const QString text, int step, int of);
     void onDisconnected(int time_s);
@@ -69,8 +86,17 @@ class ConcordConnection: public QWidget
     bool busy = false;
     LearnedCommandMode learnMode = LearnedCommandMode::IR_STREAM;
 
+    /** who started the learning that is currently running */
+    enum class LearnSource {
+        NONE,
+        BUILTIN,
+        EXTERNAL
+    };
+    LearnSource learnSource = LearnSource::NONE;
+
   private:
     void updateActionStates(bool setToBusy = false);
+    void startLearn(LearnedCommandMode mode, LearnSource source);
     void cleanup();
 
   private:
@@ -102,6 +128,8 @@ class ConcordConnection: public QWidget
     QAction *actionWriteConfig;
     QAction *actionLearnIrSingle;
     QAction *actionLearnIrStream;
+    QAction *actionExternalLearnSingle;
+    QAction *actionExternalLearnStream;
     QWidgetAction *actionProgress;
 
     QProgressBar *progressBar;
