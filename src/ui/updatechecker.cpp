@@ -58,7 +58,7 @@ void UpdateChecker::handleReply(QNetworkReply *reply)
   }
 
   auto jsonText = reply->readAll().toStdString();
-  std::cout << "json: " << jsonText << std::endl;
+  //std::cout << "json: " << jsonText << std::endl;
   try {
     releases = json::parse(jsonText);
   } catch (const json::exception&) {
