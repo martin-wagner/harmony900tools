@@ -406,12 +406,12 @@ void MainWindow::createActions()
   databaseToolBar->addAction(downloadAct);
   const QIcon queryIcon = lib::getIcon(
       ":/res/icons/BreezeConverted/64x64/actions/system-search.png");
-  queryAct = new QAction(queryIcon, tr("Search database"), this);
+  queryAct = new QAction(queryIcon, tr("Search"), this);
   queryAct->setToolTip(tr("Search for devices in device database"));
   connect(queryAct, &QAction::triggered, this, &MainWindow::showDatabaseSearch);
   databaseToolBar->addAction(queryAct);
   const QIcon axeIcon = lib::getIcon(":/res/pickaxe.png");
-  pickaxeAct = new QAction(axeIcon, tr("Deep search database"), this);
+  pickaxeAct = new QAction(axeIcon, tr("Pickaxe"), this);
   pickaxeAct->setToolTip(tr("Needs active connection!\n\n"
       "Use learned IR commands to search for devices in device database"));
   connect(pickaxeAct, &QAction::triggered, this,
@@ -951,6 +951,10 @@ void MainWindow::enablePickaxeButton()
     pickaxeAct->setEnabled(false);
     return;
   }
-  deviceSearchWidget->setCatalogue(database);
+  devicePickaxeWidget->setCatalogue(database);
   pickaxeAct->setEnabled(true);
+
+  //todo connect to concord connection state. for testing remove again!!
+  devicePickaxeWidget->setLearningAvailable(true);
+
 }
