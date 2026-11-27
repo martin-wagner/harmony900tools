@@ -23,6 +23,10 @@ int main(int argc, char *argv[])
   QSplashScreen splash(pixmap);
   splash.show();
   app.processEvents();
+  //fix splash not showing. No idea why this is needed...
+  std::this_thread::sleep_for(std::chrono::milliseconds(25));
+  app.processEvents();
+
   QCoreApplication::setOrganizationName("io.github.martin-wagner");
   QCoreApplication::setOrganizationDomain(
       "https://github.com/martin-wagner/harmony900tools");
