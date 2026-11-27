@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <map>
+#include <QMap>
 #include <string>
 
 #include "database.h"
@@ -32,6 +33,14 @@ class Database: public QObject
       data::Enum<data::DatabaseDeviceType> type = data::DatabaseDeviceType::Unknown;
       uint64_t id;
       uint64_t line;
+    };
+
+    /** identifies one device in the database */
+    struct DeviceKey {
+      QString manufacturerName;
+      QString deviceName;
+
+      bool isEmpty() const { return manufacturerName.isEmpty() || deviceName.isEmpty(); }
     };
 
     /** one learned ir command */
@@ -103,19 +112,20 @@ class Database: public QObject
     bool importDevice(const Device &source, document::Config &config, bool tryConvertProtocol = true) const;
 
     /**
-     * pickaxe search: finds the devices of one manufacturer whose commands
-     * match the learned commands.
+     * pickaxe search: finds the devices whose commands match the learned
+     * commands.
      *
      * @remark BLOCKING, call it from a worker thread. emits pickaxeProgress
      * from the calling thread.
      *
-     * @param manufacturerName manufacturer of all devices to check
-     * @param deviceNames devices to check
+     * @param devices devices to check. key is the manufacturer, value the
+     * devices of it to check. an empty list checks all devices of the
+     * manufacturer
      * @param commands learned commands, key is the HardButtons string
-     * (additionally "Power", which is not part of the enum)
+     * (additionally "Power Toggle", which is not part of the enum)
      * @return the devices that match
      */
-    QList<Device> pickaxe(const QString &manufacturerName, const QStringList &deviceNames, const std::map<std::string, LearnedCommand> &commands) const { return QList<Device>();};
+    QList<DeviceKey> pickaxe(const QMap<QString, QStringList> &devices, const std::map<std::string, LearnedCommand> &commands) const { return QList<DeviceKey>(); };
 
   signals:
     /** pickaxe progress, checked of total devices */

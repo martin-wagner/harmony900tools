@@ -16,6 +16,7 @@
 #include <QListWidget>
 #include <QProgressBar>
 #include <QPushButton>
+#include <QSignalBlocker>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <QtConcurrent>
@@ -53,11 +54,6 @@ DevicePickaxeWidget::~DevicePickaxeWidget()
 
 void DevicePickaxeWidget::setCatalogue(const Database *catalogue)
 {
-  if (this->catalogue == catalogue) {
-    //lazy compare
-    return;
-  }
-
   // TODO: a running search still uses the old catalogue. the caller must not
   // delete it while searching (the widgets are disabled meanwhile)
   if (this->catalogue != nullptr) {
@@ -71,12 +67,13 @@ void DevicePickaxeWidget::setCatalogue(const Database *catalogue)
         &DevicePickaxeWidget::onPickaxeProgress);
   }
 
+  // the selection belongs to the old catalogue
+  manufacturerList->clear();
   manufacturerEdit->clear();
   updateManufacturers();
   deviceEdit->clear();
   updateDevices();
   resultList->clear();
-  resultManufacturer.clear();
   updateDeviceInfo();
   updatePickaxeButton();
   updateImportButton();
@@ -151,13 +148,13 @@ void DevicePickaxeWidget::onDeviceSelectionChanged()
 
 void DevicePickaxeWidget::onResultSelectionChanged()
 {
-  const auto deviceName = getSelectedResult();
+  const auto key = getSelectedResult();
 
   updateDeviceInfo();
   updateImportButton();
 
-  if (!resultManufacturer.isEmpty() && !deviceName.isEmpty()) {
-    emit deviceSelected(resultManufacturer, deviceName);
+  if (!key.isEmpty()) {
+    emit deviceSelected(key.manufacturerName, key.deviceName);
   }
 }
 
@@ -186,16 +183,20 @@ void DevicePickaxeWidget::onLearnClicked(int row)
 void DevicePickaxeWidget::onPickaxeClicked()
 {
   const auto db = catalogue;
-  const auto manufacturerName = getSelectedManufacturer();
   const auto devices = getDevicesToCheck();
-  const auto deviceCount = static_cast<int>(devices.size());
   map<string, Database::LearnedCommand> commands;
 
-  if ((db == nullptr) || manufacturerName.isEmpty() || devices.isEmpty()) {
+  if ((db == nullptr) || devices.isEmpty()) {
+    return;
+  }
+  if ((devices.size() == 1) && devices.first().isEmpty()) {
+    // single manufacturer, but no device listed: an empty list would mean all
+    emit writeMsg(tr("invalid selection"));
     return;
   }
   for (auto i = 0; i < COMMAND_COUNT; i++) {
     if (!learned[i].has_value()) {
+      //should never get here
       return;
     }
     // key is the HardButtons string, "Power Toggle" is not part of the enum
@@ -203,50 +204,50 @@ void DevicePickaxeWidget::onPickaxeClicked()
   }
 
   resultList->clear();
-  resultManufacturer = manufacturerName;
-  progressBar->setRange(0, deviceCount);
-  progressBar->setValue(0);
-  progressBar->setTextVisible(true);
+  // device count is unknown until the first progress arrives
+  progressBar->setRange(0, db->getDeviceCount());
+  progressBar->setTextVisible(false);
   setSearchRunning(true);
 
   // blocking call, so it runs in a worker thread. result: onPickaxeFinished
-  pickaxeWatcher->setFuture(QtConcurrent::run(
-      [db, manufacturerName, devices, commands]() {
-        return db->pickaxe(manufacturerName, devices, commands);
-      }));
+  pickaxeWatcher->setFuture(QtConcurrent::run([db, devices, commands]() {
+    return db->pickaxe(devices, commands);
+  }));
 }
 
 void DevicePickaxeWidget::onPickaxeProgress(int checked, int total)
 {
   progressBar->setRange(0, total);
   progressBar->setValue(checked);
+  progressBar->setTextVisible(true);
 }
 
 void DevicePickaxeWidget::onPickaxeFinished()
 {
-  QStringList names;
-  const auto matches = pickaxeWatcher->result();
+  auto matches = pickaxeWatcher->result();
   const auto total = progressBar->maximum();
 
-  for (const auto &device : matches) {
-    names.append(device.name);
+  sort(matches.begin(), matches.end(), &DevicePickaxeWidget::isLessDeviceKey);
+  for (const auto &key : matches) {
+    addDeviceItem(resultList, key);
   }
-  names.sort(Qt::CaseInsensitive);
-
-  resultList->addItems(names);
-  progressBar->setValue(total);
+  if (total > 0) {
+    progressBar->setValue(total);
+  } else {
+    progressBar->setRange(0, 1);
+    progressBar->setValue(0);
+  }
   setSearchRunning(false);
   updateDeviceInfo();
 
-  emit writeMsg(
-      tr("pickaxe finished: %1 of %2 device(s) match").arg(matches.size()).arg(
-          total));
+  emit writeMsg(tr("pickaxe finished: %1 device(s) match").arg(matches.size()));
 }
 
 void DevicePickaxeWidget::onImportClicked()
 {
-  const auto manufacturerName = resultManufacturer;
-  const auto deviceName = getSelectedResult();
+  const auto key = getSelectedResult();
+  const auto manufacturerName = key.manufacturerName;
+  const auto deviceName = key.deviceName;
   const auto tryConvertProtocol = tryConvertProtocolCheck->isChecked();
   auto config = ctx.config();
   auto ok = false;
@@ -302,11 +303,18 @@ void DevicePickaxeWidget::createView()
   }
 
   explanationLabel = new QLabel(
-      tr("Finds the devices in the database that respond to the same three "
-          "IR commands as your source remote. Connect your Harmony, select a "
-          "manufacturer, optionally select the devices to check, learn three "
-          "commands, run the pickaxe search, then select a matching device and "
-          "import it."), this);
+      tr("The pickaxe search finds the devices in the database that respond "
+          "to the same three IR commands as your source remote. Steps:"
+          "<ul>"
+          "<li>connect your Harmony remote</li>"
+          "<li>select one or more manufacturers</li>"
+          "<li>optionally select the devices to check (single manufacturer "
+          "only)</li>"
+          "<li>learn three commands</li>"
+          "<li>run the pickaxe search</li>"
+          "<li>select a matching device and import it</li>"
+          "</ul>"), this);
+  explanationLabel->setTextFormat(Qt::RichText);
   explanationLabel->setWordWrap(true);
 
   hintLabel = new QLabel(this);
@@ -319,16 +327,19 @@ void DevicePickaxeWidget::createView()
   manufacturerEdit->setPlaceholderText(tr("search manufacturer"));
 
   clearManufacturerButton = new QPushButton(tr("clear"), this);
-  clearManufacturerButton->setToolTip(tr("Deselect the manufacturer"));
+  clearManufacturerButton->setToolTip(tr("Deselect all manufacturers"));
 
   manufacturerList = new QListWidget(this);
-  manufacturerList->setSelectionMode(QAbstractItemView::SingleSelection);
+  manufacturerList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
   deviceEdit = new QLineEdit(this);
   deviceEdit->setPlaceholderText(tr("search device"));
   deviceEdit->setToolTip(
-      tr("Selected devices are checked. Without a selection all listed "
-          "devices are checked."));
+      tr("You can speed up the search by filtering and/or selecting "
+          "devices here. Only what is selected will \nbe searched. When "
+          "no manual selection is active, all currently visible devices "
+          "are searched.\nOnly available "
+          "with single manufacturer!."));
 
   deviceList = new QListWidget(this);
   deviceList->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -363,7 +374,7 @@ void DevicePickaxeWidget::createView()
   progressBar->setFormat(tr("checked %v of %m devices"));
   progressBar->setTextVisible(false);
 
-  pickaxeWatcher = new QFutureWatcher<QList<Database::Device>>(this);
+  pickaxeWatcher = new QFutureWatcher<QList<Database::DeviceKey>>(this);
 
   resultList = new QListWidget(this);
   resultList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -464,43 +475,75 @@ void DevicePickaxeWidget::createConnections()
 
 void DevicePickaxeWidget::updateManufacturers()
 {
-  manufacturerList->clear();
-  if (catalogue == nullptr) {
-    return;
+  const auto previous = getSelectedManufacturers();
+  auto matches = QStringList();
+
+  {
+    // devices are updated once below, not for every item
+    const QSignalBlocker blocker(manufacturerList);
+
+    manufacturerList->clear();
+    if (catalogue != nullptr) {
+      matches = catalogue->findManufacturers(manufacturerEdit->text());
+      matches.sort(Qt::CaseInsensitive);
+      manufacturerList->addItems(matches);
+    }
+
+    // a changed filter keeps the selection of what is still visible
+    for (auto i = 0; i < manufacturerList->count(); i++) {
+      if (previous.contains(manufacturerList->item(i)->text())) {
+        manufacturerList->item(i)->setSelected(true);
+      }
+    }
   }
 
-  auto matches = catalogue->findManufacturers(manufacturerEdit->text());
-  matches.sort(Qt::CaseInsensitive);
-  manufacturerList->addItems(matches);
+  updateDevices();
 }
 
 void DevicePickaxeWidget::updateDevices()
 {
-  const QString manufacturerName = getSelectedManufacturer();
+  const auto manufacturerNames = getSelectedManufacturers();
   auto matches = QStringList();
 
   deviceList->clear();
-  if ((catalogue != nullptr) && !manufacturerName.isEmpty()) {
-    matches = catalogue->findDevices(manufacturerName, deviceEdit->text());
+  if ((catalogue != nullptr) && (manufacturerNames.size() == 1)) {
+    matches = catalogue->findDevices(manufacturerNames.first(),
+        deviceEdit->text());
     matches.sort(Qt::CaseInsensitive);
     deviceList->addItems(matches);
   }
 
+  updateDeviceControls();
   updatePickaxeButton();
+}
+
+void DevicePickaxeWidget::updateDeviceControls()
+{
+  const auto manufacturerCount = getSelectedManufacturers().size();
+  const auto selectable = (!searchRunning) && (manufacturerCount == 1);
+
+  // device selection needs exactly one manufacturer
+  deviceEdit->setEnabled(selectable);
+  deviceList->setEnabled(selectable);
+  if (manufacturerCount > 1) {
+    deviceEdit->setPlaceholderText(
+        tr("all devices of the selected manufacturers are checked"));
+  } else {
+    deviceEdit->setPlaceholderText(tr("search device"));
+  }
 }
 
 void DevicePickaxeWidget::updateDeviceInfo()
 {
-  const QString resultName = getSelectedResult();
+  const auto key = getSelectedResult();
 
   deviceInfoLabel->clear();
-  if ((catalogue == nullptr) || resultName.isEmpty()
-      || resultManufacturer.isEmpty()) {
+  if ((catalogue == nullptr) || key.isEmpty()) {
     return;
   }
 
-  const Database::Device info = catalogue->getDeviceInfo(resultManufacturer,
-      resultName);
+  const Database::Device info = catalogue->getDeviceInfo(key.manufacturerName,
+      key.deviceName);
   if (info.name.isEmpty()) {
     deviceInfoLabel->setText(tr("device not found"));
     return;
@@ -512,6 +555,7 @@ void DevicePickaxeWidget::updateDeviceInfo()
 
 void DevicePickaxeWidget::updateHint()
 {
+  const auto manufacturerCount = getSelectedManufacturers().size();
   auto learnedCount = 0;
 
   for (auto i = 0; i < COMMAND_COUNT; i++) {
@@ -528,23 +572,25 @@ void DevicePickaxeWidget::updateHint()
     hintLabel->setText(tr("No devices available!"));
   } else if (!learningAvailable) {
     hintLabel->setText(tr("next: connect your harmony remote"));
-  } else if (getSelectedManufacturer().isEmpty()) {
-    hintLabel->setText(tr("next: select a manufacturer"));
+  } else if (manufacturerCount == 0) {
+    hintLabel->setText(tr("next: select one or more manufacturers"));
   } else if (learningRow >= 0) {
     hintLabel->setText(tr("next: press the button on the remote"));
-  } else if (deviceList->count() == 0) {
+  } else if ((manufacturerCount == 1) && (deviceList->count() == 0)) {
     hintLabel->setText(tr("no device matches the filter"));
   } else if (learnedCount < COMMAND_COUNT) {
-    hintLabel->setText(
-        tr("next: learn the commands (%1 of %2 learned)").arg(learnedCount).arg(
-            COMMAND_COUNT));
+    hintLabel->setText(tr("next: learn the commands "
+        "(%1 of %2 learned)").arg(learnedCount).arg(COMMAND_COUNT));
   } else if (resultList->count() > 0) {
-    hintLabel->setText(
-        tr("next: select a matching device to import it, or search again"));
+    hintLabel->setText(tr("next: select a matching device "
+        "to import it, or search again"));
+  } else if (manufacturerCount > 1) {
+    hintLabel->setText(tr("next: press search (all devices "
+        "of %1 manufacturers will be "
+        "checked)").arg(manufacturerCount));
   } else {
-    hintLabel->setText(
-        tr("next: press search (%1 device(s) will be checked)").arg(
-            getDevicesToCheck().size()));
+    hintLabel->setText(tr("next: press search (%1 device(s) "
+        "will be checked)").arg(getDevicesToCheck().first().size()));
   }
 }
 
@@ -594,6 +640,7 @@ void DevicePickaxeWidget::updateLearnControls()
 
 void DevicePickaxeWidget::updatePickaxeButton()
 {
+  const auto manufacturerCount = getSelectedManufacturers().size();
   auto allLearned = true;
 
   for (auto i = 0; i < COMMAND_COUNT; i++) {
@@ -602,10 +649,8 @@ void DevicePickaxeWidget::updatePickaxeButton()
     }
   }
 
-  const bool ready = (catalogue != nullptr)
-      && !getSelectedManufacturer().isEmpty() && (deviceList->count() > 0)
+  const bool ready = (catalogue != nullptr) && (manufacturerCount >= 1)
       && allLearned && !searchRunning && (learningRow < 0);
-
   pickaxeButton->setEnabled(ready);
   updateHint();
 }
@@ -613,7 +658,7 @@ void DevicePickaxeWidget::updatePickaxeButton()
 void DevicePickaxeWidget::updateImportButton()
 {
   const bool ready = (catalogue != nullptr) && !searchRunning
-      && !resultManufacturer.isEmpty() && !getSelectedResult().isEmpty();
+      && !getSelectedResult().isEmpty();
 
   importButton->setEnabled(ready);
 }
@@ -625,52 +670,96 @@ void DevicePickaxeWidget::setSearchRunning(bool running)
   manufacturerEdit->setEnabled(!running);
   clearManufacturerButton->setEnabled(!running);
   manufacturerList->setEnabled(!running);
-  deviceEdit->setEnabled(!running);
-  deviceList->setEnabled(!running);
   resultList->setEnabled(!running);
 
+  updateDeviceControls();
   updateLearnControls();
   updatePickaxeButton();
   updateImportButton();
 }
 
-QString DevicePickaxeWidget::getSelectedManufacturer() const
+QStringList DevicePickaxeWidget::getSelectedManufacturers() const
 {
-  const QList<QListWidgetItem*> items = manufacturerList->selectedItems();
-  if (items.isEmpty()) {
-    return QString();
-  }
-
-  return items.first()->text();
-}
-
-QStringList DevicePickaxeWidget::getDevicesToCheck() const
-{
-  const QList<QListWidgetItem*> items = deviceList->selectedItems();
   QStringList result;
+  const auto items = manufacturerList->selectedItems();
 
-  if (items.isEmpty()) {
-    // no selection: everything the filter lets through
-    for (auto i = 0; i < deviceList->count(); i++) {
-      result.append(deviceList->item(i)->text());
-    }
-  } else {
-    for (const auto *item : items) {
-      result.append(item->text());
-    }
+  for (const auto *item : items) {
+    result.append(item->text());
   }
-
   return result;
 }
 
-QString DevicePickaxeWidget::getSelectedResult() const
+QMap<QString, QStringList> DevicePickaxeWidget::getDevicesToCheck() const
+{
+  QMap<QString, QStringList> result;
+  const auto manufacturerNames = getSelectedManufacturers();
+  const auto items = deviceList->selectedItems();
+
+  // empty device list = all devices of the manufacturer
+  for (const auto &manufacturerName : manufacturerNames) {
+    result.insert(manufacturerName, QStringList());
+  }
+  if (manufacturerNames.size() != 1) {
+    //todo devices leere liste, ist das so korrekt?
+    return result;
+  }
+
+  // single manufacturer: selected devices, without selection everything the
+  // filter lets through
+  auto &names = result[manufacturerNames.first()];
+  if (items.isEmpty()) {
+    for (auto i = 0; i < deviceList->count(); i++) {
+      names.append(deviceList->item(i)->text());
+    }
+  } else {
+    for (const auto *item : items) {
+      names.append(item->text());
+    }
+  }
+  return result;
+}
+
+Database::DeviceKey DevicePickaxeWidget::getSelectedResult() const
 {
   const QList<QListWidgetItem*> items = resultList->selectedItems();
   if (items.isEmpty()) {
-    return QString();
+    return Database::DeviceKey();
   }
 
-  return items.first()->text();
+  return getDeviceKey(items.first());
+}
+
+void DevicePickaxeWidget::addDeviceItem(QListWidget *list,
+    const Database::DeviceKey &key)
+{
+  // results can come from several manufacturers
+  const auto text = QStringLiteral("%1 / %2").arg(key.manufacturerName,
+      key.deviceName);
+  auto *item = new QListWidgetItem(text, list);
+  item->setData(Qt::UserRole, key.manufacturerName);
+  item->setData(Qt::UserRole + 1, key.deviceName);
+}
+
+Database::DeviceKey DevicePickaxeWidget::getDeviceKey(
+    const QListWidgetItem *item)
+{
+  Database::DeviceKey key;
+
+  key.manufacturerName = item->data(Qt::UserRole).toString();
+  key.deviceName = item->data(Qt::UserRole + 1).toString();
+  return key;
+}
+
+bool DevicePickaxeWidget::isLessDeviceKey(const Database::DeviceKey &a,
+    const Database::DeviceKey &b)
+{
+  const auto manufacturerOrder = a.manufacturerName.compare(b.manufacturerName,
+      Qt::CaseInsensitive);
+
+  if (manufacturerOrder != 0) {
+    return manufacturerOrder < 0;
+  }
+  return a.deviceName.compare(b.deviceName, Qt::CaseInsensitive) < 0;
 }
 
 }

@@ -8,6 +8,7 @@
 
 #include <QFutureWatcher>
 #include <QList>
+#include <QMap>
 #include <QWidget>
 
 #include "context.h"
@@ -18,6 +19,7 @@ class QComboBox;
 class QLabel;
 class QLineEdit;
 class QListWidget;
+class QListWidgetItem;
 class QProgressBar;
 class QPushButton;
 
@@ -27,9 +29,10 @@ namespace database
 /**
  * pickaxe search for the device database.
  *
- * the user selects a manufacturer (mandatory), optionally filters/selects
- * devices and learns three commands from a remote. the database then checks
- * which of the devices contain matching commands. matching devices are listed
+ * the user selects one or more manufacturers (mandatory) and learns three
+ * commands from a remote. with a single manufacturer the devices to check can
+ * be filtered/selected, with several all their devices are checked. the
+ * database then checks which of the devices contain matching commands. matching devices are listed
  * and can be imported.
  */
 class DevicePickaxeWidget: public QWidget
@@ -88,6 +91,7 @@ class DevicePickaxeWidget: public QWidget
 
     void updateManufacturers();
     void updateDevices();
+    void updateDeviceControls();
     void updateDeviceInfo();
     void updateHint();
     void updateButtonChoices();
@@ -95,20 +99,24 @@ class DevicePickaxeWidget: public QWidget
     void updatePickaxeButton();
     void updateImportButton();
     void setSearchRunning(bool running);
-    QString getSelectedManufacturer() const;
-    QStringList getDevicesToCheck() const;
-    QString getSelectedResult() const;
+
+    static void addDeviceItem(QListWidget *list, const document::files::Database::DeviceKey &key);
+    static document::files::Database::DeviceKey getDeviceKey( const QListWidgetItem *item);
+    static bool isLessDeviceKey(const document::files::Database::DeviceKey &a, const document::files::Database::DeviceKey &b);
+
+    QStringList getSelectedManufacturers() const;
+    QMap<QString, QStringList> getDevicesToCheck() const;
+    document::files::Database::DeviceKey getSelectedResult() const;
 
     const document::files::Database *catalogue = nullptr;
 
-    QString resultManufacturer;
     bool searchRunning = false;
     bool learningAvailable = false;
     /** row we wait for a learn answer, -1 if none */
     int learningRow = -1;
     std::array<std::optional<document::files::Database::LearnedCommand>, COMMAND_COUNT> learned;
 
-    QFutureWatcher<QList<document::files::Database::Device>> *pickaxeWatcher = nullptr;
+    QFutureWatcher<QList<document::files::Database::DeviceKey>> *pickaxeWatcher = nullptr;
 
     QLineEdit *manufacturerEdit = nullptr;
     QPushButton *clearManufacturerButton = nullptr;

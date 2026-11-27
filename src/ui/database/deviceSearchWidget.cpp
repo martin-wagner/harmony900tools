@@ -27,12 +27,7 @@ DeviceSearchWidget::DeviceSearchWidget(Context &ctx, QWidget *parent) :
 void DeviceSearchWidget::setCatalogue(
     const document::files::Database *catalogue)
 {
-  if (this->catalogue == catalogue) {
-    //lazy compare
-    return;
-  }
   this->catalogue = catalogue;
-
   manufacturerEdit->clear();
   updateManufacturers();
   deviceEdit->clear();
