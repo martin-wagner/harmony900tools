@@ -34,7 +34,7 @@ class ImportWidget: public QWidget
     explicit ImportWidget(QWidget *parent = nullptr);
 
     const QString releaseBaseUrl =
-        "https://github.com/pickysysadmin/logitech-harmony-ir-archive/releases/download/raw-2026-09-02/";
+        "https://github.com/pickysysadmin/logitech-harmony-ir-archive/releases/download/20261110/";
     const QList<QPair<document::files::DatabaseCatalogueFileType, QString>> dataFiles = {
       {document::files::DatabaseCatalogueFileType::Raw, "catalog_raw.jsonl.gz"},
       {document::files::DatabaseCatalogueFileType::Devices, "device_features_raw.jsonl.gz"},
