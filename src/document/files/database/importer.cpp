@@ -371,6 +371,8 @@ QList<Database::DeviceKey> Database::pickaxe(
   string line;
   std::vector<std::pair<QString, Device>> rocks;
 
+  pickaxeAbort = false;
+
   if (d.devices.isEmpty()) {
     return ret;
   }
@@ -415,6 +417,10 @@ QList<Database::DeviceKey> Database::pickaxe(
     return a.second.line < b.second.line;
   });
 
+  if (pickaxeAbort) {
+    return ret;
+  }
+
   peak = static_cast<int>(rocks.size());
   level = 0;
   emit pickaxeProgress(level, peak);
@@ -423,6 +429,10 @@ QList<Database::DeviceKey> Database::pickaxe(
   next = 0;
   while ((next < rocks.size()) && getline(f, line)) {
     while ((next < rocks.size()) && (rocks[next].second.line == lineNo)) {
+      if (pickaxeAbort) {
+        //present what we already have
+        return ret;
+      }
       pickRock(rocks[next].first, rocks[next].second, pickaxes, line, ret);
       level++;
       emit pickaxeProgress(level, peak);
@@ -442,6 +452,7 @@ void Database::clear()
 {
   db.clear();
   deviceCount = 0;
+  pickaxeAbort = false;
   d = DatabasePaths();
 }
 

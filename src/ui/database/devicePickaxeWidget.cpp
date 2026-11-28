@@ -21,9 +21,7 @@
 #include <QToolButton>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
-#include <QElapsedTimer>
 #include <QCoreApplication>
-#include <QEventLoop>
 
 #include "lib/qtHelpers.h"
 #include "lib/icon.h"
@@ -224,10 +222,11 @@ void DevicePickaxeWidget::onPickaxeClicked()
   }
   progressBar->setRange(0, count);
   progressBar->setTextVisible(false);
+  pickaxeAborted = false;
   setSearchRunning(true);
 
-  // blocking, returns when all devices are checked. the progress signal keeps
-  // the ui alive meanwhile, see onPickaxeProgress()
+  // blocking, returns when all devices are checked or the search is aborted.
+  // the progress signal keeps the ui alive meanwhile, see onPickaxeProgress()
   auto matches = db->pickaxe(devices, commands, *config);
 
   sort(matches.begin(), matches.end(), &DevicePickaxeWidget::isLessDeviceKey);
@@ -236,7 +235,13 @@ void DevicePickaxeWidget::onPickaxeClicked()
   }
   setSearchRunning(false);
 
-  emit writeMsg(tr("pickaxe finished: %1 device(s) match").arg(matches.size()));
+  if (pickaxeAborted) {
+    emit writeMsg(
+        tr("pickaxe aborted: %1 device(s) match").arg(matches.size()));
+  } else {
+    emit writeMsg(
+        tr("pickaxe finished: %1 device(s) match").arg(matches.size()));
+  }
 }
 
 void DevicePickaxeWidget::onPickaxeProgress(int checked, int total)
@@ -244,12 +249,17 @@ void DevicePickaxeWidget::onPickaxeProgress(int checked, int total)
   progressBar->setRange(0, total);
   progressBar->setValue(checked);
 
-  // the search blocks this thread. give the ui an event pass now and then,
-  // without user input: the widgets are locked anyway
-  if (pickaxeLastEvents.elapsed() >= PICKAXE_EVENT_INTERVAL_MS) {
-    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    pickaxeLastEvents.restart();
-  }
+  // the search blocks this thread. one event pass per device, so the abort
+  // button gets its click. the other widgets are locked anyway
+  QCoreApplication::processEvents();
+}
+
+void DevicePickaxeWidget::onAbortClicked()
+{
+  pickaxeAborted = true;
+  abortButton->setEnabled(false);
+  // the search returns the matches found so far
+  catalogue->abortPickaxe();
 }
 
 void DevicePickaxeWidget::onImportClicked()
@@ -382,6 +392,9 @@ void DevicePickaxeWidget::createView()
   pickaxeButton = new QPushButton(axeIcon, tr(" start deep search"), this);
   pickaxeButton->setEnabled(false);
 
+  abortButton = new QPushButton(tr("abort"), this);
+  abortButton->setEnabled(false);
+
   progressBar = new QProgressBar(this);
   progressBar->setRange(0, 1);
   progressBar->setValue(0);
@@ -423,6 +436,7 @@ void DevicePickaxeWidget::createView()
   auto *pickaxeLayout = new QHBoxLayout();
   pickaxeLayout->addWidget(pickaxeButton);
   pickaxeLayout->addWidget(progressBar, 1);
+  pickaxeLayout->addWidget(abortButton);
 
   auto *importLayout = new QHBoxLayout();
   importLayout->addWidget(tryConvertProtocolCheck);
@@ -487,6 +501,8 @@ void DevicePickaxeWidget::createConnections()
 
   connect(pickaxeButton, &QPushButton::clicked, this,
       &DevicePickaxeWidget::onPickaxeClicked);
+  connect(abortButton, &QPushButton::clicked, this,
+      &DevicePickaxeWidget::onAbortClicked);
   connect(importButton, &QPushButton::clicked, this,
       &DevicePickaxeWidget::onImportClicked);
 }
@@ -688,6 +704,7 @@ void DevicePickaxeWidget::setSearchRunning(bool running)
   clearManufacturerButton->setEnabled(!running);
   manufacturerList->setEnabled(!running);
   resultList->setEnabled(!running);
+  abortButton->setEnabled(running);
 
   updateDeviceControls();
   updateLearnControls();

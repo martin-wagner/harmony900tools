@@ -8,7 +8,6 @@
 #include <optional>
 #include <string>
 
-#include <QElapsedTimer>
 #include <QList>
 #include <QMap>
 #include <QWidget>
@@ -77,6 +76,7 @@ class DevicePickaxeWidget: public QWidget
     void onLearnTriggered();
     void onPickaxeClicked();
     void onPickaxeProgress(int checked, int total);
+    void onAbortClicked();
     void onImportClicked();
     void onClearManufacturerClicked();
 
@@ -87,8 +87,6 @@ class DevicePickaxeWidget: public QWidget
 
   private:
     static constexpr int COMMAND_COUNT = 3;
-    /** how often the blocked ui gets an event pass during the search */
-    static constexpr int PICKAXE_EVENT_INTERVAL_MS = 50;
     inline static const QString POWER_BUTTON = "PowerToggle";
 
   private:
@@ -124,8 +122,8 @@ class DevicePickaxeWidget: public QWidget
     int pendingRow = -1;
     std::array<std::optional<document::files::Database::LearnedCommand>, COMMAND_COUNT> learned;
 
-    /** time since the ui last got an event pass during the search */
-    QElapsedTimer pickaxeLastEvents;
+    /** set by the abort button, checked during the search */
+    bool pickaxeAborted = false;
 
     QLineEdit *manufacturerEdit = nullptr;
     QPushButton *clearManufacturerButton = nullptr;
@@ -140,6 +138,7 @@ class DevicePickaxeWidget: public QWidget
     std::array<QLabel*, COMMAND_COUNT> learnStatus{};
 
     QPushButton *pickaxeButton = nullptr;
+    QPushButton *abortButton = nullptr;
     QProgressBar *progressBar = nullptr;
 
     QLabel *explanationLabel = nullptr;

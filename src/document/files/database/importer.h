@@ -127,6 +127,10 @@ class Database: public QObject
      */
     QList<DeviceKey> pickaxe(const QMap<QString, QStringList> &mountain, const std::map<std::string, LearnedCommand> &picks, const document::Config &config) const;
 
+    /** asks a running pickaxe() to stop and return
+     * the matches found so far */
+    void abortPickaxe() const { pickaxeAbort = true; };
+
   signals:
     /** pickaxe progress, checked of total devices */
     void pickaxeProgress(int checked, int total) const;
@@ -149,6 +153,9 @@ class Database: public QObject
     std::unordered_map<QString, Manufacturer> db;
 
     ProtocolDatabase protocolDatabase;
+
+    /** set by abortPickaxe(), checked by pickaxe() */
+    mutable bool pickaxeAbort = false;
 
   private:
     struct PickAxe {
