@@ -16,7 +16,7 @@ cd ../../..
 
 echo "---> Linux Build <---"
 # appimage build scatter/gathers it's dependencies from the host system -> use always-clean host.
-docker build -t h900-builder ./tools/docker || exit 1
+docker build -t remote-workbench-builder ./tools/docker || exit 1
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -e USER="$(whoami)" \
@@ -24,7 +24,7 @@ docker run --rm \
   -e CCACHE_DISABLE=1 \
   -v "$(pwd):/src" \
   -w /src \
-  h900-builder \
+  remote-workbench-builder \
   ./tools/docker/build-linux.sh || exit 1
 
 echo "---> MXE Build <---"
@@ -36,10 +36,10 @@ cd ../../..
 
 echo "---> collecting build products <---"
 mkdir out
-cp build/release/docker/h900tools*.tar.gz out
-cp build/release/docker/h900tools*.deb out
-cp build/release/docker/H900*.AppImage out
-cp build/release/x86-64-windows/h900tools*.exe out
-cp build/release/x86-64-windows/h900tools*.zip out
+cp build/release/docker/remoteWorkbench*.tar.gz out
+cp build/release/docker/remoteworkbench*.deb out
+cp build/release/docker/RemoteWorkbench*.AppImage out
+cp build/release/x86-64-windows/remoteWorkbench*.exe out
+cp build/release/x86-64-windows/remoteWorkbench*.zip out
 ls -lh out
 echo "---< done >---"

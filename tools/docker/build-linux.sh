@@ -19,10 +19,10 @@ make package -j$(nproc)
 set +e
 make install -j$(nproc)
 mkdir -p generated/icon
-convert ../../../res/harmony-900-color-screen.png -resize 256x256^ -gravity center -extent 256x256 generated/icon/h900edit.png
+convert ../../../res/harmony-900-color-screen.png -resize 256x256^ -gravity center -extent 256x256 generated/icon/remoteWorkbench.png
 wget -N https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
 wget -N https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
 chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
 source generated/version.env
 export QMAKE=/usr/bin/qmake6
-./linuxdeploy-x86_64.AppImage --appdir AppDir -i generated/icon/h900edit.png -d ../../../res/h900edit.desktop --plugin qt --output appimage
+./linuxdeploy-x86_64.AppImage --appdir AppDir -i generated/icon/remoteWorkbench.png -d ../../../res/remoteWorkbench.desktop --plugin qt --output appimage

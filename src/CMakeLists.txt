@@ -4,7 +4,7 @@
 add_subdirectory(cli)
 
 # program name
-set(programName h900edit)
+set(programName remoteWorkbench)
 
 # dependencies (external)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Concurrent Svg LinguistTools
@@ -281,12 +281,12 @@ else()
   install(TARGETS qtadvanceddocking-qt6
       RUNTIME DESTINATION bin
   )
-  install(FILES "${CMAKE_SOURCE_DIR}/res/h900edit.desktop"
+  install(FILES "${CMAKE_SOURCE_DIR}/res/remoteWorkbench.desktop"
       DESTINATION share/applications
   )
   install(FILES "${resourcePath}/harmony-900-color-screen.png"
       DESTINATION share/icons/hicolor/64x64/apps
-      RENAME h900edit.png
+      RENAME remoteWorkbench.png
   )
   install(DIRECTORY "${LIBCONCORD_INSTALL}/lib/"
       DESTINATION lib
@@ -295,7 +295,7 @@ else()
 endif()
 
 # cpack config
-set(CPACK_PACKAGE_NAME "h900tools")
+set(CPACK_PACKAGE_NAME "remoteWorkbench")
 set(CPACK_PACKAGE_VENDOR "Martin Wagner")
 set(CPACK_PACKAGE_CONTACT "https://github.com/martin-wagner/harmony900tools/issues")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "H900 remote tools")
