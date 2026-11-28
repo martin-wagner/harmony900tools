@@ -1195,6 +1195,9 @@ bool document::files::Database::makePickAxes(
         axes.clear();
         return false;
       }
+      emit writeLog(LogLevel::Debug,
+          tr("pick: cmd %1 protocol %2").arg(qstr(name)).arg(
+              axe.type.get().getQString()), ContentType::PlainText);
     } else {
       axe.type = data::Enum<data::CodeType>(data::CodeType::Proprietary);
     }
