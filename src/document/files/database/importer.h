@@ -118,14 +118,14 @@ class Database: public QObject
      * @remark BLOCKING, call it from a worker thread. emits pickaxeProgress
      * from the calling thread.
      *
-     * @param devices devices to check. key is the manufacturer, value the
+     * @param mountain devices to check. key is the manufacturer, value the
      * devices of it to check. an empty list checks all devices of the
      * manufacturer
-     * @param commands learned commands, key is the HardButtons string
+     * @param picks learned commands, key is the HardButtons string
      * (additionally "Power Toggle", which is not part of the enum)
      * @return the devices that match
      */
-    QList<DeviceKey> pickaxe(const QMap<QString, QStringList> &devices, const std::map<std::string, LearnedCommand> &commands) const { return QList<DeviceKey>(); };
+    QList<DeviceKey> pickaxe(const QMap<QString, QStringList> &mountain, const std::map<std::string, LearnedCommand> &picks, const document::Config &config) const;
 
   signals:
     /** pickaxe progress, checked of total devices */
@@ -149,6 +149,18 @@ class Database: public QObject
     std::unordered_map<QString, Manufacturer> db;
 
     ProtocolDatabase protocolDatabase;
+
+  private:
+    struct PickAxe {
+      std::string button;
+      //raw
+      LearnedCommand raw;
+      //learned
+      data::PropertyEnum<data::CodeType> type {data::CodeType::None} ;
+      binary::irProto::IrProto protocol;
+      binary::irProto::Code code;
+    };
+    using PickAxes = std::vector<PickAxe>;
 
   private:
     //ai did some guessing...
@@ -182,6 +194,13 @@ class Database: public QObject
     bool checkReadActionSequences(const std::string &key, const nlohmann::json &j, data::item::DeviceAction &out) const;
     bool readActionSequences(const nlohmann::json &j, data::item::DeviceAction &out) const;
     bool readActionSequence(const nlohmann::json &j, data::item::SequenceItem &out) const;
+
+    bool makePickAxes(const std::map<std::string, LearnedCommand> &picks, PickAxes &axes, const document::Config &config) const;
+    bool pickRock(const QString &mnf, const Device &rock, const PickAxes &axes, const std::string &line, QList<DeviceKey> &out) const;
+    bool pickRock(const nlohmann::json &rock, PickAxes axes) const;
+    bool pickPebble(const nlohmann::json &pebble, PickAxes &axes) const;
+    int matchProto(const binary::irProto::IrProto &protocol, const binary::irProto::Code &code, const PickAxe &axe) const;
+    bool matchRaw(const binary::irProto::IrProto &protocol, const binary::irProto::Code &code, const PickAxe &axe) const;
 
     bool hasCapability(const nlohmann::json &j, Capabilities capability) const;
     static data::DeviceType mapDatabaseDeviceType(data::DatabaseDeviceType source);

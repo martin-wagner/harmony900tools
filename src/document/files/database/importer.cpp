@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include <boost/algorithm/string.hpp>
+#include <algorithm>
 #include <fstream>
+#include <utility>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -349,9 +352,90 @@ bool files::Database::importDevice(const Device &source, Config &config,
         tr("load %1: Json error at line %2 [%3]: %4").arg(d.devices).arg(
             source.line).arg(e.id).arg(QString(e.what())),
         ContentType::PlainText);
-    config.endMacro();
-    return false;
   }
+  config.endMacro();
+  return false;
+}
+
+QList<Database::DeviceKey> Database::pickaxe(
+    const QMap<QString, QStringList> &mountain,
+    const map<string, LearnedCommand> &picks,
+    const document::Config &config) const
+{
+  int peak;
+  int level;
+  uint64_t lineNo;
+  size_t next;
+  QList<Database::DeviceKey> ret;
+  PickAxes pickaxes;
+  string line;
+  std::vector<std::pair<QString, Device>> rocks;
+
+  if (d.devices.isEmpty()) {
+    return ret;
+  }
+  auto size = QFile(d.devices).size();
+  if (size == 0) {
+    emit writeLog(LogLevel::Error, tr("pick: %1 is empty").arg(d.devices),
+        ContentType::PlainText);
+    return ret;
+  }
+
+#ifdef _WIN32
+  ifstream f(d.devices.toStdWString().c_str(), ios::binary);
+#else
+  ifstream f(d.devices.toUtf8(), ios::binary);
+#endif
+  if (!f.is_open()) {
+    emit writeLog(LogLevel::Error, tr("pick: failed to open %1").arg(d.devices),
+        ContentType::PlainText);
+    return ret;
+  }
+
+  auto res = makePickAxes(picks, pickaxes, config);
+  if (res != true) {
+    emit writeMsg(tr("pickaxe creation failed. Re-learn and try again!"));
+    return ret;
+  }
+
+  //collect the devices from the caller once, then sort them by line so the
+  //database file is read in a single forward pass
+  for (auto it = mountain.cbegin(); it != mountain.cend(); it++) {
+    const auto &mnf = it.key();
+    for (const auto &boulder : it.value()) {
+      auto rock = getDeviceInfo(mnf, boulder);
+      if (rock.name.isEmpty()) {
+        //should not happen
+        continue;
+      }
+      rocks.emplace_back(mnf, rock);
+    }
+  }
+  std::sort(rocks.begin(), rocks.end(), [](const auto &a, const auto &b) {
+    return a.second.line < b.second.line;
+  });
+
+  peak = static_cast<int>(rocks.size());
+  level = 0;
+  emit pickaxeProgress(level, peak);
+
+  lineNo = 0;
+  next = 0;
+  while ((next < rocks.size()) && getline(f, line)) {
+    while ((next < rocks.size()) && (rocks[next].second.line == lineNo)) {
+      pickRock(rocks[next].first, rocks[next].second, pickaxes, line, ret);
+      level++;
+      emit pickaxeProgress(level, peak);
+      next++;
+    }
+    lineNo++;
+  }
+  for (; next < rocks.size(); next++) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick %1: line %2 not found").arg(d.devices).arg(
+            rocks[next].second.line), ContentType::PlainText);
+  }
+  return ret;
 }
 
 void Database::clear()
@@ -389,58 +473,59 @@ bool Database::importDevice(const json &j, Config &config,
       hasPowerFeature, hasInternalStateFeature, hasOutputFeature);
 
   //don't use devices id from database, create instance id when adding to project
-  data::item::Device d(0);
+  data::item::Device device(0);
   auto &jd = j.at("device");
 
   //description
   auto deviceType =
       static_cast<data::DatabaseDeviceType>(jd.at("DeviceType").get<int>());
-  d.type.set(mapDatabaseDeviceType(deviceType));
-  data::serialiser::fromJson(jd, "Manufacturer", d.mnf);
-  data::serialiser::fromJson(jd, "Model", d.model);
-  data::serialiser::fromJson(jd, "Name", d.label);
+  device.type.set(mapDatabaseDeviceType(deviceType));
+  data::serialiser::fromJson(jd, "Manufacturer", device.mnf);
+  data::serialiser::fromJson(jd, "Model", device.model);
+  data::serialiser::fromJson(jd, "Name", device.label);
 
   //properties
   if (hasPowerFeature) {
     auto jp = getFeature(j, "PowerFeature");
-    data::serialiser::fromJson(jd, "IsPowerAlwaysOn", d.manualPower);
-    data::serialiser::fromJson(jd, "IsPoweredOnBetweenActivities", d.alwaysOn);
+    data::serialiser::fromJson(jp, "IsPowerAlwaysOn", device.manualPower);
+    data::serialiser::fromJson(jp, "IsPoweredOnBetweenActivities",
+        device.alwaysOn);
   }
   auto display = hasCapability(jd, Capabilities::IS_DISPLAY);
   if (display) {
-    d.isDisplayDevice.set(true).setIncluded(data::Used::YES);
+    device.isDisplayDevice.set(true).setIncluded(data::Used::YES);
   }
 //  auto tuner = hasCapability(jd, Capabilities::HAS_TUNER_INPUT);
 //  if (tuner) {
 //    d.tunerInput.set(data::TunerInput::Tuner).setIncluded(data::Used::YES);
 //  } todo do we need to check this?
   if (hasChannelTuningFeature) {
-    d.tunerInput.set(data::TunerInput::Tuner).setIncluded(data::Used::YES);
+    device.tunerInput.set(data::TunerInput::Tuner).setIncluded(data::Used::YES);
   }
-  data::serialiser::fromJson(jd, "IsScartCableSupported", d.scart);
+  data::serialiser::fromJson(jd, "IsScartCableSupported", device.scart);
   //fixme more?
 
   //delays
   data::serialiser::fromJson(jd, "InterDeviceDelay",
-      d.getIrCommands().pressPreSilenceMs);
+      device.getIrCommands().pressPreSilenceMs);
   data::serialiser::fromJson(jd, "InterKeyDelay",
-      d.getIrCommands().pressInterKeyMs);
+      device.getIrCommands().pressInterKeyMs);
   data::serialiser::fromJson(jd, "HoldInterDeviceDelay",
-      d.getIrCommands().holdPreSilenceMs);
+      device.getIrCommands().holdPreSilenceMs);
   data::serialiser::fromJson(jd, "HoldInterKeyDelay",
-      d.getIrCommands().holdInterKeyMs);
+      device.getIrCommands().holdInterKeyMs);
 
   //data
   if (j.contains("commands") && j.at("commands").is_array()) {
-    ret &= commands(j, d, config, tryConvertProtocol);
+    ret &= commands(j, device, config, tryConvertProtocol);
   }
-  ret &= readChannelTuningFeature(j, d, config, hasChannelTuningFeature);
-  ret &= readPowerFeature(j, d, config, hasPowerFeature);
-  ret &= readInputFeature(j, d, config, hasInputFeature);
-  ret &= readInternalStateFeatures(j, d, config, hasInternalStateFeature);
-  ret &= readOutputFeature(j, d, config, hasOutputFeature);
+  ret &= readChannelTuningFeature(j, device, config, hasChannelTuningFeature);
+  ret &= readPowerFeature(j, device, config, hasPowerFeature);
+  ret &= readInputFeature(j, device, config, hasInputFeature);
+  ret &= readInternalStateFeatures(j, device, config, hasInternalStateFeature);
+  ret &= readOutputFeature(j, device, config, hasOutputFeature);
 
-  ret &= config.modify().addDeviceCommand(d, -1);
+  ret &= config.modify().addDeviceCommand(device, -1);
   return ret;
 }
 
@@ -718,7 +803,7 @@ bool Database::readChannelTuningFeature(const nlohmann::json &j,
     num.fixedDigits.set(0).setIncluded(data::Used::YES);
     num.first = digits;
   } else {
-    data::serialiser::fromJson(j, "FixedDigits", num.fixedDigits);
+    data::serialiser::fromJson(jctf, "FixedDigits", num.fixedDigits);
     num.first = digits;
     num.middle = digits;
     num.last = digits;
@@ -917,9 +1002,8 @@ bool Database::readOutputFeature(const nlohmann::json &j,
   return true;
 }
 
-bool Database::readStateMachine(const std::string &keyArray,
-    const std::string &keyName, const nlohmann::json &j,
-    data::item::StateMachine &sm) const
+bool Database::readStateMachine(const string &keyArray, const string &keyName,
+    const nlohmann::json &j, data::item::StateMachine &sm) const
 {
   bool res;
   data::item::DeviceAction a;
@@ -993,7 +1077,7 @@ bool Database::readStateMachine(const std::string &keyArray,
   return true;
 }
 
-bool files::Database::checkReadActionSequences(const std::string &key,
+bool files::Database::checkReadActionSequences(const string &key,
     const nlohmann::json &j, data::item::DeviceAction &out) const
 {
   data::item::DeviceAction a;
@@ -1066,6 +1150,228 @@ bool Database::readActionSequence(const nlohmann::json &j,
   data::serialiser::fromJson(j, "StateName", out.stateName); //there are _many_ more than the enum values!
   data::serialiser::fromJson(j, "StateValue", out.value);
   return true;
+}
+
+bool document::files::Database::makePickAxes(
+    const std::map<std::string, LearnedCommand> &picks, PickAxes &axes,
+    const document::Config &config) const
+{
+  axes.clear();
+
+  for (const auto& [name, raw] : picks) {
+    if (raw.timing.timings().empty()) {
+      axes.clear();
+      return false;
+    }
+
+    PickAxe axe;
+    axe.button = name;
+    axe.raw = raw;
+    //learn the command
+    auto decoder = binary::codec::Decode(raw.timing, raw.carrier);
+    auto &data = decoder.getData();
+    if (data.decoded == binary::codec::Status::OK) {
+      axe.type = data::Enum<data::CodeType>(data.codeType);
+      axe.protocol = config.data().getProtocolCatalogue().get(
+          axe.type.get().getQString());
+      if (axe.protocol.isEmpty()) {
+        axes.clear();
+        return false;
+      }
+      axe.code = binary::codec::encode(0, axe.protocol, data.codeType,
+          data.codeString, data.address, data.command, data.data);
+      if (!axe.code.isValid()) {
+        axes.clear();
+        return false;
+      }
+    } else {
+      axe.type = data::Enum<data::CodeType>(data::CodeType::Proprietary);
+    }
+    axes.push_back(std::move(axe));
+  }
+  return true;
+}
+
+bool document::files::Database::pickRock(const QString &mnf, const Device &rock,
+    const PickAxes &axes, const string &line,
+    QList<Database::DeviceKey> &out) const
+{
+  json j;
+
+  try {
+    j = json::parse(line);
+  } catch (const json::parse_error &e) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick %1: Json parse error at line %2, byte %3: %4").arg(d.devices).arg(
+            rock.line).arg(e.byte).arg(QString(e.what())),
+        ContentType::PlainText);
+    return false;
+  } catch (const json::exception &e) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick %1: Json error at line %2 [%3]: %4").arg(d.devices).arg(
+            rock.line).arg(e.id).arg(QString(e.what())),
+        ContentType::PlainText);
+    return false;
+  }
+
+  if ((!j.contains("id")) || !j.at("id").is_number_unsigned()) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick %1: line %2 has no id").arg(d.devices).arg(rock.line),
+        ContentType::PlainText);
+    return false;
+  }
+
+  auto id = j.at("id").get<uint64_t>();
+  if (id != rock.id) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick %1: line %2 id mismatch (expected %3, got %4)").arg(d.devices).arg(
+            rock.line).arg(rock.id).arg(id), ContentType::PlainText);
+    return false;
+  }
+
+  try {
+    auto res = pickRock(j, axes);
+    if (res == true) {
+      out.push_back( { mnf, rock.name });
+      return true;
+    }
+  } catch (const json::exception &e) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick %1: Json error at line %2 [%3]: %4").arg(d.devices).arg(
+            rock.line).arg(e.id).arg(QString(e.what())),
+        ContentType::PlainText);
+  }
+  return false;
+}
+
+bool document::files::Database::pickRock(const nlohmann::json &rock,
+    PickAxes axes) const
+{
+  if (!rock.contains("commands") || !rock.at("commands").is_array()) {
+    return false;
+  }
+
+  for (const auto &pebble : rock.at("commands")) {
+    auto res = pickPebble(pebble, axes);
+    if (res != true) {
+      //error or mismatch -- we don't care
+      return false;
+    }
+    if (axes.empty()) {
+      //done
+      return true;
+    }
+  }
+  //not all axes used up -- mismatch
+  return false;
+}
+
+bool document::files::Database::pickPebble(const nlohmann::json &pebble,
+    PickAxes &axes) const
+{
+  string protocolName;
+  optional<PickAxe> axe;
+
+  //plausibility
+  if (!pebble.contains("CommandTypeId") || !pebble.contains("ProtocolId")
+      || !pebble.at("ProtocolId").is_number_unsigned()
+      || !pebble.contains("KeyCode") || !pebble.at("KeyCode").is_string()) {
+    emit writeLog(LogLevel::Debug, tr("pick: PROTO data missing/invalid"),
+        ContentType::PlainText);
+    return true;
+  }
+
+  //check if one of our axes can work
+  auto button = pebble.at("CommandTypeId").get<string>();
+  for (auto i = axes.begin(); i != axes.end(); i++) {
+    if (boost::iequals(i->button, button)) {
+      axe.emplace(std::move(*i));
+      axes.erase(i);
+      break;
+    }
+  }
+  if (!axe.has_value()) {
+    return true;
+  }
+
+  //prepare the data
+  auto protocolId = pebble.at("ProtocolId").get<uint32_t>();
+  auto protocol = protocolDatabase.getProtocol(protocolId, &protocolName);
+  if (protocol.isEmpty()) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick: PROTO import failed (ID %1: %2)").arg(protocolId).arg(
+            protocolDatabase.getErrStr()), ContentType::PlainText);
+    return false;
+  }
+  auto keyCodeStr = pebble.at("KeyCode").get<string>();
+  auto code = protocolDatabase.getCode(qstr(keyCodeStr));
+  if (!code.isValid(true)) {
+    emit writeLog(LogLevel::Debug,
+        tr("pick: PROTO code import failed (%1: %2)").arg(qstr(protocolName)).arg(
+            protocolDatabase.getErrStr()), ContentType::PlainText);
+    return false;
+  }
+
+  //use the axe
+  auto res = matchProto(protocol, code, *axe);
+  if (res == 0) {
+    //clear match
+    return true;
+  } else if (res < 0) {
+    //clear mismatch
+    return false;
+  } else {
+    //can't match protocol, check raw timings
+    return matchRaw(protocol, code, *axe);
+  }
+}
+
+int document::files::Database::matchProto(
+    const binary::irProto::IrProto &protocol, const binary::irProto::Code &code,
+    const PickAxe &axe) const
+{
+  binary::TimingStream timingData;
+
+  // we "learn" the command: serialise and throw the timings at the IR recognition code
+  // then check if type and data match what is in axe
+  auto binaryData = code.getData(true);
+  auto res = protocol.serialiseIrStream(timingData, binaryData);
+  if (res == binary::irProto::Status::OK) {
+    auto decoder = binary::codec::Decode(timingData,
+        static_cast<int>(protocol.getClock()));
+    auto &data = decoder.getData();
+    if (data.decoded == binary::codec::Status::OK) {
+      auto type = data::Enum<data::CodeType>(data.codeType);
+      if (type.getValue() != axe.type.get().getValue()) {
+        //protocol type mismatch
+        return -1;
+      }
+      auto cmpCode = binary::codec::encode(0, axe.protocol, data.codeType,
+          data.codeString, data.address, data.command, data.data);
+      if (!cmpCode.isValid()) {
+        //can't create code
+        return -1;
+      }
+      if (cmpCode.getData() == axe.code.getData()) {
+        return 0;
+      } else {
+        //data mismatch
+        return -1;
+      }
+    } else {
+      //protocol is proprietary
+      return 1;
+    }
+  }
+  return -1;
+}
+
+bool document::files::Database::matchRaw(
+    const binary::irProto::IrProto &protocol, const binary::irProto::Code &code,
+    const PickAxe &axe) const
+{
+  //todo implement this
+  return false;
 }
 
 bool files::Database::hasCapability(const nlohmann::json &j,

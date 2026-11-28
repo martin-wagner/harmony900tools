@@ -4,9 +4,11 @@
 
 #include <array>
 #include <cstdint>
+#include <map>
 #include <optional>
+#include <string>
 
-#include <QFutureWatcher>
+#include <QElapsedTimer>
 #include <QList>
 #include <QMap>
 #include <QWidget>
@@ -46,7 +48,6 @@ class DevicePickaxeWidget: public QWidget
     /** the learn actions are owned by the connection, the widget only uses them */
     explicit DevicePickaxeWidget(Context &ctx, QAction *actionLearnIrSingle,
         QAction *actionLearnIrStream, QWidget *parent = nullptr);
-    ~DevicePickaxeWidget() override;
 
     /** sets the database to search in, nullptr clears the view */
     void setCatalogue(const document::files::Database *catalogue);
@@ -76,7 +77,6 @@ class DevicePickaxeWidget: public QWidget
     void onLearnTriggered();
     void onPickaxeClicked();
     void onPickaxeProgress(int checked, int total);
-    void onPickaxeFinished();
     void onImportClicked();
     void onClearManufacturerClicked();
 
@@ -87,7 +87,9 @@ class DevicePickaxeWidget: public QWidget
 
   private:
     static constexpr int COMMAND_COUNT = 3;
-    inline static const QString POWER_BUTTON = "Power Toggle";
+    /** how often the blocked ui gets an event pass during the search */
+    static constexpr int PICKAXE_EVENT_INTERVAL_MS = 50;
+    inline static const QString POWER_BUTTON = "PowerToggle";
 
   private:
     void createView();
@@ -122,7 +124,8 @@ class DevicePickaxeWidget: public QWidget
     int pendingRow = -1;
     std::array<std::optional<document::files::Database::LearnedCommand>, COMMAND_COUNT> learned;
 
-    QFutureWatcher<QList<document::files::Database::DeviceKey>> *pickaxeWatcher = nullptr;
+    /** time since the ui last got an event pass during the search */
+    QElapsedTimer pickaxeLastEvents;
 
     QLineEdit *manufacturerEdit = nullptr;
     QPushButton *clearManufacturerButton = nullptr;

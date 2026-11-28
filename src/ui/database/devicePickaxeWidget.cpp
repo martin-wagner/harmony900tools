@@ -21,7 +21,9 @@
 #include <QToolButton>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
-#include <QtConcurrent>
+#include <QElapsedTimer>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 #include "lib/qtHelpers.h"
 #include "lib/icon.h"
@@ -50,12 +52,6 @@ DevicePickaxeWidget::DevicePickaxeWidget(Context &ctx,
   updateImportButton();
 }
 
-DevicePickaxeWidget::~DevicePickaxeWidget()
-{
-  // TODO: the search can't be cancelled yet, so we have to wait for it
-  pickaxeWatcher->waitForFinished();
-}
-
 void DevicePickaxeWidget::setCatalogue(const Database *catalogue)
 {
   // TODO: a running search still uses the old catalogue. the caller must not
@@ -66,7 +62,6 @@ void DevicePickaxeWidget::setCatalogue(const Database *catalogue)
   }
   this->catalogue = catalogue;
   if (this->catalogue != nullptr) {
-    // emitted from the worker thread, qt queues it into the gui thread
     connect(this->catalogue, &Database::pickaxeProgress, this,
         &DevicePickaxeWidget::onPickaxeProgress);
   }
@@ -199,8 +194,10 @@ void DevicePickaxeWidget::onLearnTriggered()
 
 void DevicePickaxeWidget::onPickaxeClicked()
 {
-  const auto db = catalogue;
+  int count;
+  const auto *db = catalogue;
   const auto devices = getDevicesToCheck();
+  const auto *config = ctx.config();
   map<string, Database::LearnedCommand> commands;
 
   if ((db == nullptr) || devices.isEmpty()) {
@@ -221,43 +218,38 @@ void DevicePickaxeWidget::onPickaxeClicked()
   }
 
   resultList->clear();
-  // device count is unknown until the first progress arrives
-  progressBar->setRange(0, db->getDeviceCount());
+  count = 0;
+  for (const QStringList &list : devices) {
+    count = count + list.size();
+  }
+  progressBar->setRange(0, count);
   progressBar->setTextVisible(false);
   setSearchRunning(true);
 
-  // blocking call, so it runs in a worker thread. result: onPickaxeFinished
-  pickaxeWatcher->setFuture(QtConcurrent::run([db, devices, commands]() {
-    return db->pickaxe(devices, commands);
-  }));
+  // blocking, returns when all devices are checked. the progress signal keeps
+  // the ui alive meanwhile, see onPickaxeProgress()
+  auto matches = db->pickaxe(devices, commands, *config);
+
+  sort(matches.begin(), matches.end(), &DevicePickaxeWidget::isLessDeviceKey);
+  for (const auto &key : matches) {
+    addDeviceItem(resultList, key);
+  }
+  setSearchRunning(false);
+
+  emit writeMsg(tr("pickaxe finished: %1 device(s) match").arg(matches.size()));
 }
 
 void DevicePickaxeWidget::onPickaxeProgress(int checked, int total)
 {
   progressBar->setRange(0, total);
   progressBar->setValue(checked);
-  progressBar->setTextVisible(true);
-}
 
-void DevicePickaxeWidget::onPickaxeFinished()
-{
-  auto matches = pickaxeWatcher->result();
-  const auto total = progressBar->maximum();
-
-  sort(matches.begin(), matches.end(), &DevicePickaxeWidget::isLessDeviceKey);
-  for (const auto &key : matches) {
-    addDeviceItem(resultList, key);
+  // the search blocks this thread. give the ui an event pass now and then,
+  // without user input: the widgets are locked anyway
+  if (pickaxeLastEvents.elapsed() >= PICKAXE_EVENT_INTERVAL_MS) {
+    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    pickaxeLastEvents.restart();
   }
-  if (total > 0) {
-    progressBar->setValue(total);
-  } else {
-    progressBar->setRange(0, 1);
-    progressBar->setValue(0);
-  }
-  setSearchRunning(false);
-  updateDeviceInfo();
-
-  emit writeMsg(tr("pickaxe finished: %1 device(s) match").arg(matches.size()));
 }
 
 void DevicePickaxeWidget::onImportClicked()
@@ -396,8 +388,6 @@ void DevicePickaxeWidget::createView()
   progressBar->setFormat(tr("checked %v of %m devices"));
   progressBar->setTextVisible(false);
 
-  pickaxeWatcher = new QFutureWatcher<QList<Database::DeviceKey>>(this);
-
   resultList = new QListWidget(this);
   resultList->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -497,8 +487,6 @@ void DevicePickaxeWidget::createConnections()
 
   connect(pickaxeButton, &QPushButton::clicked, this,
       &DevicePickaxeWidget::onPickaxeClicked);
-  connect(pickaxeWatcher, &QFutureWatcherBase::finished, this,
-      &DevicePickaxeWidget::onPickaxeFinished);
   connect(importButton, &QPushButton::clicked, this,
       &DevicePickaxeWidget::onImportClicked);
 }
@@ -724,26 +712,27 @@ QMap<QString, QStringList> DevicePickaxeWidget::getDevicesToCheck() const
   const auto manufacturerNames = getSelectedManufacturers();
   const auto items = deviceList->selectedItems();
 
-  // empty device list = all devices of the manufacturer
   for (const auto &manufacturerName : manufacturerNames) {
     result.insert(manufacturerName, QStringList());
   }
+
   if (manufacturerNames.size() != 1) {
-    //todo devices leere liste, ist das so korrekt?
+    //all devices of all selected manufacturers
+    for (const auto &mnf : result.keys()) {
+      result[mnf] = catalogue->findDevices(mnf, "");
+    }
     return result;
   }
-
-  // single manufacturer: selected devices, without selection everything the
-  // filter lets through
-  auto &names = result[manufacturerNames.first()];
   if (items.isEmpty()) {
+    //all devices of single manufacturer
     for (auto i = 0; i < deviceList->count(); i++) {
-      names.append(deviceList->item(i)->text());
+      result[manufacturerNames.first()].append(deviceList->item(i)->text());
     }
-  } else {
-    for (const auto *item : items) {
-      names.append(item->text());
-    }
+    return result;
+  }
+  //selected devices of single manufacturer
+  for (const auto *item : items) {
+    result[manufacturerNames.first()].append(item->text());
   }
   return result;
 }
