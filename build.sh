@@ -37,7 +37,7 @@ cd ../../..
 echo "---> collecting build products <---"
 mkdir out
 cp build/release/docker/remoteWorkbench*.tar.gz out
-cp build/release/docker/remoteworkbench*.deb out
+cp build/release/docker/remoteWorkbench*.deb out
 cp build/release/docker/RemoteWorkbench*.AppImage out
 cp build/release/x86-64-windows/remoteWorkbench*.exe out
 cp build/release/x86-64-windows/remoteWorkbench*.zip out
