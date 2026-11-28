@@ -2,7 +2,7 @@ include(FetchContent)
 FetchContent_Declare(
     zlib
     GIT_REPOSITORY https://github.com/madler/zlib.git
-    GIT_TAG        da607da739fa6047df13e66a2af6b8bec7c2a498 #v1.3.2
+    GIT_TAG        99623ef7097352da7993ba614161fd6a311e046e #v1.4
     SOURCE_DIR     ${CMAKE_SOURCE_DIR}/src_external/zlib
     BINARY_DIR     ${CMAKE_BINARY_DIR}/src_external/zlib
 )
