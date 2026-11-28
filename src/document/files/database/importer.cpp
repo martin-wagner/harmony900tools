@@ -2,6 +2,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <utility>
 #include <vector>
@@ -1285,6 +1286,8 @@ bool document::files::Database::pickPebble(const nlohmann::json &pebble,
 {
   string protocolName;
   optional<PickAxe> axe;
+  binary::TimingStream libTiming;
+  uint32_t libClock = 0;
 
   //plausibility
   if (!pebble.contains("CommandTypeId") || !pebble.contains("ProtocolId")
@@ -1327,7 +1330,7 @@ bool document::files::Database::pickPebble(const nlohmann::json &pebble,
   }
 
   //use the axe
-  auto res = matchProto(protocol, code, *axe);
+  auto res = matchProto(protocol, code, *axe, libTiming, libClock);
   if (res == 0) {
     //clear match
     return true;
@@ -1336,21 +1339,21 @@ bool document::files::Database::pickPebble(const nlohmann::json &pebble,
     return false;
   } else {
     //can't match protocol, check raw timings
-    return matchRaw(protocol, code, *axe);
+    return matchRaw(libTiming, libClock, *axe);
   }
 }
 
 int document::files::Database::matchProto(
     const binary::irProto::IrProto &protocol, const binary::irProto::Code &code,
-    const PickAxe &axe) const
+    const PickAxe &axe, binary::TimingStream &timingData,
+    uint32_t &libClock) const
 {
-  binary::TimingStream timingData;
-
   // we "learn" the command: serialise and throw the timings at the IR recognition code
   // then check if type and data match what is in axe
   auto binaryData = code.getData(true);
   auto res = protocol.serialiseIrStream(timingData, binaryData);
   if (res == binary::irProto::Status::OK) {
+    libClock = static_cast<uint32_t>(protocol.getClock());
     auto decoder = binary::codec::Decode(timingData,
         static_cast<int>(protocol.getClock()));
     auto &data = decoder.getData();
@@ -1380,12 +1383,61 @@ int document::files::Database::matchProto(
   return -1;
 }
 
-bool document::files::Database::matchRaw(
-    const binary::irProto::IrProto &protocol, const binary::irProto::Code &code,
-    const PickAxe &axe) const
+bool document::files::Database::matchRaw(const binary::TimingStream &libTiming,
+    uint32_t libClock, const PickAxe &axe) const
 {
-  //todo implement this
-  return false;
+  auto libFrame = cropFrame(libTiming);
+  auto learnedFrame = cropFrame(axe.raw.timing);
+  size_t i = 0;
+
+  if ((libClock != 0) && (axe.raw.carrier != 0)) {
+    if (!isWithinTolerance(libClock, axe.raw.carrier, RAW_CLOCK_TOLERANCE)) {
+      return false;
+    }
+  }
+  //ignore carrier 0, just continue
+
+  if (libFrame.empty() || (libFrame.size() != learnedFrame.size())) {
+    return false;
+  }
+
+  for (i = 0; i < libFrame.size(); i++) {
+    if (!isWithinTolerance(libFrame[i].mark_us, learnedFrame[i].mark_us,
+        RAW_TIMING_TOLERANCE)) {
+      return false;
+    }
+    //the pause of the last block is the frame gap, arbitrary on both sides
+    if (i + 1 < libFrame.size()) {
+      if (!isWithinTolerance(libFrame[i].pause_us, learnedFrame[i].pause_us,
+          RAW_TIMING_TOLERANCE)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+vector<binary::Block> document::files::Database::cropFrame(
+    const binary::TimingStream &stream)
+{
+  vector<binary::Block> frame;
+
+  for (const auto &block : stream.timings()) {
+    frame.push_back(block);
+    if (block.pause_us >= RAW_FRAME_GAP_US) {
+      break;
+    }
+  }
+  return frame;
+}
+
+bool document::files::Database::isWithinTolerance(uint32_t a, uint32_t b,
+    double tolerance)
+{
+  auto diff = std::abs(static_cast<double>(a) - static_cast<double>(b));
+  auto reference = static_cast<double>(std::max(a, b));
+
+  return diff <= tolerance * reference;
 }
 
 bool files::Database::hasCapability(const nlohmann::json &j,

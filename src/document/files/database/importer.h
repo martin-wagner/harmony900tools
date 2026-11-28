@@ -54,6 +54,11 @@ class Database: public QObject
     static constexpr int MIN_POWER_DELAY_MS = 1000;
     static constexpr int MIN_INTERNAL_DELAY_MS = 100;
 
+    //raw matching fallback (pickaxe)
+    static constexpr double RAW_CLOCK_TOLERANCE = 0.1;
+    static constexpr double RAW_TIMING_TOLERANCE = 0.2;
+    static constexpr uint32_t RAW_FRAME_GAP_US = 20000;
+
   public:
     Database(QObject *parent = nullptr);
 
@@ -206,8 +211,10 @@ class Database: public QObject
     bool pickRock(const QString &mnf, const Device &rock, const PickAxes &axes, const std::string &line, QList<DeviceKey> &out) const;
     bool pickRock(const nlohmann::json &rock, PickAxes axes) const;
     bool pickPebble(const nlohmann::json &pebble, PickAxes &axes) const;
-    int matchProto(const binary::irProto::IrProto &protocol, const binary::irProto::Code &code, const PickAxe &axe) const;
-    bool matchRaw(const binary::irProto::IrProto &protocol, const binary::irProto::Code &code, const PickAxe &axe) const;
+    int matchProto(const binary::irProto::IrProto &protocol, const binary::irProto::Code &code, const PickAxe &axe, binary::TimingStream &libTiming, uint32_t &libClock) const;
+    bool matchRaw(const binary::TimingStream &libTiming, uint32_t libClock, const PickAxe &axe) const;
+    static std::vector<binary::Block> cropFrame(const binary::TimingStream &stream);
+    static bool isWithinTolerance(uint32_t a, uint32_t b, double tolerance);
 
     bool hasCapability(const nlohmann::json &j, Capabilities capability) const;
     static data::DeviceType mapDatabaseDeviceType(data::DatabaseDeviceType source);
